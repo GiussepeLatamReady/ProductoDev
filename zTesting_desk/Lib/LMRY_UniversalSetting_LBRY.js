@@ -70,6 +70,38 @@ define(['N/search', 'N/log', 'N/runtime', 'N/record', 'N/url', 'N/https', './LMR
             }
         }
 
+        function automaticSetFieldDocument(recordObj){
+            var data_automatic_search = automatic_search(recordObj);
+            var relatedFields = ['custbody_lmry_document_type','custbody_lmry_serie_doc_cxc','custbody_lmry_modification_reason','custbody_lmry_serie_doc_loc_cxc'];
+                
+            if (data_automatic_search != '' && data_automatic_search != null) {
+                var data = data_automatic_search[0].getValue('custrecord_lmry_setup_us_data');
+                if (data != null && data != '') {
+                    var set_data = JSON.parse(data_automatic_search[0].getValue('custrecord_lmry_setup_us_data'));                
+                    for (var i = 0; i < set_data.length; i++) {
+                        var fieldIndex = relatedFields.indexOf(set_data[i].field);
+                        log.debug("field - value :", set_data[i].field + " - " + set_data[i].value);
+                        log.debug("fieldIndex :", fieldIndex);
+                        if (fieldIndex!=-1) {
+                            //recordObj.setValue(set_data[i].field, set_data[i].value);
+                            log.debug("field - value :", set_data[i].field + " - " + set_data[i].value);
+                            log.debug("recordObj.type :", recordObj.type);
+                            var valuesObj = {};
+                            valuesObj[set_data[i].field] = set_data[i].value;
+                            record.submitFields({
+                                type : recordObj.type,
+                                id : recordObj.id,
+                                values : valuesObj,
+                                options : {
+                                    disableTriggers : true
+                                }
+                            });
+                        }
+                    }
+                }
+            }
+        }
+
         /* ------------------------------------------------------------------------------------------------------
          * Funcion para el seteo automatico - Automatic Setfield
          * --------------------------------------------------------------------------------------------------- */
@@ -78,12 +110,11 @@ define(['N/search', 'N/log', 'N/runtime', 'N/record', 'N/url', 'N/https', './LMR
             //Seteo de campos cabecera de acuerdo a configuración Automatic Set
 
             try {
-
                 //variable interface, si es true es cabecera si es false es despues de guardar
                 var data_automatic_search = automatic_search(currentRCD);
                 var validateFieldsAR = ['custbody_lmry_document_type_validate', 'custbody_lmry_serie_doc_cxc_validate'];
                 var typeTransactionError = ['creditmemo','customerpayment','vendorbill'];
-                var relatedFields = []
+                var relatedFields = ['custbody_lmry_document_type','custbody_lmry_serie_doc_cxc','custbody_lmry_modification_reason','custbody_lmry_serie_doc_loc_cxc'];
                 var id_country = currentRCD.getValue('custbody_lmry_subsidiary_country');
                 var type_transaction = currentRCD.type;
 
@@ -91,12 +122,29 @@ define(['N/search', 'N/log', 'N/runtime', 'N/record', 'N/url', 'N/https', './LMR
                     var data = data_automatic_search[0].getValue('custrecord_lmry_setup_us_data');
                     if (data != null && data != '') {
                         var set_data = JSON.parse(data_automatic_search[0].getValue('custrecord_lmry_setup_us_data'));
-                        for (var i = 0; i < set_data.length; i++) {
-                            if (set_data[i].value != '' && set_data[i].value != null) {
-                                if (validateFieldsAR.indexOf(set_data[i].field) != -1) continue;
-                                currentRCD.setValue(set_data[i].field, set_data[i].value);
+                        log.debug("[automatic_setfield] - type_transaction :",type_transaction);
+                        if (typeTransactionError.indexOf(type_transaction)!=-1) {
+                            for (var i = 0; i < set_data.length; i++) {
+                                if (set_data[i].value != '' && set_data[i].value != null) {
+                                    if (validateFieldsAR.indexOf(set_data[i].field) != -1) continue;
+                                    var fieldIndex = relatedFields.indexOf(set_data[i].field);
+                                    log.debug("[automatic_setfield] field - value :",set_data[i].field+" - "+set_data[i].value);
+                                    log.debug("[automatic_setfield] fieldIndex :",fieldIndex);
+                                    if (fieldIndex==-1) {
+                                        currentRCD.setValue(set_data[i].field, set_data[i].value);
+                                    }
+                                    
+                                }
+                            }
+                        }else{
+                            for (var i = 0; i < set_data.length; i++) {
+                                if (set_data[i].value != '' && set_data[i].value != null) {
+                                    if (validateFieldsAR.indexOf(set_data[i].field) != -1) continue;
+                                    currentRCD.setValue(set_data[i].field, set_data[i].value);
+                                }
                             }
                         }
+                        
 
                         // 11:  Argentina            (AR)
                         if (id_country == '11' && type_transaction == "invoice") validateDocument(currentRCD, set_data, validateFieldsAR);
@@ -1092,7 +1140,7 @@ define(['N/search', 'N/log', 'N/runtime', 'N/record', 'N/url', 'N/https', './LMR
             return out;
         }
 
-        function set_preimpreso(currentRCD, LMRY_Result, licenses) {
+        function set_preimpreso(currentRCD, LMRY_Result, licenses,processAfterSubmit) {
             //Seteo de número preimpreso y modificación de tranid MX, CO, BR (Inventarios)
             //Se maneja a partir de features version 3.0
             try {
@@ -1100,9 +1148,9 @@ define(['N/search', 'N/log', 'N/runtime', 'N/record', 'N/url', 'N/https', './LMR
 
                 // Solo para subsidiaria con acceso - Transaction Number Invoice
                 var lmry_DocNum = currentRCD.getValue('custbody_lmry_num_preimpreso');
-
+                log.debug("lmry_DocNum: ",lmry_DocNum);
                 if (lmry_DocNum == '' || lmry_DocNum == null) {
-
+                    
                     if ((LMRY_Result[0] == 'MX' || LMRY_Result[0] == 'BR' || LMRY_Result[0] == 'CO' || LMRY_Result[0] == 'UY' || LMRY_Result[0] == 'BO' || LMRY_Result[0] == 'GT' || LMRY_Result[0] == 'PA' || LMRY_Result[0] == 'PE' || LMRY_Result[0] == 'PY' || LMRY_Result[0] == 'DO') && LMRY_Result[2]) {
                         // Verifica que no este vacio el numero de serie
                         var lmry_DocSer = '';
@@ -1112,7 +1160,7 @@ define(['N/search', 'N/log', 'N/runtime', 'N/record', 'N/url', 'N/https', './LMR
                         else {
                             lmry_DocSer = currentRCD.getValue('custbody_lmry_serie_doc_cxc');
                         }
-
+                        log.debug("lmry_DocSer: ",lmry_DocSer);
                         if (lmry_DocSer != '' && lmry_DocSer != null && lmry_DocSer != 0) {
                             switch (type_transaction) {
                                 case 'invoice':
@@ -1307,9 +1355,20 @@ define(['N/search', 'N/log', 'N/runtime', 'N/record', 'N/url', 'N/https', './LMR
                                 return true;
                             }
                             // Crea el numero consecutivo
+                            log.debug("validacion 1:",nroConse > maxPermi);
                             if (nroConse > maxPermi) {
                                 // Asigna el numero pre-impreso
-                                currentRCD.setValue('custbody_lmry_num_preimpreso', '');
+                                if (processAfterSubmit) {
+                                    record.submitFields({
+                                        type: currentRCD.type,
+                                        id: currentRCD.id,
+                                        values: {
+                                            'custbody_lmry_num_preimpreso': ''
+                                        }
+                                    });
+                                } else{
+                                    currentRCD.setValue('custbody_lmry_num_preimpreso', '');
+                                }
                             } else {
                                 var longNumeroConsec = parseInt((nroConse + '').length);
                                 var llenarCeros = '';
@@ -1318,9 +1377,21 @@ define(['N/search', 'N/log', 'N/runtime', 'N/record', 'N/url', 'N/https', './LMR
                                 }
                                 nroConse = llenarCeros + nroConse;
                                 // Asigna el numero pre-impero
-                                currentRCD.setValue('custbody_lmry_num_preimpreso', nroConse);
 
+                                if (processAfterSubmit) {
+                                    record.submitFields({
+                                        type: currentRCD.type,
+                                        id: currentRCD.id,
+                                        values: {
+                                            'custbody_lmry_num_preimpreso': nroConse
+                                        }
+                                    });
+                                } else{
+                                    currentRCD.setValue('custbody_lmry_num_preimpreso', nroConse);
+                                }
+                                
 
+                                
                                 // Llama a la funcion de seteo del Tranid
                                 actualizar_serie(currentRCD);
 
@@ -1393,7 +1464,7 @@ define(['N/search', 'N/log', 'N/runtime', 'N/record', 'N/url', 'N/https', './LMR
                                 }
 
                                 //Seteo de tranid
-                                set_tranid(currentRCD, LMRY_Result, lmry_DocSerText, licenses);
+                                set_tranid(currentRCD, LMRY_Result, lmry_DocSerText, licenses,processAfterSubmit);
 
                             }
                         }
@@ -1405,7 +1476,7 @@ define(['N/search', 'N/log', 'N/runtime', 'N/record', 'N/url', 'N/https', './LMR
             }
         }
 
-        function set_tranid(currentRCD, LMRY_Result, lmry_DocSerText, licenses) {
+        function set_tranid(currentRCD, LMRY_Result, lmry_DocSerText, licenses,processAfterSubmit) {
             try {
                 // Seteo de tranid con la concatenación de número prefijo de la subsidiaria, iniciales del tipo de documento, número preimpreso y serie
                 var type_transaction = currentRCD.type;
@@ -1460,11 +1531,24 @@ define(['N/search', 'N/log', 'N/runtime', 'N/record', 'N/url', 'N/https', './LMR
                         } else {
                             texto = tipini.toUpperCase() + ' ' + lmry_DocSerText + '-' + currentRCD.getValue('custbody_lmry_num_preimpreso');
                         }
-
-                        currentRCD.setValue({
-                            fieldId: 'tranid',
-                            value: texto
-                        });
+                        log.debug("validacion 2:",processAfterSubmit);
+                        if (processAfterSubmit) {
+                            log.debug("validacion 3:","Entro");
+                            record.submitFields({
+                                type: currentRCD.type,
+                                id: currentRCD.id,
+                                values: {
+                                    'tranid': texto
+                                }
+                            });
+                        }else{
+                            log.debug("validacion 4:","Entro");
+                            currentRCD.setValue({
+                                fieldId: 'tranid',
+                                value: texto
+                            });
+                        }
+                        
                     }
                 }
                 return true;
@@ -1508,7 +1592,7 @@ define(['N/search', 'N/log', 'N/runtime', 'N/record', 'N/url', 'N/https', './LMR
                 var columns = wtax_type.columns;
 
                 var nroConse = parseInt(results[0].getValue(columns[0]));
-
+                log.debug("validacion 5:",parseFloat(Auxnumer) > parseFloat(nroConse));
                 if (parseFloat(Auxnumer) > parseFloat(nroConse)) {
                     var id = record.submitFields({
                         type: 'customrecord_lmry_serie_impresion_cxc',
@@ -1834,7 +1918,8 @@ define(['N/search', 'N/log', 'N/runtime', 'N/record', 'N/url', 'N/https', './LMR
             search_entity: search_entity,
             set_preimpreso: set_preimpreso,
             tax_calculator: tax_calculator,
-            path_file: path_file
+            path_file: path_file,
+            automaticSetFieldDocument: automaticSetFieldDocument
         };
 
     });

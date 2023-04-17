@@ -876,7 +876,7 @@ define(['N/currency', 'N/log', 'N/config', 'N/ui/serverWidget', 'N/record', 'N/s
               if (recordObj.getValue('custpage_uni_set_status') == 'F' && (type_document == '' || type_document == null)) {
                 //Seteo campos cabecera, numero pre impreso y template
                 library_Uni_Setting.automatic_setfield(recordObj, false);
-                library_Uni_Setting.set_preimpreso(recordObj, LMRY_Result, licenses);
+                //library_Uni_Setting.set_preimpreso(recordObj, LMRY_Result, licenses);
                 library_Uni_Setting.setear_datos_invoice(recordObj);
                 library_Uni_Setting.set_template(recordObj, licenses);
                 recordObj.setValue('custpage_uni_set_status', 'T');
@@ -885,7 +885,7 @@ define(['N/currency', 'N/log', 'N/config', 'N/ui/serverWidget', 'N/record', 'N/s
             } else if (type_interface == 'USEREVENT' && (type_document == '' || type_document == null)) {
               //Seteo campos cabecera, numero pre impreso y template
               library_Uni_Setting.automatic_setfield(recordObj, false);
-              library_Uni_Setting.set_preimpreso(recordObj, LMRY_Result, licenses);
+              //library_Uni_Setting.set_preimpreso(recordObj, LMRY_Result, licenses);
               library_Uni_Setting.setear_datos_invoice(recordObj);
               library_Uni_Setting.set_template(recordObj, licenses);
               band = false;
@@ -896,7 +896,7 @@ define(['N/currency', 'N/log', 'N/config', 'N/ui/serverWidget', 'N/record', 'N/s
               if ((check_csv == false || check_csv == 'F') && (type_document == '' || type_document == null)) {
                 //Seteo campos cabecera, numero pre impreso y template
                 library_Uni_Setting.automatic_setfield(recordObj, false);
-                library_Uni_Setting.set_preimpreso(recordObj, LMRY_Result, licenses);
+                //library_Uni_Setting.set_preimpreso(recordObj, LMRY_Result, licenses);
                 library_Uni_Setting.setear_datos_invoice(recordObj);
                 library_Uni_Setting.set_template(recordObj, licenses);
 
@@ -909,6 +909,7 @@ define(['N/currency', 'N/log', 'N/config', 'N/ui/serverWidget', 'N/record', 'N/s
               }
             }
 
+            
             //Seteo de campo de columna Invoice Identifier
             library_Uni_Setting.set_inv_identifier(recordObj);
 
@@ -1342,7 +1343,7 @@ define(['N/currency', 'N/log', 'N/config', 'N/ui/serverWidget', 'N/record', 'N/s
         form = scriptContext.form;
         typeC = recordObj.type;
         var type_interface = runtime.executionContext;
-
+        var type_document = recordObj.getValue('custbody_lmry_document_type');
         // Sale del proceso si es MAPREDUCE
         if (type_interface == 'MAPREDUCE') {
           return true;
@@ -1389,6 +1390,28 @@ define(['N/currency', 'N/log', 'N/config', 'N/ui/serverWidget', 'N/record', 'N/s
               } else {
                 recordObj.setValue('custbody_lmry_scheduled_process', false);
               }
+            }
+          }
+          log.debug("Get Process:","start")
+          if (type_interface == 'USERINTERFACE'){
+            log.debug("Get Process:","USERINTERFACE")
+            log.debug("Get Process [custpage_uni_set_status]:",recordObj.getValue('custpage_uni_set_status'))
+            if (recordObj.getValue('custpage_uni_set_status') == 'T' && (type_document == '' || type_document == null)) {
+              log.debug("Get Process:","custpage_uni_set_status")
+              library_Uni_Setting.automaticSetFieldDocument(recordObj);
+              library_Uni_Setting.set_preimpreso(recordObj, LMRY_Result, licenses,true);
+            }
+          } else if (type_interface == 'USEREVENT' && (type_document == '' || type_document == null)) {
+            log.debug("Get Process:","USEREVENT")
+            library_Uni_Setting.automaticSetFieldDocument(recordObj);
+            library_Uni_Setting.set_preimpreso(recordObj, LMRY_Result, licenses,true);
+          } else if (type_interface == 'CSVIMPORT'){
+            log.debug("Get Process:","CSVIMPORT")
+            var check_csv = recordObj.getValue('custbody_lmry_scheduled_process');
+            if ((check_csv == false || check_csv == 'F') && (type_document == '' || type_document == null)) {
+              log.debug("Get Process:","check_csv")
+              library_Uni_Setting.automaticSetFieldDocument(recordObj);
+              library_Uni_Setting.set_preimpreso(recordObj, LMRY_Result, licenses,true);
             }
           }
         }
