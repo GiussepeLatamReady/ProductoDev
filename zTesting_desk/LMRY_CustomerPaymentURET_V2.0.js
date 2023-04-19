@@ -424,7 +424,7 @@ define(['N/log', 'N/config', 'N/ui/serverWidget', 'N/record', 'N/search', 'N/run
               if (newRecord.getValue('custpage_uni_set_status') == 'F' && (type_document == '' || type_document == null)) {
                 //Seteo campos cabecera, numero pre impreso y template
                 library_Uni_Setting.automatic_setfield(newRecord, false);
-                library_Uni_Setting.set_preimpreso(newRecord, LMRY_Result, licenses);
+                //library_Uni_Setting.set_preimpreso(newRecord, LMRY_Result, licenses);
                 library_Uni_Setting.set_template(newRecord, licenses);
                 newRecord.setValue('custpage_uni_set_status', 'T');
               }
@@ -435,7 +435,7 @@ define(['N/log', 'N/config', 'N/ui/serverWidget', 'N/record', 'N/search', 'N/run
               if ((check_csv == false || check_csv == 'F') && (type_document == '' || type_document == null)) {
                 //Seteo campos cabecera, numero pre impreso y template
                 library_Uni_Setting.automatic_setfield(newRecord, false);
-                library_Uni_Setting.set_preimpreso(newRecord, LMRY_Result, licenses);
+                //library_Uni_Setting.set_preimpreso(newRecord, LMRY_Result, licenses);
                 library_Uni_Setting.set_template(newRecord, licenses);
 
                 if (check_csv == 'F') {
@@ -485,6 +485,8 @@ define(['N/log', 'N/config', 'N/ui/serverWidget', 'N/record', 'N/search', 'N/run
           if (type_interface == 'USERINTERFACE') {
             //Mediante el custpage se conoce que el seteo de cabecera fue realizado por Universal Setting
             if (newRecord.getValue('custpage_uni_set_status') == 'T') {
+              library_Uni_Setting.automaticSetFieldDocument(newRecord, false);
+              library_Uni_Setting.set_preimpreso(newRecord, LMRY_Result, licenses,true);
               //Seteo de campos perteneciente a record anexado
               library_Uni_Setting.automatic_setfieldrecord(newRecord);
             }
@@ -494,6 +496,9 @@ define(['N/log', 'N/config', 'N/ui/serverWidget', 'N/record', 'N/search', 'N/run
 
             if (check_csv == 'T' || check_csv == true) {
               //Seteo de campos perteneciente a record anexado
+              library_Uni_Setting.automaticSetFieldDocument(newRecord, false);
+              library_Uni_Setting.set_preimpreso(newRecord, LMRY_Result, licenses,true);
+
               library_Uni_Setting.automatic_setfieldrecord(newRecord);
 
               if (check_csv == 'T') {

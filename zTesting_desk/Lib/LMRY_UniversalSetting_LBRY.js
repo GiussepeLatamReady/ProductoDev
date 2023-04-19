@@ -70,34 +70,83 @@ define(['N/search', 'N/log', 'N/runtime', 'N/record', 'N/url', 'N/https', './LMR
             }
         }
 
-        function automaticSetFieldDocument(recordObj){
+        /* ------------------------------------------------------------------------------------------------------
+         * Funcion para el seteo automatico - Automatic Setfield - After Submit (D0952)
+         * --------------------------------------------------------------------------------------------------- */
+
+        function automaticSetFieldDocument(recordObj) {
             var data_automatic_search = automatic_search(recordObj);
-            var relatedFields = ['custbody_lmry_document_type','custbody_lmry_serie_doc_cxc','custbody_lmry_modification_reason','custbody_lmry_serie_doc_loc_cxc'];
-                
+            var relatedFields = ['custbody_lmry_document_type', 'custbody_lmry_serie_doc_cxc', 'custbody_lmry_modification_reason', 'custbody_lmry_serie_doc_loc_cxc'];
+            var id_country = recordObj.getValue('custbody_lmry_subsidiary_country');
+            var type_transaction = recordObj.type;
             if (data_automatic_search != '' && data_automatic_search != null) {
                 var data = data_automatic_search[0].getValue('custrecord_lmry_setup_us_data');
                 if (data != null && data != '') {
-                    var set_data = JSON.parse(data_automatic_search[0].getValue('custrecord_lmry_setup_us_data'));                
+                    var set_data = JSON.parse(data_automatic_search[0].getValue('custrecord_lmry_setup_us_data'));
                     for (var i = 0; i < set_data.length; i++) {
                         var fieldIndex = relatedFields.indexOf(set_data[i].field);
                         log.debug("field - value :", set_data[i].field + " - " + set_data[i].value);
                         log.debug("fieldIndex :", fieldIndex);
-                        if (fieldIndex!=-1) {
+                        if (fieldIndex != -1) {
                             //recordObj.setValue(set_data[i].field, set_data[i].value);
                             log.debug("field - value :", set_data[i].field + " - " + set_data[i].value);
                             log.debug("recordObj.type :", recordObj.type);
                             var valuesObj = {};
                             valuesObj[set_data[i].field] = set_data[i].value;
                             record.submitFields({
-                                type : recordObj.type,
-                                id : recordObj.id,
-                                values : valuesObj,
-                                options : {
-                                    disableTriggers : true
+                                type: recordObj.type,
+                                id: recordObj.id,
+                                values: valuesObj,
+                                options: {
+                                    disableTriggers: true
                                 }
                             });
                         }
                     }
+
+                    /* ******************************** */
+                    // 2022.01.13 :Solo para Mexico
+                    // 157: Mexico               (MX)
+                    /* ******************************** */
+                    if (id_country == '157' && (type_transaction == "invoice" ||
+                        type_transaction == 'creditmemo' || type_transaction == 'customerpayment' ||
+                        type_transaction == 'customtransaction_lmry_payment_complemnt')) {
+
+                        // Latam - Serie CxC (No debe estar vacio la seria)
+                        var serie_id = recordObj.getValue('custbody_lmry_serie_doc_cxc');
+                        // Latam - MX Document Design (Debe estar vacio el campo)
+                        var docum_sg = recordObj.getValue('custbody_lmry_mx_document_design');
+
+                        log.error('type_transaction , serie_id , docum_sg', type_transaction + ' - ' + serie_id + ' - ' + docum_sg);
+
+                        if (serie_id && !docum_sg) {
+
+                            // LatamReady - Print Series
+                            var diseno_id = search.lookupFields({
+                                type: 'customrecord_lmry_serie_impresion_cxc',
+                                id: serie_id, columns: ['custrecord_lmry_diseno_pdf']
+                            }).custrecord_lmry_diseno_pdf;
+
+                            if (diseno_id && diseno_id.length) {
+                                diseno_id = diseno_id[0].value;
+                            } else {
+                                diseno_id = "";
+                            }
+
+                            log.error('custbody_lmry_mx_document_design', diseno_id);
+
+                            // Latam - MX Document Design
+                            //recordObj.setValue('custbody_lmry_mx_document_design', diseno_id);
+
+                            record.submitFields({
+                                type: recordObj.type,
+                                id: recordObj.id,
+                                values: {
+                                    'custbody_lmry_mx_document_design': diseno_id
+                                }
+                            });
+                        }
+                    } // 2022.01.13 :Solo para Mexico
                 }
             }
         }
@@ -182,7 +231,7 @@ define(['N/search', 'N/log', 'N/runtime', 'N/record', 'N/url', 'N/https', './LMR
 
                                 // Latam - MX Document Design
                                 currentRCD.setValue('custbody_lmry_mx_document_design', diseno_id);
-
+                                
                             }
                         } // 2022.01.13 :Solo para Mexico
                     } else {
@@ -1140,7 +1189,7 @@ define(['N/search', 'N/log', 'N/runtime', 'N/record', 'N/url', 'N/https', './LMR
             return out;
         }
 
-        function set_preimpreso(currentRCD, LMRY_Result, licenses,processAfterSubmit) {
+        function set_preimpreso(currentRCD, LMRY_Result, licenses, processAfterSubmit) {
             //Seteo de número preimpreso y modificación de tranid MX, CO, BR (Inventarios)
             //Se maneja a partir de features version 3.0
             try {

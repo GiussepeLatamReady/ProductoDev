@@ -1043,7 +1043,7 @@ define(['N/record', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/log', 'N/co
               if (recordObj.getValue('custpage_uni_set_status') == 'F' && (type_document == '' || type_document == null)) {
                 //Seteo campos cabecera, numero pre impreso y template
                 library_Uni_Setting.automatic_setfield_purchase(recordObj, false);
-                library_Uni_Setting.set_preimpreso_purchase(recordObj, LMRY_Result, licenses);
+                //library_Uni_Setting.set_preimpreso_purchase(recordObj, LMRY_Result, licenses);
                 library_Uni_Setting.setear_datos_bill(recordObj);
                 library_Uni_Setting.set_template_purchase(recordObj, licenses);
                 recordObj.setValue('custpage_uni_set_status', 'T');
@@ -1054,7 +1054,7 @@ define(['N/record', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/log', 'N/co
               if ((check_csv == false || check_csv == 'F') && (type_document == '' || type_document == null)) {
                 //Seteo campos cabecera, numero pre impreso y template
                 library_Uni_Setting.automatic_setfield_purchase(recordObj, false);
-                library_Uni_Setting.set_preimpreso_purchase(recordObj, LMRY_Result, licenses);
+                //library_Uni_Setting.set_preimpreso_purchase(recordObj, LMRY_Result, licenses);
                 library_Uni_Setting.setear_datos_bill(recordObj);
                 library_Uni_Setting.set_template_purchase(recordObj, licenses);
                 if (check_csv == 'F') {
@@ -1259,6 +1259,9 @@ define(['N/record', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/log', 'N/co
             //Mediante el custpage se conoce que el seteo de cabecera fue realizado por Universal Setting
             if (recordObj.getValue('custpage_uni_set_status') == 'T') {
               //Seteo de campos perteneciente a record anexado
+              library_Uni_Setting.automaticSetfieldPurchaseDocument(recordObj);
+              library_Uni_Setting.set_preimpreso_purchase(recordObj, LMRY_Result, licenses,true);
+
               library_Uni_Setting.automatic_setfieldrecord_purchase(recordObj);
             }
           } else if (type_interface == 'CSVIMPORT' || type_interface == 'USEREVENT') {
@@ -1266,6 +1269,9 @@ define(['N/record', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/log', 'N/co
             var check_csv = recordObj.getValue('custbody_lmry_scheduled_process');
             if (check_csv == 'T' || check_csv == true) {
               //Seteo de campos perteneciente a record anexado
+              library_Uni_Setting.automaticSetfieldPurchaseDocument(recordObj);
+              library_Uni_Setting.set_preimpreso_purchase(recordObj, LMRY_Result, licenses,true);
+              
               library_Uni_Setting.automatic_setfieldrecord_purchase(recordObj);
               if (check_csv == 'T') {
                 recordObj.setValue('custbody_lmry_scheduled_process', 'F');
