@@ -159,7 +159,7 @@ define(['N/search', 'N/log', 'N/runtime', 'N/record', 'N/url', 'N/https', './LMR
             //Seteo de campos cabecera de acuerdo a configuración Automatic Set
 
             try {
-                //variable interface, si es true es cabecera si es false es despues de guardar
+                //variable interface, si es true es setea los campos IU , USERVENT, CSVIMPORT
                 var data_automatic_search = automatic_search(currentRCD);
                 var validateFieldsAR = ['custbody_lmry_document_type_validate', 'custbody_lmry_serie_doc_cxc_validate'];
                 var typeTransactionError = ['creditmemo','customerpayment','vendorbill'];
@@ -171,14 +171,12 @@ define(['N/search', 'N/log', 'N/runtime', 'N/record', 'N/url', 'N/https', './LMR
                     var data = data_automatic_search[0].getValue('custrecord_lmry_setup_us_data');
                     if (data != null && data != '') {
                         var set_data = JSON.parse(data_automatic_search[0].getValue('custrecord_lmry_setup_us_data'));
-                        log.debug("[automatic_setfield] - type_transaction :",type_transaction);
-                        if (typeTransactionError.indexOf(type_transaction)!=-1) {
+                        if (typeTransactionError.indexOf(type_transaction)!=-1&& interface) {
                             for (var i = 0; i < set_data.length; i++) {
                                 if (set_data[i].value != '' && set_data[i].value != null) {
                                     if (validateFieldsAR.indexOf(set_data[i].field) != -1) continue;
                                     var fieldIndex = relatedFields.indexOf(set_data[i].field);
-                                    log.debug("[automatic_setfield] field - value :",set_data[i].field+" - "+set_data[i].value);
-                                    log.debug("[automatic_setfield] fieldIndex :",fieldIndex);
+
                                     if (fieldIndex==-1) {
                                         currentRCD.setValue(set_data[i].field, set_data[i].value);
                                     }

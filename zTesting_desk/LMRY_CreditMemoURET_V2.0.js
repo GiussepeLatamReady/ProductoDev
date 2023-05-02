@@ -856,7 +856,6 @@ define(['N/currency', 'N/log', 'N/config', 'N/ui/serverWidget', 'N/record', 'N/s
           fieldId: 'subsidiary'
         });
         licenses = libraryMail.getLicenses(subsidiary);
-
         var LMRY_Result = Validate_Access_CM(subsidiary, form, typeC, type, recordObj);
 
         /* Validacion 04/02/22 */
@@ -875,7 +874,7 @@ define(['N/currency', 'N/log', 'N/config', 'N/ui/serverWidget', 'N/record', 'N/s
             if (type_interface == 'USERINTERFACE') {
               if (recordObj.getValue('custpage_uni_set_status') == 'F' && (type_document == '' || type_document == null)) {
                 //Seteo campos cabecera, numero pre impreso y template
-                library_Uni_Setting.automatic_setfield(recordObj, false);
+                library_Uni_Setting.automatic_setfield(recordObj, true);
                 //library_Uni_Setting.set_preimpreso(recordObj, LMRY_Result, licenses);
                 library_Uni_Setting.setear_datos_invoice(recordObj);
                 library_Uni_Setting.set_template(recordObj, licenses);
@@ -884,7 +883,7 @@ define(['N/currency', 'N/log', 'N/config', 'N/ui/serverWidget', 'N/record', 'N/s
               }
             } else if (type_interface == 'USEREVENT' && (type_document == '' || type_document == null)) {
               //Seteo campos cabecera, numero pre impreso y template
-              library_Uni_Setting.automatic_setfield(recordObj, false);
+              library_Uni_Setting.automatic_setfield(recordObj, true);
               //library_Uni_Setting.set_preimpreso(recordObj, LMRY_Result, licenses);
               library_Uni_Setting.setear_datos_invoice(recordObj);
               library_Uni_Setting.set_template(recordObj, licenses);
@@ -895,7 +894,7 @@ define(['N/currency', 'N/log', 'N/config', 'N/ui/serverWidget', 'N/record', 'N/s
               //Check box para controlar el seteo automático en el record anexado
               if ((check_csv == false || check_csv == 'F') && (type_document == '' || type_document == null)) {
                 //Seteo campos cabecera, numero pre impreso y template
-                library_Uni_Setting.automatic_setfield(recordObj, false);
+                library_Uni_Setting.automatic_setfield(recordObj, true);
                 //library_Uni_Setting.set_preimpreso(recordObj, LMRY_Result, licenses);
                 library_Uni_Setting.setear_datos_invoice(recordObj);
                 library_Uni_Setting.set_template(recordObj, licenses);

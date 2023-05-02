@@ -866,7 +866,7 @@ define(['N/record', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/log', 'N/co
     function beforeSubmit(context) {
 
       try {
-
+        log.debug("beforeSubmit","START");
         ST_FEATURE = runtime.isFeatureInEffect({
           feature: "tax_overhauling"
         });
@@ -1032,7 +1032,7 @@ define(['N/record', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/log', 'N/co
         if (LMRY_Result[0] == "MX" && library.getAuthorization(671, licenses) && context.type == 'delete' && (ST_FEATURE == false || ST_FEATURE == "F")) {
           libraryMxJsonResult._inactiveTaxResult(recordObj.id, taxType = 4)
         }
-
+        log.debug("Message","Validacion 05/04/22");
         /* Validacion 05/04/22 */
         //Universal Setting se realiza solo al momento de crear
         if (type == 'create' && (typeInterfaces == 'USERINTERFACE' || typeInterfaces == 'USEREVENT' || typeInterfaces == 'CSVIMPORT') && (ST_FEATURE == false || ST_FEATURE == "F")) {
@@ -1040,20 +1040,24 @@ define(['N/record', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/log', 'N/co
           if (library_Uni_Setting.auto_universal_setting_purchase(licenses, false)) {
             //Solo si el campo LATAM - LEGAL DOCUMENT TYPE se encuentra vacío
             if (typeInterfaces == 'USERINTERFACE') {
+              log.debug("Message","USERINTERFACE");
               if (recordObj.getValue('custpage_uni_set_status') == 'F' && (type_document == '' || type_document == null)) {
                 //Seteo campos cabecera, numero pre impreso y template
-                library_Uni_Setting.automatic_setfield_purchase(recordObj, false);
+                log.debug("Message","USERINTERFACE - custpage_uni_set_status");
+                library_Uni_Setting.automatic_setfield_purchase(recordObj, true);
                 //library_Uni_Setting.set_preimpreso_purchase(recordObj, LMRY_Result, licenses);
                 library_Uni_Setting.setear_datos_bill(recordObj);
                 library_Uni_Setting.set_template_purchase(recordObj, licenses);
                 recordObj.setValue('custpage_uni_set_status', 'T');
               }
             } else if (typeInterfaces == 'CSVIMPORT' || typeInterfaces == 'USEREVENT') {
+              log.debug("Message","CSVIMPORT");
               var check_csv = recordObj.getValue('custbody_lmry_scheduled_process');
               //Check box para controlar el seteo automático en el record anexado
               if ((check_csv == false || check_csv == 'F') && (type_document == '' || type_document == null)) {
                 //Seteo campos cabecera, numero pre impreso y template
-                library_Uni_Setting.automatic_setfield_purchase(recordObj, false);
+                log.debug("Message","CSVIMPORT - check_csv");
+                library_Uni_Setting.automatic_setfield_purchase(recordObj, true);
                 //library_Uni_Setting.set_preimpreso_purchase(recordObj, LMRY_Result, licenses);
                 library_Uni_Setting.setear_datos_bill(recordObj);
                 library_Uni_Setting.set_template_purchase(recordObj, licenses);
@@ -1069,7 +1073,7 @@ define(['N/record', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/log', 'N/co
           }
         }
         /* Fin validacion 05/04/22 */
-
+        log.debug("Message","Fin validacion 05/04/22");
         if (type == "delete") {
           if (ST_FEATURE == true || ST_FEATURE == "T") {
             switch (LMRY_Result[0]) {
@@ -1116,7 +1120,7 @@ define(['N/record', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/log', 'N/co
                 break;
             }
           }
-
+          log.debug("Message","BORRADO DE RETENCION PARA URUGUAY");
           //BORRADO DE RETENCION PARA URUGUAY
           var applWTH = recordObj.getValue({
             fieldId: 'custbody_lmry_apply_wht_code'
@@ -1127,7 +1131,7 @@ define(['N/record', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/log', 'N/co
             }
           }
         }
-
+        log.debug("Message","setWhtRuleInLines");
         if (['create', 'edit', 'copy', 'view'].indexOf(context.type) != -1) {
           if (ST_FEATURE == true || ST_FEATURE == "T") {
             switch (LMRY_Result[0]) {
@@ -1139,7 +1143,7 @@ define(['N/record', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/log', 'N/co
             }
           }
         }
-
+        log.debug("Message","setBaseAmounts");
         var eventsEC = ['create', 'copy', 'edit'];
         if (eventsEC.indexOf(context.type) != -1) {
 
@@ -1173,6 +1177,7 @@ define(['N/record', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/log', 'N/co
               'exclude': 918
             }
           };
+          log.debug("Message","generateTranID");
           if (typeInterfaces == 'CSVIMPORT') {
             if (LMRY_Result[0] == 'AR' ||
               (featureTranid[LMRY_Result[0]] != undefined &&
@@ -1194,23 +1199,24 @@ define(['N/record', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/log', 'N/co
             }
           }
         }
-
+        log.debug("Message","setValue CO");
         if (LMRY_Result[0] == "CO") {
           if (library.getAuthorization(720, licenses) == true && context.type == 'edit') {
             recordObj.setValue('custbody_lmry_scheduled_process', false);
           }
         }
-
+        log.debug("Message","IFFFF ULTIMO");
         if (["create", "edit", "copy", "delete"].indexOf(context.type) != -1 && LMRY_Result[0] == "BO" && library.getAuthorization(828, licenses)) {
+          log.debug("Message","deleteTaxResults");
           if (context.type == "delete") {
             libBoTaxes.deleteTaxResults(recordObj);
           }
-
+          log.debug("Message","setUndefTaxLines");
           if (["create", "edit", "copy"].indexOf(context.type) != -1) {
             libBoTaxes.setUndefTaxLines(recordObj);
           }
         }
-
+        log.debug("Message","END");
       } catch (err) {
         recordObj = context.newRecord;
         library.sendemail2(' [ BeforeSubmit ] ' + err, LMRY_script, recordObj, 'transactionnumber', 'entity');
@@ -1230,7 +1236,7 @@ define(['N/record', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/log', 'N/co
 
     function afterSubmit(context) {
       try {
-
+        log.debug("afterSubmit","START");
         ST_FEATURE = runtime.isFeatureInEffect({
           feature: "tax_overhauling"
         });
@@ -1251,14 +1257,16 @@ define(['N/record', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/log', 'N/co
         // Libreria - Valida Periodo cerrado
         if (LibraryValidatePeriod.validatePeriod(recordObj.getValue('postingperiod'), licenses, LMRY_Result[0], 'purchase')) return true;
         /* Fin validacion 04/02/22 */
-
+        log.debug("afterSubmit","Validacion 05/04/22");
         /* Validacion 05/04/22 */
         //Universal Setting se realiza solo al momento de crear
         if (type == 'create' && (type_interface == 'USERINTERFACE' || type_interface == 'USEREVENT' || type_interface == 'CSVIMPORT') && (ST_FEATURE == false || ST_FEATURE == "F")) {
           if (type_interface == 'USERINTERFACE') {
             //Mediante el custpage se conoce que el seteo de cabecera fue realizado por Universal Setting
+            log.debug("afterSubmit","USERINTERFACE");
             if (recordObj.getValue('custpage_uni_set_status') == 'T') {
               //Seteo de campos perteneciente a record anexado
+              log.debug("afterSubmit","custpage_uni_set_status");
               library_Uni_Setting.automaticSetfieldPurchaseDocument(recordObj);
               library_Uni_Setting.set_preimpreso_purchase(recordObj, LMRY_Result, licenses,true);
 
@@ -1266,6 +1274,7 @@ define(['N/record', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/log', 'N/co
             }
           } else if (type_interface == 'CSVIMPORT' || type_interface == 'USEREVENT') {
             //Mediante el siguiente campo se conoce si seteo de cabecera fue realizado por Universal Setting
+            log.debug("afterSubmit","CSVIMPORT");
             var check_csv = recordObj.getValue('custbody_lmry_scheduled_process');
             if (check_csv == 'T' || check_csv == true) {
               //Seteo de campos perteneciente a record anexado
@@ -1282,7 +1291,7 @@ define(['N/record', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/log', 'N/co
           }
         }
         /* Fin validacion 05/04/22 */
-
+        log.debug("afterSubmit","Fin Validacion 05/04/22");
         if (type == 'delete') {
           // Para Colombia, Bolivia y Paraguay - Enabled Feature WHT Latam
           if (LMRY_Result[0] == 'CO') {
@@ -1785,8 +1794,9 @@ define(['N/record', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/log', 'N/co
         }
 
         //FIN GENERAR RETENCION POR CABECERA MEXICO
-
+        log.debug("afterSubmit","END");
       } catch (err) {
+        log.error("afterSubmit",err);
         recordObj = context.newRecord;
         library.sendemail2(' [ VCUret_AfterSubmit ] ' + err, LMRY_script, recordObj, 'transactionnumber', 'entity');
       }

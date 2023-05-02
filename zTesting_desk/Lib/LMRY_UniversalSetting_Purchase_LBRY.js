@@ -79,19 +79,18 @@ define(['N/search', 'N/log', 'N/runtime', 'N/record', 'N/url', 'N/https', './LMR
             try {
                 //variable interface, si es true es cabecera si es false es despues de guardar
                 var data_automatic_search = automatic_search(currentRCD);
-                var typeTransactionError = ['creditmemo','customerpayment','vendorbill'];
+                var typeTransactionError = ['creditmemo','customerpayment','vendorcredit'];
                 var relatedFields = ['custbody_lmry_document_type','custbody_lmry_serie_doc_cxc','custbody_lmry_modification_reason','custbody_lmry_serie_doc_loc_cxc'];
                 var type_transaction = currentRCD.type;
+                
                 if (data_automatic_search != '' && data_automatic_search != null) {
                     var data = data_automatic_search[0].getValue('custrecord_lmry_setup_us_data');
                     if (data != null && data != '') {
                         var set_data = JSON.parse(data_automatic_search[0].getValue('custrecord_lmry_setup_us_data'));
-                        if (typeTransactionError.indexOf(type_transaction)!=-1) {
+                        if (typeTransactionError.indexOf(type_transaction)!=-1 && interface) {
                             for (var i = 0; i < set_data.length; i++) {
                                 if (set_data[i].value != '' && set_data[i].value != null) {
                                     var fieldIndex = relatedFields.indexOf(set_data[i].field);
-                                    log.debug("[automatic_setfield_purchase] field - value :",set_data[i].field+" - "+set_data[i].value);
-                                    log.debug("[automatic_setfield_purchase] fieldIndex :",fieldIndex);
                                     if (fieldIndex==-1) {
                                         currentRCD.setValue(set_data[i].field, set_data[i].value);
                                     }
@@ -972,7 +971,8 @@ define(['N/search', 'N/log', 'N/runtime', 'N/record', 'N/url', 'N/https', './LMR
             setear_datos_bill: setear_datos_bill,
             set_template_purchase: set_template_purchase,
             search_entity_purchase: search_entity_purchase,
-            set_preimpreso_purchase: set_preimpreso_purchase
+            set_preimpreso_purchase: set_preimpreso_purchase,
+            automaticSetfieldPurchaseDocument: automaticSetfieldPurchaseDocument
         };
 
     });

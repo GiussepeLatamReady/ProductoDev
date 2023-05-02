@@ -423,7 +423,7 @@ define(['N/log', 'N/config', 'N/ui/serverWidget', 'N/record', 'N/search', 'N/run
             if (type_interface == 'USERINTERFACE') {
               if (newRecord.getValue('custpage_uni_set_status') == 'F' && (type_document == '' || type_document == null)) {
                 //Seteo campos cabecera, numero pre impreso y template
-                library_Uni_Setting.automatic_setfield(newRecord, false);
+                library_Uni_Setting.automatic_setfield(newRecord, true);
                 //library_Uni_Setting.set_preimpreso(newRecord, LMRY_Result, licenses);
                 library_Uni_Setting.set_template(newRecord, licenses);
                 newRecord.setValue('custpage_uni_set_status', 'T');
@@ -434,7 +434,7 @@ define(['N/log', 'N/config', 'N/ui/serverWidget', 'N/record', 'N/search', 'N/run
               //Check box para controlar el seteo automático en el record anexado
               if ((check_csv == false || check_csv == 'F') && (type_document == '' || type_document == null)) {
                 //Seteo campos cabecera, numero pre impreso y template
-                library_Uni_Setting.automatic_setfield(newRecord, false);
+                library_Uni_Setting.automatic_setfield(newRecord, true);
                 //library_Uni_Setting.set_preimpreso(newRecord, LMRY_Result, licenses);
                 library_Uni_Setting.set_template(newRecord, licenses);
 
