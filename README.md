@@ -22,7 +22,19 @@ LatamReady - Invoicing Populate MPRD
 ## Script relacionados
 
 
-LatamReady - Credit Memo URET 2.0
+Name: LatamReady - Credit Memo URET 2.0
+Id: customscript_lmry_credit_memo_uret_2_0
+File: LMRY_CreditMemoURET_V2.0.js
+
+Name: LatamReady - Customer Payment URET V2.0
+Id: customscript_lmry_customer_pay_uret_2_0
+File: LMRY_CustomerPaymentURET_V2.0.js
+
+Name: LatamReady - Vendor Credit URET 2.0
+Id: customscript_lmry_vendorcredit_uret_2_0
+File: LMRY_VendorCreditURET_V2.0.js
+
+
 LatamReady - Vendor Credit URET 2.0
 LatamReady - Customer Payment URET V2.0
 Script Afectados Advance Flow:
