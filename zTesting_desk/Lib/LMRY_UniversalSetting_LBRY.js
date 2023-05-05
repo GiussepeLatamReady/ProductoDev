@@ -166,6 +166,10 @@ define(['N/search', 'N/log', 'N/runtime', 'N/record', 'N/url', 'N/https', './LMR
                 var relatedFields = ['custbody_lmry_document_type','custbody_lmry_serie_doc_cxc','custbody_lmry_modification_reason','custbody_lmry_serie_doc_loc_cxc'];
                 var id_country = currentRCD.getValue('custbody_lmry_subsidiary_country');
                 var type_transaction = currentRCD.type;
+                var fieldReplace = {
+                    'custbody_lmry_document_type':'custpage_document_type',
+                    'custbody_lmry_serie_doc_cxc':'custpage_serie_doc'
+                }
 
                 if (data_automatic_search != '' && data_automatic_search != null) {
                     var data = data_automatic_search[0].getValue('custrecord_lmry_setup_us_data');
@@ -187,7 +191,17 @@ define(['N/search', 'N/log', 'N/runtime', 'N/record', 'N/url', 'N/https', './LMR
                             for (var i = 0; i < set_data.length; i++) {
                                 if (set_data[i].value != '' && set_data[i].value != null) {
                                     if (validateFieldsAR.indexOf(set_data[i].field) != -1) continue;
-                                    currentRCD.setValue(set_data[i].field, set_data[i].value);
+                                    if (type_transaction == 'customtransaction_lmry_payment_complemnt') {
+                                        if (fieldReplace[set_data[i].field]) {
+                                            currentRCD.setValue(fieldReplace[set_data[i].field], set_data[i].value)
+                                        } else{
+                                            currentRCD.setValue(set_data[i].field, set_data[i].value);
+                                        }
+                                    } else{
+                                        currentRCD.setValue(set_data[i].field, set_data[i].value);
+                                    }
+                                    
+                                    
                                 }
                             }
                         }
@@ -447,7 +461,7 @@ define(['N/search', 'N/log', 'N/runtime', 'N/record', 'N/url', 'N/https', './LMR
                         fieldId: 'custcol_lmry_br_service_catalog',
                         line: 0
                     });
-                    var rate = currentRCD.getValue('discountrate');
+                    var rate = currentRCD.getValue('discountrate');  
                 }
 
                 var filters = [
@@ -491,8 +505,7 @@ define(['N/search', 'N/log', 'N/runtime', 'N/record', 'N/url', 'N/https', './LMR
                         break;
 
                     case 'customtransaction_lmry_payment_complemnt':
-                        var nType =  currentRCD.getValue("ntype");
-                        filters.push('AND', ['custrecord_lmry_us_transaction', 'anyof', nType]);
+                        filters.push('AND', ['custrecord_lmry_us_transaction', 'anyof', 9]);
                         if (check_fact == 1) {
                             filters.push('AND', ['custrecord_lmry_document_type.custrecord_lmry_fact_electronica', 'is', 'F']);
                         } else if (check_fact == 2) {
