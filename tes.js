@@ -1,11 +1,9 @@
-
-json= {
-    a:"b"
-}
+ arr = []
 
 
-if (json['a']) {
-    console.log("1")
-}else{
+ if(arr && 0){
+    console.log("1");
+ }else{
     console.log("2")
-}
+ }
+ console.log(arr.length)
