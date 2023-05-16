@@ -6,9 +6,26 @@
  * @Author LatamReady - Giussepe Delgado
  * @Date 05/09/2023
  */
-define(['N/runtime'],
+define(['N/log',  
+        'N/config', 
+        'N/redirect', 
+        'N/task', 
+        'N/search', 
+        'N/record', 
+        'N/ui/serverWidget',
+        'N/runtime', 
+        './EI_Library/LMRY_IP_libSendingEmailsLBRY_V2.0', 
+        './EI_Library/LMRY_EI_libSendingEmailsLBRY_V2.0', 
+        'N/http', 
+        'N/https',
+        'N/translation'
+        ],
     
-    (runtime) => {
+    (log, config, redirect, task, search, recordApi, serverWidget, runtime, library, libraryFeature, http, https,nTranslation) => {
+
+        // Script information
+        const LMRY_SCRIPT = "LatamReady - Advance Flow STLT V2.1";
+        const LMRY_SCRIPT_NAME = "LMRY_AdvanceFlow_STLT_V2.1.js";
 
         let subsiOW = runtime.isFeatureInEffect({
             feature: 'SUBSIDIARIES'
@@ -28,17 +45,19 @@ define(['N/runtime'],
          */
         const onRequest = (scriptContext) => {
             try {
-                if (context.request.method == 'GET') {
+
+                const translatedFields = getFieldTranslations();
+                if (scriptContext.request.method == 'GET') {
                     let form = serverWidget.createForm({
-                        title: jsonLanguage.title[Language]
+                        title: translatedFields.afTitle
                     });
 
-                    let Rd_Subsi = context.request.parameters.custparam_subsi;
-                    let Rd_Date = context.request.parameters.custparam_date;
-                    let Rd_Date_2 = context.request.parameters.custparam_date_2;
-                    let Rd_Country = context.request.parameters.custparam_country;
-                    let Rd_Transaction = context.request.parameters.custparam_transaction;
-                    let Rd_CheckPaid = context.request.parameters.custparam_checkpaid;
+                    let Rd_Subsi = scriptContext.request.parameters.custparam_subsi;
+                    let Rd_Date = scriptContext.request.parameters.custparam_date;
+                    let Rd_Date_2 = scriptContext.request.parameters.custparam_date_2;
+                    let Rd_Country = scriptContext.request.parameters.custparam_country;
+                    let Rd_Transaction = scriptContext.request.parameters.custparam_transaction;
+                    let Rd_CheckPaid = scriptContext.request.parameters.custparam_checkpaid;
                     let allLicenses = libraryFeature.getAllLicenses();
 
                     let idFeature = {
@@ -61,14 +80,14 @@ define(['N/runtime'],
                     // Primary Information
                     form.addFieldGroup({
                         id: 'group_pi',
-                        label: jsonLanguage.primary[Language]
+                        label: translatedFields.afGrpPrimary
                     });
 
                     if (subsiOW) {
                         let f_subsi = form.addField({
                             id: 'custpage_subsi',
                             type: 'select',
-                            label: jsonLanguage.subsidiary[Language],
+                            label: translatedFields.afSubSidiary,
                             container: 'group_pi'
                         });
                         f_subsi.isMandatory = true;
@@ -111,7 +130,7 @@ define(['N/runtime'],
                     let p_country = form.addField({
                         id: 'custpage_country',
                         type: serverWidget.FieldType.TEXT,
-                        label: jsonLanguage.country[Language],
+                        label: translatedFields.afCountry,
                         container: 'group_pi'
                     });
                     p_country.updateDisplayType({
@@ -136,7 +155,7 @@ define(['N/runtime'],
                     let p_transaction = form.addField({
                         id: 'custpage_transaction',
                         type: 'select',
-                        label: jsonLanguage.transaction[Language],
+                        label: translatedFields.afTransaction,
                         container: 'group_pi'
                     });
                     p_transaction.isMandatory = true;
@@ -145,7 +164,7 @@ define(['N/runtime'],
                     let p_checkpaid = form.addField({
                         id: 'custpage_checkpaid',
                         type: 'checkbox',
-                        label: jsonLanguage.checkpaid[Language],
+                        label: translatedFields.afCheckPaid,
                         container: 'group_pi'
                     });
 
@@ -154,13 +173,13 @@ define(['N/runtime'],
                     // Modificacion 26.03-2020 : Grupo - Date Ranges
                     form.addFieldGroup({
                         id: 'group_rg',
-                        label: jsonLanguage.dateranges[Language]
+                        label: translatedFields.afDateRanges
                     });
 
                     let f_date = form.addField({
                         id: 'custpage_date',
                         type: serverWidget.FieldType.DATE,
-                        label: jsonLanguage.datefrom[Language],
+                        label: translatedFields.afDateFrom,
                         container: 'group_rg',
                         source: 'date'
                     });
@@ -173,7 +192,7 @@ define(['N/runtime'],
                     let f_date_2 = form.addField({
                         id: 'custpage_date_2',
                         type: serverWidget.FieldType.DATE,
-                        label: jsonLanguage.dateto[Language],
+                        label: translatedFields.afDateTo,
                         container: 'group_rg',
                         source: 'date'
                     });
@@ -187,13 +206,13 @@ define(['N/runtime'],
                     if (Rd_Country) {
                         form.addFieldGroup({
                             id: 'group_count',
-                            label: jsonLanguage.transactioncount[Language]
+                            label: translatedFields.afTransactionCount
                         });
 
                         let fNumber = form.addField({
                             id: 'custpage_number',
                             type: serverWidget.FieldType.INTEGER,
-                            label: jsonLanguage.numbertransactions[Language],
+                            label: translatedFields.afNumberTransactions,
                             container: 'group_count'
                         });
                         fNumber.updateDisplayType({
@@ -207,7 +226,7 @@ define(['N/runtime'],
                         let fSeleccionadas = form.addField({
                             id: 'custpage_seleccionadas',
                             type: serverWidget.FieldType.INTEGER,
-                            label: jsonLanguage.numberselectedtransactions[Language],
+                            label: translatedFields.afNumberSelectedTransactions,
                             container: 'group_count'
                         });
                         fSeleccionadas.updateDisplayType({
@@ -222,7 +241,7 @@ define(['N/runtime'],
                         let fSelectTransaction = form.addField({
                             id: 'custpage_select',
                             type: serverWidget.FieldType.SELECT,
-                            label: jsonLanguage.selecttransactions[Language],
+                            label: translatedFields.afSelectTransactions,
                             container: 'group_count'
                         });
                         fSelectTransaction.addSelectOption({
@@ -231,15 +250,15 @@ define(['N/runtime'],
                         });
                         fSelectTransaction.addSelectOption({
                             value: 500,
-                            text: '500 ' + jsonLanguage.transactions[Language]
+                            text: '500 ' + translatedFields.afTransactions
                         });
                         fSelectTransaction.addSelectOption({
                             value: 1000,
-                            text: '1000 ' + jsonLanguage.transactions[Language]
+                            text: '1000 ' + translatedFields.afTransactions
                         });
                         fSelectTransaction.addSelectOption({
                             value: 2000,
-                            text: '2000 ' + jsonLanguage.transactions[Language]
+                            text: '2000 ' + translatedFields.afTransactions
                         });
 
                         fSelectTransaction.updateBreakType({
@@ -249,7 +268,7 @@ define(['N/runtime'],
                         let fQuantity = form.addField({
                             id: 'custpage_quantity',
                             type: serverWidget.FieldType.INTEGER,
-                            label: jsonLanguage.transactionstoselect[Language],
+                            label: translatedFields.afTransactionsToSelect,
                             container: 'group_count'
                         });
                         fQuantity.updateDisplaySize({
@@ -274,7 +293,7 @@ define(['N/runtime'],
                         strhtml += '<tr>';
                         strhtml += '<td class="text">';
                         strhtml += '<div style="color: gray; font-size: 12pt; margin-top: 10px; padding: 5px; border-top: 1pt solid silver">';
-                        strhtml += jsonLanguage.autentification[Language] + '</div>';
+                        strhtml += translatedFields.afAuthentication + '</div>';
                         strhtml += '</td>';
                         strhtml += '</tr>';
                         strhtml += '</table>';
@@ -285,53 +304,53 @@ define(['N/runtime'],
 
                     let f_sublist = form.addSublist({
                         id: 'custpage_sublista',
-                        label: jsonLanguage.invoices[Language],
+                        label: translatedFields.afInvoices,
                         type: serverWidget.SublistType.LIST
                     });
                     f_sublist.addField({
                         id: 'id_apply',
                         type: serverWidget.FieldType.CHECKBOX,
-                        label: jsonLanguage.apply[Language]
+                        label: translatedFields.afApply
                     });
                     f_sublist.addField({
                         id: 'id_int',
                         type: serverWidget.FieldType.TEXT,
-                        label: jsonLanguage.internalid[Language]
+                        label: translatedFields.afInternalId
                     });
                     f_sublist.addField({
                         id: 'id_tran',
                         type: serverWidget.FieldType.TEXT,
-                        label: jsonLanguage.tranid[Language]
+                        label: translatedFields.afTranId
                     });
                     f_sublist.addField({
                         id: 'id_type',
                         type: serverWidget.FieldType.TEXT,
-                        label: jsonLanguage.transaction[Language]
+                        label: translatedFields.afTransaction
                     });
                     f_sublist.addField({
                         id: 'id_date',
                         type: serverWidget.FieldType.DATE,
-                        label: jsonLanguage.date[Language]
+                        label: translatedFields.afDate
                     });
                     f_sublist.addField({
                         id: 'id_ent',
                         type: serverWidget.FieldType.TEXT,
-                        label: jsonLanguage.customer[Language]
+                        label: translatedFields.afCustomer
                     });
                     f_sublist.addField({
                         id: 'id_doc',
                         type: serverWidget.FieldType.TEXT,
-                        label: jsonLanguage.documenttype[Language]
+                        label: translatedFields.afDocumentType
                     });
                     f_sublist.addField({
                         id: 'id_memo',
                         type: serverWidget.FieldType.TEXT,
-                        label: jsonLanguage.memo[Language]
+                        label: translatedFields.afMemo
                     });
                     f_sublist.addField({
                         id: 'id_amount',
                         type: serverWidget.FieldType.TEXT,
-                        label: jsonLanguage.amount[Language]
+                        label: translatedFields.afAmount
                     });
 
                     if (Rd_Country) {
@@ -427,7 +446,7 @@ define(['N/runtime'],
 
                         let f_state = form.addField({
                             id: 'custpage_state',
-                            label: jsonLanguage.state[Language],
+                            label: translatedFields.afState,
                             type: serverWidget.FieldType.TEXT,
                             container: 'group_pi'
                         });
@@ -1067,12 +1086,12 @@ define(['N/runtime'],
 
                         f_sublist.addButton({
                             id: 'id_mark',
-                            label: jsonLanguage.markall[Language],
+                            label: translatedFields.afMarkAll,
                             functionName: 'markAll(' + c + ')'
                         });
                         f_sublist.addButton({
                             id: 'id_desmark',
-                            label: jsonLanguage.desmarkall[Language],
+                            label: translatedFields.afDesMarkAll,
                             functionName: 'desmarkAll'
                         });
 
@@ -1114,29 +1133,29 @@ define(['N/runtime'],
 
                         form.addButton({
                             id: 'id_cancel',
-                            label: jsonLanguage.back[Language],
+                            label: translatedFields.afBack,
                             functionName: 'funcionCancel'
                         });
                     }
 
-                    form.clientScriptModulePath = './EI_Library/LMRY_Invoicing_Populate_CLNT.js';
+                    form.clientScriptModulePath = './LMRY_AdvanceFlow_CLNT_V2.1.js';
 
                     if (Rd_Subsi != null && Rd_Subsi != '') {
                         form.addSubmitButton({
-                            label: jsonLanguage.save[Language]
+                            label: translatedFields.afSave
                         });
                     } else {
                         form.addSubmitButton({
-                            label: jsonLanguage.filter[Language]
+                            label: translatedFields.afFilter
                         });
-                        // form.addResetButton({label: jsonLanguage['reset'][Language]});
+                        
                     }
 
-                    context.response.writePage(form);
+                    scriptContext.response.writePage(form);
                 }else {
-                    let p_state = context.request.parameters.custpage_state;
+                    let p_state = scriptContext.request.parameters.custpage_state;
 
-                    let auxSubsi = subsiOW ? context.request.parameters.custpage_subsi : 1;
+                    let auxSubsi = subsiOW ? scriptContext.request.parameters.custpage_subsi : 1;
 
                     if (p_state == null || p_state == '') {
                         redirect.toSuitelet({
@@ -1144,32 +1163,32 @@ define(['N/runtime'],
                             deploymentId: 'customdeploy_lmry_invoicing_populat_stl',
                             parameters: {
                                 custparam_subsi: auxSubsi,
-                                custparam_doctype: context.request.parameters.custpage_doctype,
-                                custparam_date: context.request.parameters.custpage_date,
-                                custparam_date_2: context.request.parameters.custpage_date_2,
-                                custparam_country: context.request.parameters.custpage_country,
-                                custparam_transaction: context.request.parameters.custpage_transaction,
-                                custparam_checkpaid: context.request.parameters.custpage_checkpaid
+                                custparam_doctype: scriptContext.request.parameters.custpage_doctype,
+                                custparam_date: scriptContext.request.parameters.custpage_date,
+                                custparam_date_2: scriptContext.request.parameters.custpage_date_2,
+                                custparam_country: scriptContext.request.parameters.custpage_country,
+                                custparam_transaction: scriptContext.request.parameters.custpage_transaction,
+                                custparam_checkpaid: scriptContext.request.parameters.custpage_checkpaid
                             }
                         });
                     } else {
                         let usuario = runtime.getCurrentUser().id;
-                        let transaction = context.request.parameters.custpage_transaction;
+                        let transaction = scriptContext.request.parameters.custpage_transaction;
                         let subsidiary_id = auxSubsi;
                         let licenses = libraryFeature.getLicenses(subsidiary_id);
                         let params = {};
                         if (transaction == 'vendorbill' || transaction == 'vendorcredit') {
-                            params.custscript_lmry_ip_params_state_purchase = context.request.parameters.custpage_state;
+                            params.custscript_lmry_ip_params_state_purchase = scriptContext.request.parameters.custpage_state;
                             params.custscript_lmry_ip_params_user_purchase = usuario;
                         } else if (transaction == 'itemfulfillment' || transaccion == 'itemreceipt') {
-                            params.custscript_lmry_ip_params_state_fillrcpt = context.request.parameters.custpage_state;
+                            params.custscript_lmry_ip_params_state_fillrcpt = scriptContext.request.parameters.custpage_state;
                             params.custscript_lmry_ip_params_user_fillrcpt = usuario;
                         } else {
-                            params.custscript_lmry_ip_params_state = context.request.parameters.custpage_state;
+                            params.custscript_lmry_ip_params_state = scriptContext.request.parameters.custpage_state;
                             params.custscript_lmry_ip_params_user = usuario;
                         }
 
-                        let country = context.request.parameters.custpage_country;
+                        let country = scriptContext.request.parameters.custpage_country;
                         let country2 = country.substring(0, 3).toUpperCase();
                         country2 = validarAcentos(country2);
 
@@ -1854,6 +1873,46 @@ define(['N/runtime'],
             } catch (error) {
                 log.error('getTranFieldPymtComp', error);
                 library.sendemail(' [ getTranFieldPymtComp ] ' + error, LMRY_script);
+            }
+        }
+
+        const getFieldTranslations = () =>{
+            return {
+                afTitle: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_title" })(),
+                afGrpPrimary: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_grp_primary" })(),
+                afSubSidiary: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_subsidiary" })(),
+                afCountry: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_country" })(),
+                afTransaction: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_transaction" })(),
+                afDateRanges: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_date_ranges" })(),
+                afDateFrom: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_date_from" })(),
+                afDateTo: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_date_to" })(),
+                afTransactionCount: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_transaction_count" })(),
+                afNumberTransactions: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_number_transactions" })(),
+                afNumberSelectedTransactions: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_number_selected_transactions" })(),
+                afSelectTransactions: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_select_transactions" })(),
+                afTransactionsToSelect: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_transactions_to_select" })(),
+                afTransactions: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_transactions" })(),
+                afAuthentication: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_authentication" })(),
+                afInvoices: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_invoices" })(),
+                afApply: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_apply" })(),
+                afInternalId: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_internal_id" })(),
+                afTranId: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_tran_id" })(),
+                afDate: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_date" })(),
+                afCustomer: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_customer" })(),
+                afDocumentType: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_document_type" })(),
+                afMemo: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_memo" })(),
+                afAmount: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_amount" })(),
+                afState: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_state" })(),
+                afMarkAll: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_mark_all" })(),
+                afDesMarkAll: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_des_mark_all" })(),
+                afBack: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_back" })(),
+                afSave: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_save" })(),
+                afFilter: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_filter" })(),
+                afReset: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_reset" })(),
+                afImportant: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_important" })(),
+                afCode: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_code" })(),
+                afDetails: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_details" })(),
+                afCheckPaid: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_check_paid" })(),
             }
         }
 
