@@ -85,12 +85,10 @@ define(['N/search', 'N/log', 'N/runtime', 'N/record', 'N/url', 'N/https', './LMR
                     var set_data = JSON.parse(data_automatic_search[0].getValue('custrecord_lmry_setup_us_data'));
                     for (var i = 0; i < set_data.length; i++) {
                         var fieldIndex = relatedFields.indexOf(set_data[i].field);
-                        log.debug("field - value :", set_data[i].field + " - " + set_data[i].value);
-                        log.debug("fieldIndex :", fieldIndex);
+                        
                         if (fieldIndex != -1) {
                             //recordObj.setValue(set_data[i].field, set_data[i].value);
-                            log.debug("field - value :", set_data[i].field + " - " + set_data[i].value);
-                            log.debug("recordObj.type :", recordObj.type);
+                            
                             var valuesObj = {};
                             valuesObj[set_data[i].field] = set_data[i].value;
                             record.submitFields({
@@ -117,8 +115,6 @@ define(['N/search', 'N/log', 'N/runtime', 'N/record', 'N/url', 'N/https', './LMR
                         // Latam - MX Document Design (Debe estar vacio el campo)
                         var docum_sg = recordObj.getValue('custbody_lmry_mx_document_design');
 
-                        log.error('type_transaction , serie_id , docum_sg', type_transaction + ' - ' + serie_id + ' - ' + docum_sg);
-
                         if (serie_id && !docum_sg) {
 
                             // LatamReady - Print Series
@@ -132,8 +128,6 @@ define(['N/search', 'N/log', 'N/runtime', 'N/record', 'N/url', 'N/https', './LMR
                             } else {
                                 diseno_id = "";
                             }
-
-                            log.error('custbody_lmry_mx_document_design', diseno_id);
 
                             // Latam - MX Document Design
                             //recordObj.setValue('custbody_lmry_mx_document_design', diseno_id);
@@ -166,6 +160,10 @@ define(['N/search', 'N/log', 'N/runtime', 'N/record', 'N/url', 'N/https', './LMR
                 var relatedFields = ['custbody_lmry_document_type','custbody_lmry_serie_doc_cxc','custbody_lmry_modification_reason','custbody_lmry_serie_doc_loc_cxc'];
                 var id_country = currentRCD.getValue('custbody_lmry_subsidiary_country');
                 var type_transaction = currentRCD.type;
+                var fieldReplace = {
+                    'custbody_lmry_document_type':'custpage_document_type',
+                    'custbody_lmry_serie_doc_cxc':'custpage_serie_doc'
+                }
 
                 if (data_automatic_search != '' && data_automatic_search != null) {
                     var data = data_automatic_search[0].getValue('custrecord_lmry_setup_us_data');
@@ -187,7 +185,17 @@ define(['N/search', 'N/log', 'N/runtime', 'N/record', 'N/url', 'N/https', './LMR
                             for (var i = 0; i < set_data.length; i++) {
                                 if (set_data[i].value != '' && set_data[i].value != null) {
                                     if (validateFieldsAR.indexOf(set_data[i].field) != -1) continue;
-                                    currentRCD.setValue(set_data[i].field, set_data[i].value);
+                                    if (type_transaction == 'customtransaction_lmry_payment_complemnt') {
+                                        if (fieldReplace[set_data[i].field]) {
+                                            currentRCD.setValue(fieldReplace[set_data[i].field], set_data[i].value)
+                                        } else{
+                                            currentRCD.setValue(set_data[i].field, set_data[i].value);
+                                        }
+                                    } else{
+                                        currentRCD.setValue(set_data[i].field, set_data[i].value);
+                                    }
+                                    
+                                    
                                 }
                             }
                         }
@@ -209,8 +217,6 @@ define(['N/search', 'N/log', 'N/runtime', 'N/record', 'N/url', 'N/https', './LMR
                             // Latam - MX Document Design (Debe estar vacio el campo)
                             var docum_sg = currentRCD.getValue('custbody_lmry_mx_document_design');
 
-                            log.error('type_transaction , serie_id , docum_sg', type_transaction + ' - ' + serie_id + ' - ' + docum_sg);
-
                             if (serie_id && !docum_sg) {
 
                                 // LatamReady - Print Series
@@ -224,8 +230,6 @@ define(['N/search', 'N/log', 'N/runtime', 'N/record', 'N/url', 'N/https', './LMR
                                 } else {
                                     diseno_id = "";
                                 }
-
-                                log.error('custbody_lmry_mx_document_design', diseno_id);
 
                                 // Latam - MX Document Design
                                 currentRCD.setValue('custbody_lmry_mx_document_design', diseno_id);
@@ -304,7 +308,10 @@ define(['N/search', 'N/log', 'N/runtime', 'N/record', 'N/url', 'N/https', './LMR
                             id_record = 'customrecord_lmry_py_transaction_fields';
                             id_record_key = 'custrecord_lmry_py_transaction';
                             break;
-
+                        case '61':
+                            id_record = 'customrecord_lmry_do_transaction_fields';
+                            id_record_key = 'custrecord_lmry_do_transaction_related';
+                            break;
                         default:
                             return true;
 
@@ -447,7 +454,7 @@ define(['N/search', 'N/log', 'N/runtime', 'N/record', 'N/url', 'N/https', './LMR
                         fieldId: 'custcol_lmry_br_service_catalog',
                         line: 0
                     });
-                    var rate = currentRCD.getValue('discountrate');
+                    var rate = currentRCD.getValue('discountrate');  
                 }
 
                 var filters = [
@@ -491,8 +498,7 @@ define(['N/search', 'N/log', 'N/runtime', 'N/record', 'N/url', 'N/https', './LMR
                         break;
 
                     case 'customtransaction_lmry_payment_complemnt':
-                        var nType =  currentRCD.getValue("ntype");
-                        filters.push('AND', ['custrecord_lmry_us_transaction', 'anyof', nType]);
+                        filters.push('AND', ['custrecord_lmry_us_transaction', 'anyof', 9]);
                         if (check_fact == 1) {
                             filters.push('AND', ['custrecord_lmry_document_type.custrecord_lmry_fact_electronica', 'is', 'F']);
                         } else if (check_fact == 2) {
@@ -1195,11 +1201,13 @@ define(['N/search', 'N/log', 'N/runtime', 'N/record', 'N/url', 'N/https', './LMR
 
                 // Solo para subsidiaria con acceso - Transaction Number Invoice
                 var lmry_DocNum = currentRCD.getValue('custbody_lmry_num_preimpreso');
-                log.debug("lmry_DocNum: ",lmry_DocNum);
+                log.error("processAfterSubmit",processAfterSubmit)
+                log.error("lmry_DocNum",lmry_DocNum)
                 if (lmry_DocNum == '' || lmry_DocNum == null) {
-                    
+                    log.error("lmry_DocNum","entro")
                     if ((LMRY_Result[0] == 'MX' || LMRY_Result[0] == 'BR' || LMRY_Result[0] == 'CO' || LMRY_Result[0] == 'UY' || LMRY_Result[0] == 'BO' || LMRY_Result[0] == 'GT' || LMRY_Result[0] == 'PA' || LMRY_Result[0] == 'PE' || LMRY_Result[0] == 'PY' || LMRY_Result[0] == 'DO') && LMRY_Result[2]) {
                         // Verifica que no este vacio el numero de serie
+                        log.error("LMRY_Result[0]",LMRY_Result[0])
                         var lmry_DocSer = '';
                         if (type_transaction == 'customtransaction_lmry_payment_complemnt') {
                             lmry_DocSer = currentRCD.getValue('custpage_serie_doc');
@@ -1207,8 +1215,9 @@ define(['N/search', 'N/log', 'N/runtime', 'N/record', 'N/url', 'N/https', './LMR
                         else {
                             lmry_DocSer = currentRCD.getValue('custbody_lmry_serie_doc_cxc');
                         }
-                        log.debug("lmry_DocSer: ",lmry_DocSer);
+                        log.error("lmry_DocSer",lmry_DocSer)
                         if (lmry_DocSer != '' && lmry_DocSer != null && lmry_DocSer != 0) {
+                            log.error("lmry_DocSer","entro")
                             switch (type_transaction) {
                                 case 'invoice':
                                     switch (LMRY_Result[0]) {
@@ -1402,9 +1411,10 @@ define(['N/search', 'N/log', 'N/runtime', 'N/record', 'N/url', 'N/https', './LMR
                                 return true;
                             }
                             // Crea el numero consecutivo
-                            log.debug("validacion 1:",nroConse > maxPermi);
+                            log.error("nroConse > maxPermi",nroConse > maxPermi)
                             if (nroConse > maxPermi) {
                                 // Asigna el numero pre-impreso
+                                log.error("message","nroConse > maxPermi 1")
                                 if (processAfterSubmit) {
                                     record.submitFields({
                                         type: currentRCD.type,
@@ -1417,6 +1427,7 @@ define(['N/search', 'N/log', 'N/runtime', 'N/record', 'N/url', 'N/https', './LMR
                                     currentRCD.setValue('custbody_lmry_num_preimpreso', '');
                                 }
                             } else {
+                                log.error("message","nroConse > maxPermi 2")
                                 var longNumeroConsec = parseInt((nroConse + '').length);
                                 var llenarCeros = '';
                                 for (var i = 0; i < (digitos - longNumeroConsec); i++) {
@@ -1578,9 +1589,9 @@ define(['N/search', 'N/log', 'N/runtime', 'N/record', 'N/url', 'N/https', './LMR
                         } else {
                             texto = tipini.toUpperCase() + ' ' + lmry_DocSerText + '-' + currentRCD.getValue('custbody_lmry_num_preimpreso');
                         }
-                        log.debug("validacion 2:",processAfterSubmit);
+                        
                         if (processAfterSubmit) {
-                            log.debug("validacion 3:","Entro");
+                           
                             record.submitFields({
                                 type: currentRCD.type,
                                 id: currentRCD.id,
@@ -1589,7 +1600,7 @@ define(['N/search', 'N/log', 'N/runtime', 'N/record', 'N/url', 'N/https', './LMR
                                 }
                             });
                         }else{
-                            log.debug("validacion 4:","Entro");
+                            
                             currentRCD.setValue({
                                 fieldId: 'tranid',
                                 value: texto
@@ -1639,7 +1650,7 @@ define(['N/search', 'N/log', 'N/runtime', 'N/record', 'N/url', 'N/https', './LMR
                 var columns = wtax_type.columns;
 
                 var nroConse = parseInt(results[0].getValue(columns[0]));
-                log.debug("validacion 5:",parseFloat(Auxnumer) > parseFloat(nroConse));
+                
                 if (parseFloat(Auxnumer) > parseFloat(nroConse)) {
                     var id = record.submitFields({
                         type: 'customrecord_lmry_serie_impresion_cxc',

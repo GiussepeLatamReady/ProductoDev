@@ -394,8 +394,30 @@ define(['N/log', 'N/config', 'N/ui/serverWidget', 'N/record', 'N/search', 'N/run
         }
 
         licenses = library.getLicenses(subsidiary);
-        var featureAfterSaving = library.getAuthorization(1009, licenses);  //Electronic Invoicing - AUTOMATIC SETTING AFTER SAVING
         var LMRY_Result = ValidAccessCPU(subsidiary, form, type, licenses);
+
+        //Electronic Invoicing - AUTOMATIC SETTING AFTER SAVING
+        var featuresAfterSavingByCountry = {
+          "AR": 1008,
+          "BR": 1009,
+          "CL": 1010,
+          "CO": 1011,
+          "CR": 1012,
+          "EC": 1013,
+          "GT": 1014,
+          "MX": 1015,
+          "PA": 1016,
+          "PY": 1017,
+          "PE": 1018,
+          "UY": 1019,
+          "DO": 1020,
+          "BO": 1021
+        };
+
+        var featureAfterSaving = false;
+        if (featuresAfterSavingByCountry.hasOwnProperty(LMRY_Result[0])) {
+          featureAfterSaving = library.getAuthorization(featuresAfterSavingByCountry[LMRY_Result[0]], licenses);
+        }
 
         /* Validacion 04/02/22 */
         // Libreria - Valida Periodo cerrado
@@ -477,8 +499,31 @@ define(['N/log', 'N/config', 'N/ui/serverWidget', 'N/record', 'N/search', 'N/run
         }
 
         licenses = library.getLicenses(subsidiary);
-        var featureAfterSaving = library.getAuthorization(1009, licenses);  //Electronic Invoicing - AUTOMATIC SETTING AFTER SAVING
         var LMRY_Result = ValidAccessCPU(subsidiary, form, type, licenses);
+
+        
+        //Electronic Invoicing - AUTOMATIC SETTING AFTER SAVING
+        var featuresAfterSavingByCountry = {
+          "AR": 1008,
+          "BR": 1009,
+          "CL": 1010,
+          "CO": 1011,
+          "CR": 1012,
+          "EC": 1013,
+          "GT": 1014,
+          "MX": 1015,
+          "PA": 1016,
+          "PY": 1017,
+          "PE": 1018,
+          "UY": 1019,
+          "DO": 1020,
+          "BO": 1021
+        };
+
+        var featureAfterSaving = false;
+        if (featuresAfterSavingByCountry.hasOwnProperty(LMRY_Result[0])) {
+          featureAfterSaving = library.getAuthorization(featuresAfterSavingByCountry[LMRY_Result[0]], licenses);
+        }
 
         /* Validacion 04/02/22 */
         // Libreria - Valida Periodo cerrado
