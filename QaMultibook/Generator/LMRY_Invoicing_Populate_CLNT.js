@@ -168,6 +168,7 @@ define(['N/search', './LMRY_IP_libSendingEmailsLBRY_V2.0', 'N/currentRecord', 'N
                             }
                         }
 
+                        console.log("jsonTransaction :",jsonTransaction)
                         if (!subsi_OW) {
                             filtrarTransaction(scriptContext);
                         }

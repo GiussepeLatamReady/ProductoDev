@@ -65,3 +65,5 @@ Tener en cuenta que por comododidad tendras la funcion de traduccion en el propi
 cambiar nSearch por search
 
 
+
+

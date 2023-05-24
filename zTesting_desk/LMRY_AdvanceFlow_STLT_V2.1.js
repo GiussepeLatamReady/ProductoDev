@@ -61,8 +61,17 @@ define([
                 nLog.error("Pmessage :","authentication...");
                 authentication(form);
                 nLog.error("Pmessage :","buildSubListFilter...");
-                buildSubListFilter(form,parameters);
+                const countTransactions = buildSubListFilter(form,parameters);
                 nLog.error("Pmessage :","LMRY_AdvanceFlow_CLNT_V2.1.js...");
+
+                if (parameters.country) {
+                    let numberOfTransactionField= form.getField({
+                        id : 'custpage_lmry_ste_number_of_trans'
+                    });
+                    numberOfTransactionField.defaultValue = countTransactions;
+                }
+                
+
                 
                 nLog.error("Pmessage :","addSubmitButton..");
                 if (!parameters.subsidiary || parameters.subsidiary === "" || parameters.subsidiary === null) {
@@ -76,7 +85,7 @@ define([
                     });
                 }
                 nLog.error("Pmessage :","End..");
-                
+
                 form.clientScriptModulePath = "./LMRY_AdvanceFlow_CLNT_V2.1.js"
                 context.response.writePage({ pageObject: form });
 
@@ -509,58 +518,18 @@ define([
 
     const buildSubListFilter = (form,parameters) => {
         const translatedFields = AF_Library.getFieldTranslations();
-        const resultList = form.addSublist({
-            id: "custlist_lmry_ste_filter",
-            type: nServerWidget.SublistType.LIST,
-            label: translatedFields.afTransactions
-        });
+        const resultList = form.addSublist({ id: "custlist_lmry_ste_filter", type: nServerWidget.SublistType.LIST, label: translatedFields.afTransactions });
+        let countTransactions = 0;
 
-        resultList.addMarkAllButtons();
-        resultList.addField({
-            id: "listcol_lmry_ste_apply",
-            label: translatedFields.afApply,
-            type: nServerWidget.FieldType.CHECKBOX
-        });
-        resultList.addField({
-            id: "listcol_lmry_ste_id",
-            label: translatedFields.afInternalId,
-            type: nServerWidget.FieldType.TEXT
-        });
-        resultList.addField({
-            id: "listcol_lmry_ste_tranid",
-            label: translatedFields.afTranId,
-            type: nServerWidget.FieldType.TEXT
-        });
-        resultList.addField({
-            id: "listcol_lmry_ste_type",
-            label: translatedFields.afTransactionType,
-            type: nServerWidget.FieldType.TEXT
-        });
-        resultList.addField({
-            id: "listcol_lmry_ste_date",
-            label: translatedFields.afDate,
-            type: nServerWidget.FieldType.DATE
-        });
-        resultList.addField({
-            id: "listcol_lmry_ste_entity",
-            label: translatedFields.afEntity,
-            type: nServerWidget.FieldType.TEXT
-        });
-        resultList.addField({
-            id: "listcol_lmry_ste_doc_type",
-            label: translatedFields.afDocumentType,
-            type: nServerWidget.FieldType.TEXT
-        });
-        resultList.addField({
-            id: "listcol_lmry_ste_memo",
-            label: translatedFields.afMemo,
-            type: nServerWidget.FieldType.TEXT
-        });
-        resultList.addField({
-            id: "listcol_lmry_ste_amount",
-            label: translatedFields.afAmount,
-            type: nServerWidget.FieldType.TEXT
-        });
+        resultList.addField({ id: "listcol_lmry_ste_apply", label: translatedFields.afApply, type: nServerWidget.FieldType.CHECKBOX });
+        resultList.addField({ id: "listcol_lmry_ste_id", label: translatedFields.afInternalId, type: nServerWidget.FieldType.TEXT });
+        resultList.addField({ id: "listcol_lmry_ste_tranid", label: translatedFields.afTranId, type: nServerWidget.FieldType.TEXT });
+        resultList.addField({ id: "listcol_lmry_ste_type", label: translatedFields.afTransactionType, type: nServerWidget.FieldType.TEXT });
+        resultList.addField({ id: "listcol_lmry_ste_date", label: translatedFields.afDate, type: nServerWidget.FieldType.DATE });
+        resultList.addField({ id: "listcol_lmry_ste_entity", label: translatedFields.afEntity, type: nServerWidget.FieldType.TEXT });
+        resultList.addField({ id: "listcol_lmry_ste_doc_type", label: translatedFields.afDocumentType, type: nServerWidget.FieldType.TEXT });
+        resultList.addField({ id: "listcol_lmry_ste_memo", label: translatedFields.afMemo, type: nServerWidget.FieldType.TEXT });
+        resultList.addField({ id: "listcol_lmry_ste_amount", label: translatedFields.afAmount, type: nServerWidget.FieldType.TEXT });
 
 
         if (parameters.country) {
@@ -575,20 +544,26 @@ define([
                 resultList.setSublistValue({ id: 'listcol_lmry_ste_type', line: index, value: transaction.typeText });
                 resultList.setSublistValue({ id: 'listcol_lmry_ste_date', line: index, value: transaction.trandate });
                 resultList.setSublistValue({ id: 'listcol_lmry_ste_entity', line: index, value: transaction.entityText });
-                resultList.setSublistValue({
-                    id: 'listcol_lmry_ste_doc_type',
-                    line: index,
-                    value: transaction.documentTypeText
-                });
+                resultList.setSublistValue({ id: 'listcol_lmry_ste_doc_type', line: index, value: transaction.documentTypeText });
                 resultList.setSublistValue({ id: 'listcol_lmry_ste_memo', line: index, value: transaction.memo });
                 resultList.setSublistValue({ id: 'listcol_lmry_ste_amount', line: index, value: transaction.fxamount });
 
             });
+            countTransactions = transactions.length;
+
+            resultList.addButton({
+                id: 'custbutton_lmry_ste_mark_all',
+                label: translatedFields.afMarkAll,
+                functionName: 'markAll(' + countTransactions + ')'
+            });
+            resultList.addButton({
+                id: 'custbutton_lmry_ste_des_mark',
+                label: translatedFields.afDesMarkAll,
+                functionName: 'desmarkAll'
+            });
         }
 
-        
-
-
+        return countTransactions;
     }
 
     const validateAccents = (s) => {
