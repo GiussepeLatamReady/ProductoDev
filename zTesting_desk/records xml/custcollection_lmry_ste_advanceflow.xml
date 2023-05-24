@@ -1,0 +1,115 @@
+<translationcollection scriptid="custcollection_lmry_ste_advanceflow">
+    <name>LR Advance Flow</name>
+    <defaultlanguage>en-US</defaultlanguage>
+    <description>This is a translation for the Advance Flow development</description>
+    <strings>
+        <string scriptid="af_title">
+            <defaulttranslation>LR - Advanced Sales Flow</defaulttranslation>
+        </string>
+        <string scriptid="af_grp_primary">
+            <defaulttranslation>Primary Information</defaulttranslation>
+        </string>
+        <string scriptid="af_subsidiary">
+            <defaulttranslation>Subsidiary</defaulttranslation>
+        </string>
+        <string scriptid="af_country">
+            <defaulttranslation>Country</defaulttranslation>
+        </string>
+        <string scriptid="af_transaction">
+            <defaulttranslation>Transaction</defaulttranslation>
+        </string>
+        <string scriptid="af_transaction_type">
+            <defaulttranslation>Transaction type</defaulttranslation>
+        </string>
+        <string scriptid="af_grp_date_ranges">
+            <defaulttranslation>Date Ranges</defaulttranslation>
+        </string>
+        <string scriptid="af_date_from">
+            <defaulttranslation>Date From</defaulttranslation>
+        </string>
+        <string scriptid="af_date_to">
+            <defaulttranslation>Date To</defaulttranslation>
+        </string>
+        <string scriptid="af_grp_transaction_count">
+            <defaulttranslation>Transaction Count</defaulttranslation>
+        </string>
+        <string scriptid="af_number_transactions">
+            <defaulttranslation>Number of Transactions</defaulttranslation>
+        </string>
+        <string scriptid="af_number_selected_transactions">
+            <defaulttranslation>Number of Selected Transactions</defaulttranslation>
+        </string>
+        <string scriptid="af_select_transactions">
+            <defaulttranslation>Select Transactions</defaulttranslation>
+        </string>
+        <string scriptid="af_transactions_to_select">
+            <defaulttranslation>Transactions to Select</defaulttranslation>
+        </string>
+        <string scriptid="af_transactions">
+            <defaulttranslation>Transactions</defaulttranslation>
+        </string>
+        <string scriptid="af_authentication">
+            <defaulttranslation>Check that the authentication data does not point to the Production environment.</defaulttranslation>
+        </string>
+        <string scriptid="af_invoices">
+            <defaulttranslation>Invoices</defaulttranslation>
+        </string>
+        <string scriptid="af_apply">
+            <defaulttranslation>Apply</defaulttranslation>
+        </string>
+        <string scriptid="af_internal_id">
+            <defaulttranslation>Internal ID</defaulttranslation>
+        </string>
+        <string scriptid="af_tran_id">
+            <defaulttranslation>Reference No.</defaulttranslation>
+        </string>
+        <string scriptid="af_date">
+            <defaulttranslation>Date</defaulttranslation>
+        </string>
+        <string scriptid="af_entity">
+            <defaulttranslation>Entity</defaulttranslation>
+        </string>
+        <string scriptid="af_document_type">
+            <defaulttranslation>Document Type</defaulttranslation>
+        </string>
+        <string scriptid="af_memo">
+            <defaulttranslation>Memo</defaulttranslation>
+        </string>
+        <string scriptid="af_amount">
+            <defaulttranslation>Amount</defaulttranslation>
+        </string>
+        <string scriptid="af_state">
+            <defaulttranslation>State</defaulttranslation>
+        </string>
+        <string scriptid="af_mark_all">
+            <defaulttranslation>Mark All</defaulttranslation>
+        </string>
+        <string scriptid="af_des_mark_all">
+            <defaulttranslation>Desmark All</defaulttranslation>
+        </string>
+        <string scriptid="af_back">
+            <defaulttranslation>Back</defaulttranslation>
+        </string>
+        <string scriptid="af_save">
+            <defaulttranslation>Save</defaulttranslation>
+        </string>
+        <string scriptid="af_filter">
+            <defaulttranslation>Filter</defaulttranslation>
+        </string>
+        <string scriptid="af_reset">
+            <defaulttranslation>Reset</defaulttranslation>
+        </string>
+        <string scriptid="af_important">
+            <defaulttranslation>Important: Access is not allowed.</defaulttranslation>
+        </string>
+        <string scriptid="af_code">
+            <defaulttranslation>Code : </defaulttranslation>
+        </string>
+        <string scriptid="af_details">
+            <defaulttranslation>Details : </defaulttranslation>
+        </string>
+        <string scriptid="af_check_paid">
+            <defaulttranslation>Include Paid Invoices</defaulttranslation>
+        </string>
+    </strings>
+</translationcollection>

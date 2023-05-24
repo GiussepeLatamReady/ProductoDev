@@ -769,7 +769,7 @@ define([
                     }
 
                     var type_transaction = 'transaction';
-                    log.error("Rd_Transaction",Rd_Transaction)
+
                     if (
                         Rd_Transaction != null &&
                         Rd_Transaction != '' &&
@@ -819,7 +819,6 @@ define([
                     }
 
                     if (type_transaction == 'transaction') {
-                        log.error("LOGGDAP","ENTRARÉ?")
                         if (Rd_Country == 'BRA') {
                             // Modificacion 02-12-2021 Se agregó para Bill e Item Receipt
                             filtros_invoice[i] = search.createFilter({

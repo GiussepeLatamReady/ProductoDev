@@ -1,5 +1,5 @@
 /**
- * @NApiVersion 2.x
+ * @NApiVersion 2.1
  * @NScriptType ClientScript
  * @NModuleScope Public
  * @Name LMRY_AdvanceFlow_CLNT_V2.1.js
@@ -7,11 +7,14 @@
  * @Date 05/09/2023
  */
 
-define(['N/runtime'],
+define(['N/runtime','N/search'],
 
-    (runtime) =>{
+    (runtime, search) =>{
 
-
+        features = {};
+        features.subsidiary = runtime.isFeatureInEffect({
+            feature: 'SUBSIDIARIES'
+        });
         /**
          * Function to be executed after page is initialized.
          *
@@ -23,18 +26,39 @@ define(['N/runtime'],
          */
         const pageInit = (scriptContext) => {
 
-
+            console.log("features:",features);
             console.log("CLNT runtime");
-            // let objRecord = scriptContext.currentRecord;
-            // let checkpaidField = objRecord.getField('custpage_lmry_ste_include_paid');
-            // let checkpaidValue = objRecord.getValue('custpage_lmry_ste_include_paid');
-            // let hiddenValue = objRecord.getValue('custpage_lmry_ste_hidden');
-            // checkpaidField.isVisible = checkpaidValue;
+            let objRecord = scriptContext.currentRecord;
+            let checkpaidField = objRecord.getField('custpage_lmry_ste_include_paid');
+            let checkpaidValue = objRecord.getValue('custpage_lmry_ste_include_paid');
+            let hiddenValue = objRecord.getValue('custpage_lmry_ste_hidden');
+            checkpaidField.isVisible = checkpaidValue;
+            
 
-            // console.log("checkpaidValue :",checkpaidValue);
-            // console.log("hiddenValue :",hiddenValue);
-            // let jsonTransactionType = getTransactionType();
-            // console.log("Trnsaction Type :",jsonTransactionType);
+
+            if (!features.subsidiary) {
+                let jsonTransactionType = getTransactionType();
+                let countryValue = objRecord.getValue('custpage_lmry_ste_country');
+                let transactionTypeField = objRecord.getField('custpage_lmry_ste_transaction');
+
+                checkpaidField.isVisible = false;
+                objRecord.setValue({fieldId: 'custpage_lmry_ste_include_paid', value: false });
+
+                transactionTypeField.removeSelectOption({
+                    value: null
+                });
+                transactionTypeField.insertSelectOption({
+                    value: 0,
+                    text: ' '
+                });
+
+                if (countryValue != '' && !countryValue) {
+                    
+                }
+
+
+            }
+
 
 
             return true;
@@ -76,7 +100,8 @@ define(['N/runtime'],
         }
 
 
-        const getTransactionType = () => {
+        const getTransactionType = (scriptContext) => {
+            
             let jsonTransaction = {};
             let searchTransaction = search.create({
                 type: 'customrecord_lmry_af_trans_by_country',
