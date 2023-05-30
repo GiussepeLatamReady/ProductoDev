@@ -1,20 +1,4 @@
-const transaformIds = (ids) => {
-
-    let idsTransform = ids.split(",")
-    const jsonIdsTypes = {
-        16: 'creditmemo',
-        17: 'invoice',
-        32: 'itemreceipt',
-        20: 'itemfulfillment',
-        7: 'vendorbill',
-        10: 'vendorcredit'
-    }
-
-    idsTransform = idsTransform.map(id => jsonIdsTypes[id] );
-    
-    return idsTransform.toString();
-}
+let trasn ='56';
 
 
-
-console.log(transaformIds("7,10,16,17,20,32"));
+console.log(trasn.split('|'));

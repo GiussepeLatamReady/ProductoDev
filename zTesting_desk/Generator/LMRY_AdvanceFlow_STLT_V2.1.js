@@ -51,18 +51,11 @@ define([
                 parameters.transaction = context.request.parameters.transaction;
                 parameters.checkpaid = context.request.parameters.checkpaid;
 
-                nLog.debug("features :",features);
-                nLog.debug("Parameters :",parameters);
 
-                nLog.error("Pmessage :","buildGroups...");
                 buildGroups(form);
-                nLog.error("Pmessage :","buildFields...");
                 buildFields(form);
-                nLog.error("Pmessage :","authentication...");
                 authentication(form);
-                nLog.error("Pmessage :","buildSubListFilter...");
                 const countTransactions = buildSubListFilter(form,parameters);
-                nLog.error("Pmessage :","LMRY_AdvanceFlow_CLNT_V2.1.js...");
 
                 if (parameters.country) {
                     let numberOfTransactionField= form.getField({
@@ -71,20 +64,16 @@ define([
                     numberOfTransactionField.defaultValue = countTransactions;
                 }
                 
-
-                
-                nLog.error("Pmessage :","addSubmitButton..");
                 if (!parameters.subsidiary || parameters.subsidiary === "" || parameters.subsidiary === null) {
-                    form.addSubmitButton({label: translatedFields.afSave});
-                } else {
                     form.addSubmitButton({label: translatedFields.afFilter});
+                } else {
+                    form.addSubmitButton({label: translatedFields.afSave});
                     form.addButton({
                         id: "custbutton_lmry_ste_back",
                         label: translatedFields.afBack,
                         functionName: "redirectBack()"
                     });
                 }
-                nLog.error("Pmessage :","End..");
 
                 form.clientScriptModulePath = "./LMRY_AdvanceFlow_CLNT_V2.1.js"
                 context.response.writePage({ pageObject: form });
@@ -110,17 +99,20 @@ define([
                     });
                 } else {
                     let user = nRuntime.getCurrentUser().id;
-                    if (transactionValue == 'vendorbill' || transactionValue == 'vendorcredit') {
-                        params.custscript_lmry_ip_params_state_purchase = statusValue;
-                        params.custscript_lmry_ip_params_user_purchase = user;
-                    } else if (transactionValue == 'itemfulfillment' || transactionValue == 'itemreceipt') {
-                        params.custscript_lmry_ip_params_state_fillrcpt = statusValue;
-                        params.custscript_lmry_ip_params_user_fillrcpt = user;
-                    } else {
-                        params.custscript_lmry_ip_params_state = statusValue;
-                        params.custscript_lmry_ip_params_user = user;
+                    const AF_logData = {
+                        status:statusValue,
+                        user:user
                     }
-
+                    if (transactionValue == 'vendorbill' || transactionValue == 'vendorcredit') {
+                        params['custscript_lmry_ste_af_purch_log_id'] = AF_logData;
+                    } else if (transactionValue == 'itemfulfillment' || transactionValue == 'itemreceipt') {
+                        params['custscript_lmry_ste_af_item_log_id'] = AF_logData;
+                    } else {
+                        params['custscript_lmry_ste_af_sales_log_id'] = AF_logData;
+                    }
+                    
+                    
+                    
                     let countryValue = context.request.parameters.custpage_lmry_ste_country;
                     countryValue = countryValue.substring(0, 3).toUpperCase();
                     countryValue = validateAccents(countryValue);
@@ -128,41 +120,33 @@ define([
                     let setting = [nTask.TaskType.MAP_REDUCE, 'customscript_lmry_lmry_ste_af_sales_mprd', 'customscript_lmry_lmry_ste_af_purchase_mprd', 'customscript_lmry_ste_af_item_mprd'];
 
                     //BRA
-                    let taskMPRD;
-
+                    let tasks = {};
                     if (transactionValue == 'vendorbill' || transactionValue == 'vendorcredit') {
-
-                        let deploySubsidiary = 'customdeploy_lmry_purchasing_pop_br_' + subsidiaryValue;
-                        taskMPRD = nTask.create({
-                            taskType: setting[0],
-                            scriptId: setting[2],
-                            deploymentId: deploySubsidiary,
+                        tasks = {
+                            taskType: nTask.TaskType.MAP_REDUCE,
+                            scriptId: 'customscript_lmry_lmry_ste_af_purchase_mprd',
+                            deploymentId : `customdeploy_lmry_ste_af_prchs_mprd_${subsidiaryValue}`,
                             params: params
-                        });
-
+                        }
                     } else if (transaction == 'itemfulfillment' || transaccion == 'itemreceipt') {
-
-                        let deploySubsidiary = 'customdeploy_lmry_fillrcpt_pop_br_' + subsidiaryValue;
-                        taskMPRD = nTask.create({
-                            taskType: setting[0],
-                            scriptId: setting[3],
-                            deploymentId: deploySubsidiary,
+                        tasks = {
+                            taskType: nTask.TaskType.MAP_REDUCE,
+                            scriptId: 'customscript_lmry_ste_af_item_mprd',
+                            deploymentId : `customdeploy_lmry_ste_af_item_mprd_${subsidiaryValue}`,
                             params: params
-                        });
-
+                        }
                     }
                     // Ventas
                     else {
-
-                        let deploySubsidiary = 'customdeploy_lmry_invoicing_pop_br_' + subsidiaryValue;
-                        taskMPRD = nTask.create({
-                            taskType: setting[0],
-                            scriptId: setting[1],
-                            deploymentId: deploySubsidiary,
+                        tasks = {
+                            taskType: nTask.TaskType.MAP_REDUCE,
+                            scriptId: 'customscript_lmry_lmry_ste_af_sales_mprd',
+                            deploymentId : `customdeploy_lmry_ste_af_sales_mprd_${subsidiaryValue}`,
                             params: params
-                        });
-
+                        }
                     }
+
+                    let taskMPRD = nTask.create(tasks);
 
                     taskMPRD.submit();
                     nRedirect.toSuitelet({
@@ -217,10 +201,9 @@ define([
             let subsidiaryField = form.addField({
                 id: 'custpage_lmry_ste_subsidiary',
                 type: nServerWidget.FieldType.SELECT,
-                label: translatedFields.afSubSidiary,
+                label: `LATAM - ${translatedFields.afSubSidiary}`,
                 container: 'custgroup_lmry_ste_primary_information'
             });
-
             subsidiaryField.isMandatory = true;
 
             let searchSub = nSearch.create({
@@ -263,7 +246,7 @@ define([
         let countryField = form.addField({
             id: 'custpage_lmry_ste_country',
             type: nServerWidget.FieldType.TEXT,
-            label: translatedFields.afCountry,
+            label: `LATAM - ${translatedFields.afCountry}`,
             container: 'custgroup_lmry_ste_primary_information'
         });
 
@@ -292,7 +275,7 @@ define([
         let transactionField = form.addField({
             id: 'custpage_lmry_ste_transaction',
             type: nServerWidget.FieldType.SELECT,
-            label: translatedFields.afTransaction,
+            label: `LATAM - ${translatedFields.afTransactionType}`,
             container: 'custgroup_lmry_ste_primary_information'
         });
 
@@ -316,7 +299,7 @@ define([
         let dateFromField = form.addField({
             id: 'custpage_lmry_ste_date_from',
             type: nServerWidget.FieldType.DATE,
-            label: translatedFields.afDateFrom,
+            label: `LATAM - ${translatedFields.afDateFrom}` ,
             container: 'custgroup_lmry_ste_date_ranges'
         });
 
@@ -333,7 +316,7 @@ define([
         let dateToField = form.addField({
             id: 'custpage_lmry_ste_date_to',
             type: nServerWidget.FieldType.DATE,
-            label: translatedFields.afDateTo,
+            label: `LATAM - ${translatedFields.afDateTo}` ,
             container: 'custgroup_lmry_ste_date_ranges'
         });
 
@@ -354,7 +337,7 @@ define([
             let statusField = form.addField({
                 id: 'custpage_lmry_ste_status',
                 type: nServerWidget.FieldType.TEXT,
-                label: translatedFields.afState,
+                label: `LATAM - ${translatedFields.afState}`,
                 container: 'custgroup_lmry_ste_primary_information'
             });
 
@@ -365,7 +348,7 @@ define([
             let numberOfTransactionField = form.addField({
                 id: 'custpage_lmry_ste_number_of_trans',
                 type: nServerWidget.FieldType.INTEGER,
-                label: translatedFields.afNumberTransactions,
+                label: `LATAM - ${translatedFields.afNumberTransactions}`,
                 container: 'custgroup_lmry_ste_trans_count'
             });
 
@@ -384,7 +367,7 @@ define([
             let numberOfSelectTransField = form.addField({
                 id: 'custpage_lmry_ste_number_select_trans',
                 type: nServerWidget.FieldType.INTEGER,
-                label: translatedFields.afNumberSelectedTransactions,
+                label: `LATAM - ${translatedFields.afNumberSelectedTransactions}`,
                 container: 'custgroup_lmry_ste_trans_count'
             });
 
@@ -404,7 +387,7 @@ define([
             let selectTransactionField = form.addField({
                 id: 'custpage_lmry_ste_select_trans',
                 type: nServerWidget.FieldType.SELECT,
-                label: translatedFields.afSelectTransactions,
+                label: `LATAM - ${translatedFields.afSelectTransactions}`,
                 container: 'custgroup_lmry_ste_trans_count'
             });
 
@@ -434,7 +417,7 @@ define([
             let transactionToSelectField = form.addField({
                 id: 'custpage_lmry_ste_trans_to_select',
                 type: nServerWidget.FieldType.INTEGER,
-                label: translatedFields.afTransactionsToSelect,
+                label: `LATAM - ${translatedFields.afTransactionsToSelect}`,
                 container: 'custgroup_lmry_ste_trans_count'
             });
 
@@ -581,7 +564,7 @@ define([
         return s;
     }
 
-    const buildErrorForm = (msgerr, context) => {
+    const buildErrorForm = (error, context) => {
         const translatedFields = AF_Library.getFieldTranslations();
 
         let formError = nServerWidget.createForm({
@@ -605,8 +588,8 @@ define([
         strhtml += '<td class="text">';
         strhtml += '<div style="color: gray; font-size: 12pt; margin-top: 10px; padding: 5px; border-top: 1pt solid silver">';
         strhtml += translatedFields.afImportant + '<br><br>';
-        strhtml += '<br>' + translatedFields.afCode + xml.escape(msgerr.name);
-        strhtml += '<br>' + translatedFields.afDetails + xml.escape(msgerr.message);
+        strhtml += '<br>' + translatedFields.afCode + xml.escape(error.name);
+        strhtml += '<br>' + translatedFields.afDetails + xml.escape(error.message);
         strhtml += '</div>';
         strhtml += '</td>';
         strhtml += '</tr>';
@@ -620,11 +603,11 @@ define([
         context.response.writePage(formError);
         nLog.error({
             title: 'Se genero un error en suitelet',
-            details: msgerr
+            details: error
         });
 
         // Envio de mail al clientes
-        SendEmail_LBRY.sendErrorEmail(`[ onRequest ] : ${msgerr}`, LMRY_SCRIPT);
+        SendEmail_LBRY.sendErrorEmail(`[ onRequest ] : ${error}`, LMRY_SCRIPT);
     }
 
 

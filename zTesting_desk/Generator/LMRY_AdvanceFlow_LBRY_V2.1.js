@@ -126,8 +126,8 @@ define([
                 transaction.status = result.getValue('status').toLowerCase();
                 transaction.fxamount = result.getValue('fxamount');
                 transaction.externalid = result.getValue('externalid');
-                transaction.documentTypeText = result.getText('custbody_lmry_document_type');
-                transaction.documentTypeValue = result.getValue('custbody_lmry_document_type');
+                transaction.documentTypeText = result.getText('custbody_lmry_ste_fiscal_doctype');
+                transaction.documentTypeValue = result.getValue('custbody_lmry_ste_fiscal_doctype');
                 transaction.amountpaid = result.getValue('amountpaid');
                 transaction.memo = result.getValue('memo');
                 transaction.total = result.getValue('total');
@@ -403,6 +403,19 @@ define([
             afCode: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_code" })(),
             afDetails: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_details" })(),
             afCheckPaid: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_check_paid" })(),
+            afMsgSubsiadiary: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_msg_subsiadiary" })(),
+            afMsgDateFrom: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_msg_date_from" })(),
+            afMsgDateTo: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_msg_date_to" })(),
+            afMsgDeploy: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_msg_deploy" })(),
+            afMsgDeploySubsidiary: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_msg_deploy_subsidiary" })(),
+            afMsgSelect: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_msg_select" })(),
+            afMsgNothing: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_msg_nothing" })(),
+            afMsgError: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_msg_error" })(),
+            afMsgNoTransactions: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_msg_no_transactions" })(),
+            afMsgThereAre: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_msg_there_are" })(),
+            afMsgTransactions: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_msg_transactions" })(),
+            afMsgTransaction: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_msg_transaction" })(),
+
         }
     }
 

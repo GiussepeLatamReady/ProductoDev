@@ -141,11 +141,60 @@
                 </trans-unit>
                 <trans-unit id="af_details">
                     <source>Details : </source>
-                    <target>Detalhes : <target>
+                    <target>Detalhes : </target>
                 </trans-unit>
                 <trans-unit id="af_check_paid">
                     <source>Include Paid Invoices</source>
                     <target>Incluir faturas pagas</target>
+                </trans-unit>
+
+                <trans-unit id="af_msg_subsiadiary">
+                    <source>MANDATORY SUBSIDIARY FIELD</source>
+                    <target>O CAMPO SUBSIDIÁRIO É OBRIGATÓRIO</target>
+                </trans-unit>
+                <trans-unit id="af_msg_date_from">
+                    <source>MANDATORY DATE FROM FIELD</source>
+                    <target>O CAMPO DATA DE É OBRIGATÓRIO</target>
+                </trans-unit>
+                <trans-unit id="af_msg_date_to">
+                    <source>MANDATORY DATE TO FIELD</source>
+                    <target>O CAMPO DATA PARA É OBRIGATÓRIA</target>
+                </trans-unit>
+                <trans-unit id="af_msg_deploy">
+                    <source>THERE IS A PROCESS RUNNING FOR THIS COUNTRY</source>
+                    <target>HÁ UM PROCESSO EM EXECUÇÃO PARA ESTE PAÍS</target>
+                </trans-unit>
+                <trans-unit id="af_msg_deploy_subsidiary">
+                    <source>THERE IS A PROCESS RUNNING FOR THIS SUBSIDIARY</source>
+                    <target>HÁ UM PROCESSO EM EXECUÇÃO PARA ESTA SUBSIDIÁRIA</target>
+                </trans-unit>
+                <trans-unit id="af_msg_select">
+                    <source>YOU HAVE NOT SELECTED ANY TRANSACTION</source>
+                    <target>VOCÊ NÃO SELECIONOU NENHUMA TRANSAÇÃO</target>
+                </trans-unit>
+                <trans-unit id="af_msg_nothing">
+                    <source>THERE IS NO TRANSACTION TO PROCESS</source>
+                    <target>NÃO HÁ TRANSAÇÃO PARA PROCESSAR</target>
+                </trans-unit>
+                <trans-unit id="af_msg_error">
+                    <source>AN ERROR OCCURRED, THE PROCESS CANNOT BE CONTINUED</source>
+                    <target>OCORREU UM ERRO, O PROCESSO NÃO PODE SER CONTINUADO</target>
+                </trans-unit>
+                <trans-unit id="af_msg_no_transactions">
+                    <source>NO TRANSACTIONS</source>
+                    <target>SEM TRANSAÇÕES</target>
+                </trans-unit>
+                <trans-unit id="af_msg_there_are">
+                    <source>THERE ARE ONLY</source>
+                    <target>EXISTEM APENAS</target>
+                </trans-unit>
+                <trans-unit id="af_msg_transactions">
+                    <source>TRANSACTIONS</source>
+                    <target>TRANSAÇÕES</target>
+                </trans-unit>
+                <trans-unit id="af_msg_transaction">
+                    <source>MANDATORY TRANSACTION FIELD</source>
+                    <target>O CAMPO TRANSAÇÃO É OBRIGATÓRIO</target>
                 </trans-unit>
             </group>
         </body>

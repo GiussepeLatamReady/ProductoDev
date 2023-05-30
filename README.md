@@ -65,5 +65,32 @@ Tener en cuenta que por comododidad tendras la funcion de traduccion en el propi
 cambiar nSearch por search
 
 
+## Script y demployments
+
+LMRY_AdvanceFlow_STLT_V2.1.js 
+	(ID: _lmry_ste_advanceflow_stlt):
+LMRY_AdvanceFlow_CLNT_V2.1.js (ID: _lmry_ste_advanceflow_clnt): 
+LMRY_AdvanceFlow_Log_STLT_V2.1.js (ID: _lmry_ste_advanceflow_log_stlt): 
+LRMY_AdvanceFlowOnSales_MPRD_V2.1.js (ID:  _lmry_ste_af_sales_mprd)
+	idDeploy:
+		BR: _lmry_ste_af_sales_mprd_${id}:
+LMRY_AdvanceFlowOnPurchase_MPRD_V2.1.js (ID: _lmry_ste_af_purchase_mprd): 
+	idDeploy:	
+		BR: _lmry_ste_af_prchs_mprd_${id}:
+LMRY_AdvanceFlowOnItemFulfillment_MPRP_V2.1.js (ID: _lmry_ste_af_item_mprd):
+	idDeploy:	
+		BR: _lmry_ste_af_item_mprd_${id}:
+LMRY_AdvanceFlow_LBRY_V2.1.js: 
 
 
+# ALERT
+var transIDs = idTransacciones.slice(0, idTransacciones.length - 1); ESTO PODRIA CAMBIA
+	A var transIDs = idTransacciones.slice(0, idTransacciones.length);
+
+
+
+## Proceso de desarrolllo 
+
+features
+	LOCALIZATION
+	AUTOMATIC TRAN ID (A/R)
