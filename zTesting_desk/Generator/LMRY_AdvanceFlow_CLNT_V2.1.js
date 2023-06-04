@@ -9,11 +9,14 @@
 
 define(['N/runtime',
     'N/search',
+    'N/url',
+    'N/currentRecord',
+    'N/record',
     './LMRY_AdvanceFlow_LBRY_V2.1.js',
     '../Send Email/LMRY_SendEmail_LBRY_V2.1.js'
 ],
 
-    (nRuntime, nSearch, AF_Library, SendEmail_LBRY) => {
+    (nRuntime, nSearch, nUrl, nCurrentRecord, nRecord, AF_Library, SendEmail_LBRY) => {
 
 
         let features = {};
@@ -42,6 +45,16 @@ define(['N/runtime',
                 checkpaidField.isVisible = checkpaidValue;
 
                 if (country == '' || !country) {
+
+                    objRecord.setValue({
+                        fieldId: 'custpage_lmry_ste_date_from',
+                        value: new Date()
+                    });
+
+                    objRecord.setValue({
+                        fieldId: 'custpage_lmry_ste_date_to',
+                        value: new Date()
+                    });
                     jsonTransactionType = getTransactionType();
                     if (!features.subsidiary) {
                         filterTransactionType(scriptContext);
@@ -72,6 +85,7 @@ define(['N/runtime',
             } catch (error) {
                 SendEmail_LBRY.sendErrorEmail(`[ fieldChanged ] : ${error}`, LMRY_SCRIPT);
             }
+            return true;
         }
 
         /**
@@ -93,18 +107,23 @@ define(['N/runtime',
         const validateField = (scriptContext) => {
             getFeatures();
             try {
+                console.log('Start')
                 if (scriptContext.fieldId == 'custpage_lmry_ste_subsidiary') {
+                    console.log('custpage_lmry_ste_subsidiary')
                     setCountry(scriptContext);
                     filterTransactionType(scriptContext);
                 }
 
-                if (scriptContext.fieldId == 'custpage_lmry_ste_number_select_trans' || scriptContext.fieldId == 'custpage_lmry_ste_select_trans') {
+                if (scriptContext.fieldId == 'custpage_lmry_ste_trans_to_select' || scriptContext.fieldId == 'custpage_lmry_ste_select_trans') {
+                    console.log('custpage_lmry_ste_trans_to_select')
                     quantityTransactions(scriptContext, scriptContext.fieldId);
                 }
 
                 if (scriptContext.fieldId == 'custpage_lmry_ste_transaction') {
+                    console.log('custpage_lmry_ste_transaction')
                     showCheckPaidInvoices(scriptContext);
                 }
+                console.log('End')
             } catch (error) {
                 SendEmail_LBRY.sendErrorEmail(`[ validateField ] : ${error}`, LMRY_SCRIPT);
             }
@@ -141,7 +160,7 @@ define(['N/runtime',
                 if (statusValue == null || statusValue == '') {
                     if (features.subsidiary) {
                         if (subsidiaryValue == null || subsidiaryValue == '' || subsidiaryValue == 0) {
-                            alert(translatedFields.afMsgSubsiadiary);
+                            alert(translatedFields.afMsgSubsidiary);
                             return false;
                         }
                     }
@@ -220,7 +239,7 @@ define(['N/runtime',
 
                         transactionList.sort((a, b) => a - b);
 
-                        let transactionsString = transactionList.join('|');
+                        let transactionsString = JSON.stringify(transactionList) ;
 
                         if (quantity == numberNotSelected) {
                             alert(translatedFields.afMsgSelect);
@@ -228,7 +247,7 @@ define(['N/runtime',
                             return false;
                         }
 
-                        let transactionsRecord = record.create({ type: 'customrecord_lmry_ste_advance_flow_log', isDynamic: true });
+                        let transactionsRecord = nRecord.create({ type: 'customrecord_lmry_ste_advance_flow_log', isDynamic: true });
 
                         if (features.subsidiary) {
                             transactionsRecord.setValue({ fieldId: 'custrecord_lmry_ste_af_log_subsidiary', value: subsidiaryValue });
@@ -248,7 +267,7 @@ define(['N/runtime',
                     }
 
                 }
-                return false; //changeGADP 
+                return true; 
             } catch (error) {
                 SendEmail_LBRY.sendErrorEmail(`[ saveRecord ] : ${error}`, LMRY_SCRIPT);
             }
@@ -261,7 +280,7 @@ define(['N/runtime',
 
             let jsonTransaction = {};
             let searchTransaction = nSearch.create({
-                type: 'customrecord_lmry_af_trans_by_country',
+                type: 'customrecord_lmry_ste_af_trans_country',
                 filters: [{
                     name: 'isinactive',
                     operator: 'is',
@@ -403,7 +422,7 @@ define(['N/runtime',
             try {
                 isManipulatedLine = false;
 
-                let objRecord = currentRecord.get();
+                let objRecord = nCurrentRecord.get();
                 let quantity = objRecord.getLineCount({
                     sublistId: 'custlist_lmry_ste_filter'
                 });
@@ -433,7 +452,7 @@ define(['N/runtime',
                 const translatedFields = AF_Library.getFieldTranslations();
                 isManipulatedLine = false;
 
-                let objRecord = currentRecord.get();
+                let objRecord = nCurrentRecord.get();
                 let totalTransactions = objRecord.getLineCount({
                     sublistId: 'custlist_lmry_ste_filter'
                 });
@@ -514,13 +533,41 @@ define(['N/runtime',
             return mapReduceStatus && mapReduceStatus.length > 0;
         }
 
+        const redirectBack = (paramIsDetails) => {
+
+            try {
+    
+                let scriptUrl = "";
+                if (paramIsDetails === true || paramIsDetails === "T") {
+                    scriptUrl = nUrl.resolveScript({
+                        scriptId: "customscript_lmry_ste_advflow_log_stlt",
+                        deploymentId: "customdeploy_lmry_ste_advflow_log_stlt",
+                    });
+                } else {
+                    scriptUrl = nUrl.resolveScript({
+                        scriptId: "customscript_lmry_ste_advanceflow_stlt",
+                        deploymentId: "customdeploy_lmry_ste_advanceflow_stlt",
+                    });
+                }
+    
+                setWindowChanged(window, false);
+                window.location.href = scriptUrl;
+    
+            } catch (error) {
+                nLog.error({ title: `[ ${LMRY_SCRIPT} : redirectBack ]`, details: error });
+                SendEmail_LBRY.sendErrorEmail(`[ redirectBack ] : ${error}`, LMRY_SCRIPT);
+            }
+    
+        }
+
         return {
             pageInit,
             validateField,
             fieldChanged,
             saveRecord,
             markAll,
-            desmarkAll
+            desmarkAll,
+            redirectBack
         };
 
     });

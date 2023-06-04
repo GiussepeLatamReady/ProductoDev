@@ -1,18 +1,17 @@
-[ onRequest
-] : {
+{
     "type": "error.SuiteScriptError",
-    "name": "SSS_INVALID_SRCH_COL",
-    "message": "An nlobjSearchColumn contains an invalid column, or is not in proper syntax: custbody_lmry_document_type.",
+    "name": "TRANSLATION_KEY_NOT_FOUND",
+    "message": "Translation for key [af_msg_subsiadiary] from collection [custcollection_lmry_ste_advanceflow] could not be loaded.",
     "stack": [
-        "Error\n at Object.getSearchTransactions (/SuiteApps/com.latamready.stelatamlocalization/Latam Tools/Advance Flow/LMRY_AdvanceFlow_LBRY_V2.1.js:108:44)\n at buildSubListFilter (/SuiteApps/com.latamready.stelatamlocalization/Latam Tools/Advance Flow/LMRY_AdvanceFlow_STLT_V2.1.js:553:39)\n at Object.onRequest (/SuiteApps/com.latamready.stelatamlocalization/Latam Tools/Advance Flow/LMRY_AdvanceFlow_STLT_V2.1.js:56:17)"
+        "Error\n at Object.getFieldTranslations (/SuiteApps/com.latamready.stelatamlocalization/Latam Tools/Advance Flow/LMRY_AdvanceFlow_LBRY_V2.1.js:286:44)\n at buildErrorForm (/SuiteApps/com.latamready.stelatamlocalization/Latam Tools/Advance Flow/LMRY_AdvanceFlow_STLT_V2.1.js:568:45)\n at Object.onRequest (/SuiteApps/com.latamready.stelatamlocalization/Latam Tools/Advance Flow/LMRY_AdvanceFlow_STLT_V2.1.js:162:13)"
     ],
     "cause": {
         "type": "internal error",
-        "code": "SSS_INVALID_SRCH_COL",
-        "details": "An nlobjSearchColumn contains an invalid column, or is not in proper syntax: custbody_lmry_document_type.",
+        "code": "TRANSLATION_KEY_NOT_FOUND",
+        "details": "Translation for key [af_msg_subsiadiary] from collection [custcollection_lmry_ste_advanceflow] could not be loaded.",
         "userEvent": null,
         "stackTrace": [
-            "Error\n at Object.getSearchTransactions (/SuiteApps/com.latamready.stelatamlocalization/Latam Tools/Advance Flow/LMRY_AdvanceFlow_LBRY_V2.1.js:108:44)\n at buildSubListFilter (/SuiteApps/com.latamready.stelatamlocalization/Latam Tools/Advance Flow/LMRY_AdvanceFlow_STLT_V2.1.js:553:39)\n at Object.onRequest (/SuiteApps/com.latamready.stelatamlocalization/Latam Tools/Advance Flow/LMRY_AdvanceFlow_STLT_V2.1.js:56:17)"
+            "Error\n at Object.getFieldTranslations (/SuiteApps/com.latamready.stelatamlocalization/Latam Tools/Advance Flow/LMRY_AdvanceFlow_LBRY_V2.1.js:286:44)\n at buildErrorForm (/SuiteApps/com.latamready.stelatamlocalization/Latam Tools/Advance Flow/LMRY_AdvanceFlow_STLT_V2.1.js:568:45)\n at Object.onRequest (/SuiteApps/com.latamready.stelatamlocalization/Latam Tools/Advance Flow/LMRY_AdvanceFlow_STLT_V2.1.js:162:13)"
         ],
         "notifyOff": false
     },

@@ -94,3 +94,11 @@ var transIDs = idTransacciones.slice(0, idTransacciones.length - 1); ESTO PODRIA
 features
 	LOCALIZATION
 	AUTOMATIC TRAN ID (A/R)
+
+
+STLT
+
+MPRD
+	No se realiza automatic setting
+	Campos de facturacion : E-Document Template y E-Document Sending Methods -> Si existe template y sending method se cambio el estado For generation
+	Se cambia el valor de : Latam - EI Automatic

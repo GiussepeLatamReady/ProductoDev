@@ -17,7 +17,7 @@ define([
     'N/runtime',
     './LMRY_AdvanceFlow_LBRY_V2.1.js',
     '../Send Email/LMRY_SendEmail_LBRY_V2.1.js'
-], (nLog, xml, nConfig, nRedirect, nTask, nSearch, nServerWidget, nRuntime, AF_Library, SendEmail_LBRY) => {
+], (nLog, nXml, nConfig, nRedirect, nTask, nSearch, nServerWidget, nRuntime, AF_Library, SendEmail_LBRY) => {
 
     // Script information
     const LMRY_SCRIPT = "LR Advance Flow STLT V2.1";
@@ -28,7 +28,7 @@ define([
     let idCountries = {
         BR: 339
     }
-    const onRequest = (context) => {
+    const onRequest = (scriptContext) => {
 
         try {
 
@@ -36,7 +36,7 @@ define([
 
 
             const translatedFields = AF_Library.getFieldTranslations();
-            if (context.request.method === 'GET') {
+            if (scriptContext.request.method === 'GET') {
 
 
                 const form = nServerWidget.createForm({
@@ -44,12 +44,12 @@ define([
                 });
 
                 //Se setean los parametros - Sujeto a cambio
-                parameters.subsidiary = context.request.parameters.subsidiary;
-                parameters.dateFrom = context.request.parameters.dateFrom;
-                parameters.dateTo = context.request.parameters.dateTo;
-                parameters.country = context.request.parameters.country;
-                parameters.transaction = context.request.parameters.transaction;
-                parameters.checkpaid = context.request.parameters.checkpaid;
+                parameters.subsidiary = scriptContext.request.parameters.subsidiary;
+                parameters.dateFrom = scriptContext.request.parameters.dateFrom;
+                parameters.dateTo = scriptContext.request.parameters.dateTo;
+                parameters.country = scriptContext.request.parameters.country;
+                parameters.transaction = scriptContext.request.parameters.transaction;
+                parameters.checkpaid = scriptContext.request.parameters.checkpaid;
 
 
                 buildGroups(form);
@@ -76,12 +76,13 @@ define([
                 }
 
                 form.clientScriptModulePath = "./LMRY_AdvanceFlow_CLNT_V2.1.js"
-                context.response.writePage({ pageObject: form });
+                scriptContext.response.writePage({ pageObject: form });
 
             } else {
-                let statusValue = context.request.parameters.custpage_lmry_ste_status;
-                let subsidiaryValue = features.subsidiary ? context.request.parameters.custpage_lmry_ste_subsidiary : 1;
-                let transactionValue = context.request.parameters.custpage_lmry_ste_transaction;
+                let statusValue = scriptContext.request.parameters.custpage_lmry_ste_status;
+                let subsidiaryValue = features.subsidiary ? scriptContext.request.parameters.custpage_lmry_ste_subsidiary : 1;
+                let transactionValue = scriptContext.request.parameters.custpage_lmry_ste_transaction;
+                nLog.debug('transactionValue :',transactionValue);
                 let params = {};
                 if (statusValue == null || statusValue == '') {
                     nRedirect.toSuitelet({
@@ -113,11 +114,10 @@ define([
                     
                     
                     
-                    let countryValue = context.request.parameters.custpage_lmry_ste_country;
+                    let countryValue = scriptContext.request.parameters.custpage_lmry_ste_country;
                     countryValue = countryValue.substring(0, 3).toUpperCase();
                     countryValue = validateAccents(countryValue);
 
-                    let setting = [nTask.TaskType.MAP_REDUCE, 'customscript_lmry_lmry_ste_af_sales_mprd', 'customscript_lmry_lmry_ste_af_purchase_mprd', 'customscript_lmry_ste_af_item_mprd'];
 
                     //BRA
                     let tasks = {};
@@ -150,8 +150,8 @@ define([
 
                     taskMPRD.submit();
                     nRedirect.toSuitelet({
-                        scriptId: 'customscript_lmry_ste_advanceflow_stlt',
-                        deploymentId: 'customdeploy_lmry_ste_advanceflow_stlt',
+                        scriptId: 'customscript_lmry_ste_advflow_log_stlt',
+                        deploymentId: 'customdeploy_lmry_ste_advflow_log_stlt',
                         params: params
                     });
 
@@ -159,7 +159,7 @@ define([
                 }
             }
         } catch (error) {
-            buildErrorForm(error,context);
+            buildErrorForm(error,scriptContext);
         }
     }
     const getFeatures = () => {
@@ -196,9 +196,10 @@ define([
 
         /**  FIELD SUBISIDIARY **/
         const translatedFields = AF_Library.getFieldTranslations();
+        let subsidiaryField;
         if (features.subsidiary) {
 
-            let subsidiaryField = form.addField({
+            subsidiaryField = form.addField({
                 id: 'custpage_lmry_ste_subsidiary',
                 type: nServerWidget.FieldType.SELECT,
                 label: `LATAM - ${translatedFields.afSubSidiary}`,
@@ -329,7 +330,7 @@ define([
 
 
         if (parameters.country) {
-
+            let countrySet = parameters.country;
             parameters.country = validateAccents(parameters.country.substring(0, 3).toUpperCase());
 
             /** STATUS **/
@@ -435,11 +436,13 @@ define([
                     displayType: nServerWidget.FieldDisplayType.DISABLED
                 });
             }
+            countryField.defaultValue = countrySet;
 
+            let transactionType = parameters.transaction.split(';');
             if (parameters.transaction != null && parameters.transaction != '' && parameters.transaction != '0') {
                 transactionField.addSelectOption({
-                    value: parameters.transaction[0],
-                    text: parameters.transaction[1]
+                    value: transactionType[0],
+                    text: transactionType[1]
                 });
             }
 
@@ -533,7 +536,6 @@ define([
 
             });
             countTransactions = transactions.length;
-
             resultList.addButton({
                 id: 'custbutton_lmry_ste_mark_all',
                 label: translatedFields.afMarkAll,
@@ -588,8 +590,8 @@ define([
         strhtml += '<td class="text">';
         strhtml += '<div style="color: gray; font-size: 12pt; margin-top: 10px; padding: 5px; border-top: 1pt solid silver">';
         strhtml += translatedFields.afImportant + '<br><br>';
-        strhtml += '<br>' + translatedFields.afCode + xml.escape(error.name);
-        strhtml += '<br>' + translatedFields.afDetails + xml.escape(error.message);
+        strhtml += '<br>' + translatedFields.afCode + nXml.escape(error.name);
+        strhtml += '<br>' + translatedFields.afDetails + nXml.escape(error.message);
         strhtml += '</div>';
         strhtml += '</td>';
         strhtml += '</tr>';
