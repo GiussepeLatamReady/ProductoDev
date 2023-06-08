@@ -9,7 +9,7 @@ define([
     'N/log',
     'N/translation',
     'N/search',
-    '../Send Email/LMRY_SendEmail_LBRY_V2.1.js'
+    '../Send Email/LMRY_SendEmail_LBRY_V2.1'
 ], (nLog, nTranslation, nSearch, SendEmail_LBRY) => {
 
     const LMRY_SCRIPT = "LR Advance Flow LBRY V2.1";
@@ -71,7 +71,12 @@ define([
                 });
                 i++;
             }
-
+            filtros_invoice[i] = nSearch.createFilter({
+                name: 'custrecord_lmry_ste_jr_related_trans',
+                join: 'custrecord_lmry_ste_jr_related_trans',
+                operator: 'anyof',
+                values: ['@NONE@']
+            });
 
             let searchTransactions = nSearch.create({
                 type: transactionType,
@@ -142,7 +147,7 @@ define([
 
 
 
-            let jsonDocument = getJsonDocument(parameters);
+            const jsonDocument = getJsonDocument(parameters);
 
             let transactionReturn = [];
             for (let i = 0; i < transactionsResult.length; i++) {
@@ -272,8 +277,11 @@ define([
                 'created',
                 'custrecord_lmry_ste_af_log_status',
                 'custrecord_lmry_ste_af_log_comments',
+                'custrecord_lmry_ste_af_log_trans_ids'
             ],
-            filters: []
+            filters: [
+                ["formulatext: {custrecord_lmry_ste_af_log_trans_ids}","isnotempty",""]
+            ]
         });
 
 
@@ -287,15 +295,16 @@ define([
             });
             page.data.forEach( result => {
                 let columns = result.columns;
-
+                nLog.error('recordList date',result.getValue(columns[4]))
                 recordList.push({
                     id: result.getValue(columns[0]),
-                    user: result.getValue(columns[1]) || '',
-                    subsidiary: result.getValue(columns[2]) || '',
-                    country: result.getValue(columns[3]) || '',
+                    user: result.getText(columns[1]) || ' ',
+                    subsidiary: result.getText(columns[2]) || ' ',
+                    country: result.getText(columns[3]) || ' ',
                     date: result.getValue(columns[4]),
-                    status: result.getValue(columns[5]) || '',
-                    comments: result.getValue(columns[6]) || '',
+                    status: result.getValue(columns[5]) || ' ',
+                    comments: result.getValue(columns[6]) || ' ',
+                    numberTrans: JSON.parse(result.getValue(columns[7])).length || 0,
                 });      
             });
         });
@@ -336,14 +345,41 @@ define([
 
                 transactions.push({
                     id: result.getValue(columns[0]),
-                    type: result.getValue(columns[1]) || '',
-                    legalDocType: result.getValue(columns[2]) || ''
+                    type: result.getValue(columns[1]) || ' ',
+                    legalDocType: result.getValue(columns[2]) || ' '
                 });      
             });
         });
 
 
         return transactions;
+    }
+
+    const getJsonState =(summary,transactionIds)=>{
+        nLog.error('summary',summary);
+        let states = {};
+        transactionIds.forEach(id => {
+            states[id] = 'PROCCESING'
+        });
+        if (summary !== null && summary !== '' && summary !== ' ') {
+            let incorrectsDetails = JSON.parse(summary).incorrects;
+        
+            if (incorrectsDetails !== 0) {
+                incorrectsDetails = incorrectsDetails.split('|');
+                const errorList = JSON.parse(incorrectsDetails[1]);
+                errorList.forEach(item => {
+                    const { id } = item;
+                    states[id] = 'ERROR';
+                });
+            }else{
+                transactionIds.forEach(id => {
+                    states[id] = 'SUCCESS'
+                });
+            }
+        }
+        
+        return states;  
+
     }
     const getFieldTranslations = () =>{
 
@@ -402,7 +438,11 @@ define([
                 afStsFinished: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_sts_finished" })(),
                 afLogComments: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_log_comments" })(), 
                 afLogIDocumentStatus: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_log_ie_document_status" })(),
-                afLogIe: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_log_ie" })(),         
+                afLogIe: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_log_ie" })(),
+                // afCommentOne: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_comment_one" })(),
+                // afCommentTwo: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_comment_two" })(),
+                // afCommentThree: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_comment_three" })(),
+                // afSucess: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_sucess" })(),         
             }
         } catch (error) {
             nLog.error({ title: `[${LMRY_SCRIPT} : getFieldTranslations]`, details: error });
@@ -415,7 +455,9 @@ define([
     return {
         getFieldTranslations,
         getSearchTransactions,
-        getAdvanceFlowRecord
+        getAdvanceFlowRecord,
+        getTransactionsDetail,
+        getJsonState
     }
 
 });

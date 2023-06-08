@@ -13,8 +13,8 @@ define(['N/log',
         'N/record',
         "../../Latam Tools/Handlers/LMRY_HandlerTax_LBRY_V2.1",
         "../../Latam Tools/Handlers/LMRY_HandlerWht_LBRY_V.2.1",
-        './LMRY_AdvanceFlow_LBRY_V2.1.js',
-        '../Send Email/LMRY_SendEmail_LBRY_V2.1.js'
+        './LMRY_AdvanceFlow_LBRY_V2.1',
+        '../Send Email/LMRY_SendEmail_LBRY_V2.1'
     ],
     
     (nLog,nRuntime,nSearch,nConfig,nRecord,HandlerTax_LBRY,HandlerWht_LBRY,AF_Library,SendEmail_LBRY) => {
@@ -43,8 +43,6 @@ define(['N/log',
             getParameters();
             try {
                 getFeatures();
-                nLog.error('features:', features);
-                nLog.error('parameters:', parameters);
 
                 const transactions = getAdvanceFlowLogRecord();
 
@@ -54,10 +52,10 @@ define(['N/log',
                     dataList.push({
                         key: index,
                         values: {
-                            id: id,
+                            transactionId: id,
                             country: transactions.country,
-                            quantity: transactions.internalIds.length,
-                            countCurrentTransaction: index + 1
+                            numberTransactions: transactions.internalIds.length,
+                            transactionPosition: index + 1
                         }
                     });
                 });
@@ -66,7 +64,7 @@ define(['N/log',
                     corrects: 0,
                     incorrects: 0
                 }
-                updateStatus(translatedFields.afStsProcessing, parameters.user, summary);
+                updateStatus(translatedFields.afStsProcessing, summary);
 
                 return dataList;
             } catch (error) {
@@ -76,7 +74,7 @@ define(['N/log',
                     incorrects: 0
                 }
 
-                updateStatus(translatedFields.afStsUnprocessed, parameters.user, summary);
+                updateStatus(translatedFields.afStsUnprocessed, summary);
                 nLog.error({ title: `[${LMRY_SCRIPT} : getInputData]`, details: error });
                 SendEmail_LBRY.sendErrorEmail(`[ getInputData ] : ${error}`, LMRY_SCRIPT);
             }
@@ -99,28 +97,30 @@ define(['N/log',
          * @since 2015.2
          */
         const reduce = (reduceContext) => {
-            let possibleError;
+            getParameters();
+            let possibleError;  
+            const { transactionId, country, numberTransactions, transactionPosition } = JSON.parse(reduceContext.values[0]).values;
             try {
+
                 getFeatures();
-                getParameters();
-                const currenData = JSON.parse(reduceContext.values[0].values);
+                
                 let isSetPrePrinted = true;
                 let numberCodeType;
                 possibleError = 'Populado';
-                setPercentage();
-                 
-                if (context.isRestarted && context.executionNo > 1) {
+                setCorrectTransactionsCount(parameters.status);
+
+                if (reduceContext.isRestarted && reduceContext.executionNo > 1) {
                     possibleError = 'Reinicio';
                     reduceContext.write({
-                        key: currenData.id,
-                        value: ['R', currenData.country, possibleError,currenData.quantity]
+                        key: transactionId,
+                        value: ['R', country, possibleError,numberTransactions]
                     });
                 }
                 
                 const search_transaction = nSearch.lookupFields({
                     type: nSearch.Type.TRANSACTION,
                     columns: ['type'],
-                    id: currenData.id
+                    id: transactionId
                 });
                 const transactionTypeRecord = search_transaction.type[0].value;
                 let transactionType;
@@ -132,16 +132,16 @@ define(['N/log',
                     transactionType = 'creditmemo';
                 }
 
-                let transactionsRecord = nRecord.load({
+                const currentTransaction = nRecord.load({
                     type: transactionType,
-                    id: currenData.id
+                    id: transactionId
                 });
 
-                const documentType = transactionsRecord.getValue({ fieldId: 'custbody_lmry_ste_fiscal_doctype' });
+                const documentType = currentTransaction.getValue({ fieldId: 'custbody_lmry_ste_fiscal_doctype' });
                 
 
                 if (documentType != null && documentType != '') {
-                    if (currenData.country == 'BRA') {
+                    if (country == 'BR') {
                         let search_doc_cod = nSearch.lookupFields({
                             type: 'customrecord_lmry_ste_fiscal_docume_type',
                             id: documentType,
@@ -154,79 +154,81 @@ define(['N/log',
                     }
                 }
 
-                const serieCxC = transactionsRecord.getValue({
+                const serieCxC = currentTransaction.getValue({
                     fieldId: 'custbody_lmry_ste_print_series_cxc'
                 });
 
                 if (serieCxC != null && serieCxC != '' && serieCxC != -1 && isSetPrePrinted) {
                     possibleError = 'set Preprinted';
-                    setPrePrinted(transactionsRecord);
+                    setPrePrinted(currentTransaction);
                 }
 
                 const scriptContext = {
                     type: 'edit',
                     newRecord: {
-                        id: transactionType,
-                        type: currenData.id
+                        id: transactionId,
+                        type: transactionType
                     }
                 };
-                
-                if (currenData.country == 'BRA') {
-                    transactionsRecord.setValue({
-                        fieldId: 'custbody_lmry_ste_apply_wht', //OBS
-                        value: true
-                    });
 
-                    if (transactionType == 'invoice') {
-                        possibleError = 'Tax Result Servicio';
-                        const { setTaxTransaction } = HandlerTax_LBRY.getHandlerTax(currenData.country, "Sales", transactionType);
-                        
-                        if (setTaxTransaction) {
-                            setTaxTransaction(scriptContext);
-                        }
-                    }
+                if ( country === 'BR' && transactionType === 'invoice' ) {
 
+                    possibleError = 'Set Settings To Tax Calculation and WHT Calculation';
+    
+                    settingsToTaxCalculation( currentTransaction );
+                    settingsToWhtCalculation( currentTransaction );
                 }
-                transactionsRecord.save({
+                
+                currentTransaction.save({
                     ignoreMandatoryFields: true,
                     disableTriggers: true
                 });
 
-                if (currenData.country == 'BRA' && transactionType == 'invoice') {
-                    possibleError = 'set wht Service';
-                    let transAppliesTo = transactionsRecord.getValue({ fieldId: "custbody_lmry_ste_whttax_appliesto" }) || "";
-                    const { setWhtTransaction } = HandlerWht_LBRY.getHandlerWht(currenData.country, "Sales", transAppliesTo);
+
+                if (country == 'BR' && transactionType == 'invoice') {
+                    possibleError = 'Execute Tax calculation and WHT Calculation';
+
+
+                    const { setTaxTransaction } = HandlerTax_LBRY.getHandlerTax(country, "Sales", transactionType);
+
+                    if (setTaxTransaction) {
+                        setTaxTransaction(scriptContext);
+                    }
+
+                    const transAppliesTo = currentTransaction.getValue({ fieldId: "custbody_lmry_ste_whttax_appliesto" }) || "";
+                    const appliestoCode = nSearch.lookupFields({
+                        type: "customrecord_lmry_ste_applies_to",
+                        id: transAppliesTo,
+                        columns: [ "custrecord_lmry_ste_appliesto_code" ]
+                    }).custrecord_lmry_ste_appliesto_code;
+                    
+
+                    const { setWhtTransaction } = HandlerWht_LBRY.getHandlerWht(country, "Sales", appliestoCode);
                     if (setWhtTransaction) {
                         setWhtTransaction(scriptContext);
                     }
+
+                   
                 }
                 possibleError = '';
-
                 reduceContext.write({
-                    key: currenData.id,
-                    value: ['T', currenData.country, possibleError,currenData.quantity]
+                    key: transactionId,
+                    value: ['T', country, possibleError,numberTransactions]
                 });
                 
 
             } catch (error) {
 
-                const currenData = JSON.parse(reduceContext.values[0].values);
-                const incorrects = parseInt(currenData.quantity) - parseInt(currenData.countCurrentTransaction);
-                const summary = {
-                    corrects: currenData.countCurrentTransaction,
-                    incorrects: incorrects
-                }
-                updateStatus('ERROR', parameters.user, summary);
-
+                nLog.error({ title: `[${LMRY_SCRIPT} : reduce]`, details: error });
                 if (error.valueOf().toString().indexOf('SSS_REQUEST_TIME_EXCEEDED') == -1) {
                     reduceContext.write({
-                        key: currenData.id,
-                        value: ['F', currenData.country, possibleError,currenData.quantity]
+                        key: transactionId,
+                        value: ['F', country, possibleError,numberTransactions]
                     });
                 } else {
                     reduceContext.write({
-                        key: currenData.id,
-                        value: ['T', currenData.country, possibleError,currenData.quantity]
+                        key: transactionId,
+                        value: ['T', country, possibleError,numberTransactions]
                     });
                 }
             }   
@@ -256,45 +258,48 @@ define(['N/log',
         const summarize = (summaryContext) => {
             try {
                 getParameters();
-                let country;
-                let totalTransactions;
-                let transactionsError = []; 
+
+                let transactionsErrors = [];
+                let statusError = '';
+                let country = '';
+                let possibleError = '';
+                let numberTransactions = 0; 
                 const translatedFields = AF_Library.getFieldTranslations();
-                summaryContext.output.iterator().each(function (key, value) {
-                    value = JSON.parse(value);
-                    country = value[1];
-                    totalTransactions = value[3]
-                    if (value[0] == 'F' || value[0] == 'R') {
-                        transactionsError.push({ id:key, error:value[2] });
+                summaryContext.output.iterator().each( (key, value) => {
+
+                    [statusError, country, possibleError, numberTransactions] = JSON.parse(value);
+    
+                    if ( statusError === 'F' || statusError === 'R') {
+                        transactionsErrors.push({ id: key, error: possibleError });
                     }
+    
                     return true;
+    
                 });
 
-                let transactionRecord = nRecord.load({ type: 'customrecord_lmry_ste_advance_flow_log', id: parameters.status });
+                const transactionRecord = nRecord.load({ type: 'customrecord_lmry_ste_advance_flow_log', id: parameters.status });
+                const correctsTransacctions = numberTransactions - transactionsErrors.length;
 
-                if (transactionsError.length>0) {
-                    const searchLog = nSearch.lookupFields({
-                        type: 'customrecord_lmry_ste_advance_flow_log',
-                        id: stateId,
-                        columns: ['custrecord_lmry_ste_af_log_summary']
-                    });
-                    let summary = JSON.parse(searchLog.custrecord_lmry_ste_af_log_summary);
-                    summary.incorrects = `${summary.incorrects} : ${transactionsError.toString()}`;
 
-                    transactionRecord.setValue({ fieldId: 'custrecord_lmry_ste_af_log_summary', value: JSON.stringify(summary)});
+
+                const summary = {
+                    corrects: correctsTransacctions,
+                    incorrects: `${transactionsErrors.length}|${JSON.stringify(transactionsErrors)}` 
                 }
+                transactionRecord.setValue({ fieldId: 'custrecord_lmry_ste_af_log_summary', value: JSON.stringify(summary)});
 
                 transactionRecord.setValue({ 
                     fieldId: 'custrecord_lmry_ste_af_log_comments', 
-                    value: `The process has finished and ${totalTransactions} were processed successfully and ${transactionsError.length} were not.`
+                    value: `The process has been completed. ${correctsTransacctions} transactions have been processed successfully, while ${transactionsErrors.length} others could not be processed successfully.`
                 });
+                
                 transactionRecord.setValue({ 
                     fieldId: 'custrecord_lmry_ste_af_log_status', 
                     value: translatedFields.afStsFinished
                 });
 
                 transactionRecord.save({ disableTriggers: true, ignoreMandatoryFields: true });
-
+                
             } catch (error) {
                 nLog.error({ title: `[${LMRY_SCRIPT} : summarize]`, details: error });
                 SendEmail_LBRY.sendErrorEmail(`[ summarize ] : ${error}`, LMRY_SCRIPT);
@@ -309,9 +314,9 @@ define(['N/log',
 
         const getParameters = () =>{
             try {
-                parameters = nRuntime.getCurrentScript().getParameter({
+                parameters = JSON.parse(nRuntime.getCurrentScript().getParameter({
                     name: 'custscript_lmry_ste_af_sales_log_id'
-                });
+                }));
             } catch (error) {
                 SendEmail_LBRY.sendErrorEmail(`[ getParameters ] : ${error}`, LMRY_SCRIPT);
             }
@@ -339,7 +344,7 @@ define(['N/log',
                 transactions.country = nConfig.load({ type: nConfig.Type.COMPANY_INFORMATION }).getText({fieldId: 'country'});
             }
 
-            transactions.country = transactions.country.substring(0, 3).toUpperCase();
+            transactions.country = transactions.country.substring(0, 2).toUpperCase();
             transactions.subsidiaryId = currentLog['custrecord_lmry_ste_af_log_subsidiary'][0].value;
             transactions.internalIds = JSON.parse(currentLog.custrecord_lmry_ste_af_log_trans_ids);
             return transactions;
@@ -353,13 +358,14 @@ define(['N/log',
          * @param {Object} transactions - Information from the transaction filtering process obtained through the record
          */
 
-        const updateStatus = (status, user, summary) =>{
+        const updateStatus = (status, summary) =>{
+
             nRecord.submitFields({
                 type: 'customrecord_lmry_ste_advance_flow_log',
-                id: stateId,
+                id: parameters.status,
                 values: {
                     custrecord_lmry_ste_af_log_status: status,
-                    custrecord_lmry_ste_af_log_user: user,
+                    custrecord_lmry_ste_af_log_user: parameters.user,
                     custrecord_lmry_ste_af_log_summary: JSON.stringify(summary)
                 },
                 options: {
@@ -370,7 +376,7 @@ define(['N/log',
             });
         }
 
-        const setPercentage = (stateId) =>{
+        const setCorrectTransactionsCount = (stateId) =>{
 
             let searchLog = nSearch.lookupFields({
                 type: 'customrecord_lmry_ste_advance_flow_log',
@@ -523,6 +529,63 @@ define(['N/log',
                 prefix = searchSubsidiary.tranprefix;
             }
             return prefix;
+        }
+
+        const settingsToTaxCalculation = ( paramTransaction ) => {
+
+            const taxDetailOverride = paramTransaction.getValue({ fieldId: 'taxdetailsoverride' });
+            if ( !taxDetailOverride || taxDetailOverride === false || taxDetailOverride === 'F' ) paramTransaction.setValue({ fieldId: 'taxdetailsoverride', value: true });
+    
+        }
+
+        const settingsToWhtCalculation = ( paramTransaction ) => {
+
+            settingApprovalStatus( paramTransaction );
+            settingAppliesToField( paramTransaction );
+            settingApplyWhtColum( paramTransaction );
+    
+        }
+    
+        const settingApprovalStatus = ( paramTransaction ) => {
+    
+                const approvalStatus = paramTransaction.getValue({ fieldId: 'approvalstatus' });
+                if ( Number(approvalStatus) !== 2 ) paramTransaction.setValue({ fieldId: 'approvalstatus', value: 2 })
+    
+        }
+    
+        const settingAppliesToField = ( paramTransaction ) => {
+    
+            const appliesToSearch = nSearch.create({
+                type: 'customrecord_lmry_ste_applies_to',
+                filters: ['custrecord_lmry_ste_appliesto_code', 'is', 'lines'],
+                columns: ['internalid']
+            }).run().getRange({ start: 0, end: 1 });
+    
+            const appliesToId = appliesToSearch[0].getValue('internalid');
+    
+            paramTransaction.setValue({
+                fieldId: 'custbody_lmry_ste_whttax_appliesto',
+                value: appliesToId
+            })
+    
+        }
+    
+        const settingApplyWhtColum = ( paramTransaction ) => {
+    
+            const itemLines = paramTransaction.getLineCount({ sublistId: 'item' });
+    
+            for ( let i = 0; i < itemLines; i++ ) {
+    
+                const itemType = paramTransaction.getSublistValue({ sublistId: 'item', fieldId: 'itemtype', line: i });
+                const appliesToWht = paramTransaction.getSublistValue({ sublistId: "item", fieldId: "custcol_lmry_ste_apply_wht", line: i });
+    
+                if (['Group', 'EndGroup', 'Discount'].includes(itemType)) continue;
+    
+                if ( appliesToWht === false ) {
+                    paramTransaction.setSublistValue({ sublistId: 'item', fieldId: 'custcol_lmry_ste_apply_wht', line: i, value: true });
+                }
+            }
+    
         }
 
         return {getInputData, reduce, summarize}

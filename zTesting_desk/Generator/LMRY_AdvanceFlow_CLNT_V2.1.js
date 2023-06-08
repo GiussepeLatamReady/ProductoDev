@@ -12,8 +12,8 @@ define(['N/runtime',
     'N/url',
     'N/currentRecord',
     'N/record',
-    './LMRY_AdvanceFlow_LBRY_V2.1.js',
-    '../Send Email/LMRY_SendEmail_LBRY_V2.1.js'
+    './LMRY_AdvanceFlow_LBRY_V2.1',
+    '../Send Email/LMRY_SendEmail_LBRY_V2.1'
 ],
 
     (nRuntime, nSearch, nUrl, nCurrentRecord, nRecord, AF_Library, SendEmail_LBRY) => {
@@ -38,11 +38,14 @@ define(['N/runtime',
             try {
                 getFeatures();
                 let objRecord = scriptContext.currentRecord;
-                let country = objRecord.getValue('custpage_lmry_ste_country');
-                let checkpaidField = objRecord.getField('custpage_lmry_ste_include_paid');
-                let checkpaidValue = objRecord.getValue('custpage_lmry_ste_include_paid');
-                let hiddenValue = objRecord.getValue('custpage_lmry_ste_hidden');
-                checkpaidField.isVisible = checkpaidValue;
+                const country = objRecord.getValue('custpage_lmry_ste_country');
+                const checkpaidField = objRecord.getField('custpage_lmry_ste_include_paid');
+                const checkpaidValue = objRecord.getValue('custpage_lmry_ste_include_paid');
+                
+                if (checkpaidField) {
+                    checkpaidField.isVisible = checkpaidValue;
+                }
+                
 
                 if (country == '' || !country) {
 
@@ -107,7 +110,6 @@ define(['N/runtime',
         const validateField = (scriptContext) => {
             getFeatures();
             try {
-                console.log('Start')
                 if (scriptContext.fieldId == 'custpage_lmry_ste_subsidiary') {
                     console.log('custpage_lmry_ste_subsidiary')
                     setCountry(scriptContext);
@@ -123,7 +125,6 @@ define(['N/runtime',
                     console.log('custpage_lmry_ste_transaction')
                     showCheckPaidInvoices(scriptContext);
                 }
-                console.log('End')
             } catch (error) {
                 SendEmail_LBRY.sendErrorEmail(`[ validateField ] : ${error}`, LMRY_SCRIPT);
             }
@@ -146,15 +147,15 @@ define(['N/runtime',
             try {
                 getFeatures();
                 const translatedFields = AF_Library.getFieldTranslations();
-                let objRecord = scriptContext.currentRecord;
-                let statusValue = objRecord.getValue({ fieldId: 'custpage_lmry_ste_status' });
+                const {currentRecord} = scriptContext;
+                const statusValue = currentRecord.getValue({ fieldId: "custpage_lmry_ste_status" });
                 let subsidiaryValue = 1;
                 if (features.subsidiary) {
-                    subsidiaryValue = objRecord.getValue({ fieldId: 'custpage_lmry_ste_subsidiary' });
+                    subsidiaryValue = currentRecord.getValue({ fieldId: "custpage_lmry_ste_subsidiary" });
                 }
-                let dateFromValue = objRecord.getValue({ fieldId: 'custpage_lmry_ste_date_from' });
-                let dateToValue = objRecord.getValue({ fieldId: 'custpage_lmry_ste_date_to' });
-                let transactionTypeValue = objRecord.getValue({ fieldId: 'custpage_lmry_ste_transaction' });
+                const dateFromValue = currentRecord.getValue({ fieldId: "custpage_lmry_ste_date_from" });
+                const dateToValue = currentRecord.getValue({ fieldId: "custpage_lmry_ste_date_to" });
+                let transactionTypeValue = currentRecord.getValue({ fieldId: "custpage_lmry_ste_transaction" });
                 transactionTypeValue = transactionTypeValue.split(';')[0];
 
                 if (statusValue == null || statusValue == '') {
@@ -187,24 +188,21 @@ define(['N/runtime',
                             idCountry: 30
                         }
                     }; // G.G
-                    let countryCode = objRecord.getValue({
+                    let countryCode = currentRecord.getValue({
                         fieldId: 'custpage_lmry_ste_country'
                     });
 
                     countryCode = countryCode.substring(0, 3).toUpperCase();
-
                     if (JsonContry[countryCode].ip = 'BR') {
                         if (transactionTypeValue == 'vendorbill' || transactionTypeValue == 'vendorcredit') {
-
-                            let deployIdBySubsidiary = `customdeploy_lmry_ste_af_prchs_mprd_${subsidiaryValue}`;
+                            let deployIdBySubsidiary = `customdeploy_lmry_ste_af_prchs_${subsidiaryValue}_mprd`;
                             if (checkExecutionByScript(deployIdBySubsidiary)) {
                                 alert(translatedFields.afMsgDeploySubsidiary);
                                 return false;
                             }
 
-                        } else if (sv_transaction == 'itemfulfillment' || sv_transaction == 'itemreceipt') {
-
-                            let deployIdBySubsidiary = `customdeploy_lmry_ste_af_item_mprd_${subsidiaryValue}`;
+                        } else if (transactionTypeValue == 'itemfulfillment' || transactionTypeValue == 'itemreceipt') {
+                            let deployIdBySubsidiary = `customdeploy_lmry_ste_af_item_${subsidiaryValue}_mprd`;
                             if (checkExecutionByScript(deployIdBySubsidiary)) {
                                 alert(translatedFields.afMsgDeploySubsidiary);
                                 return false;
@@ -212,55 +210,47 @@ define(['N/runtime',
                         }
                         // Ventas
                         else {
-                            let deployIdBySubsidiary = `customdeploy_lmry_ste_af_sales_mprd_${subsidiaryValue}`;
+                            
+                            let deployIdBySubsidiary = `customdeploy_lmry_ste_af_sales_${subsidiaryValue}_mprd`;
                             if (checkExecutionByScript(deployIdBySubsidiary)) {
                                 alert(translatedFields.afMsgDeploySubsidiary);
                                 return false;
                             }
                         }
                     }
-
                     let numberNotSelected = 0;
                     let transactionList = [];
-                    let quantity = objRecord.getLineCount({ sublistId: 'custlist_lmry_ste_filter' });
-
+                    const quantity = currentRecord.getLineCount({ sublistId: "custlist_lmry_ste_filter" });
 
                     if (quantity > 0) {
-
                         for (let i = 0; i < quantity; i++) {
-                            let isApply = objRecord.getSublistValue({ sublistId: 'custlist_lmry_ste_filter', fieldId: 'listcol_lmry_ste_apply', line: i });
-                            let internalId = objRecord.getSublistValue({ sublistId: 'custpage_sublista', fieldId: 'listcol_lmry_ste_id', line: i });
+                            const isApply = currentRecord.getSublistValue({ sublistId: "custlist_lmry_ste_filter", fieldId: "listcol_lmry_ste_apply", line: i });
+                            const internalId = currentRecord.getSublistValue({ sublistId: "custlist_lmry_ste_filter", fieldId: "listcol_lmry_ste_id", line: i });
                             if (isApply) {
                                 transactionList.push(internalId);
                             } else {
                                 numberNotSelected++;
                             }
                         }
-
                         transactionList.sort((a, b) => a - b);
-
-                        let transactionsString = JSON.stringify(transactionList) ;
-
+                        const transactionsString = JSON.stringify(transactionList) ;
                         if (quantity == numberNotSelected) {
                             alert(translatedFields.afMsgSelect);
-                        } else {
                             return false;
                         }
-
-                        let transactionsRecord = nRecord.create({ type: 'customrecord_lmry_ste_advance_flow_log', isDynamic: true });
-
+                        let transactionsRecord = nRecord.create({ type: "customrecord_lmry_ste_advance_flow_log", isDynamic: true });
+                        
                         if (features.subsidiary) {
-                            transactionsRecord.setValue({ fieldId: 'custrecord_lmry_ste_af_log_subsidiary', value: subsidiaryValue });
+                            transactionsRecord.setValue({ fieldId: "custrecord_lmry_ste_af_log_subsidiary", value: subsidiaryValue });
                         }
-
-                        transactionsRecord.setValue({ fieldId: 'custrecord_lmry_ste_af_log_country', value: JsonContry[countryCode].idCountry });
-                        transactionsRecord.setValue({ fieldId: 'custrecord_lmry_ste_af_log_datefrom', value: dateFromValue });
-                        transactionsRecord.setValue({ fieldId: 'custrecord_lmry_ste_af_log_trans_ids', value: transactionsString });
-                        transactionsRecord.setValue({ fieldId: 'custrecord_lmry_ste_af_log_dateto', value: dateToValue });
+                        transactionsRecord.setValue({ fieldId: "custrecord_lmry_ste_af_log_country", value: JsonContry[countryCode].idCountry });                       
+                        transactionsRecord.setValue({ fieldId: "custrecord_lmry_ste_af_log_datefrom", value: dateFromValue });
+                        transactionsRecord.setValue({ fieldId: "custrecord_lmry_ste_af_log_trans_ids", value: transactionsString });
+                        transactionsRecord.setValue({ fieldId: "custrecord_lmry_ste_af_log_dateto", value: dateToValue });
+                        transactionsRecord.setValue({ fieldId: "custrecord_lmry_ste_af_log_status", value: translatedFields.afStsProcessing });
+                        transactionsRecord.setValue({ fieldId: "custrecord_lmry_ste_af_log_user", value: nRuntime.getCurrentUser().id });
                         let statusId = transactionsRecord.save({ disableTriggers: true, ignoreMandatoryFields: true });
-
-                        objRecord.setValue({ fieldId: 'custpage_lmry_ste_status', value: statusId });
-
+                        currentRecord.setValue({ fieldId: "custpage_lmry_ste_status", value: statusId });
                     } else {
                         alert(translatedFields.afMsgNothing);
                         return false;
@@ -515,21 +505,18 @@ define(['N/runtime',
         }
        
         const checkExecutionByScript = (deployId) => {
-
             const mapReduceStatus = nSearch.create({
                 type: "scheduledscriptinstance",
                 columns: [
-                    "mapreducestage",
                     "status",
                     "taskid"
                 ],
                 filters: [
-                    ["scriptdeployment.scriptid", "anyof", deployId],
+                    ["formulatext: {scriptdeployment.scriptid}","is",deployId],
                     "AND",
                     ["status", "anyof", "PENDING", "PROCESSING"]
                 ]
             }).run().getRange({ start: 0, end: 10 });
-
             return mapReduceStatus && mapReduceStatus.length > 0;
         }
 

@@ -15,8 +15,8 @@ define([
     'N/search',
     'N/ui/serverWidget',
     'N/runtime',
-    './LMRY_AdvanceFlow_LBRY_V2.1.js',
-    '../Send Email/LMRY_SendEmail_LBRY_V2.1.js'
+    './LMRY_AdvanceFlow_LBRY_V2.1',
+    '../Send Email/LMRY_SendEmail_LBRY_V2.1'
 ], (nLog, nXml, nConfig, nRedirect, nTask, nSearch, nServerWidget, nRuntime, AF_Library, SendEmail_LBRY) => {
 
     // Script information
@@ -124,15 +124,15 @@ define([
                     if (transactionValue == 'vendorbill' || transactionValue == 'vendorcredit') {
                         tasks = {
                             taskType: nTask.TaskType.MAP_REDUCE,
-                            scriptId: 'customscript_lmry_lmry_ste_af_purchase_mprd',
-                            deploymentId : `customdeploy_lmry_ste_af_prchs_mprd_${subsidiaryValue}`,
+                            scriptId: 'customscript_lmry_ste_af_purchase_mprd',
+                            deploymentId : `customdeploy_lmry_ste_af_prchs_${subsidiaryValue}_mprd`,
                             params: params
                         }
-                    } else if (transaction == 'itemfulfillment' || transaccion == 'itemreceipt') {
+                    } else if (transactionValue == 'itemfulfillment' || transactionValue == 'itemreceipt') {
                         tasks = {
                             taskType: nTask.TaskType.MAP_REDUCE,
                             scriptId: 'customscript_lmry_ste_af_item_mprd',
-                            deploymentId : `customdeploy_lmry_ste_af_item_mprd_${subsidiaryValue}`,
+                            deploymentId : `customdeploy_lmry_ste_af_item_${subsidiaryValue}_mprd`,
                             params: params
                         }
                     }
@@ -140,8 +140,8 @@ define([
                     else {
                         tasks = {
                             taskType: nTask.TaskType.MAP_REDUCE,
-                            scriptId: 'customscript_lmry_lmry_ste_af_sales_mprd',
-                            deploymentId : `customdeploy_lmry_ste_af_sales_mprd_${subsidiaryValue}`,
+                            scriptId: 'customscript_lmry_ste_af_sales_mprd',
+                            deploymentId : `customdeploy_lmry_ste_af_sales_${subsidiaryValue}_mprd`,
                             params: params
                         }
                     }
@@ -525,14 +525,14 @@ define([
             transactions.forEach((transaction, index) => {
 
 
-                resultList.setSublistValue({ id: 'listcol_lmry_ste_id', line: index, value: transaction.internalId });
-                resultList.setSublistValue({ id: 'listcol_lmry_ste_tranid', line: index, value: transaction.tranid });
-                resultList.setSublistValue({ id: 'listcol_lmry_ste_type', line: index, value: transaction.typeText });
-                resultList.setSublistValue({ id: 'listcol_lmry_ste_date', line: index, value: transaction.trandate });
-                resultList.setSublistValue({ id: 'listcol_lmry_ste_entity', line: index, value: transaction.entityText });
-                resultList.setSublistValue({ id: 'listcol_lmry_ste_doc_type', line: index, value: transaction.documentTypeText });
-                resultList.setSublistValue({ id: 'listcol_lmry_ste_memo', line: index, value: transaction.memo });
-                resultList.setSublistValue({ id: 'listcol_lmry_ste_amount', line: index, value: transaction.fxamount });
+                resultList.setSublistValue({ id: "listcol_lmry_ste_id", line: index, value: transaction.internalId });
+                resultList.setSublistValue({ id: "listcol_lmry_ste_tranid", line: index, value: transaction.tranid });
+                resultList.setSublistValue({ id: "listcol_lmry_ste_type", line: index, value: transaction.typeText });
+                resultList.setSublistValue({ id: "listcol_lmry_ste_date", line: index, value: transaction.trandate });
+                resultList.setSublistValue({ id: "listcol_lmry_ste_entity", line: index, value: transaction.entityText });
+                resultList.setSublistValue({ id: "listcol_lmry_ste_doc_type", line: index, value: transaction.documentTypeText });
+                resultList.setSublistValue({ id: "listcol_lmry_ste_memo", line: index, value: transaction.memo });
+                resultList.setSublistValue({ id: "listcol_lmry_ste_amount", line: index, value: transaction.fxamount });
 
             });
             countTransactions = transactions.length;
