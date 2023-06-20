@@ -16,7 +16,7 @@ define(['N/runtime',
     '../Send Email/LMRY_SendEmail_LBRY_V2.1'
 ],
 
-    (nRuntime, nSearch, nUrl, nCurrentRecord, nRecord, AF_Library, SendEmail_LBRY) => {
+    (nRuntime, nSearch, nUrl, nCurrentRecord, nRecord, AdvanceFlow_LBRY, SendEmail_LBRY) => {
 
 
         let features = {};
@@ -146,7 +146,7 @@ define(['N/runtime',
         const saveRecord = (scriptContext) => {
             try {
                 getFeatures();
-                const translatedFields = AF_Library.getFieldTranslations();
+                const translatedFields = AdvanceFlow_LBRY.getFieldTranslations();
                 const {currentRecord} = scriptContext;
                 const statusValue = currentRecord.getValue({ fieldId: "custpage_lmry_ste_status" });
                 let subsidiaryValue = 1;
@@ -439,7 +439,7 @@ define(['N/runtime',
 
         const markAll = (quantity) => {
             try {
-                const translatedFields = AF_Library.getFieldTranslations();
+                const translatedFields = AdvanceFlow_LBRY.getFieldTranslations();
                 isManipulatedLine = false;
 
                 let objRecord = nCurrentRecord.get();

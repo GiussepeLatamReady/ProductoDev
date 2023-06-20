@@ -17,7 +17,7 @@ define([
     'N/runtime',
     './LMRY_AdvanceFlow_LBRY_V2.1',
     '../Send Email/LMRY_SendEmail_LBRY_V2.1'
-], (nLog, nXml, nConfig, nRedirect, nTask, nSearch, nServerWidget, nRuntime, AF_Library, SendEmail_LBRY) => {
+], (nLog, nXml, nConfig, nRedirect, nTask, nSearch, nServerWidget, nRuntime, AdvanceFlow_LBRY, SendEmail_LBRY) => {
 
     // Script information
     const LMRY_SCRIPT = "LR Advance Flow STLT V2.1";
@@ -35,7 +35,7 @@ define([
             getFeatures();
 
 
-            const translatedFields = AF_Library.getFieldTranslations();
+            const translatedFields = AdvanceFlow_LBRY.getFieldTranslations();
             if (scriptContext.request.method === 'GET') {
 
 
@@ -172,7 +172,7 @@ define([
 
     const buildGroups = (form) => {
 
-        const translatedFields = AF_Library.getFieldTranslations();
+        const translatedFields = AdvanceFlow_LBRY.getFieldTranslations();
         form.addFieldGroup({ // Primary Information
             id: "custgroup_lmry_ste_primary_information",
             label: translatedFields.afGrpPrimary
@@ -195,7 +195,7 @@ define([
     const buildFields = (form) => {
 
         /**  FIELD SUBISIDIARY **/
-        const translatedFields = AF_Library.getFieldTranslations();
+        const translatedFields = AdvanceFlow_LBRY.getFieldTranslations();
         let subsidiaryField;
         if (features.subsidiary) {
 
@@ -475,7 +475,7 @@ define([
     }
 
     const authentication = (form) => {
-        const translatedFields = AF_Library.getFieldTranslations();
+        const translatedFields = AdvanceFlow_LBRY.getFieldTranslations();
         if (nRuntime.envType == 'SANDBOX' || nRuntime.accountId.indexOf('TSTDRV') == 0) {
             let myInlineHtml = form.addField({
                 id: 'custpage_lmry_ste_id_message',
@@ -503,7 +503,7 @@ define([
 
 
     const buildSubListFilter = (form,parameters) => {
-        const translatedFields = AF_Library.getFieldTranslations();
+        const translatedFields = AdvanceFlow_LBRY.getFieldTranslations();
         const resultList = form.addSublist({ id: "custlist_lmry_ste_filter", type: nServerWidget.SublistType.LIST, label: translatedFields.afTransactions });
         let countTransactions = 0;
 
@@ -519,7 +519,7 @@ define([
 
 
         if (parameters.country) {
-            let transactions = AF_Library.getSearchTransactions(features, parameters);
+            let transactions = AdvanceFlow_LBRY.getSearchTransactions(features, parameters);
 
 
             transactions.forEach((transaction, index) => {
@@ -567,7 +567,7 @@ define([
     }
 
     const buildErrorForm = (error, context) => {
-        const translatedFields = AF_Library.getFieldTranslations();
+        const translatedFields = AdvanceFlow_LBRY.getFieldTranslations();
 
         let formError = nServerWidget.createForm({
             title: translatedFields.afTitle

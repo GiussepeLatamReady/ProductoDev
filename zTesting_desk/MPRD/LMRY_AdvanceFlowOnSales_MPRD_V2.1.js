@@ -17,7 +17,7 @@ define(['N/log',
         '../Send Email/LMRY_SendEmail_LBRY_V2.1'
     ],
     
-    (nLog,nRuntime,nSearch,nConfig,nRecord,HandlerTax_LBRY,HandlerWht_LBRY,AF_Library,SendEmail_LBRY) => {
+    (nLog,nRuntime,nSearch,nConfig,nRecord,HandlerTax_LBRY,HandlerWht_LBRY,AdvanceFlow_LBRY,SendEmail_LBRY) => {
 
         // Script information
         const LMRY_SCRIPT = "LR Advance Flow Sales MPRD";
@@ -39,7 +39,7 @@ define(['N/log',
         let parameters = {};
         const getInputData = (inputContext) => {
 
-            const translatedFields = AF_Library.getFieldTranslations();
+            const translatedFields = AdvanceFlow_LBRY.getFieldTranslations();
             getParameters();
             try {
                 getFeatures();
@@ -259,12 +259,15 @@ define(['N/log',
             try {
                 getParameters();
 
+                const { afStsFinished,afCommentOne,afCommentTwo,afCommentThree } = AdvanceFlow_LBRY.getFieldTranslations();
+                const { getJsonState, getTransactionsDetail } = AdvanceFlow_LBRY;
+
                 let transactionsErrors = [];
                 let statusError = '';
                 let country = '';
                 let possibleError = '';
                 let numberTransactions = 0; 
-                const translatedFields = AF_Library.getFieldTranslations();
+                
                 summaryContext.output.iterator().each( (key, value) => {
 
                     [statusError, country, possibleError, numberTransactions] = JSON.parse(value);
@@ -280,26 +283,33 @@ define(['N/log',
                 const transactionRecord = nRecord.load({ type: 'customrecord_lmry_ste_advance_flow_log', id: parameters.status });
                 const correctsTransacctions = numberTransactions - transactionsErrors.length;
 
-
-
-                const summary = {
+                const summary = JSON.stringify({
                     corrects: correctsTransacctions,
-                    incorrects: `${transactionsErrors.length}|${JSON.stringify(transactionsErrors)}` 
-                }
-                transactionRecord.setValue({ fieldId: 'custrecord_lmry_ste_af_log_summary', value: JSON.stringify(summary)});
+                    incorrects: transactionsErrors.length>0 ? `${transactionsErrors.length}|${JSON.stringify(transactionsErrors)}` : 0
+                });
+                transactionRecord.setValue({ fieldId: 'custrecord_lmry_ste_af_log_summary', value: summary});
 
                 transactionRecord.setValue({ 
                     fieldId: 'custrecord_lmry_ste_af_log_comments', 
-                    value: `The process has been completed. ${correctsTransacctions} transactions have been processed successfully, while ${transactionsErrors.length} others could not be processed successfully.`
+                    value: `${afCommentOne} ${correctsTransacctions} ${afCommentTwo} ${transactionsErrors.length} ${afCommentThree}`
                 });
                 
                 transactionRecord.setValue({ 
                     fieldId: 'custrecord_lmry_ste_af_log_status', 
-                    value: translatedFields.afStsFinished
+                    value: afStsFinished
                 });
 
                 transactionRecord.save({ disableTriggers: true, ignoreMandatoryFields: true });
+
+                const subsidiary = transactionRecord.getText('custrecord_lmry_ste_af_log_subsidiary');
+                const transactionIds = JSON.parse(transactionRecord.getValue('custrecord_lmry_ste_af_log_trans_ids'));
+
+                const transactionDetails = getTransactionsDetail(transactionIds);
+                const states = getJsonState(summary,transactionIds);
                 
+
+                SendEmail_LBRY.sendAFDetailsEmail(subsidiary,transactionDetails,states);
+
             } catch (error) {
                 nLog.error({ title: `[${LMRY_SCRIPT} : summarize]`, details: error });
                 SendEmail_LBRY.sendErrorEmail(`[ summarize ] : ${error}`, LMRY_SCRIPT);
@@ -425,14 +435,14 @@ define(['N/log',
                 });
 
                 const results = wtax_type.run().getRange(0, 1);
-                const columns = wtax_type.columns;        
+                const columns = wtax_type.columns; 
+                let numberSerie = parseInt(results[0].getValue(columns[0])) + 1;                  
                 const numberSerieStatic = numberSerie;
                 const endRange = parseInt(results[0].getValue(columns[1]));
                 const numberOfDigits = parseInt(results[0].getValue(columns[2]));
-                let numberSerie = parseInt(results[0].getValue(columns[0])) + 1;
+                
 
                 if (numberOfDigits != null && numberOfDigits != '' && numberSerie <= endRange) {
-
                     const longNumberConsec = parseInt(String(numberSerie).length);
                     let fillZeros = '';
 
@@ -460,7 +470,8 @@ define(['N/log',
                         });
                     }
 
-                    setTranId(transactionRecord);
+                    const tranid = setTranId(transactionRecord);
+                    transactionRecord.setValue({ fieldId: 'tranid', value: tranid });
                 }
             }
 
@@ -475,14 +486,13 @@ define(['N/log',
 
             let textTrandId = '';
             if (transPrefix != '' && transPrefix != null) {
+
                 textTrandId = transPrefix + ' ' + documentType.toUpperCase() + ' ' + printSeries + '-' + preprintedNumber;
             } else {
+
                 textTrandId = documentType.toUpperCase() + ' ' + printSeries + '-' + preprintedNumber;
             }
-
-            if (textTrandId != '' && textTrandId != null) {
-                transactionRecord.setValue({ fieldId: 'tranid', value: textTrandId });
-            }
+            return textTrandId;
 
         }
 

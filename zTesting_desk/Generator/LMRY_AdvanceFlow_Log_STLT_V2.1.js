@@ -15,7 +15,7 @@ define(['N/log',
         '../Tax Result Engine/LMRY_TaxResultEngine_LBRY_V2.1',
         '../Send Email/LMRY_SendEmail_LBRY_V2.1'],
 
-    (nLog,nServerWidget,nUrl,nRuntime,nSearch,AF_Library,TRE_Library, SendEmail_LBRY) => {
+    (nLog,nServerWidget,nUrl,nRuntime,nSearch,AdvanceFlow_LBRY,TRE_Library, SendEmail_LBRY) => {
         /**
          * Defines the Suitelet script trigger point.
          * @param {Object} scriptContext
@@ -25,23 +25,10 @@ define(['N/log',
          */
         const LMRY_SCRIPT = "LR Advance Flow Log STLT V2.1";
         const LMRY_SCRIPT_NAME = "LMRY_AdvanceFlow_Log_STLT_V2.1.js";
-        const transactionTypeList = {
-            SalesOrd: { name: "Sales Order", id: "salesorder" },
-            CustInvc: { name: "Invoice", id: "invoice" },
-            CustCred: { name: "Credit Memo", id: "creditmemo" },
-            CustPymt: { name: "Customer Payment", id: "customerpayment" },
-            CashSale: { name: "Cash Sales", id: "cashsale" },
-            PurchOrd: { name: "Purchase Order", id: "purchaseorder" },
-            VendBill: { name: "Bill", id: "vendorbill" },
-            VendCred: { name: "Bill Credit", id: "vendorcredit" },
-            VendPymt: { name: "Vendor Payment", id: "vendorpayment" },
-            ItemShip: { name: "Item Fulfillment", id: "itemfulfillment" },
-            ItemRcpt: { name: "Item Receipt", id: "itemreceipt" },
-        };
 
         const onRequest = (scriptContext) => {
             const translatedFieldsTRE = TRE_Library.getFieldTranslations();
-            const translatedFieldsAF = AF_Library.getFieldTranslations();
+            const translatedFieldsAF = AdvanceFlow_LBRY.getFieldTranslations();
             if (scriptContext.request.method === "GET") {
                 try {
                     const paramIsDetails = scriptContext.request.parameters.isDetails || "F";
@@ -97,7 +84,7 @@ define(['N/log',
                         resultList.addField({ id: "listcol_lmry_ste_comments", type: nServerWidget.FieldType.TEXTAREA, label: translatedFieldsAF.afLogComments });
                         resultList.addField({ id: "listcol_lmry_ste_details", type: nServerWidget.FieldType.TEXT, label: translatedFieldsTRE.treLstColDetails });
 
-                        const advanceFlowList = AF_Library.getAdvanceFlowRecord();
+                        const advanceFlowList = AdvanceFlow_LBRY.getAdvanceFlowRecord();
                         let order = advanceFlowList.length;
 
                         advanceFlowList.forEach((record,cont) => {
@@ -170,12 +157,12 @@ define(['N/log',
                             detailsList.addField({ id: "listcol_lmry_ste_ei", type: nServerWidget.FieldType.TEXT, label: `${translatedFieldsAF.afLogIe}?` });
                             detailsList.addField({ id: "listcol_lmry_ste_state", type: nServerWidget.FieldType.TEXT, label: translatedFieldsAF.afState });
 
-                            const transactionDetails = AF_Library.getTransactionsDetail(afLogIds);
-                            const states = AF_Library.getJsonState(summary,afLogIds);
+                            const transactionDetails = AdvanceFlow_LBRY.getTransactionsDetail(afLogIds);
+                            const states = AdvanceFlow_LBRY.getJsonState(summary,afLogIds);
                             transactionDetails.forEach((transaction,index) => {
                                 detailsList.setSublistValue({ id: "listcol_lmry_ste_order", value: (index + 1), line: index });
                                 const transactionUrl = nUrl.resolveRecord({
-                                    recordType: transactionTypeList[transaction.type].id,
+                                    recordType: transaction.typeId,
                                     recordId: transaction.id
                                 });
                                 detailsList.setSublistValue({
@@ -196,8 +183,8 @@ define(['N/log',
                                 label: translatedFieldsTRE.treBtnBack,
                                 functionName: `redirectBack("${paramIsDetails}")`
                             });
+                            
                         }
-
                     }
 
                     

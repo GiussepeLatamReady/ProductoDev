@@ -17,7 +17,7 @@ define([
     './LMRY_AdvanceFlow_LBRY_V2.1'
 ], (nLog, nRecord, nSearch, nRuntime , SendEmail_LBRY, HandlerTax_LBRY, HandlerWht_LBRY, AdvanceFlow_LBRY ) => {
 
-    const { sendErrorEmail } = SendEmail_LBRY;
+    const { sendErrorEmail, sendAFDetailsEmail } = SendEmail_LBRY;
 
     const LMRY_SCRIPT = 'LR Advance Flow On Purchase MPRD V2.1';
 
@@ -260,8 +260,8 @@ define([
 
         try {
 
-            const { afStsFinished } = AdvanceFlow_LBRY.getFieldTranslations();
-
+            const { afStsFinished,afCommentOne,afCommentTwo,afCommentThree } = AdvanceFlow_LBRY.getFieldTranslations();
+            const { getJsonState, getTransactionsDetail } = AdvanceFlow_LBRY;
             const transactionsErrors = [];
 
             let country = '';
@@ -283,28 +283,27 @@ define([
             });
 
             const currentAdvanceFlowLog = nRecord.load({ type: 'customrecord_lmry_ste_advance_flow_log', id: stateId });
+            const correctTransactions = numberTransactions - transactionsErrors.length;
 
-            if ( transactionsErrors.length > 0 ) {
-
-                const advanceFlowSearch = nSearch.lookupFields({
-                    type: 'customrecord_lmry_ste_advance_flow_log',
-                    id: stateId,
-                    columns: ['custrecord_lmry_ste_af_log_summary']
-                }).custrecord_lmry_ste_af_log_summary;
-
-                let advanceFlowSummary = JSON.parse( advanceFlowSearch );
-
-                advanceFlowSummary.incorrects = `${advanceFlowSummary.incorrects} : ${transactionsErrors.toString()}`;
-
-                currentAdvanceFlowLog.setValue({ fieldId: 'custrecord_lmry_ste_af_log_summary', value: JSON.stringify( advanceFlowSummary )});
-
+            const advanceFlowSummary = {
+                corrects: correctTransactions,
+                incorrects: transactionsErrors.length>0 ? `${transactionsErrors.length}|${JSON.stringify(transactionsErrors)}` : 0
             }
 
-            currentAdvanceFlowLog.setValue({ fieldId: 'custrecord_lmry_ste_af_log_comments', value: `The process has finished and ${numberTransactions} were processed successfully and ${transactionsErrors.length} were not.`});
+            currentAdvanceFlowLog.setValue({ fieldId: 'custrecord_lmry_ste_af_log_summary', value: JSON.stringify( advanceFlowSummary )});
+            currentAdvanceFlowLog.setValue({ fieldId: 'custrecord_lmry_ste_af_log_comments', value: `${afCommentOne} ${correctTransactions} ${afCommentTwo} ${transactionsErrors.length} ${afCommentThree}` });
             currentAdvanceFlowLog.setValue({ fieldId: 'custrecord_lmry_ste_af_log_status', value: afStsFinished });
 
             currentAdvanceFlowLog.save({ disableTriggers: true, ignoreMandatoryFields: true });
 
+            const subsidiary = currentAdvanceFlowLog.getText('custrecord_lmry_ste_af_log_subsidiary');
+            const transactionIds = JSON.parse(currentAdvanceFlowLog.getValue('custrecord_lmry_ste_af_log_trans_ids'));
+
+            const transactionDetails = getTransactionsDetail(transactionIds);
+            const states = getJsonState(summary, transactionIds);
+
+
+            sendAFDetailsEmail(subsidiary,transactionDetails,states);
         } catch (error) {
             sendErrorEmail( `[ summarize ] : ${error}`, LMRY_SCRIPT );
             nLog.error( `[ ${LMRY_SCRIPT} : summarize ]`, error );

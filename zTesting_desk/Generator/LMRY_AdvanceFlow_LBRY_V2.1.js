@@ -9,8 +9,10 @@ define([
     'N/log',
     'N/translation',
     'N/search',
+    'N/runtime',
+    'N/email',
     '../Send Email/LMRY_SendEmail_LBRY_V2.1'
-], (nLog, nTranslation, nSearch, SendEmail_LBRY) => {
+], (nLog, nTranslation, nSearch, nRuntime, nEmail, SendEmail_LBRY) => {
 
     const LMRY_SCRIPT = "LR Advance Flow LBRY V2.1";
     const LMRY_SCRIPT_NAME = "LMRY_AdvanceFlow_LBRY_V2.1.js";
@@ -295,7 +297,6 @@ define([
             });
             page.data.forEach( result => {
                 let columns = result.columns;
-                nLog.error('recordList date',result.getValue(columns[4]))
                 recordList.push({
                     id: result.getValue(columns[0]),
                     user: result.getText(columns[1]) || ' ',
@@ -313,13 +314,29 @@ define([
     }
 
     const getTransactionsDetail = (transactionIds) =>{
+
+        const transactionTypeList = {
+            SalesOrd: { name: "Sales Order", id: "salesorder" },
+            CustInvc: { name: "Invoice", id: "invoice" },
+            CustCred: { name: "Credit Memo", id: "creditmemo" },
+            CustPymt: { name: "Customer Payment", id: "customerpayment" },
+            CashSale: { name: "Cash Sales", id: "cashsale" },
+            PurchOrd: { name: "Purchase Order", id: "purchaseorder" },
+            VendBill: { name: "Bill", id: "vendorbill" },
+            VendCred: { name: "Bill Credit", id: "vendorcredit" },
+            VendPymt: { name: "Vendor Payment", id: "vendorpayment" },
+            ItemShip: { name: "Item Fulfillment", id: "itemfulfillment" },
+            ItemRcpt: { name: "Item Receipt", id: "itemreceipt" },
+        };
         let transactions =[];
         var searchTransactions = nSearch.create({
             type: nSearch.Type.TRANSACTION,
             columns: [
                     'internalid', 
                     'type', 
-                    'custbody_lmry_ste_fiscal_doctype' 
+                    'custbody_lmry_ste_fiscal_doctype',
+                    'tranid',
+                    'entity' 
                ],
             filters: [{
                 name: 'internalid',
@@ -345,8 +362,11 @@ define([
 
                 transactions.push({
                     id: result.getValue(columns[0]),
-                    type: result.getValue(columns[1]) || ' ',
-                    legalDocType: result.getValue(columns[2]) || ' '
+                    typeId: transactionTypeList[result.getValue(columns[1])].id,
+                    typeName: transactionTypeList[result.getValue(columns[1])].name,
+                    legalDocType: result.getValue(columns[2]) || ' ',
+                    tranid: result.getValue(columns[3]) || ' ',
+                    entity: result.getText(columns[4]) || ' '
                 });      
             });
         });
@@ -356,31 +376,38 @@ define([
     }
 
     const getJsonState =(summary,transactionIds)=>{
-        nLog.error('summary',summary);
+        const {afSucess,afStsProcessing} = getFieldTranslations();
         let states = {};
         transactionIds.forEach(id => {
-            states[id] = 'PROCCESING'
+            states[id] = afStsProcessing
         });
+        states['numTrans'] = transactionIds.length;
+        states['incorrects'] = 0;
+        states['corrects'] = 0;
         if (summary !== null && summary !== '' && summary !== ' ') {
             let incorrectsDetails = JSON.parse(summary).incorrects;
-        
+            const correctsDetails = JSON.parse(summary).corrects;
             if (incorrectsDetails !== 0) {
                 incorrectsDetails = incorrectsDetails.split('|');
                 const errorList = JSON.parse(incorrectsDetails[1]);
                 errorList.forEach(item => {
                     const { id } = item;
                     states[id] = 'ERROR';
+                    states['incorrects']++;
                 });
             }else{
-                transactionIds.forEach(id => {
-                    states[id] = 'SUCCESS'
-                });
+                if (correctsDetails !== 0) {
+                    transactionIds.forEach(id => {
+                        states[id] = afSucess.toUpperCase();
+                        states['corrects']++;
+                    });
+                }              
             }
         }
         
         return states;  
-
     }
+
     const getFieldTranslations = () =>{
 
         try {
@@ -439,10 +466,10 @@ define([
                 afLogComments: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_log_comments" })(), 
                 afLogIDocumentStatus: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_log_ie_document_status" })(),
                 afLogIe: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_log_ie" })(),
-                // afCommentOne: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_comment_one" })(),
-                // afCommentTwo: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_comment_two" })(),
-                // afCommentThree: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_comment_three" })(),
-                // afSucess: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_sucess" })(),         
+                afCommentOne: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_comment_one" })(),
+                afCommentTwo: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_comment_two" })(),
+                afCommentThree: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_comment_three" })(),
+                afSucess: nTranslation.get({ collection: "custcollection_lmry_ste_advanceflow", key: "af_sucess" })(),         
             }
         } catch (error) {
             nLog.error({ title: `[${LMRY_SCRIPT} : getFieldTranslations]`, details: error });
