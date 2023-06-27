@@ -108,6 +108,7 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
           case 'invoice': filtroTransactionType = 1; break;
           case 'creditmemo': filtroTransactionType = 8; break;
           case 'cashsale': filtroTransactionType = 3; break;
+          case 'salesorder': filtroTransactionType = 2; break;
         }
 
         if (auto_wht && validarTipoDoc(tipo_Docum) && (eDocStatus != "Sent" && eDocStatus != "Enviado")) {

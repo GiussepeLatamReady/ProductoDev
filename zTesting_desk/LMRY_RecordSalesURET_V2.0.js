@@ -19,13 +19,13 @@ define(['N/config', 'N/currency', 'N/record', 'N/runtime', 'N/search', 'N/ui/ser
     './Latam_Library/LMRY_GLImpact_LBRY_V2.0', './Latam_Library/LMRY_PE_MapAndSaveFields_LBRY_v2.0',
     './WTH_Library/LMRY_MX_TAX_Withholding_LBRY_V2.0', './Latam_Library/LMRY_BR_UPDATE_Flete_Transaction_Field_LBRY_2.0',
     './Latam_Library/LMRY_MX_STE_Sales_Tax_Transaction_LBRY_V2.0',
-    './Latam_Library/LMRY_Custom_ExchangeRate_Field_LBRY_V2.0.js'
+    './Latam_Library/LMRY_Custom_ExchangeRate_Field_LBRY_V2.0.js','./WTH_Library/LMRY_AutoPercepcionDesc_LBRY_V2.0'
   ],
 
   function(config, currencyModule, record, runtime, search, serverWidget, log,
     Library_Mail, Library_HideView, Library_WHT_Transaction, library_hideview3,
     library_SalesOrder, libraryGLImpact, PE_libMapTransactions, libraryTaxWithholding, libraryFleteGlobales,
-    MX_STE_TaxLibrary, Library_ExchangeRate_Field) {
+    MX_STE_TaxLibrary, Library_ExchangeRate_Field,Library_AutoPercepcionDesc) {
 
     var LMRY_script = 'LMRY Record Sales URET V2.0';
     var OBJ_FORM = '';
@@ -654,8 +654,34 @@ define(['N/config', 'N/currency', 'N/record', 'N/runtime', 'N/search', 'N/ui/ser
           libraryTaxWithholding._inactiveRelatedRecord(id_delete);
         }
 
+        var LMRY_Result = ValidateAccessInv(RCD_OBJ);
+        if (scriptContext.type != 'delete') {
+          // Para todos los paises que tengan acceso
+          log.debug('LMRY_Result', LMRY_Result);
+          if (LMRY_Result[2] == true && LMRY_Result[3] == true && RCD_OBJ.getValue({
+            fieldId: 'memo'
+          }) != 'VOID') { 
+              /*************************************
+             * Auto Percepcions para Argentina,
+             *************************************/
+            var swAutoPe = false;
+            if (LMRY_Result[0] == 'AR') {
+              swAutoPe = Library_Mail.getAuthorization(142, licenses);
+            }
+            // Si hay acceso Procesa
+            if (ST_FEATURE == false || ST_FEATURE == "F") {
+              if (swAutoPe) {
+                // Realiza el seteo de percepciones
+                Library_AutoPercepcionDesc.autoperc_beforeSubmit(scriptContext, LMRY_Result[0], scriptContext.type);
+              }
+            }
+
+          }
+        }
+
       } catch (err) {
         Library_Mail.sendemail(' [ beforeSubmit ] ' + err, LMRY_script);
+        log.error('Error',err)
       }
     }
 
@@ -805,6 +831,56 @@ define(['N/config', 'N/currency', 'N/record', 'N/runtime', 'N/search', 'N/ui/ser
         log.error('searchPediments', err);
         Library_Mail.sendemail2(' [ searchPediments ] ' + err, LMRY_script, RCD_OBJ, 'tranid', 'entity');
       }
+    }
+
+    function ValidateAccessInv(RCD) {
+      try {
+
+        var ID = RCD.getValue({ fieldId: 'subsidiary'});
+        var LMRY_countr = Library_Mail.Validate_Country(ID);
+        var LMRY_access = false;
+        var LMRY_Result = ['', '-None-', LMRY_access];
+    
+        if (LMRY_countr.length < 1) {
+          return LMRY_Result;
+        }
+    
+        LMRY_access = Library_Mail.getCountryOfAccess(LMRY_countr, licenses);
+        LMRY_Result[0] = LMRY_countr[0];
+        LMRY_Result[1] = LMRY_countr[1];
+        LMRY_Result[2] = LMRY_access;
+        LMRY_Result = activate_fe(LMRY_Result, licenses);
+      } catch (err) {
+        Library_Mail.sendemail2('[ ValidateAccessInv ] ' + err, LMRY_script, RCD, 'tranid', 'entity');
+
+      }
+    
+      return LMRY_Result;
+    }
+
+    function activate_fe(fe_countr, licenses) {
+      var authorizations_fe = {
+        'AR': 246,
+        'BO': 247,
+        'BR': 248,
+        'CL': 249,
+        'CO': 250,
+        'CR': 251,
+        'EC': 252,
+        'SV': 253,
+        'GT': 254,
+        'MX': 255,
+        'PA': 256,
+        'PY': 257,
+        'PE': 258,
+        'UY': 259,
+        'NI': 407,
+        'DO': 400
+      };
+      
+      var autfe = authorizations_fe[fe_countr[0]] ? Library_Mail.getAuthorization(authorizations_fe[fe_countr[0]], licenses) : false;
+      fe_countr.push(autfe);
+      return fe_countr;
     }
 
     return {
