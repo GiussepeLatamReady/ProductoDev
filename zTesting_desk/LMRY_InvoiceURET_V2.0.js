@@ -1253,6 +1253,11 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
           }
         }
 
+        if (LMRY_Result[0] == "CO" && ["create", "edit", "copy"].indexOf(scriptContext.type) != -1) {
+           log.debug("Entre a colombia");
+           setLineDiscount(RCD);
+        }
+
         //SETEO DE CAMPOS BASE 0%, 12% Y 14%
         var eventsEC = ['create', 'copy', 'edit'];
         if (LMRY_Result[0] == 'EC' && Library_Mail.getAuthorization(42, licenses) && eventsEC.indexOf(scriptContext.type) != -1) {
@@ -2977,7 +2982,38 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
       }
 
     }
+    
 
+    /**
+     * Function that establishes the value of the unit price applied the discount and the percentage of this discount.
+     */
+
+    function setLineDiscount(recordObj){
+      try {
+        var numberItems = recordObj.getLineCount({ sublistId: "item" });
+        var totalDiscountPercentage = 0;
+        if (numberItems) {
+          for (var i = numberItems - 1; i >= 0; i--) {
+            var itemType = recordObj.getSublistValue({ sublistId: "item", fieldId: "itemtype", line: i });
+            var rate = recordObj.getSublistValue({ sublistId: "item", fieldId: "rate", line: i });
+
+            if (itemType == 'Discount') {
+              totalDiscountPercentage += rate;
+            } else {
+
+              recordObj.setSublistValue({ sublistId: "item", fieldId: "custcol_lmry_sales_discount_percentag", value: Math.abs(totalDiscountPercentage), line: i });
+              rate *= (1 - Math.abs(totalDiscountPercentage) / 100);
+              recordObj.setSublistValue({ sublistId: "item", fieldId: "custcol_lmry_sales_discount_unit_real", value: Math.abs(rate), line: i });
+
+              totalDiscountPercentage = 0;
+            }
+          }
+        }
+      } catch (error) {
+        log.debug('Error [setLineDiscount]', error)
+      }
+  }
+  
 
     return {
       beforeLoad: beforeLoad,

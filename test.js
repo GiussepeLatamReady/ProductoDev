@@ -1,62 +1,17 @@
-console.log('Prueba [activate_fe]');
+function acortarNumero(num) {
+    const multiplicador = Math.pow(10, 4); // Multiplicador para mover los decimales a la izquierda
+    const truncado = Math.trunc(num * multiplicador); // Truncar el número multiplicado
+    const resultado = truncado / multiplicador; // Dividir el número truncado para obtener el resultado final
 
-function activate_fe_optimizado(fe_countr, licenses) {
-    var authorizations_fe = {
-        'AR': 246,
-        'BO': 247,
-        'BR': 248,
-        'CL': 249,
-        'CO': 250,
-        'CR': 251,
-        'EC': 252,
-        'SV': 253,
-        'GT': 254,
-        'MX': 255,
-        'PA': 256,
-        'PY': 257,
-        'PE': 258,
-        'UY': 259,
-        'NI': 407,
-        'DO': 400
-    };
-
-    var autfe = authorizations_fe[fe_countr[0]] ? Library_Mail.getAuthorization(authorizations_fe[fe_countr[0]], licenses) : false;
-    fe_countr.push(autfe);
-    return fe_countr;
+    return resultado;
 }
-
-
-function activate_fe_original(fe_countr, licenses) {
-    var autfe = false;
-    var authorizations_fe = {
-        'AR': 246,
-        'BO': 247,
-        'BR': 248,
-        'CL': 249,
-        'CO': 250,
-        'CR': 251,
-        'EC': 252,
-        'SV': 253,
-        'GT': 254,
-        'MX': 255,
-        'PA': 256,
-        'PY': 257,
-        'PE': 258,
-        'UY': 259,
-        'NI': 407,
-        'DO': 400
-    };
-
-    if (authorizations_fe[fe_countr[0]]) {
-        autfe = Library_Mail.getAuthorization(authorizations_fe[fe_countr[0]], licenses);
-    }
-
-    if (autfe == true) {
-        fe_countr.push(true);
-    } else {
-        fe_countr.push(false);
-    }
-    return fe_countr;
-}
-
-console('[activate_fe]:',activate_fe_optimizado())
+function acortarNumer(num) {
+    const resultado = Number(num.toFixed(4));
+    return resultado;
+  }
+// Ejemplo de uso:
+const numero = 3.10;
+const resultado = acortarNumero(numero);
+const resultado2 = acortarNumero(numero);
+console.log(resultado); // Imprime 3.1415
+console.log(resultado2); // Imprime 3.1415
