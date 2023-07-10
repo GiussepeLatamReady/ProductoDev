@@ -28,6 +28,7 @@ calculos:
 -   Name: Latam Col - Sales Discount Percentage
 -   id: custcol_lmry_sales_discount_percentag
 ______________________________
+cambio
 
 
 
