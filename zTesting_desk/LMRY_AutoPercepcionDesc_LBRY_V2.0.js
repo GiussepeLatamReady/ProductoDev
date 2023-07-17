@@ -109,6 +109,7 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
           case 'creditmemo': filtroTransactionType = 8; break;
           case 'cashsale': filtroTransactionType = 3; break;
           case 'salesorder': filtroTransactionType = 2; break;
+          case 'estimate': filtroTransactionType = 10; break;
         }
 
         if (auto_wht && validarTipoDoc(tipo_Docum) && (eDocStatus != "Sent" && eDocStatus != "Enviado")) {
@@ -696,8 +697,41 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
       return tipoDocEncontrado;
     }
 
+
+    /**************************************************************
+     * Funcion que elimina las lineas de percepcion
+     * Name. : Latam Col - Item Tributo
+     * ID ...: custcol_lmry_ar_item_tributo
+     *********************************************************** */
+
+    function removePerceptionLines(recordObj) {
+      var currentNumberLine = recordObj.getLineCount({
+        sublistId: 'item'
+      });
+      var deletedTransactions = [];
+      for (var i = currentNumberLine-1; i >= 0; i--) {
+        
+        var isItemTax = recordObj.getSublistValue({
+          sublistId: 'item',
+          fieldId: 'custcol_lmry_ar_item_tributo',
+          line: i
+        });
+        
+        if (isItemTax || isItemTax == 'T') {
+          deletedTransactions.push(i);
+        }
+      }
+      deletedTransactions.forEach(function (id) {
+        recordObj.removeLine({
+          sublistId: 'item',
+          line: id
+        });
+      });
+    }
+
     // Regresa la funcion para el User Event
     return {
-      autoperc_beforeSubmit: autoperc_beforeSubmit
+      autoperc_beforeSubmit: autoperc_beforeSubmit,
+      removePerceptionLines: removePerceptionLines
     };
   });

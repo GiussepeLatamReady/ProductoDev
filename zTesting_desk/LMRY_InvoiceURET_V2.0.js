@@ -93,7 +93,7 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
         var subsidiary = RCD_OBJ.getValue({
           fieldId: 'subsidiary'
         });
-
+        
         if (scriptContext.type != 'print' && scriptContext.type != 'email') {
           licenses = Library_Mail.getLicenses(subsidiary);
           if (licenses == null || licenses == '') {
@@ -111,7 +111,7 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
         var LMRY_Result = ValidateAccessInv(RCD_OBJ.getValue({
           fieldId: 'subsidiary'
         }), OBJ_FORM, true, scriptContext.type);
-
+        
         if (scriptContext.type == 'create' || scriptContext.type == 'copy' || scriptContext.type == 'edit' || scriptContext.type == 'view') {
           if (LMRY_Result[0] === "MX" && Library_Mail.getAuthorization(30, licenses)) {
             Crear_Wht_Rule(RCD_OBJ, scriptContext)
@@ -281,6 +281,7 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
           }
         }
 
+       
 
         if (scriptContext.type != 'print' && scriptContext.type != 'email') {
 
@@ -351,6 +352,7 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
                   break;
               }
             }
+            
 
             if (["copy", "create"].indexOf(scriptContext.type) != -1) {
               var createdFrom = RCD_OBJ.getValue({
@@ -819,6 +821,11 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
         if (scriptContext.type == "copy" && LMRY_Result[0] == "MX" && Library_Mail.getAuthorization(672, licenses) == true) {
           libraryTaxWithholding.resetLines(RCD_OBJ);
         }
+
+        if (LMRY_Result[0]=='AR') {
+          Library_AutoPercepcionDesc.removePerceptionLines(RCD_OBJ);
+        }
+        
 
       } catch (err) {
         log.error('err', err);

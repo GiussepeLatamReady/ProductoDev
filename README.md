@@ -1,5 +1,5 @@
 # [LatamReady ARG - Percepciones en orden de venta C0914](https://docs.google.com/document/d/1wDp4s2DHJ9cxZnDISm54t0dyF9OhywEb/edit)
-
+# [LatamReady ARG - Percepciones en Cotizaciones] ()
 Se requiere considerar en el producto la generación de líneas para artículos de percepciones según las clases contributivas relacionadas al cliente de la orden de venta.
 
 

@@ -592,6 +592,10 @@ define(['N/config', 'N/currency', 'N/record', 'N/runtime', 'N/search', 'N/ui/ser
           libraryTaxWithholding.resetLines(RCD_OBJ);
         }
 
+        if (LMRY_countr[0]=='AR') {
+          Library_AutoPercepcionDesc.removePerceptionLines(RCD_OBJ);
+        }
+
 
       } catch (err) {
         Library_Mail.sendemail(' [ beforeLoad ] ' + err, LMRY_script);
@@ -654,13 +658,11 @@ define(['N/config', 'N/currency', 'N/record', 'N/runtime', 'N/search', 'N/ui/ser
           libraryTaxWithholding._inactiveRelatedRecord(id_delete);
         }
 
-        var LMRY_Result = ValidateAccessInv(RCD_OBJ);
+        var LMRY_Result = ValidateAccessTransaction(RCD_OBJ);
         if (scriptContext.type != 'delete') {
           // Para todos los paises que tengan acceso
           log.debug('LMRY_Result', LMRY_Result);
-          if (LMRY_Result[2] == true && LMRY_Result[3] == true && RCD_OBJ.getValue({
-            fieldId: 'memo'
-          }) != 'VOID') { 
+          if (LMRY_Result[2] == true && RCD_OBJ.getValue({fieldId: 'memo'}) != 'VOID') { 
               /*************************************
              * Auto Percepcions para Argentina,
              *************************************/
@@ -833,7 +835,7 @@ define(['N/config', 'N/currency', 'N/record', 'N/runtime', 'N/search', 'N/ui/ser
       }
     }
 
-    function ValidateAccessInv(RCD) {
+    function ValidateAccessTransaction(RCD) {
       try {
 
         var ID = RCD.getValue({ fieldId: 'subsidiary'});
@@ -849,7 +851,6 @@ define(['N/config', 'N/currency', 'N/record', 'N/runtime', 'N/search', 'N/ui/ser
         LMRY_Result[0] = LMRY_countr[0];
         LMRY_Result[1] = LMRY_countr[1];
         LMRY_Result[2] = LMRY_access;
-        LMRY_Result = activate_fe(LMRY_Result, licenses);
       } catch (err) {
         Library_Mail.sendemail2('[ ValidateAccessInv ] ' + err, LMRY_script, RCD, 'tranid', 'entity');
 
@@ -858,30 +859,7 @@ define(['N/config', 'N/currency', 'N/record', 'N/runtime', 'N/search', 'N/ui/ser
       return LMRY_Result;
     }
 
-    function activate_fe(fe_countr, licenses) {
-      var authorizations_fe = {
-        'AR': 246,
-        'BO': 247,
-        'BR': 248,
-        'CL': 249,
-        'CO': 250,
-        'CR': 251,
-        'EC': 252,
-        'SV': 253,
-        'GT': 254,
-        'MX': 255,
-        'PA': 256,
-        'PY': 257,
-        'PE': 258,
-        'UY': 259,
-        'NI': 407,
-        'DO': 400
-      };
-      
-      var autfe = authorizations_fe[fe_countr[0]] ? Library_Mail.getAuthorization(authorizations_fe[fe_countr[0]], licenses) : false;
-      fe_countr.push(autfe);
-      return fe_countr;
-    }
+    
 
     return {
       beforeLoad: beforeLoad,
