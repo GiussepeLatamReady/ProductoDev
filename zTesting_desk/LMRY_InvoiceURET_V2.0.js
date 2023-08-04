@@ -1252,10 +1252,13 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
             }
           }
         }
-
+        
+        
         if (LMRY_Result[0] == "CO" && ["create", "edit", "copy"].indexOf(scriptContext.type) != -1) {
-           log.debug("Entre a colombia");
-           setLineDiscount(RCD);
+          var percentageDiscount = Library_Mail.getAuthorization(1026, licenses);
+          if (percentageDiscount) {
+            setLineDiscount(RCD);
+          }
         }
 
         //SETEO DE CAMPOS BASE 0%, 12% Y 14%
@@ -2795,6 +2798,10 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
           whtTaxRateGlobal = "";
         }
 
+        if (whtAppliesTo == "T" || whtAppliesTo == true) {
+          whtTaxAmount = round2(Math.abs(whtBaseAmount) * parseFloat(whtTaxRateGlobal) / 100);
+        }
+
         var whtTaxName = "";
         if (Number(whtTaxCodeGlobal)) {
           whtTaxName = search.lookupFields({
@@ -2989,18 +2996,16 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
      */
 
     function setLineDiscount(recordObj){
-      try {
+      try {        
         var numberItems = recordObj.getLineCount({ sublistId: "item" });
         var totalDiscountPercentage = 0;
         if (numberItems) {
           for (var i = numberItems - 1; i >= 0; i--) {
             var itemType = recordObj.getSublistValue({ sublistId: "item", fieldId: "itemtype", line: i });
-            var rate = recordObj.getSublistValue({ sublistId: "item", fieldId: "rate", line: i });
-
+            var rate = recordObj.getSublistValue({ sublistId: "item", fieldId: "rate", line: i });            
             if (itemType == 'Discount') {
               totalDiscountPercentage += rate;
-            } else {
-
+            } else {              
               recordObj.setSublistValue({ sublistId: "item", fieldId: "custcol_lmry_sales_discount_percentag", value: Math.abs(totalDiscountPercentage), line: i });
               rate *= (1 - Math.abs(totalDiscountPercentage) / 100);
               recordObj.setSublistValue({ sublistId: "item", fieldId: "custcol_lmry_sales_discount_unit_real", value: Math.abs(rate), line: i });
@@ -3009,8 +3014,9 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
             }
           }
         }
-      } catch (error) {
-        log.debug('Error [setLineDiscount]', error)
+      } catch (err) {
+        log.error('Error [setLineDiscount]', err);
+        Library_Mail.sendemail2(' [ setLineDiscount ] ' + err, LMRY_script, RCD_OBJ, 'tranid', 'entity');
       }
   }
   
