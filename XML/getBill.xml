@@ -1,0 +1,239 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+   <soapenv:Header>
+      <platformMsgs:documentInfo xmlns:platformMsgs="urn:messages_2019_2.platform.webservices.netsuite.com">
+         <platformMsgs:nsId>WEBSERVICES_TSTDRV1774174_080620238359952991622783148_3d32fe</platformMsgs:nsId>
+      </platformMsgs:documentInfo>
+   </soapenv:Header>
+   <soapenv:Body>
+      <getResponse xmlns="urn:messages_2019_2.platform.webservices.netsuite.com">
+         <readResponse>
+            <platformCore:status isSuccess="true" xmlns:platformCore="urn:core_2019_2.platform.webservices.netsuite.com"/>
+            <record internalId="3890507" xsi:type="tranPurch:VendorBill" xmlns:tranPurch="urn:purchases_2019_2.transactions.webservices.netsuite.com">
+               <tranPurch:createdDate>2023-04-04T14:08:51.000-07:00</tranPurch:createdDate>
+               <tranPurch:lastModifiedDate>2023-04-04T17:27:42.000-07:00</tranPurch:lastModifiedDate>
+               <tranPurch:customForm internalId="50" xmlns:platformCore="urn:core_2019_2.platform.webservices.netsuite.com">
+                  <platformCore:name>Standard Vendor Bill</platformCore:name>
+               </tranPurch:customForm>
+               <tranPurch:billAddressList internalId="255225" xmlns:platformCore="urn:core_2019_2.platform.webservices.netsuite.com">
+                  <platformCore:name>Av. Callecita</platformCore:name>
+               </tranPurch:billAddressList>
+               <tranPurch:account internalId="25" xmlns:platformCore="urn:core_2019_2.platform.webservices.netsuite.com">
+                  <platformCore:name>2000 Accounts Payable T</platformCore:name>
+               </tranPurch:account>
+               <tranPurch:entity internalId="8555" xmlns:platformCore="urn:core_2019_2.platform.webservices.netsuite.com">
+                  <platformCore:name>1475 !“#$%&amp;/(VeÑdor Perú 123)=\-+/*ªº</platformCore:name>
+               </tranPurch:entity>
+               <tranPurch:subsidiary internalId="5" xmlns:platformCore="urn:core_2019_2.platform.webservices.netsuite.com">
+                  <platformCore:name>HoneyComb PE</platformCore:name>
+               </tranPurch:subsidiary>
+               <tranPurch:approvalStatus internalId="2" xmlns:platformCore="urn:core_2019_2.platform.webservices.netsuite.com">
+                  <platformCore:name>Approved</platformCore:name>
+               </tranPurch:approvalStatus>
+               <tranPurch:nextApprover internalId="-1" xmlns:platformCore="urn:core_2019_2.platform.webservices.netsuite.com"/>
+               <tranPurch:vatRegNum>20553157286</tranPurch:vatRegNum>
+               <tranPurch:postingPeriod internalId="668" xmlns:platformCore="urn:core_2019_2.platform.webservices.netsuite.com">
+                  <platformCore:name>Jul 2020</platformCore:name>
+               </tranPurch:postingPeriod>
+               <tranPurch:tranDate>2020-07-09T22:00:00.000-07:00</tranPurch:tranDate>
+               <tranPurch:currencyName>Dolares Americanos</tranPurch:currencyName>
+               <tranPurch:billingAddress xmlns:platformCommon="urn:common_2019_2.platform.webservices.netsuite.com">
+                  <platformCommon:country>_peru</platformCommon:country>
+                  <platformCommon:addressee>!“#$%&amp;/(VeÑdor Perú 123)=\-+/*ªº</platformCommon:addressee>
+                  <platformCommon:addr1>Av. Callecita</platformCommon:addr1>
+                  <platformCommon:addr2>Nro 123</platformCommon:addr2>
+                  <platformCommon:city>Lima</platformCommon:city>
+                  <platformCommon:state>Perú</platformCommon:state>
+                  <platformCommon:zip>051</platformCommon:zip>
+                  <platformCommon:addrText>!“#$%&amp;/(VeÑdor Perú 123)=\-+/*ªº
+Av. Callecita
+Nro 123
+Lima Perú 051
+Peru</platformCommon:addrText>
+                  <platformCommon:override>false</platformCommon:override>
+               </tranPurch:billingAddress>
+               <tranPurch:exchangeRate>3.37</tranPurch:exchangeRate>
+               <tranPurch:dueDate>2020-07-09T22:00:00.000-07:00</tranPurch:dueDate>
+               <tranPurch:tranId>CO 34545654-211</tranPurch:tranId>
+               <tranPurch:userTotal>12.61</tranPurch:userTotal>
+               <tranPurch:taxTotal>1.93</tranPurch:taxTotal>
+               <tranPurch:paymentHold>false</tranPurch:paymentHold>
+               <tranPurch:currency internalId="1" xmlns:platformCore="urn:core_2019_2.platform.webservices.netsuite.com">
+                  <platformCore:name>Dolares Americanos</platformCore:name>
+               </tranPurch:currency>
+               <tranPurch:status>Paid In Full</tranPurch:status>
+               <tranPurch:landedCostMethod>_weight</tranPurch:landedCostMethod>
+               <tranPurch:landedCostPerLine>false</tranPurch:landedCostPerLine>
+               <tranPurch:transactionNumber>37268</tranPurch:transactionNumber>
+               <tranPurch:accountingBookDetailList xmlns:platformCommon="urn:common_2019_2.platform.webservices.netsuite.com">
+                  <platformCommon:accountingBookDetail>
+                     <platformCommon:accountingBook internalId="4" xmlns:platformCore="urn:core_2019_2.platform.webservices.netsuite.com">
+                        <platformCore:name>Local (Prueba)</platformCore:name>
+                     </platformCommon:accountingBook>
+                     <platformCommon:currency internalId="5" xmlns:platformCore="urn:core_2019_2.platform.webservices.netsuite.com">
+                        <platformCore:name>NUEVO SOL</platformCore:name>
+                     </platformCommon:currency>
+                     <platformCommon:exchangeRate>3.37</platformCommon:exchangeRate>
+                  </platformCommon:accountingBookDetail>
+                  <platformCommon:accountingBookDetail>
+                     <platformCommon:accountingBook internalId="2" xmlns:platformCore="urn:core_2019_2.platform.webservices.netsuite.com">
+                        <platformCore:name>USGAAP</platformCore:name>
+                     </platformCommon:accountingBook>
+                     <platformCommon:currency internalId="1" xmlns:platformCore="urn:core_2019_2.platform.webservices.netsuite.com">
+                        <platformCore:name>Dolares Americanos</platformCore:name>
+                     </platformCommon:currency>
+                     <platformCommon:exchangeRate>1.0</platformCommon:exchangeRate>
+                  </platformCommon:accountingBookDetail>
+               </tranPurch:accountingBookDetailList>
+               <tranPurch:itemList>
+                  <tranPurch:item>
+                     <tranPurch:item internalId="387" xmlns:platformCore="urn:core_2019_2.platform.webservices.netsuite.com">
+                        <platformCore:name>ACC00001</platformCore:name>
+                     </tranPurch:item>
+                     <tranPurch:vendorName>Vendor Name</tranPurch:vendorName>
+                     <tranPurch:line>1</tranPurch:line>
+                     <tranPurch:quantity>1.0</tranPurch:quantity>
+                     <tranPurch:units internalId="7" xmlns:platformCore="urn:core_2019_2.platform.webservices.netsuite.com">
+                        <platformCore:name>Bx</platformCore:name>
+                     </tranPurch:units>
+                     <tranPurch:description>400 Watt Power Supply 1</tranPurch:description>
+                     <tranPurch:taxCode internalId="1009" xmlns:platformCore="urn:core_2019_2.platform.webservices.netsuite.com">
+                        <platformCore:name>VAT_PE:S-PE</platformCore:name>
+                     </tranPurch:taxCode>
+                     <tranPurch:taxRate1>18.0</tranPurch:taxRate1>
+                     <tranPurch:grossAmt>12.61</tranPurch:grossAmt>
+                     <tranPurch:tax1Amt>1.93</tranPurch:tax1Amt>
+                     <tranPurch:rate>10.68249258</tranPurch:rate>
+                     <tranPurch:amount>10.68</tranPurch:amount>
+                     <tranPurch:location internalId="6" xmlns:platformCore="urn:core_2019_2.platform.webservices.netsuite.com">
+                        <platformCore:name>Lima</platformCore:name>
+                     </tranPurch:location>
+                     <tranPurch:isBillable>false</tranPurch:isBillable>
+                     <tranPurch:customFieldList xmlns:platformCore="urn:core_2019_2.platform.webservices.netsuite.com">
+                        <platformCore:customField internalId="5030" scriptId="custcol_4601_witaxapplies" xsi:type="platformCore:BooleanCustomFieldRef">
+                           <platformCore:value>false</platformCore:value>
+                        </platformCore:customField>
+                        <platformCore:customField internalId="8716" scriptId="custcol_lmry_monto_iva_no_recup_cl" xsi:type="platformCore:DoubleCustomFieldRef">
+                           <platformCore:value>6.6</platformCore:value>
+                        </platformCore:customField>
+                        <platformCore:customField internalId="8776" scriptId="custcol_lmry_ar_item_tributo" xsi:type="platformCore:BooleanCustomFieldRef">
+                           <platformCore:value>false</platformCore:value>
+                        </platformCore:customField>
+                        <platformCore:customField internalId="30229" scriptId="custcol_lmry_pe_impuesto_renta" xsi:type="platformCore:SelectCustomFieldRef">
+                           <platformCore:value internalId="1" typeId="2565">
+                              <platformCore:name>Actividades de seguro</platformCore:name>
+                           </platformCore:value>
+                        </platformCore:customField>
+                     </tranPurch:customFieldList>
+                  </tranPurch:item>
+               </tranPurch:itemList>
+               <tranPurch:landedCostsList>
+                  <tranPurch:landedCost xmlns:platformCommon="urn:common_2019_2.platform.webservices.netsuite.com">
+                     <platformCommon:category internalId="1" xmlns:platformCore="urn:core_2019_2.platform.webservices.netsuite.com">
+                        <platformCore:name>Landed Cost - Duty</platformCore:name>
+                     </platformCommon:category>
+                  </tranPurch:landedCost>
+                  <tranPurch:landedCost xmlns:platformCommon="urn:common_2019_2.platform.webservices.netsuite.com">
+                     <platformCommon:category internalId="2" xmlns:platformCore="urn:core_2019_2.platform.webservices.netsuite.com">
+                        <platformCore:name>Landed Cost - Freight</platformCore:name>
+                     </platformCommon:category>
+                  </tranPurch:landedCost>
+                  <tranPurch:landedCost xmlns:platformCommon="urn:common_2019_2.platform.webservices.netsuite.com">
+                     <platformCommon:category internalId="36" xmlns:platformCore="urn:core_2019_2.platform.webservices.netsuite.com">
+                        <platformCore:name>Flete</platformCore:name>
+                     </platformCommon:category>
+                  </tranPurch:landedCost>
+               </tranPurch:landedCostsList>
+               <tranPurch:overrideInstallments>false</tranPurch:overrideInstallments>
+               <tranPurch:customFieldList xmlns:platformCore="urn:core_2019_2.platform.webservices.netsuite.com">
+                  <platformCore:customField internalId="8993" scriptId="custbody_lmry_monto_retencion_igv" xsi:type="platformCore:DoubleCustomFieldRef">
+                     <platformCore:value>6.6</platformCore:value>
+                  </platformCore:customField>
+                  <platformCore:customField internalId="24172" scriptId="custbody_sii_not_reported_in_time" xsi:type="platformCore:BooleanCustomFieldRef">
+                     <platformCore:value>false</platformCore:value>
+                  </platformCore:customField>
+                  <platformCore:customField internalId="9358" scriptId="custbody_mx_operation_type" xsi:type="platformCore:SelectCustomFieldRef">
+                     <platformCore:value internalId="3" typeId="1222">
+                        <platformCore:name>Others</platformCore:name>
+                     </platformCore:value>
+                  </platformCore:customField>
+                  <platformCore:customField internalId="8992" scriptId="custbody_lmry_pe_metodo_pago_sunat" xsi:type="platformCore:SelectCustomFieldRef">
+                     <platformCore:value internalId="1" typeId="1027">
+                        <platformCore:name>DEPOSITO EN CUENTA</platformCore:name>
+                     </platformCore:value>
+                  </platformCore:customField>
+                  <platformCore:customField internalId="30390" scriptId="custbody_lmry_include_item" xsi:type="platformCore:BooleanCustomFieldRef">
+                     <platformCore:value>false</platformCore:value>
+                  </platformCore:customField>
+                  <platformCore:customField internalId="220" scriptId="custbody_powf_ctrl_ok" xsi:type="platformCore:BooleanCustomFieldRef">
+                     <platformCore:value>false</platformCore:value>
+                  </platformCore:customField>
+                  <platformCore:customField internalId="700" scriptId="custbody11" xsi:type="platformCore:BooleanCustomFieldRef">
+                     <platformCore:value>false</platformCore:value>
+                  </platformCore:customField>
+                  <platformCore:customField internalId="8890" scriptId="custbody_lmry_wtax_amount" xsi:type="platformCore:DoubleCustomFieldRef">
+                     <platformCore:value>0.0</platformCore:value>
+                  </platformCore:customField>
+                  <platformCore:customField internalId="8865" scriptId="custbody_lmry_apply_wht_code" xsi:type="platformCore:BooleanCustomFieldRef">
+                     <platformCore:value>true</platformCore:value>
+                  </platformCore:customField>
+                  <platformCore:customField internalId="8812" scriptId="custbody_lmry_transaction_type_doc" xsi:type="platformCore:SelectCustomFieldRef">
+                     <platformCore:value internalId="9" typeId="1153">
+                        <platformCore:name>Comprobante de No Domiciliado</platformCore:name>
+                     </platformCore:value>
+                  </platformCore:customField>
+                  <platformCore:customField internalId="223" scriptId="custbody_powf_se_ok" xsi:type="platformCore:BooleanCustomFieldRef">
+                     <platformCore:value>false</platformCore:value>
+                  </platformCore:customField>
+                  <platformCore:customField internalId="8797" scriptId="custbody_lmry_subsidiary_country" xsi:type="platformCore:SelectCustomFieldRef">
+                     <platformCore:value internalId="174" typeId="-159">
+                        <platformCore:name>Peru</platformCore:name>
+                     </platformCore:value>
+                  </platformCore:customField>
+                  <platformCore:customField internalId="8870" scriptId="custbody_lmry_concepto_detraccion" xsi:type="platformCore:SelectCustomFieldRef">
+                     <platformCore:value internalId="12" typeId="985">
+                        <platformCore:name>SIN DETRACCIÓN</platformCore:name>
+                     </platformCore:value>
+                  </platformCore:customField>
+                  <platformCore:customField internalId="8799" scriptId="custbody_lmry_serie_doc_cxp" xsi:type="platformCore:StringCustomFieldRef">
+                     <platformCore:value>34545654</platformCore:value>
+                  </platformCore:customField>
+                  <platformCore:customField internalId="24171" scriptId="custbody_sii_article_72_73" xsi:type="platformCore:BooleanCustomFieldRef">
+                     <platformCore:value>false</platformCore:value>
+                  </platformCore:customField>
+                  <platformCore:customField internalId="8829" scriptId="custbody_lmry_paymentmethod" xsi:type="platformCore:SelectCustomFieldRef">
+                     <platformCore:value internalId="101" typeId="1117">
+                        <platformCore:name>PE - DEPÓSITO EN CUENTA</platformCore:name>
+                     </platformCore:value>
+                  </platformCore:customField>
+                  <platformCore:customField internalId="8891" scriptId="custbody_lmry_wbase_amount" xsi:type="platformCore:DoubleCustomFieldRef">
+                     <platformCore:value>0.0</platformCore:value>
+                  </platformCore:customField>
+                  <platformCore:customField internalId="4803" scriptId="custbody_cash_register" xsi:type="platformCore:BooleanCustomFieldRef">
+                     <platformCore:value>false</platformCore:value>
+                  </platformCore:customField>
+                  <platformCore:customField internalId="8886" scriptId="custbody_lmry_porcentaje_detraccion" xsi:type="platformCore:DoubleCustomFieldRef">
+                     <platformCore:value>0.0</platformCore:value>
+                  </platformCore:customField>
+                  <platformCore:customField internalId="8841" scriptId="custbody_lmry_carga_inicial" xsi:type="platformCore:BooleanCustomFieldRef">
+                     <platformCore:value>false</platformCore:value>
+                  </platformCore:customField>
+                  <platformCore:customField internalId="8821" scriptId="custbody_lmry_document_type" xsi:type="platformCore:SelectCustomFieldRef">
+                     <platformCore:value internalId="354" typeId="1145">
+                        <platformCore:name>Comprobante de No Domiciliado</platformCore:name>
+                     </platformCore:value>
+                  </platformCore:customField>
+                  <platformCore:customField internalId="8800" scriptId="custbody_lmry_num_preimpreso" xsi:type="platformCore:StringCustomFieldRef">
+                     <platformCore:value>209</platformCore:value>
+                  </platformCore:customField>
+                  <platformCore:customField internalId="41969" scriptId="custbody_lmry_bo_is_config_vendor" xsi:type="platformCore:BooleanCustomFieldRef">
+                     <platformCore:value>false</platformCore:value>
+                  </platformCore:customField>
+                  <platformCore:customField internalId="4799" scriptId="custbody_nondeductible_processed" xsi:type="platformCore:BooleanCustomFieldRef">
+                     <platformCore:value>false</platformCore:value>
+                  </platformCore:customField>
+               </tranPurch:customFieldList>
+            </record>
+         </readResponse>
+      </getResponse>
+   </soapenv:Body>
+</soapenv:Envelope>
