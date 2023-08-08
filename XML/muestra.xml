@@ -1,0 +1,271 @@
+<Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<Header>
+		<applicationInfo>
+			<applicationId>
+				B8C3341B-2398-469D-BA64-97DCA6A76A89
+			</applicationId>
+		</applicationInfo>
+		<passport>
+			<email>
+				giussepe@latamready.com
+			</email>
+			<password>
+				Codigomorse01LatamReady
+			</password>
+			<account>
+				tstdrv1774174
+			</account>
+			<!-- Optional: -->
+			<role internalId="3">
+			</role>
+		</passport>
+	</Header>
+	<Body>
+        
+		<add xmlns="urn:messages_2019_2.platform.webservices.netsuite.com">
+			<record xsi:type="tranPurch:VendorBill" xmlns:tranPurch="urn:purchases_2019_2.transactions.webservices.netsuite.com">
+				<createdDate>
+					2023-08-08T10:00:00.000-07:00
+				</createdDate>
+				<customForm internalId="50">
+					<name>
+						Standard Vendor Bill
+					</name>
+				</customForm>
+				<billAddressList internalId="255225">
+					<name>
+						Av. Callecita
+					</name>
+				</billAddressList>
+				<account internalId="25">
+					<name>
+						2000 Accounts Payable T
+					</name>
+				</account>
+				<entity internalId="8555">
+					<name>
+						1475 !“#$%&amp;/(VeÑdor Perú 123)=\-+/*ªº
+					</name>
+				</entity>
+				<subsidiary internalId="5">
+					<name>
+						HoneyComb PE
+					</name>
+				</subsidiary>
+				<approvalStatus internalId="2">
+					<name>
+						Approved
+					</name>
+				</approvalStatus>
+				<vatRegNum>
+					20553157286
+				</vatRegNum>
+				<postingPeriod internalId="668">
+					<name>
+						Jul 2020
+					</name>
+				</postingPeriod>
+				<tranDate>
+					2020-07-09T22:00:00.000-07:00
+				</tranDate>
+				<currencyName>
+					Dolares Americanos
+				</currencyName>
+				<billingAddress>
+					<country>
+						_peru
+					</country>
+					<addressee>
+						!“#$%&amp;/(VeÑdor Perú 123)=\-+/*ªº
+					</addressee>
+					<addr1>
+						Av. Callecita
+					</addr1>
+					<addr2>
+						Nro 123
+					</addr2>
+					<city>
+						Lima
+					</city>
+					<state>
+						Perú
+					</state>
+					<zip>
+						051
+					</zip>
+					<addrText>
+						!“#$%&amp;/(VeÑdor Perú 123)=\-+/*ªº Av. Callecita Nro 123 Lima Perú 051 Peru
+					</addrText>
+					<override>
+						false
+					</override>
+				</billingAddress>
+				<exchangeRate>
+					3.37
+				</exchangeRate>
+				<dueDate>
+					2020-07-09T22:00:00.000-07:00
+				</dueDate>
+				<tranId>
+					CO 34545654-211
+				</tranId>
+				<userTotal>
+					12.61
+				</userTotal>
+				<taxTotal>
+					1.93
+				</taxTotal>
+				<paymentHold>
+					false
+				</paymentHold>
+				<currency internalId="1">
+					<name>
+						Dolares Americanos
+					</name>
+				</currency>
+				<status>
+					Paid In Full
+				</status>
+				<landedCostMethod>
+					_weight
+				</landedCostMethod>
+				<landedCostPerLine>
+					false
+				</landedCostPerLine>
+				<transactionNumber>
+					37268
+				</transactionNumber>
+				<accountingBookDetailList>
+					<accountingBookDetail>
+						<accountingBook internalId="4">
+							<name>
+								Local (Prueba)
+							</name>
+						</accountingBook>
+						<currency internalId="5">
+							<name>
+								NUEVO SOL
+							</name>
+						</currency>
+						<exchangeRate>
+							3.37
+						</exchangeRate>
+					</accountingBookDetail>
+					<accountingBookDetail>
+						<accountingBook internalId="2">
+							<name>
+								USGAAP
+							</name>
+						</accountingBook>
+						<currency internalId="1">
+							<name>
+								Dolares Americanos
+							</name>
+						</currency>
+						<exchangeRate>
+							1.0
+						</exchangeRate>
+					</accountingBookDetail>
+				</accountingBookDetailList>
+				<itemList>
+					<item>
+						<item internalId="387">
+							<name>
+								ACC00001
+							</name>
+						</item>
+						<vendorName>
+							Vendor Name
+						</vendorName>
+						<line>
+							1
+						</line>
+						<quantity>
+							1.0
+						</quantity>
+						<units internalId="7">
+							<name>
+								Bx
+							</name>
+						</units>
+						<description>
+							400 Watt Power Supply 1
+						</description>
+						<taxCode internalId="1009">
+							<name>
+								VAT_PE:S-PE
+							</name>
+						</taxCode>
+						<taxRate1>
+							18.0
+						</taxRate1>
+						<grossAmt>
+							12.61
+						</grossAmt>
+						<tax1Amt>
+							1.93
+						</tax1Amt>
+						<rate>
+							10.68249258
+						</rate>
+						<amount>
+							10.68
+						</amount>
+						<location internalId="6">
+							<name>
+								Lima
+							</name>
+						</location>
+						<isBillable>
+							false
+						</isBillable>
+						<customFieldList>
+							<customField internalId="5030" xsi:type="platformCore:BooleanCustomFieldRef">
+								<value>
+									false
+								</value>
+							</customField>
+							<customField internalId="8716" xsi:type="platformCore:DoubleCustomFieldRef">
+								<value>
+									6.6
+								</value>
+							</customField>
+							<!-- Otros campos personalizados aquí -->
+						</customFieldList>
+					</item>
+				</itemList>
+				<landedCostsList>
+					<landedCost>
+						<category internalId="1">
+							<name>
+								Landed Cost - Duty
+							</name>
+						</category>
+					</landedCost>
+					<landedCost>
+						<category internalId="2">
+							<name>
+								Landed Cost - Freight
+							</name>
+						</category>
+					</landedCost>
+					<landedCost>
+						<category internalId="36">
+							<name>
+								Flete
+							</name>
+						</category>
+					</landedCost>
+				</landedCostsList>
+				<customFieldList>
+					<customField internalId="8993" xsi:type="platformCore:DoubleCustomFieldRef">
+						<value>
+							6.6
+						</value>
+					</customField>
+					<!-- Otros campos personalizados aquí -->
+				</customFieldList>
+			</record>
+		</add>
+	</Body>
+</Envelope>
