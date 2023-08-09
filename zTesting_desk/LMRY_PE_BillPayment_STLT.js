@@ -51,7 +51,7 @@ define(['N/record', 'N/currency', 'N/task', 'N/log', 'N/xml', 'N/ui/serverWidget
                 LblCur: 'Moneda',
                 LblAPAccount: 'Cuenta A/R',
                 LblBnkAccount: 'Cuenta Bancaria',
-                LblActPrd: 'Priodo Contable',
+                LblActPrd: 'Periodo Contable',
                 LblGroup2: 'Classificación',
                 LblDpt: 'Departmento',
                 LblPyMtd: 'LATAM - Método de Pago',
