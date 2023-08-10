@@ -1139,8 +1139,12 @@ define(['require', './Latam_Library/LMRY_UniversalSetting_Purchase_LBRY', 'N/rec
 
         recordObj = context.newRecord;
         type = context.type;
+        log.error("recordObj",recordObj);
+        log.error("type",type);
+
         var type_interface = runtime.executionContext;
         var form = context.form;
+        log.error("form",form);
         var subsidiary = recordObj.getValue({
           fieldId: 'subsidiary'
         });
@@ -1199,12 +1203,18 @@ define(['require', './Latam_Library/LMRY_UniversalSetting_Purchase_LBRY', 'N/rec
          * Modificacion - Integracion Kofax autoseteo campos cabecera para generacion de retenciones
          */
         var type_interface = runtime.executionContext;
+        log.error("type_interface w",type_interface);
         if ((type == 'create') && type_interface != 'USERINTERFACE') {
           if (["AR", "CO", "PE", "MX", "CL", "PA"].indexOf(LMRY_Result[0]) != -1) {
             require(["./Latam_Library/LMRY_KofaxIntegrations_LBRY_V2.0", './Latam_Library/LMRY_TranID_CSV_LBRY_V2.0.js'],
               function(kofaxModule, csvModule) {
+                log.debug("Execute Library","true");
+                log.debug("kofaxModule",kofaxModule);
                 kofaxModule.SetCustomField_WHT_Code_VB(recordObj, LMRY_Result, licenses);
+                log.debug("END MSG","kofax");
+                
                 recordObj.setValue("custbody_lmry_apply_wht_code", true);
+                log.debug("csvModule",csvModule);
                 csvModule.generateTranID(recordObj, LMRY_Result[0], licenses);
               });
           }
@@ -1540,6 +1550,8 @@ define(['require', './Latam_Library/LMRY_UniversalSetting_Purchase_LBRY', 'N/rec
         type = context.type;
         // newRecord = Referencia al registro
         recordObj = context.newRecord;
+        log.error("recordObj [afterSubmit]",recordObj);
+        log.error("type [afterSubmit]",type);
         // id = Internal ID de la transaccion
         var LMRY_Intern = recordObj.id;
         // form = Formulario en ejecucion

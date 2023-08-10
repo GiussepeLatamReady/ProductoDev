@@ -4,9 +4,9 @@
  * @NModuleScope Public
  * @Name LMRY_KofaxIntegrations_LBRY_V2.0.js
  */
-define(['N/search', 'N/runtime', 'N/https', 'N/url', './LMRY_libSendingEmailsLBRY_V2.0'],
+define(['N/search', 'N/runtime', 'N/https', 'N/url', './LMRY_libSendingEmailsLBRY_V2.0', 'N/log'],
 
-    function (search, runtime, https, url, library) {
+    function (search, runtime, https, url, library,log) {
         /**
          *
          * @param {Record} recordObj
@@ -16,6 +16,7 @@ define(['N/search', 'N/runtime', 'N/https', 'N/url', './LMRY_libSendingEmailsLBR
          */
         function SetCustomField_WHT_Code_VC(recordObj, LMRY_countr, licenses) {
             try {
+                
                 // Solo para subsidiria de Bolivia, Colombia y Paraguay
                 if (LMRY_countr[0] != 'BO' && LMRY_countr[0] != 'CO' && LMRY_countr[0] != 'PY') {
                     return true;
@@ -322,6 +323,8 @@ define(['N/search', 'N/runtime', 'N/https', 'N/url', './LMRY_libSendingEmailsLBR
          */
         function SetCustomField_WHT_Code_VB(recordObj, LMRY_countr, licenses) {
             try {
+                log.error("[SetCustomField_WHT_Code_VC]","START");
+                log.debug("[SetCustomField_WHT_Code_VC]","START");
                 // Solo para subsidiria de Bolivia, Colombia, Paraguay y Ecuador
                 if (LMRY_countr[0] != 'BO' && LMRY_countr[0] != 'CO' && LMRY_countr[0] != 'PY' && LMRY_countr[0] != 'EC') {
                     return true;
