@@ -138,12 +138,11 @@ define(['N/log', './LMRY_libSendingEmailsLBRY_V2.0', 'N/search', 'N/runtime', '.
           if (!libraryVaTranId.validateTranID(recordObj, LMRY_countr, licenses)) {
             return false;
           }
-
         }
         log.debug('[generateTranID]', 'END');
       } catch (error) {
-        log.error('generateTranID', error);
-        libraryMail.sendemail('[generateTranID] ' + error, LMRY_script);
+        log.error('generateTranID error', error);
+        //libraryMail.sendemail('[generateTranID] ' + error, LMRY_script);
       }
       return true;
     }

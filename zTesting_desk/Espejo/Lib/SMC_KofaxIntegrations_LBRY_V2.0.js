@@ -323,12 +323,13 @@ define(['N/search', 'N/runtime', 'N/https', 'N/url', './LMRY_libSendingEmailsLBR
          */
         function SetCustomField_WHT_Code_VB(recordObj, LMRY_countr, licenses) {
             try {
-                log.debug("[SetCustomField_WHT_Code_VC]","START");
+                log.error("[SetCustomField_WHT_Code_VC]","START");
                 // Solo para subsidiria de Bolivia, Colombia, Paraguay y Ecuador
                 if (LMRY_countr[0] != 'BO' && LMRY_countr[0] != 'CO' && LMRY_countr[0] != 'PY' && LMRY_countr[0] != 'EC') {
                     return true;
                 }
-
+                log.error("[SetCustomField_WHT_Code_VC] LMRY_countr[2]",LMRY_countr[2]);
+                log.error("[SetCustomField_WHT_Code_VC] LMRY_countr",LMRY_countr);
                 if (LMRY_countr[2] == false) {
                     return true;
                 }
@@ -439,6 +440,8 @@ define(['N/search', 'N/runtime', 'N/https', 'N/url', './LMRY_libSendingEmailsLBR
                 if (lmry_entity != '' && lmry_entity != null) {
                     // Solo para subsidiria de Bolivia
                     if (LMRY_countr[0] == 'BO') {
+                        log.error("[SetCustomField_WHT_Code_VC] Proceso bolivia",LMRY_countr[0]);
+                        log.error("[SetCustomField_WHT_Code_VC] 46",library.getAuthorization(46, licenses));
                         if (library.getAuthorization(46, licenses)) {
                             // Seteo de campos
                             var rec_entity = search.lookupFields({
@@ -472,6 +475,8 @@ define(['N/search', 'N/runtime', 'N/https', 'N/url', './LMRY_libSendingEmailsLBR
                         }
                     } // Solo para subsidiria de Colombia
                     else if (LMRY_countr[0] == 'CO') {
+                        log.error("[SetCustomField_WHT_Code_VC] Proceso Colombia",LMRY_countr[0]);
+                        log.error("[SetCustomField_WHT_Code_VC] 27",library.getAuthorization(27, licenses));
                         if (library.getAuthorization(27, licenses)) {
                             // Seteo de campos
                             var rec_entity = search.lookupFields({
@@ -527,6 +532,8 @@ define(['N/search', 'N/runtime', 'N/https', 'N/url', './LMRY_libSendingEmailsLBR
                         }
                     } // Solo para subsidiria de Paraguay
                     else if (LMRY_countr[0] == 'PY') {
+                        log.error("[SetCustomField_WHT_Code_VC] Proceso Paraguay",LMRY_countr[0]);
+                        log.error("[SetCustomField_WHT_Code_VC] 47",library.getAuthorization(47, licenses));
                         var auth = library.getAuthorization(47, licenses);
                         if (auth == true || auth == 'T') {
                             // Seteo de campos
@@ -559,6 +566,8 @@ define(['N/search', 'N/runtime', 'N/https', 'N/url', './LMRY_libSendingEmailsLBR
                         }
                     } // Solo para subsidiria de Ecuador
                     else if (LMRY_countr[0] == 'EC') {
+                        log.error("[SetCustomField_WHT_Code_VC] Proceso Paraguay",LMRY_countr[0]);
+                        log.error("[SetCustomField_WHT_Code_VC] 41",library.getAuthorization(41, licenses));
                         if (library.getAuthorization(41, licenses)) {
                             // Seteo de campos
                             var rec_entity = search.lookupFields({
@@ -590,9 +599,10 @@ define(['N/search', 'N/runtime', 'N/https', 'N/url', './LMRY_libSendingEmailsLBR
                         }
                     }
                 }
-                log.debug("[SetCustomField_WHT_Code_VC]","END");
+                log.error("[SetCustomField_WHT_Code_VC]","END");
             } catch (err) {
-                library.sendemail2(' [ SetCustomField_WHT_Code_VB ] ' + err, LMRY_script, recordObj, 'transactionnumber', 'entity');
+                log.error("[SetCustomField_WHT_Code_VC] error",err);
+                //library.sendemail2(' [ SetCustomField_WHT_Code_VB ] ' + err, LMRY_script, recordObj, 'transactionnumber', 'entity');
             }
 
             return true;
