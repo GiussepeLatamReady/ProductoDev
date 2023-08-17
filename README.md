@@ -26,6 +26,14 @@ Se está presentando que cuando se integran los documentos tipo bill mediante el
 - 	id: customscript_smc_features_subsi_stlt
 - 	File: SMC_Features_Subsi_STLT_V2.0.js
 
+customscript_lmry_features_subsi_stlt
+
+
+## FEATURES
+
+Strict Bill Duplicity
+Strict Bill Credit Duplicity
+
     
 
 
