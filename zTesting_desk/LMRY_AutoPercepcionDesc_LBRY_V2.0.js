@@ -611,32 +611,52 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
      *         por total
      * ************************************************ */
     function logicaDescuentos(invoiceRecord, numLines) {
-      var pos = 0;
-      var trantype = '';
+      try {
+        var pos = 0;
+        var trantype = '';
+        var posgroup = 0;
+        // Begin for
+        for (var i = 1; i < numLines && numLines > 1; i++) {
+          var type_anterior = invoiceRecord.getSublistValue('item', 'itemtype', i - 1);
+          var type_actual = invoiceRecord.getSublistValue('item', 'itemtype', i);
 
-      // Begin for
-      for (var i = 1; i < numLines && numLines > 1; i++) {
-        type_anterior = invoiceRecord.getSublistValue('item', 'itemtype', i - 1);
-        type_actual = invoiceRecord.getSublistValue('item', 'itemtype', i);
+          // log.debug("Line : " + i + " - type_anterior : " + type_anterior, "type_actual : " + type_actual);
 
-        // Discount
-        if (type_actual == "Discount" && type_anterior != "Discount") {
-
-          log.debug("logicaDescuentos : " + i, 'Suma Descuentos');
-
-          disc_amount = invoiceRecord.getSublistValue('item', 'amount', i);
-
-          // Valida que el campo Latam Col - Sales Discount este vacio
-          var SaleDisc = invoiceRecord.getSublistValue('item', 'custcol_lmry_col_sales_discount', i - 1);
-
-          log.debug("logicaDescuentos : " + i, 'SaleDisc : ' + SaleDisc);
-          if (SaleDisc=='' || SaleDisc==null){
-            invoiceRecord.setSublistValue('item', 'custcol_lmry_col_sales_discount', i - 1, Math.abs(disc_amount));            
+          // Guarda la posicion inicial del ItemGroup
+          if (type_actual == "Group") {
+            posgroup = i;
           }
 
-        } // Discount
-      } // End for
+          // Discount
+          if (type_actual == "Discount" && type_anterior != "Discount") {
+            var disc_amount = invoiceRecord.getSublistValue('item', 'amount', i);
 
+            // 2023-07-18 : Solo actualiza si la linea anterior no es un EndGroup
+            // log.debug("Line : " + i + " - logicaDescuentos : ", 'SaleDisc : ' + disc_amount);
+            if (type_anterior != "EndGroup") {
+              // Valida que el campo Latam Col - Sales Discount este vacio
+              var SaleDisc = invoiceRecord.getSublistValue('item', 'custcol_lmry_col_sales_discount', i - 1);
+              if (SaleDisc == '' || SaleDisc == null) {
+                invoiceRecord.setSublistValue('item', 'custcol_lmry_col_sales_discount', i - 1, Math.abs(disc_amount));
+              }
+            } else {
+              // Actualiza la linea principal del ItemGroup
+              // log.debug("Group : ", 'Pos : ' + posgroup);
+              if (posgroup != -1) {
+                // Valida que el campo Latam Col - Sales Discount este vacio
+                var SaleDisc = invoiceRecord.getSublistValue('item', 'custcol_lmry_col_sales_discount', posgroup);
+                if (SaleDisc == '' || SaleDisc == null) {
+                  invoiceRecord.setSublistValue('item', 'custcol_lmry_col_sales_discount', posgroup, Math.abs(disc_amount));
+                }
+                posgroup = -1;
+              }
+            } // EndGroup
+          } // Discount
+        } // End for
+      } catch (errmsg) {
+        // Envio de mail con errores
+        LibraryMail.sendemail('[ logicaDescuentos ] ' + errmsg, Name_script);
+      }
     }
 
     /**************************************************************

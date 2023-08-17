@@ -13,19 +13,19 @@
 ||  2.0     1 oct 2018  LatamReady    Use Script 2.0            ||
  \= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = */
 define(['N/config', 'N/currency', 'N/record', 'N/runtime', 'N/search', 'N/ui/serverWidget',
-    'N/log', './Latam_Library/LMRY_libSendingEmailsLBRY_V2.0',
-    './Latam_Library/LMRY_HideViewLBRY_V2.0', './WTH_Library/LMRY_TAX_TransactionLBRY_V2.0',
-    './Latam_Library/LMRY_HideView3LBRY_V2.0', './Latam_Library/LMRY_SalesOrderButtonLBRY_V2.0',
-    './Latam_Library/LMRY_GLImpact_LBRY_V2.0', './Latam_Library/LMRY_PE_MapAndSaveFields_LBRY_v2.0',
-    './WTH_Library/LMRY_MX_TAX_Withholding_LBRY_V2.0', './Latam_Library/LMRY_BR_UPDATE_Flete_Transaction_Field_LBRY_2.0',
-    './Latam_Library/LMRY_MX_STE_Sales_Tax_Transaction_LBRY_V2.0',
-    './Latam_Library/LMRY_Custom_ExchangeRate_Field_LBRY_V2.0.js','./WTH_Library/LMRY_AutoPercepcionDesc_LBRY_V2.0'
-  ],
+  'N/log', './Latam_Library/LMRY_libSendingEmailsLBRY_V2.0',
+  './Latam_Library/LMRY_HideViewLBRY_V2.0', './WTH_Library/LMRY_TAX_TransactionLBRY_V2.0',
+  './Latam_Library/LMRY_HideView3LBRY_V2.0', './Latam_Library/LMRY_SalesOrderButtonLBRY_V2.0',
+  './Latam_Library/LMRY_GLImpact_LBRY_V2.0', './Latam_Library/LMRY_PE_MapAndSaveFields_LBRY_v2.0',
+  './WTH_Library/LMRY_MX_TAX_Withholding_LBRY_V2.0', './Latam_Library/LMRY_BR_UPDATE_Flete_Transaction_Field_LBRY_2.0',
+  './Latam_Library/LMRY_MX_STE_Sales_Tax_Transaction_LBRY_V2.0',
+  './Latam_Library/LMRY_Custom_ExchangeRate_Field_LBRY_V2.0.js', './WTH_Library/LMRY_AutoPercepcionDesc_LBRY_V2.0'
+],
 
-  function(config, currencyModule, record, runtime, search, serverWidget, log,
+  function (config, currencyModule, record, runtime, search, serverWidget, log,
     Library_Mail, Library_HideView, Library_WHT_Transaction, library_hideview3,
     library_SalesOrder, libraryGLImpact, PE_libMapTransactions, libraryTaxWithholding, libraryFleteGlobales,
-    MX_STE_TaxLibrary, Library_ExchangeRate_Field,Library_AutoPercepcionDesc) {
+    MX_STE_TaxLibrary, Library_ExchangeRate_Field, Library_AutoPercepcionDesc) {
 
     var LMRY_script = 'LMRY Record Sales URET V2.0';
     var OBJ_FORM = '';
@@ -149,8 +149,8 @@ define(['N/config', 'N/currency', 'N/record', 'N/runtime', 'N/search', 'N/ui/ser
           // recordObj => OBJ_FORM (17/09/2021)
           if (Library_Mail.getAuthorization(552, licenses)) {
             var whtamount = parseFloat(RCD_OBJ.getValue({
-                fieldId: 'custbody_lmry_co_reteica_amount'
-              })) +
+              fieldId: 'custbody_lmry_co_reteica_amount'
+            })) +
               parseFloat(RCD_OBJ.getValue({
                 fieldId: 'custbody_lmry_co_reteiva_amount'
               })) +
@@ -383,19 +383,19 @@ define(['N/config', 'N/currency', 'N/record', 'N/runtime', 'N/search', 'N/ui/ser
             type: 'customrecord_lmry_currency_by_country',
             columns: ['custrecord_lmry_currency'],
             filters: [{
-                name: 'custrecord_lmry_currency_country_local',
-                operator: 'is',
-                values: countrySO
-              }, {
-                name: 'custrecord_lmry_is_country_base_currency',
-                operator: 'is',
-                values: 'T'
-              },
-              {
-                name: 'isinactive',
-                operator: 'is',
-                values: 'F'
-              }
+              name: 'custrecord_lmry_currency_country_local',
+              operator: 'is',
+              values: countrySO
+            }, {
+              name: 'custrecord_lmry_is_country_base_currency',
+              operator: 'is',
+              values: 'T'
+            },
+            {
+              name: 'isinactive',
+              operator: 'is',
+              values: 'F'
+            }
             ]
           });
 
@@ -542,8 +542,8 @@ define(['N/config', 'N/currency', 'N/record', 'N/runtime', 'N/search', 'N/ui/ser
               RCD_OBJ.setValue(fieldRateUF, parseFloat(rateUF));
 
               for (var i = 0; i < RCD_OBJ.getLineCount({
-                  sublistId: 'item'
-                }); i++) {
+                sublistId: 'item'
+              }); i++) {
 
                 var amountUF = RCD_OBJ.getSublistValue({
                   sublistId: 'item',
@@ -592,7 +592,7 @@ define(['N/config', 'N/currency', 'N/record', 'N/runtime', 'N/search', 'N/ui/ser
           libraryTaxWithholding.resetLines(RCD_OBJ);
         }
 
-        if (LMRY_countr[0]=='AR') {
+        if (LMRY_countr[0] == 'AR') {
           Library_AutoPercepcionDesc.removePerceptionLines(RCD_OBJ);
         }
 
@@ -657,15 +657,51 @@ define(['N/config', 'N/currency', 'N/record', 'N/runtime', 'N/search', 'N/ui/ser
           log.debug("id_delete", id_delete);
           libraryTaxWithholding._inactiveRelatedRecord(id_delete);
         }
+        var type = RCD_OBJ.getValue('baserecordtype');
+        if (LMRY_countr[0] == 'CL' && type == 'salesorder') {
+          //BUSQUEDA PARA LLENADO DE CAMPOS AUTOMATICOS PARA FACTURACION
+          var jsonTxCode = {}
+          var searchTxCode = search.create({
+            type: "customrecord_lmry_taxtype_by_invoicingid",
+            filters: [
+              ["custrecord_lmry_taxtype_country", "anyof", "45"],
+              "AND",
+              ["isinactive", "is", "F"]
+            ],
+            columns: [
+              search.createColumn({
+                name: "custrecord_lmry_tax_code_invid",
+                label: "Latam - Tax Code by Inv ID"
+              }),
+              search.createColumn({
+                name: "custrecord_lmry_inv_id",
+                label: "Latam - Invoicing ID"
+              })
+            ]
+          });
+          var runSearch = searchTxCode.run().getRange(0, 1000);
+          for (var i = 0; i < runSearch.length; i++) {
+            var columns = runSearch[i].columns
+            jsonTxCode[runSearch[i].getValue(columns[0])] = runSearch[i].getValue(columns[1]);
+          }
+          var lineas = RCD_OBJ.getLineCount("item")
+          for (var i = 0; i < lineas; i++) {
+            var txcode = RCD_OBJ.getSublistValue("item", "taxcode", i);
+            var inviden = RCD_OBJ.getSublistValue("item", "custcol_lmry_invoicing_id", i);
+            if (jsonTxCode[txcode] && !inviden) {
+              RCD_OBJ.setSublistValue("item", "custcol_lmry_invoicing_id", i, jsonTxCode[txcode])
+            }
+          }
+        }
 
         var LMRY_Result = ValidateAccessTransaction(RCD_OBJ);
         if (scriptContext.type != 'delete') {
           // Para todos los paises que tengan acceso
           log.debug('LMRY_Result', LMRY_Result);
-          if (LMRY_Result[2] == true && RCD_OBJ.getValue({fieldId: 'memo'}) != 'VOID') { 
-              /*************************************
-             * Auto Percepcions para Argentina,
-             *************************************/
+          if (LMRY_Result[2] == true && RCD_OBJ.getValue({ fieldId: 'memo' }) != 'VOID') {
+            /*************************************
+           * Auto Percepcions para Argentina,
+           *************************************/
             var swAutoPe = false;
             if (LMRY_Result[0] == 'AR') {
               swAutoPe = Library_Mail.getAuthorization(142, licenses);
@@ -683,7 +719,7 @@ define(['N/config', 'N/currency', 'N/record', 'N/runtime', 'N/search', 'N/ui/ser
 
       } catch (err) {
         Library_Mail.sendemail(' [ beforeSubmit ] ' + err, LMRY_script);
-        log.error('Error',err)
+        log.error('Error', err)
       }
     }
 
@@ -834,7 +870,7 @@ define(['N/config', 'N/currency', 'N/record', 'N/runtime', 'N/search', 'N/ui/ser
         Library_Mail.sendemail2(' [ searchPediments ] ' + err, LMRY_script, RCD_OBJ, 'tranid', 'entity');
       }
     }
-
+    
     function ValidateAccessTransaction(RCD) {
       try {
 
@@ -858,8 +894,6 @@ define(['N/config', 'N/currency', 'N/record', 'N/runtime', 'N/search', 'N/ui/ser
     
       return LMRY_Result;
     }
-
-    
 
     return {
       beforeLoad: beforeLoad,

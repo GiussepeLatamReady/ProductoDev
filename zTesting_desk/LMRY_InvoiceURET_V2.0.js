@@ -93,7 +93,7 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
         var subsidiary = RCD_OBJ.getValue({
           fieldId: 'subsidiary'
         });
-        
+
         if (scriptContext.type != 'print' && scriptContext.type != 'email') {
           licenses = Library_Mail.getLicenses(subsidiary);
           if (licenses == null || licenses == '') {
@@ -111,7 +111,7 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
         var LMRY_Result = ValidateAccessInv(RCD_OBJ.getValue({
           fieldId: 'subsidiary'
         }), OBJ_FORM, true, scriptContext.type);
-        
+
         if (scriptContext.type == 'create' || scriptContext.type == 'copy' || scriptContext.type == 'edit' || scriptContext.type == 'view') {
           if (LMRY_Result[0] === "MX" && Library_Mail.getAuthorization(30, licenses)) {
             Crear_Wht_Rule(RCD_OBJ, scriptContext)
@@ -281,7 +281,6 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
           }
         }
 
-       
 
         if (scriptContext.type != 'print' && scriptContext.type != 'email') {
 
@@ -352,7 +351,6 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
                   break;
               }
             }
-            
 
             if (["copy", "create"].indexOf(scriptContext.type) != -1) {
               var createdFrom = RCD_OBJ.getValue({
@@ -825,7 +823,6 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
         if (LMRY_Result[0]=='AR') {
           Library_AutoPercepcionDesc.removePerceptionLines(RCD_OBJ);
         }
-        
 
       } catch (err) {
         log.error('err', err);
@@ -865,6 +862,28 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
         // Libreria - Valida Periodo cerrado
         if (LibraryValidatePeriod.validatePeriod(RCD.getValue('postingperiod'), licenses, LMRY_Result[0], 'sales')) return true;
         /* Fin validacion 04/02/22 */
+
+        var featuresAfterSavingByCountry = {
+          "AR": 1008,
+          "BR": 1009,
+          "CL": 1010,
+          "CO": 1011,
+          "CR": 1012,
+          "EC": 1013,
+          "GT": 1014,
+          "MX": 1015,
+          "PA": 1016,
+          "PY": 1017,
+          "PE": 1018,
+          "UY": 1019,
+          "DO": 1020,
+          "BO": 1021
+        };
+
+        var featureAfterSaving = false;
+        if (featuresAfterSavingByCountry.hasOwnProperty(LMRY_Result[0])) {
+          featureAfterSaving = Library_Mail.getAuthorization(featuresAfterSavingByCountry[LMRY_Result[0]], licenses);
+        }
 
         // Obtiene la interface que se esta ejecutando
         var type_interface = runtime.executionContext;
@@ -918,8 +937,12 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
             if (type_interface == 'USERINTERFACE') {
               if (RCD.getValue('custpage_uni_set_status') == 'F' && (type_document == '' || type_document == null)) {
                 //Seteo campos cabecera, numero pre impreso y template
-                library_Uni_Setting.automatic_setfield(RCD, false);
-                library_Uni_Setting.set_preimpreso(RCD, LMRY_Result, licenses);
+                if (featureAfterSaving == true || featureAfterSaving == 'T') {
+                  library_Uni_Setting.automatic_setfield(RCD, true);
+                } else {
+                  library_Uni_Setting.automatic_setfield(RCD, false);
+                  library_Uni_Setting.set_preimpreso(RCD, LMRY_Result, licenses);
+                }
                 library_Uni_Setting.set_template(RCD, licenses);
                 RCD.setValue('custpage_uni_set_status', 'T');
               }
@@ -929,8 +952,12 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
               //Check box para controlar el seteo automático en el record anexado
               if ((check_csv == false || check_csv == 'F') && (type_document == '' || type_document == null)) {
                 //Seteo campos cabecera, numero pre impreso y template
-                library_Uni_Setting.automatic_setfield(RCD, false);
-                library_Uni_Setting.set_preimpreso(RCD, LMRY_Result, licenses);
+                if (featureAfterSaving == true || featureAfterSaving == 'T') {
+                  library_Uni_Setting.automatic_setfield(RCD, true);
+                } else {
+                  library_Uni_Setting.automatic_setfield(RCD, false);
+                  library_Uni_Setting.set_preimpreso(RCD, LMRY_Result, licenses);
+                }
                 library_Uni_Setting.set_template(RCD, licenses);
 
                 if (check_csv == 'F') {
@@ -1259,6 +1286,14 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
             }
           }
         }
+        
+        
+        if (LMRY_Result[0] == "CO" && ["create", "edit", "copy"].indexOf(scriptContext.type) != -1) {
+          var percentageDiscount = Library_Mail.getAuthorization(1026, licenses);
+          if (percentageDiscount) {
+            setLineDiscount(RCD);
+          }
+        }
 
         //SETEO DE CAMPOS BASE 0%, 12% Y 14%
         var eventsEC = ['create', 'copy', 'edit'];
@@ -1396,6 +1431,28 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
         if (LibraryValidatePeriod.validatePeriod(RCD.getValue('postingperiod'), licenses, LMRY_Result[0], 'sales')) return true;
         /* Fin validacion 04/02/22 */
 
+        var featuresAfterSavingByCountry = {
+          "AR": 1008,
+          "BR": 1009,
+          "CL": 1010,
+          "CO": 1011,
+          "CR": 1012,
+          "EC": 1013,
+          "GT": 1014,
+          "MX": 1015,
+          "PA": 1016,
+          "PY": 1017,
+          "PE": 1018,
+          "UY": 1019,
+          "DO": 1020,
+          "BO": 1021
+        };
+
+        var featureAfterSaving = false;
+        if (featuresAfterSavingByCountry.hasOwnProperty(LMRY_Result[0])) {
+          featureAfterSaving = Library_Mail.getAuthorization(featuresAfterSavingByCountry[LMRY_Result[0]], licenses);
+        }
+        
         // Tipo de evento del users events
         var type_event = scriptContext.type;
 
@@ -1440,20 +1497,32 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
         } // Sale del proceso si es MAP/REDUCE
 
         //Universal Setting se realiza solo al momento de crear
-        if (type_event == 'create' && (type_interface == 'USERINTERFACE' || type_interface == 'USEREVENT' || type_interface == 'CSVIMPORT') && (ST_FEATURE == false || ST_FEATURE == "F")) {
+        if (type_event == 'create' && ["USERINTERFACE", "USEREVENT", "CSVIMPORT", "RESTWEBSERVICES", "RESTLET", "WEBSERVICES"].indexOf(type_interface) != -1 && (ST_FEATURE == false || ST_FEATURE == "F")) {
           var type_document = RCD.getValue('custbody_lmry_document_type');
 
           if (type_interface == 'USERINTERFACE') {
             //Mediante el custpage se conoce que el seteo de cabecera fue realizado por Universal Setting
             if (RCD.getValue('custpage_uni_set_status') == 'T') {
+
+              if (featureAfterSaving == true || featureAfterSaving == 'T') {
+                if (type_document == '' || type_document == null) {
+                  library_Uni_Setting.automaticSetFieldDocument(RCD);
+                  library_Uni_Setting.set_preimpreso(RCD, LMRY_Result, licenses, true);
+                }
+              }
               //Seteo de campos perteneciente a record anexado
               library_Uni_Setting.automatic_setfieldrecord(RCD);
             }
-          } else if (type_interface == 'CSVIMPORT' || type_interface == 'USEREVENT') {
+          } else if (["USEREVENT", "CSVIMPORT", "RESTWEBSERVICES", "RESTLET", "WEBSERVICES"].indexOf(type_interface) != -1) {
             //Mediante el siguiente campo se conoce si seteo de cabecera fue realizado por Universal Setting
             var check_csv = RCD.getValue('custbody_lmry_scheduled_process');
 
             if (check_csv == 'T' || check_csv == true) {
+
+              if (featureAfterSaving == true || featureAfterSaving == 'T') {
+                library_Uni_Setting.automaticSetFieldDocument(RCD);
+                library_Uni_Setting.set_preimpreso(RCD, LMRY_Result, licenses, true);
+              }
               //Seteo de campos perteneciente a record anexado
               library_Uni_Setting.automatic_setfieldrecord(RCD);
 
@@ -2797,6 +2866,10 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
           whtTaxRateGlobal = "";
         }
 
+        if (whtAppliesTo == "T" || whtAppliesTo == true) {
+          whtTaxAmount = round2(Math.abs(whtBaseAmount) * parseFloat(whtTaxRateGlobal) / 100);
+        }
+
         var whtTaxName = "";
         if (Number(whtTaxCodeGlobal)) {
           whtTaxName = search.lookupFields({
@@ -2984,7 +3057,37 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
       }
 
     }
+   
 
+    /**
+     * Function that establishes the value of the unit price applied the discount and the percentage of this discount.
+     */
+
+    function setLineDiscount(recordObj){
+      try {        
+        var numberItems = recordObj.getLineCount({ sublistId: "item" });
+        var totalDiscountPercentage = 0;
+        if (numberItems) {
+          for (var i = numberItems - 1; i >= 0; i--) {
+            var itemType = recordObj.getSublistValue({ sublistId: "item", fieldId: "itemtype", line: i });
+            var rate = recordObj.getSublistValue({ sublistId: "item", fieldId: "rate", line: i });            
+            if (itemType == 'Discount') {
+              totalDiscountPercentage += rate;
+            } else {              
+              recordObj.setSublistValue({ sublistId: "item", fieldId: "custcol_lmry_sales_discount_percentag", value: Math.abs(totalDiscountPercentage), line: i });
+              rate *= (1 - Math.abs(totalDiscountPercentage) / 100);
+              recordObj.setSublistValue({ sublistId: "item", fieldId: "custcol_lmry_sales_discount_unit_real", value: Math.abs(rate), line: i });
+
+              totalDiscountPercentage = 0;
+            }
+          }
+        }
+      } catch (err) {
+        log.error('Error [setLineDiscount]', err);
+        Library_Mail.sendemail2(' [ setLineDiscount ] ' + err, LMRY_script, RCD_OBJ, 'tranid', 'entity');
+      }
+  }
+  
 
     return {
       beforeLoad: beforeLoad,
