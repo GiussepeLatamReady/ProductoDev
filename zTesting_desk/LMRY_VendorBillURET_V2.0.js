@@ -1215,14 +1215,16 @@ define(['require', './Latam_Library/LMRY_UniversalSetting_Purchase_LBRY', 'N/rec
          */
         var type_interface = runtime.executionContext;
         log.error("type_interface w",type_interface);
-        if ((type == 'create') && type_interface != 'USERINTERFACE') {
+        if ((type == 'create'&&type == 'edit') && type_interface != 'USERINTERFACE') {
           if (["AR", "CO", "PE", "MX", "CL", "PA"].indexOf(LMRY_Result[0]) != -1) {
             require(["./Latam_Library/LMRY_KofaxIntegrations_LBRY_V2.0", './Latam_Library/LMRY_TranID_CSV_LBRY_V2.0.js'],
               function(kofaxModule, csvModule) {
                 log.debug("Execute Library","true");
-                log.debug("kofaxModule",kofaxModule);
-                kofaxModule.SetCustomField_WHT_Code_VB(recordObj, LMRY_Result, licenses);
-                log.debug("END MSG","kofax");
+                if (type == 'create') {
+                  log.debug("kofaxModule",kofaxModule);
+                  kofaxModule.SetCustomField_WHT_Code_VB(recordObj, LMRY_Result, licenses);
+                  log.debug("END MSG","kofax");
+                }
                 
                 recordObj.setValue("custbody_lmry_apply_wht_code", true);
                 log.debug("csvModule",csvModule);

@@ -15,6 +15,17 @@ Se está presentando que cuando se integran los documentos tipo bill mediante el
 - 	File: LMRY_VendorBillURET_V2.0.js
 
 ## Create Fields 
+
+**1. STLT ESPEJO GENERAL**
+- 	Nombre: SMC - Features STLT
+- 	id: customscript_smc_features_stlt
+- 	File: SMC_Features_STLT_V2.0.js
+
+**2. STLT ESPEJO SUBSI**
+- 	Nombre: SMC - Feature Subsidiary STLT
+- 	id: customscript_smc_features_subsi_stlt
+- 	File: SMC_Features_Subsi_STLT_V2.0.js
+
     
 
 
