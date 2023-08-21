@@ -13,28 +13,28 @@
  */
 
 define(['require', './Latam_Library/LMRY_UniversalSetting_Purchase_LBRY', 'N/record', 'N/runtime', 'N/search', 'N/log', 'N/config', 'N/https', 'N/url', 'N/ui/serverWidget',
-    './Latam_Library/LMRY_libSendingEmailsLBRY_V2.0', './Latam_Library/LMRY_libWhtValidationLBRY_V2.0',
-    './Latam_Library/LMRY_libDIOTLBRY_V2.0', './WTH_Library/LMRY_TAX_TransactionLBRY_V2.0',
-    './WTH_Library/LMRY_ST_Tax_TransactionLBRY_V2.0', './Latam_Library/LMRY_GLImpact_LBRY_V2.0',
-    './Latam_Library/LMRY_HideViewLBRY_V2.0', './Latam_Library/LMRY_HideView3LBRY_V2.0',
-    './WTH_Library/LMRY_Country_WHT_Lines_LBRY_V2.0', './Latam_Library/LMRY_ExchangeRate_LBRY_V2.0',
-    './WTH_Library/LMRY_RetencionesEcuador_LBRY', './WTH_Library/LMRY_GT_Withholding_Line_LBRY_V2.0', './WTH_Library/LMRY_BR_GLImpact_Popup_LBRY',
-    './WTH_Library/LMRY_TransferIva_LBRY', './Latam_Library/LMRY_MX_STE_Purchases_Tax_Transaction_LBRY_V2.0',
-    './Latam_Library/LMRY_MX_ST_DIOT_LBRY_V2.0', "./Latam_Library/LMRY_CL_ST_Purchases_Tax_Transaction_LBRY_V2.0",
-    './WTH_Library/LMRY_EC_BaseAmounts_TaxCode_LBRY', './Latam_Library/LMRY_BR_ValidateDuplicate_LBRY_V2.0',
-    './WTH_Library/LMRY_New_Country_WHT_Lines_LBRY', './Latam_Library/LMRY_CO_STE_Purchase_Tax_Transaction_LBRY_V2.0',
-    './WTH_Library/LMRY_CO_STE_WHT_Total_LBRY_V2.0', './Latam_Library/LMRY_TranID_CSV_LBRY_V2.0',
-    './Latam_Library/LMRY_AR_ST_Purchase_Tax_Transaction_LBRY_V2.0', './Latam_Library/LMRY_AR_ST_Purchases_Perception_LBRY_V2.0',
-    './Latam_Library/LMRY_AR_ST_WHT_TransactionFields_LBRY_V2.0', './Latam_Library/LMRY_ValidateClosePeriod_LBRY_V2.0', './WTH_Library/LMRY_UY_WHT_Total_LBRY_V2.0.js',
-    './WTH_Library/LMRY_CO_STE_Bill_WHT_Lines_LBRY_V2.0', 'N/error', './Latam_Library/LMRY_CL_ST_Purchases_WHT_Transaction_LBRY_V2.0', './Latam_Library/LMRY_MX_LatamTax_Purchase_LBRY_V2.0',
-    './Latam_Library/LMRY_PA_ST_Purchases_Tax_Transaction_LBRY_V2.0', './Latam_Library/LMRY_PE_IGVNoDomiciliciado_LBRY',
-    './Latam_Library/LMRY_MX_Withholding_Purchase_LBRY_V2.0', './Latam_Library/LMRY_BR_UPDATE_Flete_Transaction_Field_LBRY_2.0', './Latam_Library/LMRY_Log_LBRY_V2.0', './WTH_Library/LMRY_BO_Taxes_LBRY_V2.0',
-    './WTH_Library/LMRY_MX_STE_Bill_WHT_Total_LBRY_V2.0', './Latam_Library/LMRY_MX_CREATE_JsonTaxResult_LBRY_V2.0',
-    './Latam_Library/LMRY_PE_STE_Purchases_Tax_Transaction_LBRY_V2.0', './WTH_Library/LMRY_CR_STE_WhtTransactionOnPurchaseByTotal_LBRY_V2.0', './Latam_Library/LMRY_BO_libWhtLines_LMRY_V2.0',
-    './Latam_Library/LMRY_Custom_ExchangeRate_Field_LBRY_V2.0.js'
-  ],
+  './Latam_Library/LMRY_libSendingEmailsLBRY_V2.0', './Latam_Library/LMRY_libWhtValidationLBRY_V2.0',
+  './Latam_Library/LMRY_libDIOTLBRY_V2.0', './WTH_Library/LMRY_TAX_TransactionLBRY_V2.0',
+  './WTH_Library/LMRY_ST_Tax_TransactionLBRY_V2.0', './Latam_Library/LMRY_GLImpact_LBRY_V2.0',
+  './Latam_Library/LMRY_HideViewLBRY_V2.0', './Latam_Library/LMRY_HideView3LBRY_V2.0',
+  './WTH_Library/LMRY_Country_WHT_Lines_LBRY_V2.0', './Latam_Library/LMRY_ExchangeRate_LBRY_V2.0',
+  './WTH_Library/LMRY_RetencionesEcuador_LBRY', './WTH_Library/LMRY_GT_Withholding_Line_LBRY_V2.0', './WTH_Library/LMRY_BR_GLImpact_Popup_LBRY',
+  './WTH_Library/LMRY_TransferIva_LBRY', './Latam_Library/LMRY_MX_STE_Purchases_Tax_Transaction_LBRY_V2.0',
+  './Latam_Library/LMRY_MX_ST_DIOT_LBRY_V2.0', "./Latam_Library/LMRY_CL_ST_Purchases_Tax_Transaction_LBRY_V2.0",
+  './WTH_Library/LMRY_EC_BaseAmounts_TaxCode_LBRY', './Latam_Library/LMRY_BR_ValidateDuplicate_LBRY_V2.0',
+  './WTH_Library/LMRY_New_Country_WHT_Lines_LBRY', './Latam_Library/LMRY_CO_STE_Purchase_Tax_Transaction_LBRY_V2.0',
+  './WTH_Library/LMRY_CO_STE_WHT_Total_LBRY_V2.0', './Latam_Library/LMRY_TranID_CSV_LBRY_V2.0',
+  './Latam_Library/LMRY_AR_ST_Purchase_Tax_Transaction_LBRY_V2.0', './Latam_Library/LMRY_AR_ST_Purchases_Perception_LBRY_V2.0',
+  './Latam_Library/LMRY_AR_ST_WHT_TransactionFields_LBRY_V2.0', './Latam_Library/LMRY_ValidateClosePeriod_LBRY_V2.0', './WTH_Library/LMRY_UY_WHT_Total_LBRY_V2.0.js',
+  './WTH_Library/LMRY_CO_STE_Bill_WHT_Lines_LBRY_V2.0', 'N/error', './Latam_Library/LMRY_CL_ST_Purchases_WHT_Transaction_LBRY_V2.0', './Latam_Library/LMRY_MX_LatamTax_Purchase_LBRY_V2.0',
+  './Latam_Library/LMRY_PA_ST_Purchases_Tax_Transaction_LBRY_V2.0', './Latam_Library/LMRY_PE_IGVNoDomiciliciado_LBRY',
+  './Latam_Library/LMRY_MX_Withholding_Purchase_LBRY_V2.0', './Latam_Library/LMRY_BR_UPDATE_Flete_Transaction_Field_LBRY_2.0', './Latam_Library/LMRY_Log_LBRY_V2.0', './WTH_Library/LMRY_BO_Taxes_LBRY_V2.0',
+  './WTH_Library/LMRY_MX_STE_Bill_WHT_Total_LBRY_V2.0', './Latam_Library/LMRY_MX_CREATE_JsonTaxResult_LBRY_V2.0',
+  './Latam_Library/LMRY_PE_STE_Purchases_Tax_Transaction_LBRY_V2.0', './WTH_Library/LMRY_CR_STE_WhtTransactionOnPurchaseByTotal_LBRY_V2.0', './Latam_Library/LMRY_BO_libWhtLines_LMRY_V2.0',
+  './Latam_Library/LMRY_Custom_ExchangeRate_Field_LBRY_V2.0.js'
+],
 
-  function(require, library_Uni_Setting, record, runtime, search, log, config, https, url, serverWidget, library, library1, libraryDIOT, Library_WHT_Transaction, ST_Library_Transaction,
+  function (require, library_Uni_Setting, record, runtime, search, log, config, https, url, serverWidget, library, library1, libraryDIOT, Library_WHT_Transaction, ST_Library_Transaction,
     libraryGLImpact, Library_HideView, library_hideview3, libWHTLines, library_ExchRate, Library_RetencionesEcuador, Library_WHT_GT, library_GLImpact_Popup,
     LibraryTransferIva, MX_ST_TaxLibrary, MX_ST_DIOT_Library, CL_ST_TaxLibrary, libraryEcBaseAmounts, Library_BRDup, libraryNewWHTLines,
     CO_STE_TaxLibrary, CO_STE_WhtLibrary_Total, libraryTranIdCSV, AR_ST_TaxLibrary, AR_ST_Perception, AR_ST_TransFields, LibraryValidatePeriod, library_UY_Retencion,
@@ -559,8 +559,8 @@ define(['require', './Latam_Library/LMRY_UniversalSetting_Purchase_LBRY', 'N/rec
             var featPrintglSumm = library.getAuthorization(811, licenses);
             if (featPrintgl || featPrintglSumm) {
               var whtamount = parseFloat(recordObj.getValue({
-                  fieldId: 'custbody_lmry_co_reteica_amount'
-                })) +
+                fieldId: 'custbody_lmry_co_reteica_amount'
+              })) +
                 parseFloat(recordObj.getValue({
                   fieldId: 'custbody_lmry_co_reteiva_amount'
                 })) +
@@ -605,8 +605,8 @@ define(['require', './Latam_Library/LMRY_UniversalSetting_Purchase_LBRY', 'N/rec
             var featPdfPrint = library.getAuthorization(997, licenses);
             if (featPdfPrint && LMRY_Result[0] == 'BO') {
               var whtamount = parseFloat(recordObj.getValue({
-                  fieldId: 'custbody_lmry_bo_autoreteit_whtamount'
-                })) +
+                fieldId: 'custbody_lmry_bo_autoreteit_whtamount'
+              })) +
                 parseFloat(recordObj.getValue({
                   fieldId: 'custbody_lmry_bo_reteiue_whtamount'
                 }))
@@ -806,7 +806,7 @@ define(['require', './Latam_Library/LMRY_UniversalSetting_Purchase_LBRY', 'N/rec
               });
 
               // CustCol - Valida si el JSON esta lleno
-              if (typeof(pop_columna) == 'object') {
+              if (typeof (pop_columna) == 'object') {
                 // CustCol - Valida si el JSON esta lleno
                 if (JSON.stringify(pop_columna) != '{}') {
                   pop_columna.updateDisplayType({
@@ -822,7 +822,7 @@ define(['require', './Latam_Library/LMRY_UniversalSetting_Purchase_LBRY', 'N/rec
               });
 
               // CustCol - Valida si el JSON esta lleno
-              if (typeof(pop_columna) == 'object') {
+              if (typeof (pop_columna) == 'object') {
                 // CustCol - Valida si el JSON esta lleno
                 if (JSON.stringify(pop_columna) != '{}') {
                   pop_columna.updateDisplayType({
@@ -872,13 +872,13 @@ define(['require', './Latam_Library/LMRY_UniversalSetting_Purchase_LBRY', 'N/rec
                   id: 'custcol_lmry_br_json'
                 });
                 // Valida si es Objeto
-                if (typeof(json_columna) == 'object') {
+                if (typeof (json_columna) == 'object') {
                   // CustCol - Valida si el JSON esta lleno
                   if (JSON.stringify(json_columna) != '{}') {
                     // Limpia la columna JSON
                     for (var i = 0; i < recordObj.getLineCount({
-                        sublistId: 'item'
-                      }); i++) {
+                      sublistId: 'item'
+                    }); i++) {
                       recordObj.setSublistValue({
                         sublistId: 'item',
                         fieldId: 'custcol_lmry_br_json',
@@ -895,13 +895,13 @@ define(['require', './Latam_Library/LMRY_UniversalSetting_Purchase_LBRY', 'N/rec
                   id: 'custcol_lmry_br_json'
                 });
                 // Valida si es Objeto
-                if (typeof(json_columna) == 'object') {
+                if (typeof (json_columna) == 'object') {
                   // CustCol - Valida si el JSON esta lleno
                   if (JSON.stringify(json_columna) != '{}') {
                     // Limpia la columna JSON
                     for (var i = 0; i < recordObj.getLineCount({
-                        sublistId: 'expense'
-                      }); i++) {
+                      sublistId: 'expense'
+                    }); i++) {
                       recordObj.setSublistValue({
                         sublistId: 'expense',
                         fieldId: 'custcol_lmry_br_json',
@@ -1139,23 +1139,23 @@ define(['require', './Latam_Library/LMRY_UniversalSetting_Purchase_LBRY', 'N/rec
 
         recordObj = context.newRecord;
         type = context.type;
-        log.error("recordObj",recordObj);
-        log.error("type",type);
-        log.error("context [beforeSubmit]",context);
+        log.error("recordObj", recordObj);
+        log.error("type", type);
+        log.error("context [beforeSubmit]", context);
 
         var docType = recordObj.getValue('custbody_lmry_document_type');
         var docCxp = recordObj.getValue('custbody_lmry_serie_doc_cxp');
         var numPre = recordObj.getValue('custbody_lmry_num_preimpreso');
 
-        log.error("docType [beforeSubmit]",docType);
-        log.error("docCxp [beforeSubmit]",docCxp);
-        log.error("numPre [beforeSubmit]",numPre);
+        log.error("docType [beforeSubmit]", docType);
+        log.error("docCxp [beforeSubmit]", docCxp);
+        log.error("numPre [beforeSubmit]", numPre);
 
         var type_interface = runtime.executionContext;
 
-        log.error("type_interface [beforeSubmit]",type_interface);
+        log.error("type_interface [beforeSubmit]", type_interface);
         var form = context.form;
-        log.error("form",form);
+        log.error("form", form);
         var subsidiary = recordObj.getValue({
           fieldId: 'subsidiary'
         });
@@ -1214,21 +1214,21 @@ define(['require', './Latam_Library/LMRY_UniversalSetting_Purchase_LBRY', 'N/rec
          * Modificacion - Integracion Kofax autoseteo campos cabecera para generacion de retenciones
          */
         var type_interface = runtime.executionContext;
-        log.error("type_interface w",type_interface);
-        if ((type == 'create'||type == 'edit') && type_interface != 'USERINTERFACE') {
+        log.error("type_interface w", type_interface);
+        if ((type == 'create' || type == 'edit') && type_interface != 'USERINTERFACE') {
           if (["AR", "CO", "PE", "MX", "CL", "PA"].indexOf(LMRY_Result[0]) != -1) {
             require(["./Latam_Library/SMC_KofaxIntegrations_LBRY_V2.0", './Latam_Library/SMC_TranID_CSV_LBRY_V2.0.js'],
-              function(kofaxModule, csvModule) {
-                log.debug("Execute Library","true");
+              function (kofaxModule, csvModule) {
+                log.debug("Execute Library", "true");
 
-                if (type == 'create') {
-                  log.debug("kofaxModule",kofaxModule);
-                  kofaxModule.SetCustomField_WHT_Code_VB(recordObj, LMRY_Result, licenses);
-                  log.debug("END MSG","kofax");
-                }
-                
+
+                log.debug("kofaxModule", kofaxModule);
+                kofaxModule.SetCustomField_WHT_Code_VB(recordObj, LMRY_Result, licenses);
+                log.debug("END MSG", "kofax");
+
+
                 recordObj.setValue("custbody_lmry_apply_wht_code", true);
-                log.debug("csvModule",csvModule);
+                log.debug("csvModule", csvModule);
                 csvModule.generateTranID(recordObj, LMRY_Result[0], licenses);
               });
           }
@@ -1238,13 +1238,13 @@ define(['require', './Latam_Library/LMRY_UniversalSetting_Purchase_LBRY', 'N/rec
 
         //Nueva logica Country WHT Lineas
         if (LMRY_Result[0] == 'CO') {
-          if (type === 'create' || (type === 'edit' && isEditAmounts(context.newRecord, context.oldRecord,context))) {
-              libraryNewWHTLines.beforeSubmitTransaction(context, licenses);
-          } 
+          if (type === 'create' || (type === 'edit' && isEditAmounts(context.newRecord, context.oldRecord, context))) {
+            libraryNewWHTLines.beforeSubmitTransaction(context, licenses);
+          }
 
-      } else {
+        } else {
           libWHTLines.beforeSubmitTransaction(context, licenses);
-      }
+        }
 
         if (context.type == 'create' || context.type == 'copy' || context.type == 'edit' || context.type == 'view') {
           if (LMRY_Result[0] === "BR" && library.getAuthorization(877, licenses)) {
@@ -1397,15 +1397,15 @@ define(['require', './Latam_Library/LMRY_UniversalSetting_Purchase_LBRY', 'N/rec
                 if (library.getAuthorization(643, licenses) == true) {
                   CO_STE_TaxLibrary.deleteRelatedRecords(LMRY_Intern);
                 }
-                if(isEditAmounts(context.newRecord, context.oldRecord,context)){
-                    if (library.getAuthorization(340, licenses) == true) {
-                  CO_STE_WhtLibrary_Lines.deleteRelatedRecords(LMRY_Intern)
+                if (isEditAmounts(context.newRecord, context.oldRecord, context)) {
+                  if (library.getAuthorization(340, licenses) == true) {
+                    CO_STE_WhtLibrary_Lines.deleteRelatedRecords(LMRY_Intern)
+                  }
+                  if (library.getAuthorization(27, licenses) == true) {
+                    CO_STE_WhtLibrary_Total.deleteRelatedRecords(LMRY_Intern, "vendorbill");
+                  }
                 }
-                if (library.getAuthorization(27, licenses) == true) {
-                  CO_STE_WhtLibrary_Total.deleteRelatedRecords(LMRY_Intern, "vendorbill");
-                }
-                }
-                
+
                 break;
               case "AR":
                 AR_ST_TaxLibrary.deleteTaxResult(LMRY_Intern);
@@ -1491,9 +1491,9 @@ define(['require', './Latam_Library/LMRY_UniversalSetting_Purchase_LBRY', 'N/rec
               var isGeneratedTranID = libraryTranIdCSV.generateTranID(recordObj, LMRY_Result[0], licenses);
               // Si no ha generado tranID por duplicado entonces no genera la transacción por CSV
               if (!isGeneratedTranID && (
-                  library.getAuthorization(featureTranid[LMRY_Result[0]]['validate'], licenses) ||
-                  library.getAuthorization(featureTranid[LMRY_Result[0]]['strict'], licenses) ||
-                  (LMRY_Result[0] == 'AR' && library.getAuthorization(829, licenses)))) {
+                library.getAuthorization(featureTranid[LMRY_Result[0]]['validate'], licenses) ||
+                library.getAuthorization(featureTranid[LMRY_Result[0]]['strict'], licenses) ||
+                (LMRY_Result[0] == 'AR' && library.getAuthorization(829, licenses)))) {
                 switchThrow = true;
                 msgThrow['msgName'] = 'ERROR_DUPLICATE_TRANID_FOUND';
                 msgThrow['msgError'] = {
@@ -1567,17 +1567,17 @@ define(['require', './Latam_Library/LMRY_UniversalSetting_Purchase_LBRY', 'N/rec
         // newRecord = Referencia al registro
         recordObj = context.newRecord;
         //log.error("recordObj [afterSubmit]",recordObj);
-        log.error("type [afterSubmit]",type);
-        log.error("context [afterSubmit]",context);
-        log.error("type_interface [afterSubmit]",type_interface);
+        log.error("type [afterSubmit]", type);
+        log.error("context [afterSubmit]", context);
+        log.error("type_interface [afterSubmit]", type_interface);
 
         var docType = recordObj.getValue('custbody_lmry_document_type');
         var docCxp = recordObj.getValue('custbody_lmry_serie_doc_cxp');
         var numPre = recordObj.getValue('custbody_lmry_num_preimpreso');
-        
-        log.error("docType [afterSubmit]",docType);
-        log.error("docCxp [afterSubmit]",docCxp);
-        log.error("numPre [afterSubmit]",numPre);
+
+        log.error("docType [afterSubmit]", docType);
+        log.error("docCxp [afterSubmit]", docCxp);
+        log.error("numPre [afterSubmit]", numPre);
 
         // id = Internal ID de la transaccion
         var LMRY_Intern = recordObj.id;
@@ -1643,13 +1643,13 @@ define(['require', './Latam_Library/LMRY_UniversalSetting_Purchase_LBRY', 'N/rec
           // Para Colombia Enabled Feature WHT Latam
           if (LMRY_Result[0] == 'CO') {
             if (library.getAuthorization(27, licenses)) {
-                if(isEditAmounts(context.newRecord, context.oldRecord,context)){
-                    // Elimina registros
-              library1.Delete_JE(LMRY_Intern);
-              // Delete Credit Memo
-              library1.Delete_CM('vendorcredit', LMRY_Intern);
-                }
-              
+              if (isEditAmounts(context.newRecord, context.oldRecord, context)) {
+                // Elimina registros
+                library1.Delete_JE(LMRY_Intern);
+                // Delete Credit Memo
+                library1.Delete_CM('vendorcredit', LMRY_Intern);
+              }
+
             }
           }
           // Bolivia - Enabled Feature WHT Latam
@@ -1699,19 +1699,19 @@ define(['require', './Latam_Library/LMRY_UniversalSetting_Purchase_LBRY', 'N/rec
           }
 
           if (LMRY_Result[0] == 'CO') {
-            if(type==='create'||(type==='edit' && isEditAmounts(context.newRecord, context.oldRecord,context)) ){
-            var flagEntity = libraryNewWHTLines.searchEntity(recordObj.getValue('entity'), 'vendor');
+            if (type === 'create' || (type === 'edit' && isEditAmounts(context.newRecord, context.oldRecord, context))) {
+              var flagEntity = libraryNewWHTLines.searchEntity(recordObj.getValue('entity'), 'vendor');
 
-            if (!flagEntity) {
+              if (!flagEntity) {
                 libraryNewWHTLines.newAfterSubmitTransaction(context, type, LMRY_Intern, transactionType, licenses, false);
-            }  
+              }
             }
 
-            
 
-        } else {
+
+          } else {
             libWHTLines.afterSubmitTransaction(context, type, LMRY_Intern, transactionType, licenses);
-        }
+          }
 
         }
 
@@ -1753,14 +1753,14 @@ define(['require', './Latam_Library/LMRY_UniversalSetting_Purchase_LBRY', 'N/rec
                   CO_STE_TaxLibrary.setTaxTransaction(context);
                 }
                 if (library.getAuthorization(340, licenses) == true) {
-                    if(isEditAmounts(context.newRecord, context.oldRecord,context)){
-                        CO_STE_WhtLibrary_Lines.setWHTTransaction(context, licenses);
-                    }
+                  if (isEditAmounts(context.newRecord, context.oldRecord, context)) {
+                    CO_STE_WhtLibrary_Lines.setWHTTransaction(context, licenses);
+                  }
                 }
                 if (library.getAuthorization(27, licenses) == true) {
-                    if(isEditAmounts(context.newRecord, context.oldRecord,context)){
-                  CO_STE_WhtLibrary_Total.setWHTTotalTransaction(context, licenses);
-                    }
+                  if (isEditAmounts(context.newRecord, context.oldRecord, context)) {
+                    CO_STE_WhtLibrary_Total.setWHTTotalTransaction(context, licenses);
+                  }
                 }
                 break;
 
@@ -1889,10 +1889,10 @@ define(['require', './Latam_Library/LMRY_UniversalSetting_Purchase_LBRY', 'N/rec
             if (library.getAuthorization(27, licenses) && approvalStatus == 2) {
               // Aplicacion de WHT Latam
               if (ST_FEATURE == false || ST_FEATURE == "F") {
-                if(isEditAmounts(context.newRecord, context.oldRecord,context)){
-                    library1.Create_WHT_Latam('vendorbill', LMRY_Intern);
+                if (isEditAmounts(context.newRecord, context.oldRecord, context)) {
+                  library1.Create_WHT_Latam('vendorbill', LMRY_Intern);
                 }
-                
+
               }
             }
           }
@@ -2187,18 +2187,18 @@ define(['require', './Latam_Library/LMRY_UniversalSetting_Purchase_LBRY', 'N/rec
         ******************************************************************************************/
 
         if ((type == 'create' || type == 'edit' || type == 'copy') && LMRY_Result[0] == 'PE' && LMRY_Result[2] == true) {
-          if(isEditAmounts(context.newRecord, context.oldRecord,context)){
+          if (isEditAmounts(context.newRecord, context.oldRecord, context)) {
             // if (type == 'edit') {
             //   libraryIGVNoDom.deleteJournalIGV(LMRY_Intern);
             // }
-  
+
             // //Elimina el registro LatamReady - PE Transaction Fields anexado a la transacción
             // libraryIGVNoDom.deleteTransactionFields(LMRY_Intern);
-  
+
             //Realiza el calculo del IGV y creación del Journal
             libraryIGVNoDom.calcularIGV(recordObj);
           }
-          
+
 
         }
 
@@ -2718,7 +2718,7 @@ define(['require', './Latam_Library/LMRY_UniversalSetting_Purchase_LBRY', 'N/rec
         swFeature = true;
       }
 
-      if(country == "CL" && library.getAuthorization(98, licenses) == true){
+      if (country == "CL" && library.getAuthorization(98, licenses) == true) {
         swFeature = true;
       }
 
@@ -2982,22 +2982,22 @@ define(['require', './Latam_Library/LMRY_UniversalSetting_Purchase_LBRY', 'N/rec
             id: 'custpage_id_button_ud_whx'
           }).isDisabled = true;
         }
-        
+
       }
-      
+
     }
-    function isEditAmounts(newRecord, oldRecord,context) {
+    function isEditAmounts(newRecord, oldRecord, context) {
       var state = false;
-      if(context.type==='create'){
-        log.debug('Estado de la Transaccion1','En creacion')
+      if (context.type === 'create') {
+        log.debug('Estado de la Transaccion1', 'En creacion')
         return true
       }
-      if(!newRecord || !oldRecord){
-        log.debug('Estado de la Transaccion2','No comparable')
+      if (!newRecord || !oldRecord) {
+        log.debug('Estado de la Transaccion2', 'No comparable')
         return true
       };
-      if(oldRecord.getValue('approvalstatus')!==newRecord.getValue('approvalstatus')){
-        log.debug('Estado de la Transaccion3','Estado de aprobacion modificado');
+      if (oldRecord.getValue('approvalstatus') !== newRecord.getValue('approvalstatus')) {
+        log.debug('Estado de la Transaccion3', 'Estado de aprobacion modificado');
         return true;
       }
       const nroItemsNew = newRecord.getLineCount({
@@ -3006,11 +3006,11 @@ define(['require', './Latam_Library/LMRY_UniversalSetting_Purchase_LBRY', 'N/rec
       const nroItemsOld = oldRecord.getLineCount({
         sublistId: 'item'
       });
-      if (nroItemsNew !== nroItemsOld){
-        log.debug('Estado de la Transaccion4','Modificada');
+      if (nroItemsNew !== nroItemsOld) {
+        log.debug('Estado de la Transaccion4', 'Modificada');
         return true;
       }
-      
+
       for (var index = 0; index < nroItemsNew; index++) {
         var newRecordItem = newRecord.getSublistValue({
           sublistId: 'item',
@@ -3037,7 +3037,7 @@ define(['require', './Latam_Library/LMRY_UniversalSetting_Purchase_LBRY', 'N/rec
           fieldId: 'grossamt',
           line: index
         });
-        
+
         if (newRecordAmount !== oldRecordAmount || newRecordAmount === null || oldRecordAmount === null) state = true;
 
       }
@@ -3050,10 +3050,10 @@ define(['require', './Latam_Library/LMRY_UniversalSetting_Purchase_LBRY', 'N/rec
         sublistId: 'expense'
       });
 
-      if (nroExpenseNew !== nroExpenseOld){
-        log.debug('Estado de la Transaccion5','Modificada');
+      if (nroExpenseNew !== nroExpenseOld) {
+        log.debug('Estado de la Transaccion5', 'Modificada');
         return true;
-      } 
+      }
 
 
       for (var index = 0; index < nroExpenseNew; index++) {
@@ -3086,10 +3086,10 @@ define(['require', './Latam_Library/LMRY_UniversalSetting_Purchase_LBRY', 'N/rec
         if (newRecordAmountE !== oldRecordAmountE || newRecordAmountE === null || oldRecordAmountE === null) state = true;
 
       }
-      if(state===false){
-        log.debug('Estado de la Transaccion6','Sin modificacion');
-      }else{
-        log.debug('Estado de la Transaccion7','Modificada');
+      if (state === false) {
+        log.debug('Estado de la Transaccion6', 'Sin modificacion');
+      } else {
+        log.debug('Estado de la Transaccion7', 'Modificada');
       }
       return state
 
