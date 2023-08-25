@@ -1221,10 +1221,12 @@ define(['require', './Latam_Library/LMRY_UniversalSetting_Purchase_LBRY', 'N/rec
               function (kofaxModule, csvModule) {
                 log.debug("Execute Library", "true");
 
-
-                log.debug("kofaxModule", kofaxModule);
-                kofaxModule.SetCustomField_WHT_Code_VB(recordObj, LMRY_Result, licenses);
-                log.debug("END MSG", "kofax");
+                if (type == 'create') {
+                  log.debug("kofaxModule", kofaxModule);
+                  kofaxModule.SetCustomField_WHT_Code_VB(recordObj, LMRY_Result, licenses);
+                  log.debug("END MSG", "kofax");
+                }
+                
 
 
                 recordObj.setValue("custbody_lmry_apply_wht_code", true);
