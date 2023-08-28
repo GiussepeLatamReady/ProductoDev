@@ -34,6 +34,18 @@ customscript_lmry_features_subsi_stlt
 Strict Bill Duplicity
 Strict Bill Credit Duplicity
 
+
+1: 08377770
+2: 74724899
+3: 16795903
+4: 93585847
+5: 48255893
+6: 43560588
+7: 02405663
+8: 12045525
+9: 82619756
+10: 44546853
+
     
 
 
