@@ -86,9 +86,15 @@ function(search, runtime) {
 
       }
 
-
+      var isBaseIGV = false;
       //SETEO DE CAMPOS DE CABECERA
       for(var i in jsonBaseAmounts){
+        if (i == 2 && jsonBaseAmounts[i]['amount'] != 0) {
+          isBaseIGV = true;
+        }
+        if (i == 4 && isBaseIGV) {
+          break;
+        }
         objRecord.setValue({fieldId: jsonBaseAmounts[i]['field'], value: jsonBaseAmounts[i]['amount']});
       }
 
