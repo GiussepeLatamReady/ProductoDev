@@ -70,7 +70,7 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
            * Logica de Descuentos por Linea solo
            * para Argentina
            *************************************/
-          if (CodeCountry == "AR") {
+          if (CodeCountry == "AR" && (invoiceRecord.type == 'invoice' || invoiceRecord.type == 'creditmemo' || invoiceRecord.type == 'cashsale')) {
             logicaDescuentos(invoiceRecord, numLines);
           }
         }
@@ -112,7 +112,7 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
           case 'estimate': filtroTransactionType = 10; break;
         }
 
-        if (auto_wht && validarTipoDoc(tipo_Docum) && (eDocStatus != "Sent" && eDocStatus != "Enviado")) {
+        if (auto_wht && validarTipoDoc(tipo_Docum,invoiceRecord.type) && (eDocStatus != "Sent" && eDocStatus != "Enviado")) {
           seteoSuma = true;
           var hayTributo = contieneTributo(invoiceRecord, numLines, cantidad);
           if (!hayTributo) {
@@ -690,10 +690,12 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
      * ID..... : customrecord_lmry_ar_doctype_percep
      * Bundle. : 37714 - LamtamReady
      *********************************************************** */
-    function validarTipoDoc(tipoDoc) {
+    function validarTipoDoc(tipoDoc,typeTransaction) {
       try {
         var tipoDocEncontrado = false;
-
+        if (typeTransaction == "salesorder" || typeTransaction == "estimate") {
+          return true;
+        }
         if (tipoDoc == '' || tipoDoc == null) {
           return tipoDocEncontrado;
         }
