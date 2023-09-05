@@ -1,15 +1,20 @@
-# [FDD HIAS EC: IVA 8% (FEL + ATS) C0932](https://docs.google.com/document/d/1y3mJ9W5czhFQCtb42TO1m2um44L6nbpTkkCBnM0j9sI/edit)
+# [CO WHT Cabecera genere Tax Results D1126](https://docs.google.com/document/d/1k6W6o4MdSt7BZfxOh42sngr8GIVgk1CpKUSV3UXf5HQ/edit)
 
-Se está presentando que cuando se integran los documentos tipo bill mediante el aplicativo de KOFAX , y al registrarse en NetSuite dentro del campo reference number or invoice number no esta concatenando los campos Latam - CXP Series y Latam - Prepinted number, de acuerdo a lo requerido por cada país.
-
-## Modified scripts
+Se generarán registros del record “LatamReady - Tax results” utilizando el proceso de retenciones de cabecera.
 
 
-**1. Libreria**
+## LatamReady - WHT Type
 
-- 	File: LMRY_EC_BaseAmounts_TaxCode_LBRY.js
+WHT Subtype
+custrecord_lmry_wht_subtype
+type: LatamReady - Setup WHT Sub Type
 
-## Script guide
+Creación de un nuevo campo “WHT Subtype” (custrecord_lmry_wht_subtype), este campo será de tipo lista y referenciando al record “LatamReady - Setup WHT Sub Type” (customrecord_lmry_ar_wht_type) donde se guardará el subtipo de retención que será utilizado en el Tax Results.
+
+
+## Script Modify
+
+
 
 
 
