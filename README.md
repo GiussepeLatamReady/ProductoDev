@@ -27,6 +27,12 @@ Se está presentando que cuando se integran los documentos tipo bill mediante el
 
     Latam - EC Base Rate 12% -- [Latam - EC Base Rate IVA] (https://tstdrv1774174.app.netsuite.com/app/common/custom/bodycustfield.nl?id=8965)
 
+    Descripcion: Es la base imponible de una tarifa 12% o 8% en el IVA siendo este último la reducción del primero bajo el Decreto Ejecutivo N.º 644 del año 2023.
+
+    Se tiene cambiar el nombre del campo Latam - EC Base Rate 12% (custbody_lmry_ec_base_rate12) a Latam - EC Base Rate IVA. La descripción nueva  del campo sería “Es la base imponible de una tarifa 12% o 8% en el IVA siendo este último la reducción del primero bajo el Decreto Ejecutivo N.º 644 del año 2023.”
+
+    Al record LatamReady - EC Base Amount se debe agregar el registro {Name : “Base 8”}
+
 
 
 
