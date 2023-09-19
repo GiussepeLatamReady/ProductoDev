@@ -845,14 +845,13 @@ define(['./LMRY_libSendingEmailsLBRY_V2.0', './LMRY_libNumberInWordsLBRY_V2.0', 
                                         value: Field_itesales
                                     });
                                 }
-                                log.debug("Field_itesales paso","passooooo");
+                                
                                 inRec.setSublistValue({
                                     sublistId: 'item',
                                     fieldId: 'quantity',
                                     line: 0,
                                     value: 1
                                 });
-                                log.debug("flag","quantit");
                                 /*inRec.setSublistValue({
                                 sublistId: 'item',
                                 fieldId: 'location',
@@ -867,7 +866,6 @@ define(['./LMRY_libSendingEmailsLBRY_V2.0', './LMRY_libNumberInWordsLBRY_V2.0', 
                                     line: 0,
                                     value: -1
                                 });
-                                log.debug("flag","quantit 1");
                                 // Importe a insertaar
                                 //log.error('item : amountresult', amountresult);
                                 // Custom
@@ -879,7 +877,7 @@ define(['./LMRY_libSendingEmailsLBRY_V2.0', './LMRY_libNumberInWordsLBRY_V2.0', 
                                         value: amountresult
                                     });
                                 }
-                                log.debug("flag","quantit 2");
+
                                 // 2019-08-09 Transaction Line TaxCode
                                 if (idtaxgparam != '' && idtaxgparam != null) {
                                     inRec.setSublistValue({
@@ -889,7 +887,6 @@ define(['./LMRY_libSendingEmailsLBRY_V2.0', './LMRY_libNumberInWordsLBRY_V2.0', 
                                         value: idtaxgparam
                                     });
                                 }
-                                log.debug("flag","quantit 3");
                                 // Campos de cabecera obligatorios (Habilitados en prefencias de contabilidad)
                                 if (linDepar != '' && linDepar != null) {
                                     inRec.setSublistValue({
@@ -899,7 +896,6 @@ define(['./LMRY_libSendingEmailsLBRY_V2.0', './LMRY_libNumberInWordsLBRY_V2.0', 
                                         value: linDepar
                                     });
                                 }
-                                log.debug("flag","quantit 4");
                                 if (linClass != '' && linClass != null) {
                                     inRec.setSublistValue({
                                         sublistId: 'item',
@@ -908,7 +904,6 @@ define(['./LMRY_libSendingEmailsLBRY_V2.0', './LMRY_libNumberInWordsLBRY_V2.0', 
                                         value: linClass
                                     });
                                 }
-                                log.debug("flag","quantit 5");
                                 if (linLocat != '' && linLocat != null) {
                                     inRec.setSublistValue({
                                         sublistId: 'item',
@@ -917,7 +912,7 @@ define(['./LMRY_libSendingEmailsLBRY_V2.0', './LMRY_libNumberInWordsLBRY_V2.0', 
                                         value: linLocat
                                     });
                                 }
-                                log.debug("flag","quanti 6");
+
                                 inRec.setSublistValue({
                                     sublistId: 'item',
                                     fieldId: 'custcol_lmry_base_amount',
@@ -931,14 +926,8 @@ define(['./LMRY_libSendingEmailsLBRY_V2.0', './LMRY_libNumberInWordsLBRY_V2.0', 
                                  * para evita le ejecucion de users events.
                                  * * * * * * * * * * * * * * * * * * * * * * * * * * */
                                 // Graba el Credit Memo
-                                log.debug("flag","quantit 7");
-                                try {
-                                    var newrec = inRec.save({ enableSourcing: true, ignoreMandatoryFields: true, disableTriggers: true });
-                                    log.debug("flag","quantit save");
-                                } catch (error) {
-                                    log.error("error",error)
-                                }
-                                
+                                var newrec = inRec.save({ enableSourcing: true, ignoreMandatoryFields: true, disableTriggers: true });
+
                                 /************************************
                                  * Abre el Credit Memo para aplicar
                                  * a la transaccion que se le genero
@@ -947,14 +936,13 @@ define(['./LMRY_libSendingEmailsLBRY_V2.0', './LMRY_libNumberInWordsLBRY_V2.0', 
 
                                 //var applyRec = record.load({ type: Field_Transa2, id: newrec, isDynamic: true });
                                 var applyRec = record.load({ type: Field_Transa2, id: newrec });
-                                log.debug("flag","quantit antes de aplicar");
+
                                 // Aplicado a
                                 var inLin = applyRec.getLineCount({ sublistId: 'apply' });
 
                                 // = = = = = = = = = = = = = = = = = = = = = = = = = = =
                                 // 2021.02.26 : Desmarca el apply se ubiera uno asignado
                                 // =  = = = = = = = = = = = = = = = = = = = = = = = = = =
-                                log.debug("flag","aplicado");
                                 for (var i = 0; i < inLin; i++) {
                                     var idTran = applyRec.getSublistValue({ sublistId: 'apply', fieldId: 'apply', line: i });
                                     if (idTran) {
@@ -963,7 +951,7 @@ define(['./LMRY_libSendingEmailsLBRY_V2.0', './LMRY_libNumberInWordsLBRY_V2.0', 
                                         log.error('apply : ' + i, applyRec.getSublistValue({ sublistId: 'apply', fieldId: 'internalid', line: i }));
                                     }
                                 }
-                                log.debug("flag","paso aplicado");
+
                                 // 2021.02.25 : Se aplica la retencion a la transaccion
                                 for (var i = 0; i < inLin; i++) {
                                     var idTran = applyRec.getSublistValue({ sublistId: 'apply', fieldId: 'internalid', line: i });

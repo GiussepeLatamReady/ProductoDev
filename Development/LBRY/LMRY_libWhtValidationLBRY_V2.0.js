@@ -27,11 +27,11 @@ define(['./LMRY_libSendingEmailsLBRY_V2.0', './LMRY_libNumberInWordsLBRY_V2.0', 
          * Creacion del WHT Latam
          * -------------------------------------
          * -------------------------------------------------------------- */
-        function Create_WHT_Latam(Transaction, ID, ORCD) {
+        function Create_WHT_Latam(Transaction, ID, context) {
 
-            var result = Library_Duplicate.Verification_Duplicate(Transaction, ID, ORCD, Search_WHT, getExchangeRate);
+            var result = Library_Duplicate.Verification_Duplicate(Transaction, ID, context, Search_WHT, getExchangeRate);
             //  log.debug('result', result);
-            log.error("result.state",result.state)
+
             if (result.state == true) {
                 //  log.debug('Son iguales');
                 return true;
@@ -65,8 +65,6 @@ define(['./LMRY_libSendingEmailsLBRY_V2.0', './LMRY_libNumberInWordsLBRY_V2.0', 
             var createWHT = Obj_RCD.getValue({
                 fieldId: 'custbody_lmry_apply_wht_code'
             });
-
-            log.error("createWHT",createWHT)
 
             if (createWHT == 'F' || createWHT == false) {
                 createWHT = null;
@@ -112,14 +110,10 @@ define(['./LMRY_libSendingEmailsLBRY_V2.0', './LMRY_libNumberInWordsLBRY_V2.0', 
 
             }
 
-            var nameCountry = Obj_RCD.getText({fieldId: 'custbody_lmry_subsidiary_country'});
-
-            if (nameCountry == 'Colombia') {
-                deleteTaxResults(ID);
-                log.debug('deleteTaxResults', "deleteTaxResults sali");
-            }
             // Importe en Letras
-            if (nameCountry == 'Colombia' &&
+            if (Obj_RCD.getText({
+                fieldId: 'custbody_lmry_subsidiary_country'
+            }) == 'Colombia' &&
                 (Transaction == 'invoice' || Transaction == 'creditmemo')) {
                 var monedaTexto = search.lookupFields({
                     type: search.Type.CURRENCY,
@@ -147,6 +141,7 @@ define(['./LMRY_libSendingEmailsLBRY_V2.0', './LMRY_libNumberInWordsLBRY_V2.0', 
                     options: { enableSourcing: true, ignoreMandatoryFields: true, disableTriggers: true }
                 });
             }
+
             // Custom Field for Bolivia
             var RETEIT = Obj_RCD.getValue({
                 fieldId: 'custbody_lmry_bo_autoreteit'
@@ -180,12 +175,11 @@ define(['./LMRY_libSendingEmailsLBRY_V2.0', './LMRY_libNumberInWordsLBRY_V2.0', 
                 fieldId: 'custbody_lmry_ec_reteiva'
             });
             Search_WHT(Transaction, ID, Obj_RCD, ECREIV);
-            log.debug("Transaction type ",Transaction)
+
             // Crea Transacciones solo para Invoice y Vendor Bill
             if (Transaction == 'invoice' || Transaction == 'vendorbill') {
 
                 // Custom Field for Colombia
-                log.debug("comenzamos create wht 1 - 4","create eht 4")
                 Create_WHT_1(ID, Obj_RCD, RETECRE, fAccPeriod);
                 Create_WHT_1(ID, Obj_RCD, RETEICA, fAccPeriod);
                 Create_WHT_1(ID, Obj_RCD, RETEIVA, fAccPeriod);
@@ -256,6 +250,10 @@ define(['./LMRY_libSendingEmailsLBRY_V2.0', './LMRY_libNumberInWordsLBRY_V2.0', 
                     id: 'customsearch_lmry_wht_base'
                 });
 
+                savedsearch.columns.push(search.createColumn({
+                    name: 'custrecord_lmry_wht_variable_rate'
+                }));
+
                 savedsearch.filters.push(search.createFilter({
                     name: 'internalid',
                     operator: search.Operator.ANYOF,
@@ -284,6 +282,11 @@ define(['./LMRY_libSendingEmailsLBRY_V2.0', './LMRY_libNumberInWordsLBRY_V2.0', 
                     var Field_datfrom = objResult[i].getValue(columns[6]);
                     var Field_datuntil = objResult[i].getValue(columns[7]);
                     var Field_Custom = objResult[i].getValue(columns[4]);
+
+                    var variable_rate = objResult[i].getValue("custrecord_lmry_wht_variable_rate");
+                    if (variable_rate && Number(Obj_RCD.getValue({ fieldId: Field_Custom })) && ['vendbill', 'vendcred'].indexOf(typetran) > -1) {
+                        return Obj_RCD.getValue({ fieldId: Field_Custom });
+                    }
                     var Field_cminbase = 0;
                     if (objResult[i].getValue('custrecord_lmry_wht_codeminbase') != '' &&
                         objResult[i].getValue('custrecord_lmry_wht_codeminbase') != null) {
@@ -303,10 +306,16 @@ define(['./LMRY_libSendingEmailsLBRY_V2.0', './LMRY_libNumberInWordsLBRY_V2.0', 
                     var Field_Standar = '';
                     if (typetran == 'custinvc' || typetran == 'custcred') {
                         Field_Standar = objResult[i].getValue(columns[12]); // custrecord_lmry_wht_salebase
+                        Field_taxpoint = objResult[i].getValue('custrecord_lmry_wht_saletaxpoint');
                     }
                     // Variables para Compras
                     if (typetran == 'vendbill' || typetran == 'vendcred') {
                         Field_Standar = objResult[i].getValue(columns[16]); // custrecord_lmry_wht_purcbase
+                        Field_taxpoint = objResult[i].getValue('custrecord_lmry_wht_purctaxpoint');
+                    }
+
+                    if (Field_taxpoint != 1) {
+                        return 0;
                     }
 
                     // Valida si el campo standar esta configurado
@@ -424,7 +433,6 @@ define(['./LMRY_libSendingEmailsLBRY_V2.0', './LMRY_libNumberInWordsLBRY_V2.0', 
         function Create_WHT_1(ID, Obj_RCD, WHTID, fAccPeriod) {
 
             try {
-                log.debug("Create_WHT_1 START",WHTID)
                 if (WHTID == '' || WHTID == null) {
                     return true;
                 }
@@ -438,6 +446,7 @@ define(['./LMRY_libSendingEmailsLBRY_V2.0', './LMRY_libNumberInWordsLBRY_V2.0', 
 
                 //Exchange RATE
                 var exchangeRate = getExchangeRate(Obj_RCD);
+                log.error('Create_WHT_1 : exchangeRate', exchangeRate);
 
                 if (Number(idCountry) == 48 || Number(idCountry) == 29) { //Colombia
                     // Realiza la una busqueda en el registro personalizado
@@ -471,6 +480,10 @@ define(['./LMRY_libSendingEmailsLBRY_V2.0', './LMRY_libNumberInWordsLBRY_V2.0', 
                 var savedsearch = search.load({
                     id: 'customsearch_lmry_wht_base'
                 });
+                savedsearch.columns.push(search.createColumn({
+                    name: 'custrecord_lmry_wht_variable_rate'
+                }));
+
                 savedsearch.filters.push(search.createFilter({
                     name: 'internalid',
                     operator: search.Operator.ANYOF,
@@ -479,8 +492,7 @@ define(['./LMRY_libSendingEmailsLBRY_V2.0', './LMRY_libNumberInWordsLBRY_V2.0', 
                 var searchresult = savedsearch.run();
                 var objResult = searchresult.getRange(0, 10);
                 if (objResult.length > 0) {
-                    // Trae todos los 
-                    log.debug("iteracion ",WHTID)
+                    // Trae todos los campos
                     var i = 0;
                     var columns = objResult[i].columns;
 
@@ -510,6 +522,7 @@ define(['./LMRY_libSendingEmailsLBRY_V2.0', './LMRY_libNumberInWordsLBRY_V2.0', 
                     var Field_xliabacc = objResult[i].getValue('custrecord_lmry_wht_taxliabacc');
                     var Field_Custom = objResult[i].getValue(columns[4]);
                     var Field_Standar = '';
+                    var Field_variable = objResult[i].getValue('custrecord_lmry_wht_variable_rate');
 
                     // Variables para Ventas
                     if (typetran == 'custinvc') {
@@ -539,7 +552,7 @@ define(['./LMRY_libSendingEmailsLBRY_V2.0', './LMRY_libNumberInWordsLBRY_V2.0', 
                     // Valida si el campo standar va a popular estan configurado
                     if (Field_Standar == '' || Field_Standar == null ||
                         Available_onts == false || Available_onts == 'F') {
-                        log.error('Create_WHT_1 - WHTID - Field Standar - Available_onts', WHTID + ' - ' + Field_Standar + ' - ' + Available_onts);
+                        //log.error('Create_WHT_1 - WHTID - Field Standar - Available_onts', WHTID + ' - ' + Field_Standar + ' - ' + Available_onts);
                         return true;
                     }
 
@@ -560,12 +573,17 @@ define(['./LMRY_libSendingEmailsLBRY_V2.0', './LMRY_libNumberInWordsLBRY_V2.0', 
 
                     // Calculo de Campos
                     var amountresult = 0;
-                    if (amount != '' && amount != null) {
-                        amountresult = parseFloat(amount) * parseFloat(Field_Rate);
-                        amountresult = parseFloat(amountresult) / 100;
-                        //amountresult = amountresult.toFixed(2);
-                        amountresult = round2(amountresult);
-                        amountresult = Math.abs(amountresult);
+                    if (Field_variable && Number(Obj_RCD.getValue({ fieldId: Field_Custom })) && typetran == 'vendbill') {
+                        amount = round2(getBase(Field_Custom, Obj_RCD) / exchangeRate);
+                        amountresult = round2(Obj_RCD.getValue({ fieldId: Field_Custom }) / exchangeRate);
+                    } else {
+                        if (amount != '' && amount != null) {
+                            amountresult = parseFloat(amount) * parseFloat(Field_Rate);
+                            amountresult = parseFloat(amountresult) / 100;
+                            //amountresult = amountresult.toFixed(2);
+                            amountresult = round2(amountresult);
+                            amountresult = Math.abs(amountresult);
+                        }
                     }
 
                     // Formato de Fechas
@@ -590,7 +608,6 @@ define(['./LMRY_libSendingEmailsLBRY_V2.0', './LMRY_libNumberInWordsLBRY_V2.0', 
                             if (Field_whtkind == 1) {
                                 // Valida si el item que se va a popular estan configurado
                                 if (Field_itesales == '' || Field_itesales == null) {
-                                    log.debug("Field_itesales",Field_itesales);
                                     return true;
                                 }
 
@@ -835,7 +852,7 @@ define(['./LMRY_libSendingEmailsLBRY_V2.0', './LMRY_libNumberInWordsLBRY_V2.0', 
                                     fieldId: 'custbody_lmry_wht_base_amount',
                                     value: amount
                                 });
-                                log.debug("Field_itesales",Field_itesales);
+
                                 // Lineas
                                 if (Field_itesales != '' && Field_itesales != null) {
                                     inRec.setSublistValue({
@@ -845,14 +862,12 @@ define(['./LMRY_libSendingEmailsLBRY_V2.0', './LMRY_libNumberInWordsLBRY_V2.0', 
                                         value: Field_itesales
                                     });
                                 }
-                                log.debug("Field_itesales paso","passooooo");
                                 inRec.setSublistValue({
                                     sublistId: 'item',
                                     fieldId: 'quantity',
                                     line: 0,
                                     value: 1
                                 });
-                                log.debug("flag","quantit");
                                 /*inRec.setSublistValue({
                                 sublistId: 'item',
                                 fieldId: 'location',
@@ -867,7 +882,6 @@ define(['./LMRY_libSendingEmailsLBRY_V2.0', './LMRY_libNumberInWordsLBRY_V2.0', 
                                     line: 0,
                                     value: -1
                                 });
-                                log.debug("flag","quantit 1");
                                 // Importe a insertaar
                                 //log.error('item : amountresult', amountresult);
                                 // Custom
@@ -879,7 +893,7 @@ define(['./LMRY_libSendingEmailsLBRY_V2.0', './LMRY_libNumberInWordsLBRY_V2.0', 
                                         value: amountresult
                                     });
                                 }
-                                log.debug("flag","quantit 2");
+
                                 // 2019-08-09 Transaction Line TaxCode
                                 if (idtaxgparam != '' && idtaxgparam != null) {
                                     inRec.setSublistValue({
@@ -889,7 +903,6 @@ define(['./LMRY_libSendingEmailsLBRY_V2.0', './LMRY_libNumberInWordsLBRY_V2.0', 
                                         value: idtaxgparam
                                     });
                                 }
-                                log.debug("flag","quantit 3");
                                 // Campos de cabecera obligatorios (Habilitados en prefencias de contabilidad)
                                 if (linDepar != '' && linDepar != null) {
                                     inRec.setSublistValue({
@@ -899,7 +912,6 @@ define(['./LMRY_libSendingEmailsLBRY_V2.0', './LMRY_libNumberInWordsLBRY_V2.0', 
                                         value: linDepar
                                     });
                                 }
-                                log.debug("flag","quantit 4");
                                 if (linClass != '' && linClass != null) {
                                     inRec.setSublistValue({
                                         sublistId: 'item',
@@ -908,7 +920,6 @@ define(['./LMRY_libSendingEmailsLBRY_V2.0', './LMRY_libNumberInWordsLBRY_V2.0', 
                                         value: linClass
                                     });
                                 }
-                                log.debug("flag","quantit 5");
                                 if (linLocat != '' && linLocat != null) {
                                     inRec.setSublistValue({
                                         sublistId: 'item',
@@ -917,7 +928,7 @@ define(['./LMRY_libSendingEmailsLBRY_V2.0', './LMRY_libNumberInWordsLBRY_V2.0', 
                                         value: linLocat
                                     });
                                 }
-                                log.debug("flag","quanti 6");
+
                                 inRec.setSublistValue({
                                     sublistId: 'item',
                                     fieldId: 'custcol_lmry_base_amount',
@@ -931,14 +942,8 @@ define(['./LMRY_libSendingEmailsLBRY_V2.0', './LMRY_libNumberInWordsLBRY_V2.0', 
                                  * para evita le ejecucion de users events.
                                  * * * * * * * * * * * * * * * * * * * * * * * * * * */
                                 // Graba el Credit Memo
-                                log.debug("flag","quantit 7");
-                                try {
-                                    var newrec = inRec.save({ enableSourcing: true, ignoreMandatoryFields: true, disableTriggers: true });
-                                    log.debug("flag","quantit save");
-                                } catch (error) {
-                                    log.error("error",error)
-                                }
-                                
+                                var newrec = inRec.save({ enableSourcing: true, ignoreMandatoryFields: true, disableTriggers: true });
+
                                 /************************************
                                  * Abre el Credit Memo para aplicar
                                  * a la transaccion que se le genero
@@ -947,14 +952,13 @@ define(['./LMRY_libSendingEmailsLBRY_V2.0', './LMRY_libNumberInWordsLBRY_V2.0', 
 
                                 //var applyRec = record.load({ type: Field_Transa2, id: newrec, isDynamic: true });
                                 var applyRec = record.load({ type: Field_Transa2, id: newrec });
-                                log.debug("flag","quantit antes de aplicar");
+
                                 // Aplicado a
                                 var inLin = applyRec.getLineCount({ sublistId: 'apply' });
 
                                 // = = = = = = = = = = = = = = = = = = = = = = = = = = =
                                 // 2021.02.26 : Desmarca el apply se ubiera uno asignado
                                 // =  = = = = = = = = = = = = = = = = = = = = = = = = = =
-                                log.debug("flag","aplicado");
                                 for (var i = 0; i < inLin; i++) {
                                     var idTran = applyRec.getSublistValue({ sublistId: 'apply', fieldId: 'apply', line: i });
                                     if (idTran) {
@@ -963,7 +967,7 @@ define(['./LMRY_libSendingEmailsLBRY_V2.0', './LMRY_libNumberInWordsLBRY_V2.0', 
                                         log.error('apply : ' + i, applyRec.getSublistValue({ sublistId: 'apply', fieldId: 'internalid', line: i }));
                                     }
                                 }
-                                log.debug("flag","paso aplicado");
+
                                 // 2021.02.25 : Se aplica la retencion a la transaccion
                                 for (var i = 0; i < inLin; i++) {
                                     var idTran = applyRec.getSublistValue({ sublistId: 'apply', fieldId: 'internalid', line: i });
@@ -1266,14 +1270,9 @@ define(['./LMRY_libSendingEmailsLBRY_V2.0', './LMRY_libNumberInWordsLBRY_V2.0', 
                             }
                         }
                     }
- 
-                    if (Number(idCountry) == 48){ // Colombia
-                        createTaxResult(Obj_RCD,Field_Rate,amount,amountresult, WHTID,exchangeRate);
-                    }
                     var usage = runtime.getCurrentScript().getRemainingUsage();
                     //log.error('Create_WHT_1 - getRemainingUsage ', usage);
                 }
-                log.debug("Create_WHT_1","end")
             } catch (err) {
                 // Debug
                 //log.error('Create_WHT_1 - Error: ', err);
@@ -1333,6 +1332,10 @@ define(['./LMRY_libSendingEmailsLBRY_V2.0', './LMRY_libNumberInWordsLBRY_V2.0', 
                 var savedsearch = search.load({
                     id: 'customsearch_lmry_wht_base'
                 });
+                savedsearch.columns.push(search.createColumn({
+                    name: 'custrecord_lmry_wht_variable_rate'
+                }));
+
                 savedsearch.filters.push(search.createFilter({
                     name: 'internalid',
                     operator: search.Operator.ANYOF,
@@ -1370,6 +1373,7 @@ define(['./LMRY_libSendingEmailsLBRY_V2.0', './LMRY_libNumberInWordsLBRY_V2.0', 
                     var Field_xliabacc = objResult[i].getValue('custrecord_lmry_wht_taxliabacc');
                     var Field_Custom = objResult[i].getValue(columns[4]);
                     var Field_Standar = '';
+                    var Field_variable = objResult[i].getValue('custrecord_lmry_wht_variable_rate');
 
                     // Variables para Ventas - Credit Memo
                     if (typetran == 'custcred') {
@@ -1416,12 +1420,17 @@ define(['./LMRY_libSendingEmailsLBRY_V2.0', './LMRY_libNumberInWordsLBRY_V2.0', 
 
                     // Calculo de Campos
                     var amountresult = 0;
-                    if (amount != '' && amount != null) {
-                        amountresult = parseFloat(amount) * parseFloat(Field_Rate);
-                        amountresult = parseFloat(amountresult) / 100;
-                        //amountresult = amountresult.toFixed(2);
-                        amountresult = round2(amountresult)
-                        amountresult = Math.abs(amountresult);
+                    if (Field_variable && Number(Obj_RCD.getValue({ fieldId: Field_Custom })) && typetran == 'vendcred') {
+                        amount = round2(getBase(Field_Custom, Obj_RCD) / exchangeRate);
+                        amountresult = round2(Obj_RCD.getValue({ fieldId: Field_Custom }) / exchangeRate);
+                    } else {
+                        if (amount != '' && amount != null) {
+                            amountresult = parseFloat(amount) * parseFloat(Field_Rate);
+                            amountresult = parseFloat(amountresult) / 100;
+                            //amountresult = amountresult.toFixed(2);
+                            amountresult = round2(amountresult)
+                            amountresult = Math.abs(amountresult);
+                        }
                     }
 
                     // Formato de Fechas
@@ -2071,10 +2080,6 @@ define(['./LMRY_libSendingEmailsLBRY_V2.0', './LMRY_libNumberInWordsLBRY_V2.0', 
                     }
                     var usage = runtime.getCurrentScript().getRemainingUsage();
                 }
-
-                if (Number(idCountry) == 48){ // Colombia
-                    createTaxResult(Obj_RCD,Field_Rate,amount,amountresult, WHTID,exchangeRate);
-                }
             } catch (err) {
                 // Debug
                 Library_Mail.sendemail('Create_WHT_2 - Error: ' + err, LMRY_script);
@@ -2487,139 +2492,81 @@ define(['./LMRY_libSendingEmailsLBRY_V2.0', './LMRY_libNumberInWordsLBRY_V2.0', 
             }
         }
 
-        /* ------------------------------------------------------------------------------------------------------
-        * Funcion que obtiene el subtype del tipo de retencion que se aplica a la transaccion.
-        * --------------------------------------------------------------------------------------------------- */
-        function getSubTypeWHT(WHTID) {
-
-            var setupWhtSubType = {
-                text: "",
-                value: 0,
-                description: ""
-            };
-            var whtCodeSearch = search.create({
-                type: "customrecord_lmry_wht_code",
-                filters:
-                    [
-                        ["internalid", "anyof", WHTID]
-                    ],
-                columns:
-                    [
-                        search.createColumn({
-                            name: "formulatext",
-                            formula: "{custrecord_lmry_wht_types.custrecord_lmry_wht_subtype}",
-                            label: "subtype"
-                        }),
-                        search.createColumn({
-                            name: "formulatext",
-                            formula: "{custrecord_lmry_wht_types.custrecord_lmry_wht_subtype.id}",
-                            label: "subtype"
-                        }),
-                        search.createColumn({
-                            name: "formulatext",
-                            formula: "{custrecord_lmry_wht_codedesc}",
-                            label: "description"
-                        })
-                    ]
-            });
-
-            whtCodeSearch.run().each(function (result) {
-                var columns = result.columns;
-                setupWhtSubType.text = result.getValue(columns[0]);
-                setupWhtSubType.value = result.getValue(columns[1]);
-                setupWhtSubType.description = result.getValue(columns[2]);
-            });
-            return setupWhtSubType;
-        }
-
-        /* ------------------------------------------------------------------------------------------------------
-        * Funcion que estructura el campo LATAM - ACCOUNTING BOOKS de un tax results
-        * --------------------------------------------------------------------------------------------------- */
-        function getAccountingBooks(recordObj) {
-            var auxBookMB = 0;
-            var auxExchangeMB = recordObj.getValue({ fieldId: "exchangerate" });
-            var featureMB = runtime.isFeatureInEffect({
-                feature: "MULTIBOOK"
-            });
-            if (featureMB) {
-                var lineasBook = recordObj.getLineCount({ sublistId: "accountingbookdetail" });
-                if (lineasBook != null && lineasBook !== "") {
-                    for (var j = 0; j < lineasBook; j++) {
-                        var lineaBook = recordObj.getSublistValue({ sublistId: "accountingbookdetail", fieldId: "accountingbook", line: j });
-                        var lineaExchangeRate = recordObj.getSublistValue({ sublistId: "accountingbookdetail", fieldId: "exchangerate", line: j });
-                        auxBookMB = auxBookMB + "|" + lineaBook;
-                        auxExchangeMB = auxExchangeMB + "|" + lineaExchangeRate;
+        function createFields(serverWidget, form, recordObj, type) {
+            if (runtime.executionContext === runtime.ContextType.USER_INTERFACE) {
+                var fieldNames = [ 
+                    { name: "custpage_lmry_retefte_base", type: serverWidget.FieldType.CURRENCY, label: "Latam - CO ReteFTE New Base"},
+                    { name: "custpage_lmry_retefte_rate", type: serverWidget.FieldType.PERCENT, label: "Latam - CO ReteFTE New Rate"},
+                    { name: "custpage_lmry_reteiva_base", type: serverWidget.FieldType.CURRENCY, label: "Latam - CO ReteIVA New Base"},
+                    { name: "custpage_lmry_reteiva_rate", type: serverWidget.FieldType.PERCENT, label: "Latam - CO ReteIVA New Rate"},
+                    { name: "custpage_lmry_reteica_base", type: serverWidget.FieldType.CURRENCY, label: "Latam - CO ReteICA New Base"},
+                    { name: "custpage_lmry_reteica_rate", type: serverWidget.FieldType.PERCENT, label: "Latam - CO ReteICA New Rate"},
+                    { name: "custpage_lmry_retecree_base", type: serverWidget.FieldType.CURRENCY, label: "Latam - CO ReteCREE New Base"},
+                    { name: "custpage_lmry_retecree_rate", type: serverWidget.FieldType.PERCENT, label: "Latam - CO ReteCREE New Rate"}
+                ]
+                var valueData = recordObj.getValue("custbody_lmry_features_active");
+                log.debug("custbody_lmry_features_active", valueData);
+                var dataJSON = valueData ? JSON.parse(valueData) : {};
+                for (var i = 0; i < fieldNames.length; i++) {
+                    var fieldObj = form.addField({ id: fieldNames[i].name, type: fieldNames[i].type, label: fieldNames[i].label });
+                    fieldObj.setHelpText(fieldNames[i].name);
+                    if (dataJSON[fieldNames[i].name]) {
+                        fieldObj.defaultValue = dataJSON[fieldNames[i].name];
+                    } else {
+                        if (type == "view") fieldObj.updateDisplayType({ displayType : serverWidget.FieldDisplayType.HIDDEN });
                     }
                 }
-            } // Fin Multibook
-
-            return auxBookMB + "&" + auxExchangeMB;
-        }
-
-        /* ------------------------------------------------------------------------------------------------------
-        * Funcion que crea tax result relacionado a las retenciones de cabecera para el pais de Colombia.
-        * --------------------------------------------------------------------------------------------------- */
-        function createTaxResult(recordTransaction, rateWht, amount, amountWht, idWHT, exchangeRate) {
-            try {
-                var subtype = getSubTypeWHT(idWHT);
-                var multibook = getAccountingBooks(recordTransaction);
-                var recordSummary = record.create({ type: 'customrecord_lmry_br_transaction', isDynamic: false });
-                recordSummary.setValue({ fieldId: 'custrecord_lmry_br_related_id', value: String(recordTransaction.id) });
-                recordSummary.setValue({ fieldId: 'custrecord_lmry_br_transaction', value: recordTransaction.id });
-                recordSummary.setValue({ fieldId: 'custrecord_lmry_br_type', value: subtype.text });
-                recordSummary.setValue({ fieldId: 'custrecord_lmry_br_type_id', value: subtype.value });
-                recordSummary.setValue({ fieldId: 'custrecord_lmry_base_amount', value: amount });
-                recordSummary.setValue({ fieldId: 'custrecord_lmry_br_total', value: amountWht });
-                recordSummary.setValue({ fieldId: 'custrecord_lmry_br_percent', value: parseFloat(rateWht) / 100 });
-                recordSummary.setValue({ fieldId: 'custrecord_lmry_total_item', value: 'Total' });
-                recordSummary.setValue({ fieldId: 'custrecord_lmry_accounting_books', value: multibook });
-                recordSummary.setValue({ fieldId: 'custrecord_lmry_tax_description', value: subtype.description });
-                recordSummary.setValue({ fieldId: 'custrecord_lmry_total_base_currency', value: amountWht * exchangeRate });
-                recordSummary.setValue({ fieldId: 'custrecord_lmry_base_amount_local_currc', value: amount * exchangeRate });
-                recordSummary.setValue({ fieldId: 'custrecord_lmry_amount_local_currency', value: amountWht * exchangeRate });
-                recordSummary.setValue({ fieldId: 'custrecord_lmry_tax_type', value: '1' });
-
-                var idRecordSummary = recordSummary.save({ disableTriggers: true, ignoreMandatoryFields: true });
-
-                log.debug('tax result creado', idRecordSummary);
-            } catch (error) {
-                log.error("[createTaxResult] error:",error)
             }
-
-
         }
-        /* ------------------------------------------------------------------------------------------------------
-        * Funcion que permite eliminar los tax results.
-        * --------------------------------------------------------------------------------------------------- */
-        function deleteTaxResults(idTransaction) {
-            log.debug('deleteTaxResults', "deleteTaxResults");
-            log.debug('deleteTaxResults idTransaction', idTransaction);
-            log.debug('deleteTaxResults idTransaction typeof ', typeof idTransaction);
 
-            var searchTaxResult = search.create({
-                type: 'customrecord_lmry_br_transaction',
-                filters: [
-                    ["custrecord_lmry_br_related_id","is",String(idTransaction)]
-                ],
-                columns:
-                    [
-                        search.createColumn({ name: "internalid", label: "Internal ID" })
-                    ]
-            });
-            var searchResultCount = searchTaxResult.runPaged().count;
-            log.debug("searchResultCount", searchResultCount)
-            searchTaxResult.run().each(function (result) {
-                var columns = result.columns;
-                var internalid = result.getValue(columns[0]);
+        function setFieldValues(recordObj) {
+            log.debug("runtime.executionContext", runtime.executionContext);
+            log.debug("runtime.ContextType.USER_INTERFACE", runtime.ContextType.USER_INTERFACE);
+            if (runtime.executionContext === runtime.ContextType.USER_INTERFACE) {
+                var rfte_amount = recordObj.getValue("custbody_lmry_co_retefte_amount");
+                var riva_amount = recordObj.getValue("custbody_lmry_co_reteiva_amount");
+                var rica_amount = recordObj.getValue("custbody_lmry_co_reteica_amount");
+                var rcree_amount = recordObj.getValue("custbody_lmry_co_retecree_amount");
+                var rfte_base = Number(rfte_amount) ? recordObj.getValue("custpage_lmry_retefte_base") : 0;
+                var rfte_rate = Number(rfte_amount) ? recordObj.getValue("custpage_lmry_retefte_rate") : 0;
+                var riva_base = Number(riva_amount) ? recordObj.getValue("custpage_lmry_reteiva_base") : 0;
+                var riva_rate = Number(riva_amount) ? recordObj.getValue("custpage_lmry_reteiva_rate") : 0;
+                var rica_base = Number(rica_amount) ? recordObj.getValue("custpage_lmry_reteica_base") : 0;
+                var rica_rate = Number(rica_amount) ? recordObj.getValue("custpage_lmry_reteica_rate") : 0;
+                var rcree_base = Number(rcree_amount) ? recordObj.getValue("custpage_lmry_retecree_base") : 0;
+                var rcree_rate = Number(rcree_amount) ? recordObj.getValue("custpage_lmry_retecree_rate") : 0;
+                var dataJSON = {};
+                if (rfte_base) dataJSON["custpage_lmry_retefte_base"] = rfte_base;
+                if (rfte_rate) dataJSON["custpage_lmry_retefte_rate"] = rfte_rate;
+                if (riva_base) dataJSON["custpage_lmry_reteiva_base"] = riva_base;
+                if (riva_rate) dataJSON["custpage_lmry_reteiva_rate"] = riva_rate;
+                if (rica_base) dataJSON["custpage_lmry_reteica_base"] = rica_base;
+                if (rica_rate) dataJSON["custpage_lmry_reteica_rate"] = rica_rate;
+                if (rcree_base) dataJSON["custpage_lmry_retecree_base"] = rcree_base;
+                if (rcree_rate) dataJSON["custpage_lmry_retecree_rate"] = rcree_rate;
+                log.debug("dataJSON", JSON.stringify(dataJSON));
+                if (Object.keys(dataJSON).length) {
+                    recordObj.setValue("custbody_lmry_features_active", JSON.stringify(dataJSON));
+                } else {
+                    recordObj.setValue("custbody_lmry_features_active", "");
+                }
+            }
+                
+            
+        }
 
-                record.delete({
-                    type: 'customrecord_lmry_br_transaction',
-                    id: internalid
-                });
-                log.debug('Registro eliminado', 'ID del registro eliminado: ' + internalid);
-                return true;
-            });
-            log.debug('deleteTaxResults', "deleteTaxResults end");
+        function getBase(key, recordObj) {
+            log.debug("key", key);
+            var JsonValues = recordObj.getValue("custbody_lmry_features_active");
+            JsonValues = JsonValues ? JSON.parse(JsonValues) : {};
+            var jsonBase = {
+                "custbody_lmry_co_retefte_amount": "custpage_lmry_retefte_base",
+                "custbody_lmry_co_reteiva_amount": "custpage_lmry_reteiva_base",
+                "custbody_lmry_co_reteica_amount": "custpage_lmry_reteica_base",
+                "custbody_lmry_co_retecree_amount": "custpage_lmry_retecree_base"
+            }
+            log.debug("getBase", jsonBase[key]);
+            return JsonValues[jsonBase[key]] || 0;
         }
 
         return {
@@ -2634,7 +2581,9 @@ define(['./LMRY_libSendingEmailsLBRY_V2.0', './LMRY_libNumberInWordsLBRY_V2.0', 
             yyymmdd: yyymmdd,
             getExchangeRate: getExchangeRate,
             getTransactionsToDelete: getTransactionsToDelete,
-            round2: round2
+            round2: round2,
+            createFields: createFields,
+            setFieldValues: setFieldValues
         };
 
     });

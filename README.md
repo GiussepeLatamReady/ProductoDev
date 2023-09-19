@@ -14,7 +14,7 @@ Creación de un nuevo campo “WHT Subtype” (custrecord_lmry_wht_subtype), est
 
 ## Script Modify
 
-
+        LMRY_libWhtValidationLBRY_V2.0.js
 
 
 
@@ -26,11 +26,77 @@ Creación de un nuevo campo “WHT Subtype” (custrecord_lmry_wht_subtype), est
 
 ## Record modificados
 
- Se agregó el registro Base 8 en el record LatamReady - EC Base Amount.
 
 ## Campo de cabecera
 
-    Latam - EC Base Rate 12% -- [Latam - EC Base Rate IVA] (https://tstdrv1774174.app.netsuite.com/app/common/custom/bodycustfield.nl?id=8965)
+
+*LATAM - RELATED ID: Internal ID de la transacción a la que se le realizó el cálculo de retenciones.
+    	custrecord_lmry_br_related_id
+*LATAM - RELATED TRANSACTION: Transacción a la que se le realizó el cálculo de retenciones.
+    	custrecord_lmry_br_transaction
+*LATAM - SUB TYPE: Se obtiene del campo “WHT Subtype” del record “LatamReady - WHT Type” relacionado al campo “WITHHOLDING TAX TYPE” del record “LatamReady - WHT Code”.
+    	custrecord_lmry_br_type
+*LATAM - BASE AMOUNT: Es el monto base de la retención en moneda de la transacción.
+        custrecord_lmry_base_amount
+LATAM - TOTAL: Es el monto de retención en moneda de la transacción.
+LATAM - TOTAL BASE CURRENCY: Es el monto de retención en moneda del país  (Pesos Colombianos).
+LATAM - PERCENTAGE: Es el porcentaje de retención (entre 0 y 1).
+LATAM - TOTAL / LINE: “Total”.
+LATAM - DESCRIPTION: Se obtiene del campo “Description” del record “LatamReady - WHT Code”.
+LATAM - ACCOUNTING BOOKS: Concatenado de libros contables con sus respectivos tipos de cambio.
+LATAM - TAX TYPE: “Retencion”.
+LATAM - SUB TYPE LIST: Se obtiene del campo “WHT Subtype” del record “LatamReady - WHT Type” relacionado al campo “WITHHOLDING TAX TYPE” del record “LatamReady - WHT Code”.
+LATAM - BASE AMOUNT LOCAL CURRENCY: Monto base de cálculo en moneda del país (Pesos Colombianos).
+LATAM - AMOUNT LOCAL CURRENCY: Monto del cálculo de retenciones calculado en moneda del país (Pesos Colombianos) con todos sus decimales.
+LATAM - GROSS AMT LOCAL CURRENCY: Monto gross de la factura en moneda nacional (Pesos Colombianos).
+LATAM - DISCOUNT AMT LOCAL CURRENCY: Monto de descuento de la factura en moneda nacional (Pesos Colombianos).
+
+## ids Documento
+
+    custrecord_lmry_br_related_id
+    custrecord_lmry_br_transaction
+    custrecord_lmry_br_type
+    custrecord_lmry_base_amount
+    custrecord_lmry_br_total
+    custrecord_lmry_total_base_currency
+    custrecord_lmry_br_percent
+    custrecord_lmry_total_item
+    custrecord_lmry_tax_description
+    custrecord_lmry_accounting_books
+    custrecord_lmry_tax_type
+    custrecord_lmry_br_type_id
+    custrecord_lmry_base_amount_local_currc
+    custrecord_lmry_amount_local_currency
+    custrecord_lmry_gross_amt_local_curr
+    custrecord_lmry_discount_amt_local_curr
+
+## ids script libry guide
+
+        custrecord_lmry_br_related_id
+        custrecord_lmry_br_transaction
+        custrecord_lmry_br_type
+        custrecord_lmry_br_type_id
+        custrecord_lmry_base_amount
+        custrecord_lmry_br_total
+        custrecord_lmry_br_percent
+        custrecord_lmry_total_item
+        custrecord_lmry_item
+        custrecord_lmry_br_positem
+        custrecord_lmry_br_ccl    
+        custrecord_lmry_ccl  
+        custrecord_lmry_ntax
+        custrecord_lmry_accounting_books
+        custrecord_lmry_tax_description
+        custrecord_lmry_ec_wht_taxcode
+        custrecord_lmry_ec_rate_rpt
+        custrecord_lmry_total_base_currency
+        custrecord_lmry_base_amount_local_currc
+        custrecord_lmry_amount_local_currency
+        custrecord_lmry_tax_type
+        custrecord_lmry_lineuniquekey
+
+
+
 
 
 
