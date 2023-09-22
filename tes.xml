@@ -1,0 +1,58 @@
+<soapenv:Envelope 	xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
+			   	xmlns:urn="urn:messages_2019_2.platform.webservices.netsuite.com" 
+			   	xmlns:urn1="urn:core_2019_2.platform.webservices.netsuite.com"
+			   	xmlns:platformMsgs="urn:messages_2019_2.platform.webservices.netsuite.com">
+   <soapenv:Header>
+      <urn:applicationInfo>
+         <urn:applicationId>B8C3341B-2398-469D-BA64-97DCA6A76A89</urn:applicationId>
+      </urn:applicationInfo>
+      <urn:passport>
+         <urn1:email>xxxxxxxxx@latamready.com</urn1:email>
+         <urn1:password>xxxxxxxxxxxxxxxxxx</urn1:password>
+         <urn1:account>tstdrv1774174</urn1:account>
+         <!--Optional:-->
+         <urn1:role internalId="3">
+         </urn1:role>
+      </urn:passport>
+   </soapenv:Header>
+   <soapenv:Body>
+      <platformMsgs:add 	xmlns:platformMsgs="urn:messages_2019_2.platform.webservices.netsuite.com" 
+      			 	>p
+         <platformMsgs:record xmlns:listRel="urn:urchases_2019_2.transactions.webservices.netsuite.com"
+         					xmlns:core="urn:core_2019_2.platform.webservices.netsuite.com"
+         					xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         					xmlns:platformCore="urn:core_2019_2.platform.webservices.netsuite.com" 
+         					xsi:type="listRel:VendorBill">
+            <!-- Aquí agregarías los datos del Vendor Bill -->
+            <listRel:entity internalId="8555"/>
+            <listRel:account internalId="25"/>
+            <listRel:subsidiary internalId="5"/>
+            <listRel:approvalStatus internalId="2"/> 
+            <listRel:currency internalId="1"/>
+            <listRel:memo>Creado por SOAP WEBSERVICE</listRel:memo>
+            <listRel:customFieldList>
+               <platformCore:customField 	scriptId="custbody_lmry_document_type" 
+      							xsi:type="platformCore:SelectCustomFieldRef">
+                  <platformCore:value internalId="354"/>
+               </platformCore:customField>
+               <platformCore:customField 	scriptId="custbody_lmry_serie_doc_cxp" 
+      							xsi:type="platformCore:SelectCustomFieldRef">
+                  <platformCore:value internalId="25070117"/>
+               </platformCore:customField>
+               <platformCore:customField 	scriptId="custbody_lmry_num_preimpreso" 
+      							xsi:type="platformCore:SelectCustomFieldRef">
+                  <platformCore:value internalId="001"/>
+               </platformCore:customField>
+            </listRel:customFieldList>
+            <listRel:itemList>
+               <listRel:item>
+                  <listRel:item internalId="387"/>
+                  <listRel:quantity>1.00</listRel:quantity>
+                  <listRel:location internalId="6"/>
+               </listRel:item>
+            </listRel:itemList>
+            <!-- Otros campos y valores del Vendor Bill -->
+         </platformMsgs:record>
+      </platformMsgs:add>
+   </soapenv:Body>
+</soapenv:Envelope>

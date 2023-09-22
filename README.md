@@ -46,6 +46,14 @@ Strict Bill Credit Duplicity
 9: 82619756
 10: 44546853
 
+
+## Script modificados
+
+LMRY_TranID_CSV_LBRY_V2.0.js
+LMRY_VendorBillURET_V2.0.js
+LMRY_VendorCreditURET_V2.0.js
+
+
     
 
 
