@@ -21,7 +21,7 @@ define(['N/log', './LMRY_libSendingEmailsLBRY_V2.0', 'N/search', 'N/runtime', '.
         function generateTranID(recordObj, LMRY_countr, licenses) {
             try {
 
-                log.debug('[generateTranID]', 'START');
+                
 
                 var docType = recordObj.getValue('custbody_lmry_document_type');
                 var docCxp = recordObj.getValue('custbody_lmry_serie_doc_cxp');
@@ -62,7 +62,7 @@ define(['N/log', './LMRY_libSendingEmailsLBRY_V2.0', 'N/search', 'N/runtime', '.
                         return false;
                     }
                 }
-                log.debug('[generateTranID]', 'END');
+                
             } catch (error) {
                 log.error('generateTranID error', error);
                 //libraryMail.sendemail('[generateTranID] ' + error, LMRY_script);
