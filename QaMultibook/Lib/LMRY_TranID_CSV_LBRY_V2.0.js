@@ -84,7 +84,9 @@ define(['N/log', './LMRY_libSendingEmailsLBRY_V2.0', 'N/search', 'N/runtime', '.
         }
 
         if (features.hasOwnProperty(LMRY_countr) && libraryMail.getAuthorization(features[LMRY_countr][recordType], licenses)) {
-          if (!validateEqualDocuments(recordObj, LMRY_countr, licenses)) {
+          var validacion = validateEqualDocuments(recordObj, LMRY_countr, licenses);
+          log.debug("validacion ",validacion)
+          if (!validacion) {
             return false;
           }
         }
@@ -206,6 +208,7 @@ define(['N/log', './LMRY_libSendingEmailsLBRY_V2.0', 'N/search', 'N/runtime', '.
             filters: filters
           });
           var searchresults = searchresults.run().getRange(0, 1000);
+          log.debug("searchresults",searchresults)
           if (searchresults != null && searchresults != '') {
             //prefijo actual
             var prefix = recordObj.getValue({
@@ -227,15 +230,20 @@ define(['N/log', './LMRY_libSendingEmailsLBRY_V2.0', 'N/search', 'N/runtime', '.
             newpref = newpref.custentity_lmry_prefijo_prov;
 
             // Se valida que no sea el mismo registro
+            log.debug("idtransac",idtransac);
+            log.debug("Internal id",searchresults[0].getValue('internalid'));
             if (idtransac == searchresults[0].getValue('internalid')) {
               exist = true;
             } else {
               if (LMRY_countr == 'AR' && libraryMail.getAuthorization(829, licenses)) {
+                log.debug("exclusionDocument",exclusionDocument);
                 if (exclusionDocument) {
                   exist = false;
                   return exist;
                 }
               }
+              log.debug("oldpref",oldpref)
+              log.debug("newpref",newpref)
               if (oldpref == newpref) {
                 exist = false;
               } else {

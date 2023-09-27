@@ -1226,11 +1226,19 @@ define(['require', './Latam_Library/LMRY_UniversalSetting_Purchase_LBRY', 'N/rec
           if (["AR", "CO", "PE", "MX", "CL", "PA"].indexOf(LMRY_Result[0]) != -1) {
             require(["./Latam_Library/LMRY_KofaxIntegrations_LBRY_V2.0", './Latam_Library/LMRY_TranID_CSV_LBRY_V2.0.js'],
               function(kofaxModule, csvModule) {
+                var isSetTranid = false;
                 if (type == 'create') {
                   kofaxModule.SetCustomField_WHT_Code_VB(recordObj, LMRY_Result, licenses);
+                  if (NewFeature) {
+                    isSetTranid = kofaxModule.generateTranID();
+                  }
+                  
                 }
                 //recordObj.setValue("custbody_lmry_apply_wht_code", true);
-                csvModule.generateTranID(recordObj, LMRY_Result[0], licenses);
+                if (!isSetTranid) {
+                  csvModule.generateTranID(recordObj, LMRY_Result[0], licenses);
+                }
+                
               });
           }
         }

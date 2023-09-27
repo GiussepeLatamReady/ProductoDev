@@ -43,12 +43,15 @@
              var idTran = recordObj.id;
              var typeTran = recordObj.type;
              var vendor = recordObj.getValue('entity'); //mine Caso Kavak AR
+             log.debug("feature Validate Tranid",libraryMail.getAuthorization(features[country], licenses))
              if (!libraryMail.getAuthorization(features[country], licenses)) {
+                log.debug("flag","feature desactivado...")
                  return true;
              }
 
              var tranID = recordObj.getValue('tranid');
              if(tranID == null || tranID == ''){
+                log.debug("flag","No tiene tranid :",tranID)
                  return true;
              }
 
@@ -72,10 +75,12 @@
              }
 
              searchTranID = searchTranID.run().getRange(0, 1000);
+             log.debug("searchTranID",searchTranID)
              if (searchTranID != null && searchTranID != '') {
+                log.debug("flag","Se encontró resultados")
                  return false;
              }
-
+             
              recordObj.setValue('tranid', tranID.trim());
 
          } catch (error) {

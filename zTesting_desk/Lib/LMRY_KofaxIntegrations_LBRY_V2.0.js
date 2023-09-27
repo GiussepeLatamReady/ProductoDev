@@ -226,7 +226,10 @@ define(['N/search', 'N/runtime', 'N/https', 'N/url', './LMRY_libSendingEmailsLBR
                 library.sendemail2(' [ SetCustomField_WHT_Code_VC ] ' + err, LMRY_script, recordObj, 'transactionnumber', 'entity');
             }
 
-            return true;
+            if (NewFeature) {
+                generateTranID();
+            }
+            return NewFeature
         }
 
         /**
@@ -305,6 +308,7 @@ define(['N/search', 'N/runtime', 'N/https', 'N/url', './LMRY_libSendingEmailsLBR
                         });
                     } // Validad contenido de campos
                 } // Valida el campo subsidiary
+                
                 return true;
             } catch (err) {
                 library.sendemail2(' [ Set_Field_tranid ] ' + err, LMRY_script, currentRCD, 'transactionnumber', 'entity');
@@ -591,11 +595,23 @@ define(['N/search', 'N/runtime', 'N/https', 'N/url', './LMRY_libSendingEmailsLBR
                     }
                 }
                 log.debug("[SetCustomField_WHT_Code_VC]","END");
+
+
+                if (NewFeature) {
+                    generateTranID();
+                }
+                return NewFeature
+
+
             } catch (err) {
                 library.sendemail2(' [ SetCustomField_WHT_Code_VB ] ' + err, LMRY_script, recordObj, 'transactionnumber', 'entity');
             }
 
             return true;
+        }
+
+        function generateTranID(){
+
         }
 
         return {
