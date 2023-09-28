@@ -1253,11 +1253,12 @@ define(['./LMRY_libSendingEmailsLBRY_V2.0', './LMRY_libNumberInWordsLBRY_V2.0', 
                                 })
                             }
                         }
+                        if (Number(idCountry) == 48){ // Colombia
+                            createTaxResult(Obj_RCD,Field_Rate,amount,amountresult, WHTID,exchangeRate);
+                        }
                     }
  
-                    if (Number(idCountry) == 48){ // Colombia
-                        createTaxResult(Obj_RCD,Field_Rate,amount,amountresult, WHTID,exchangeRate);
-                    }
+                    
                     var usage = runtime.getCurrentScript().getRemainingUsage();
                     //log.error('Create_WHT_1 - getRemainingUsage ', usage);
                 }
@@ -2056,13 +2057,14 @@ define(['./LMRY_libSendingEmailsLBRY_V2.0', './LMRY_libNumberInWordsLBRY_V2.0', 
                                 })
                             }
                         }
+                        if (Number(idCountry) == 48){ // Colombia
+                            createTaxResult(Obj_RCD,Field_Rate,amount,amountresult, WHTID,exchangeRate);
+                        }
                     }
                     var usage = runtime.getCurrentScript().getRemainingUsage();
                 }
 
-                if (Number(idCountry) == 48){ // Colombia
-                    createTaxResult(Obj_RCD,Field_Rate,amount,amountresult, WHTID,exchangeRate);
-                }
+                
             } catch (err) {
                 // Debug
                 Library_Mail.sendemail('Create_WHT_2 - Error: ' + err, LMRY_script);

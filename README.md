@@ -15,9 +15,10 @@ Creación de un nuevo campo “WHT Subtype” (custrecord_lmry_wht_subtype), est
 ## Script Modify
 
         LMRY_libWhtValidationLBRY_V2.0.js
-
-
-
+        LMRY_CO_WHT_MainLevel_LBRY_V2.1.js
+        LMRY_CreditMemoURET_V2.0.js
+        LMRY_InvoiceURET_V2.0.js
+        
 ## Create Fields 
 
 
