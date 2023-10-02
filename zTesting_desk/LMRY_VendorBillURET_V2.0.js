@@ -1218,6 +1218,22 @@ define(['require', './Latam_Library/LMRY_UniversalSetting_Purchase_LBRY', 'N/rec
           library_ExchRate.setExchRate(context);
         }
 
+        var featuresExecuteIntegrationByCountry = {
+          "AR": 1058,
+          "CL": 1059,
+          "CO": 1060,
+          "EC": 1062,
+          "GT": 1063,
+          "MX": 1064,
+          "PA": 1065,
+          "PE": 1066,
+          "UY": 1067,
+        };
+
+        var featureExecuteIntegration = false;
+        if (featuresExecuteIntegrationByCountry.hasOwnProperty(LMRY_Result[0])) {
+          featureExecuteIntegration = library.getAuthorization(featuresExecuteIntegrationByCountry[LMRY_Result[0]], licenses);
+        }
         /**
          * Modificacion - Integracion Kofax autoseteo campos cabecera para generacion de retenciones
          */
@@ -1226,19 +1242,14 @@ define(['require', './Latam_Library/LMRY_UniversalSetting_Purchase_LBRY', 'N/rec
           if (["AR", "CO", "PE", "MX", "CL", "PA"].indexOf(LMRY_Result[0]) != -1) {
             require(["./Latam_Library/LMRY_KofaxIntegrations_LBRY_V2.0", './Latam_Library/LMRY_TranID_CSV_LBRY_V2.0.js'],
               function(kofaxModule, csvModule) {
-                var isSetTranid = false;
                 if (type == 'create') {
-                  kofaxModule.SetCustomField_WHT_Code_VB(recordObj, LMRY_Result, licenses);
-                  if (NewFeature) {
-                    isSetTranid = kofaxModule.generateTranID();
-                  }
-                  
+                  kofaxModule.SetCustomField_WHT_Code_VB(recordObj, LMRY_Result, licenses);    
                 }
-                //recordObj.setValue("custbody_lmry_apply_wht_code", true);
-                if (!isSetTranid) {
+                if (featureExecuteIntegration == true || featureExecuteIntegration == 'T') {
+                  kofaxModule.generateTranIDIntegration(recordObj, LMRY_Result[0], licenses);
+                }else{
                   csvModule.generateTranID(recordObj, LMRY_Result[0], licenses);
                 }
-                
               });
           }
         }

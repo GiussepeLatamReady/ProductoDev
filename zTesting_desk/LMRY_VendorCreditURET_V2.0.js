@@ -979,6 +979,23 @@ define(['N/record', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/log', 'N/co
         /**
          * Modificacion - Integracion Kofax autoseteo campos cabecera para generacion de retenciones
          */
+
+        var featuresExecuteIntegrationByCountry = {
+          "AR": 1058,
+          "CL": 1059,
+          "CO": 1060,
+          "EC": 1062,
+          "GT": 1063,
+          "MX": 1064,
+          "PA": 1065,
+          "PE": 1066,
+          "UY": 1067,
+        };
+
+        var featureExecuteIntegration = false;
+        if (featuresExecuteIntegrationByCountry.hasOwnProperty(LMRY_Result[0])) {
+          featureExecuteIntegration = library.getAuthorization(featuresExecuteIntegrationByCountry[LMRY_Result[0]], licenses);
+        }
         var type_interface = runtime.executionContext;
         if ((type == 'create' && type == 'edit') && type_interface != 'USERINTERFACE') {
           if (["AR", "CO", "PE", "MX", "CL", "PA"].indexOf(LMRY_Result[0]) != -1) {
@@ -988,7 +1005,11 @@ define(['N/record', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/log', 'N/co
                   kofaxModule.SetCustomField_WHT_Code_VC(recordObj, LMRY_Result, licenses);
                 }        
                 //recordObj.setValue("custbody_lmry_apply_wht_code", true);
-                csvModule.generateTranID(recordObj, LMRY_Result[0], licenses);
+                if (featureExecuteIntegration == true || featureExecuteIntegration == 'T'){
+                  kofaxModule.generateTranIDIntegration(recordObj, LMRY_Result[0], licenses);
+                }else{
+                  csvModule.generateTranID(recordObj, LMRY_Result[0], licenses);
+                }
               });
           }
         }

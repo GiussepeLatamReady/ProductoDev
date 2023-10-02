@@ -4,9 +4,9 @@
  * @NModuleScope Public
  * @Name LMRY_KofaxIntegrations_LBRY_V2.0.js
  */
-define(['N/search', 'N/runtime', 'N/https', 'N/url', './LMRY_libSendingEmailsLBRY_V2.0', 'N/log'],
+define(['N/search', 'N/runtime', 'N/https', 'N/url', './LMRY_libSendingEmailsLBRY_V2.0', 'N/log', './LMRY_Validate_TranID_LBRY'],
 
-    function (search, runtime, https, url, library,log) {
+    function (search, runtime, https, url, library,log,libraryVaTranId) {
         /**
          *
          * @param {Record} recordObj
@@ -226,10 +226,8 @@ define(['N/search', 'N/runtime', 'N/https', 'N/url', './LMRY_libSendingEmailsLBR
                 library.sendemail2(' [ SetCustomField_WHT_Code_VC ] ' + err, LMRY_script, recordObj, 'transactionnumber', 'entity');
             }
 
-            if (NewFeature) {
-                generateTranID();
-            }
-            return NewFeature
+            
+            return true
         }
 
         /**
@@ -597,11 +595,6 @@ define(['N/search', 'N/runtime', 'N/https', 'N/url', './LMRY_libSendingEmailsLBR
                 log.debug("[SetCustomField_WHT_Code_VC]","END");
 
 
-                if (NewFeature) {
-                    generateTranID();
-                }
-                return NewFeature
-
 
             } catch (err) {
                 library.sendemail2(' [ SetCustomField_WHT_Code_VB ] ' + err, LMRY_script, recordObj, 'transactionnumber', 'entity');
@@ -610,13 +603,61 @@ define(['N/search', 'N/runtime', 'N/https', 'N/url', './LMRY_libSendingEmailsLBR
             return true;
         }
 
-        function generateTranID(){
+        function generateTranIDIntegration(recordObj, LMRY_countr, licenses) {
+            try {
 
+                var docType = recordObj.getValue('custbody_lmry_document_type');
+                var docCxp = recordObj.getValue('custbody_lmry_serie_doc_cxp');
+                var numPre = recordObj.getValue('custbody_lmry_num_preimpreso');
+                var idsubsi = recordObj.getValue({ fieldId: 'subsidiary' });
+
+                if (LMRY_countr == 'AR' && libraryMail.getAuthorization(707, licenses) == true) {
+                    docCxp = libtools.completeSeries(docCxp, idsubsi);
+                    numPre = libtools.completePreprinted(numPre, idsubsi);
+                    recordObj.setValue({ fieldId: 'custbody_lmry_serie_doc_cxp', value: docCxp });
+                    recordObj.setValue({ fieldId: 'custbody_lmry_num_preimpreso', value: numPre });
+                }
+
+                log.debug('docType - docCxp - numPre', docType + ' - ' + docCxp + ' - ' + numPre);
+
+                if (docType != '' && docType != null) {
+                    var textIni = search.lookupFields({
+                        type: 'customrecord_lmry_tipo_doc',
+                        id: docType,
+                        columns: ['custrecord_lmry_doc_initials']
+                    });
+
+                    var textIni = textIni.custrecord_lmry_doc_initials || '';
+                    var text = ''
+
+                    text += textIni.toUpperCase() + ' ' + docCxp + '-' + numPre;
+
+                    log.debug('text', text);
+
+                    recordObj.setValue({
+                        fieldId: 'tranid',
+                        value: text
+                    });
+
+                    var validate = libraryVaTranId.validateTranID(recordObj, LMRY_countr, licenses)
+                    log.debug('validate', validate);
+                    if (!validate) {
+                        return false;
+                    }
+                }
+                
+            } catch (error) {
+                log.error('generateTranID error', error);
+                //libraryMail.sendemail('[generateTranID] ' + error, LMRY_script);
+            }
+            return true;
         }
+
 
         return {
             SetCustomField_WHT_Code_VC: SetCustomField_WHT_Code_VC,
             Set_Field_tranid: Set_Field_tranid,
-            SetCustomField_WHT_Code_VB: SetCustomField_WHT_Code_VB
+            SetCustomField_WHT_Code_VB: SetCustomField_WHT_Code_VB,
+            generateTranIDIntegration:generateTranIDIntegration
         };
     });
