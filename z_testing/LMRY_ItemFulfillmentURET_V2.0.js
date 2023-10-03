@@ -13,8 +13,8 @@
  */
 define(['N/runtime', 'N/log', 'N/search', 'N/record', 'N/ui/serverWidget', './Latam_Library/LMRY_libSendingEmailsLBRY_V2.0',
   './Latam_Library/LMRY_HideViewLBRY_V2.0', './Latam_Library/LMRY_GLImpact_LBRY_V2.0', './Latam_Library/LMRY_UniversalSetting_Fulfillment_Receipt_LBRY',
-  './Latam_Library/LMRY_BR_LatamTax_Purchase_LBRY_V2.0', './Latam_Library/LMRY_BR_ValidateDuplicate_LBRY_V2.0', './Latam_Library/LMRY_ValidateClosePeriod_LBRY_V2.0', './Latam_Library/LMRY_libToolsFunctionsLBRY_V2.0'],
-  function (runtime, log, search, record, serverWidget, library_mail, library_HideView, libraryGLImpact, library_Uni_Setting, library_taxPurchase, Library_BRDup, LibraryValidatePeriod, libtools) {
+  './Latam_Library/LMRY_BR_LatamTax_Purchase_LBRY_V2.0', './Latam_Library/LMRY_BR_ValidateDuplicate_LBRY_V2.0', './Latam_Library/LMRY_ValidateClosePeriod_LBRY_V2.0', './Latam_Library/LMRY_libToolsFunctionsLBRY_V2.0','./Latam_Library/LMRY_second_Entity_LBR_V2.0'],
+  function (runtime, log, search, record, serverWidget, library_mail, library_HideView, libraryGLImpact, library_Uni_Setting, library_taxPurchase, Library_BRDup, LibraryValidatePeriod, libtools,librarySecondClient) {
     var LMRY_script = 'LatamReady - Item Fulfillment URET V2.0';
     var licenses = [];
 
@@ -132,6 +132,11 @@ define(['N/runtime', 'N/log', 'N/search', 'N/record', 'N/ui/serverWidget', './La
             }
 
           }
+        }
+        
+
+        if (LMRY_Result[0]=='BR' && (context.type=="create"||context.type=="edit"||context.type=="view")) {
+          librarySecondClient.setSecondClient(recordObj,OBJ_FORM,context.type);
         }
 
 
@@ -334,10 +339,12 @@ define(['N/runtime', 'N/log', 'N/search', 'N/record', 'N/ui/serverWidget', './La
             library_Uni_Setting.automatic_setfieldrecord(RCD);
           }
         }
-
+        
         if (["create", "edit", "copy"].indexOf(type) != -1) {
           var country = LMRY_Result[0];
+          
           if (country == "BR") {
+            log.debug("type country", country)
             if ('create' == type) {
               Library_BRDup.assignPreprinted(RCD, licenses);
             }
@@ -366,6 +373,8 @@ define(['N/runtime', 'N/log', 'N/search', 'N/record', 'N/ui/serverWidget', './La
                 library_taxPurchase.deleteTaxResults(RCD.id);
               }
             }
+
+            librarySecondClient.saveSecondClient(RCD);
 
           }
         }

@@ -19,13 +19,14 @@ define(['N/config', 'N/currency', 'N/record', 'N/runtime', 'N/search', 'N/ui/ser
   './Latam_Library/LMRY_GLImpact_LBRY_V2.0', './Latam_Library/LMRY_PE_MapAndSaveFields_LBRY_v2.0',
   './WTH_Library/LMRY_MX_TAX_Withholding_LBRY_V2.0', './Latam_Library/LMRY_BR_UPDATE_Flete_Transaction_Field_LBRY_2.0',
   './Latam_Library/LMRY_MX_STE_Sales_Tax_Transaction_LBRY_V2.0',
-  './Latam_Library/LMRY_Custom_ExchangeRate_Field_LBRY_V2.0.js', './WTH_Library/LMRY_AutoPercepcionDesc_LBRY_V2.0'
+  './Latam_Library/LMRY_Custom_ExchangeRate_Field_LBRY_V2.0.js', './WTH_Library/LMRY_AutoPercepcionDesc_LBRY_V2.0',
+  './Latam_Library/LMRY_second_Entity_LBR_V2.0'
 ],
 
   function (config, currencyModule, record, runtime, search, serverWidget, log,
     Library_Mail, Library_HideView, Library_WHT_Transaction, library_hideview3,
     library_SalesOrder, libraryGLImpact, PE_libMapTransactions, libraryTaxWithholding, libraryFleteGlobales,
-    MX_STE_TaxLibrary, Library_ExchangeRate_Field, Library_AutoPercepcionDesc) {
+    MX_STE_TaxLibrary, Library_ExchangeRate_Field, Library_AutoPercepcionDesc,librarySecondClient) {
 
     var LMRY_script = 'LMRY Record Sales URET V2.0';
     var OBJ_FORM = '';
@@ -596,6 +597,9 @@ define(['N/config', 'N/currency', 'N/record', 'N/runtime', 'N/search', 'N/ui/ser
           Library_AutoPercepcionDesc.removePerceptionLines(RCD_OBJ);
         }
 
+        if (LMRY_countr[0]=='BR' && (scriptContext.type=="create"||scriptContext.type=="edit"||scriptContext.type=="view")) {
+          librarySecondClient.setSecondClient(RCD_OBJ,OBJ_FORM,scriptContext.type);
+        }
 
       } catch (err) {
         Library_Mail.sendemail(' [ beforeLoad ] ' + err, LMRY_script);
@@ -754,6 +758,9 @@ define(['N/config', 'N/currency', 'N/record', 'N/runtime', 'N/search', 'N/ui/ser
 
           if (["create", "edit", "copy"].indexOf(scriptContext.type) != -1 && Library_Mail.getAuthorization(877, licenses)) {
             libraryFleteGlobales.updateBrTransactionField(scriptContext);
+          }
+          if (["create", "edit", "copy"].indexOf(scriptContext.type) != -1) {
+            librarySecondClient.saveSecondClient(RCD_OBJ);
           }
         }
 
