@@ -112,7 +112,7 @@ define(['./LMRY_libSendingEmailsLBRY_V2.0', './LMRY_libNumberInWordsLBRY_V2.0', 
             var Field_xliabacc = objResult[i].getValue('custrecord_lmry_wht_taxliabacc');
             var Field_Custom = objResult[i].getValue(columns[4]);
             var Field_Standar = '';
-
+            var Field_Rate = objResult[i].getValue('custrecord_lmry_wht_coderate');
             // Variables para Ventas
             if (typeTransaction == 'invoice') {
                 Field_Transa1 = 'invoice';
@@ -222,7 +222,7 @@ define(['./LMRY_libSendingEmailsLBRY_V2.0', './LMRY_libNumberInWordsLBRY_V2.0', 
                 "vendorcredit": "vendorbill"
             }
             var amountTransaction = recordObj.getValue("amount");
-            deleteTaxResults(idTransaction);
+            deleteTaxResultsWHTMain(idTransaction);
             if (Field_whtkind == 1) {
                 var formulario = Field_Formsdf;
                 
@@ -454,8 +454,9 @@ define(['./LMRY_libSendingEmailsLBRY_V2.0', './LMRY_libNumberInWordsLBRY_V2.0', 
                         type: typeTransaction,
                         id: idTransaction
                     })
+                    var exchangeRate = getExchangeRate(recordObj);
                     //log.debug("actualizando cabecera transaccion", [Number(amountRetention * getExchangeRate(recordObj)), idRetention])
-                    recordObj.setValue({ fieldId: Field_Custom, value: Number(amountRetention * getExchangeRate(recordObj)) })
+                    recordObj.setValue({ fieldId: Field_Custom, value: Number(amountRetention * exchangeRate) })
                     recordObj.setValue({ fieldId: Field_Custom.split("_amount")[0] == "custbody_lmry_co_retecree" ? "custbody_lmry_co_autoretecree" : Field_Custom.split("_amount")[0], value: idRetention })
 
                     // record.submitFields({
@@ -528,7 +529,7 @@ define(['./LMRY_libSendingEmailsLBRY_V2.0', './LMRY_libNumberInWordsLBRY_V2.0', 
                         recordObj.save({ enableSourcing: true, ignoreMandatoryFields: true, disableTriggers: true });
                     }
 
-                    createTaxResult(recordObj,Field_Rate,amountTransaction,amountresult, WHTID,exchangeRate);
+                    createTaxResultsWHTMain(recordObj,Field_Rate,amountTransaction,amountRetention, idRecordRetention, exchangeRate);
 
                 } catch (error) {
                     Library_Mail.sendemail('[retention creation] ' + error, LMRY_script);
@@ -841,6 +842,8 @@ define(['./LMRY_libSendingEmailsLBRY_V2.0', './LMRY_libNumberInWordsLBRY_V2.0', 
                     journal.save({ enableSourcing: true, ignoreMandatoryFields: true, disableTriggers: true })
                 }
                 //log.debug("id autoretencion", newrec)
+
+                createTaxResultsWHTMain(recordObj,Field_Rate,amountTransaction,amountRetention, idRecordRetention, exchangeRate);
 
                 return returnIDS
             }
@@ -3178,7 +3181,7 @@ define(['./LMRY_libSendingEmailsLBRY_V2.0', './LMRY_libNumberInWordsLBRY_V2.0', 
         /* ------------------------------------------------------------------------------------------------------
         * Funcion que crea tax result relacionado a las retenciones de cabecera para el pais de Colombia.
         * --------------------------------------------------------------------------------------------------- */
-        function createTaxResult(recordTransaction, rateWht, amount, amountWht, idWHT, exchangeRate) {
+        function createTaxResultsWHTMain(recordTransaction, rateWht, amount, amountWht, idWHT, exchangeRate) {
             try {
                 let subtype = getSubTypeWHT(idWHT);
                 let multibook = getAccountingBooks(recordTransaction);
@@ -3202,15 +3205,15 @@ define(['./LMRY_libSendingEmailsLBRY_V2.0', './LMRY_libNumberInWordsLBRY_V2.0', 
 
                 log.debug('tax result creado', idRecordSummary);
             } catch (error) {
-                log.error("[createTaxResult] error:",error)
+                log.error("[createTaxResultsWHTMain] error:",error)
             }
 
 
         }
         /* ------------------------------------------------------------------------------------------------------
-        * Funcion que permite eliminar los tax results.
+        * Funcion que permite eliminar los tax results relacionadas a retenciones de cabecera.
         * --------------------------------------------------------------------------------------------------- */
-        function deleteTaxResults(idTransaction) {
+        function deleteTaxResultsWHTMain(idTransaction) {
             log.debug('deleteTaxResults', "deleteTaxResults");
             log.debug('deleteTaxResults idTransaction', idTransaction);
             log.debug('deleteTaxResults idTransaction typeof ', typeof idTransaction);

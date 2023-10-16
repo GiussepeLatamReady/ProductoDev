@@ -1205,10 +1205,14 @@ define(['N/log', 'N/record', 'N/search', 'N/runtime', 'N/format'],
                                 // Graba el Journal
                                 jeRec.save({ enableSourcing: true, ignoreMandatoryFields: true, disableTriggers: true });
                             }
+                            /* ---------------------------------------------
+                             * Create Tax result main
+                             * ------------------------------------------ */
+                            if (Number(idCountry) == 48){ // Colombia
+                                createTaxResult(Obj_RCD,Field_Rate,amount,amountresult, WHTID,exchangeRate);
+                            }
                         }
-                        if (Number(idCountry) == 48){ // Colombia
-                            createTaxResult(Obj_RCD,Field_Rate,amount,amountresult, WHTID,exchangeRate);
-                        }
+                        
                     }
                     
                 }
