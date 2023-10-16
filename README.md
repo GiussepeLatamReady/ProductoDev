@@ -1,34 +1,37 @@
-# [Tener la opción de seleccionar otro cliente en el ítem de cumplimiento para generar la factura electrónica del envío C0968](https://docs.google.com/document/d/1FOSrsRX4DaZJiyql_TafJZGQ1JBND7GX2LnJnO30TEQ/edit)
-
-# [Referencia Latam Seals]((https://docs.google.com/document/d/1NjzXm_GqoBMOASrjodtyx2Q2BmhbHsB6grXCx0hooiY/edit))
+# [PE: Pago de Detracciones incluir entidad en las líneas de redondeo del Journal Entry (Ventas) C1017](https://docs.google.com/document/d/1KGKd3uSz04AfABCBtdibHk2JdjK8XxuGntnsatZLq7c/edit#heading=h.1mllta7bdj39)
 
 
-## Description
+## Description of the Requirement
 
-Para atender el escenario de generar un documento de remessa electrónico para un cliente, a diferencia del llenado en el campo nativo, se creará un nuevo campo para la transacción Item Fulfillment. 
+Se requiere que dentro del módulo de pago de detracciones, se popule en las líneas de redondeo del Journal Entry la entidad relacionada a fin de que el cliente pueda realizar su conciliación bancaria de manera correcta.
 
-Creación del campo denominado Cliente Remessa:
-Item Fulfillment
-Tipo: List (Customer)
-Finalidad: Rellene el valor del cliente que se enviará a Oobj, reportes fiscales y Systax.
-
-## 
+## Description of the solution
 
 
-## Script Modify
+## Scripts
++ Create
++ Update
++ Delete
+## Records
++ Create
++ Update
++ Delete
+## Fields
++ Create
++ Update 
++ Delete
 
-      
-        
-## Create Fields 
+## Features
++ Create
++ Involved
++ Delete
+
+## Bundles involved
++ 37714 (production environment)
++ 35754 (development environment)
 
 
-## FEATURES
 
-
-## Record modificados
-
-
-## Campo de cabecera
 
 
 
