@@ -94,11 +94,16 @@ define(['N/error', 'N/log', 'N/runtime', 'N/search', 'N/url', 'N/config', 'N/for
 
       search.create({
         type: 'customrecord_lmry_pe_detrac_acc_sales',
+        filters:
+          [
+            ["custrecord_lmry_pe_dec_ac_sales_subsi.isinactive", "is", "F"]
+          ],
         columns: [
           'custrecord_lmry_pe_dec_ac_sales_subsi',
           'custrecord_lmry_pe_dec_ac_sales_acc_1',
           'custrecord_lmry_pe_dec_ac_sales_acc_2',
-          'custrecord_lmry_pe_dec_ac_sales_acc_3'
+          'custrecord_lmry_pe_dec_ac_sales_acc_3',
+          'custrecord_lmry_pe_detailed_rounding'
         ]
       }).run().each((line) => {
 
@@ -106,12 +111,13 @@ define(['N/error', 'N/log', 'N/runtime', 'N/search', 'N/url', 'N/config', 'N/for
         let det = line.getValue(line.columns[1]);
         let rounding = line.getValue(line.columns[2]);
         let bank = line.getValue(line.columns[3]);
-
+        let checkDetailedRounding = line.getValue(line.columns[4]);
         result[subsididary] = {
           subsidiary: subsididary,
           detraction: det,
           rounding: rounding,
-          bank: bank
+          bank: bank,
+          checkDetailedRounding:checkDetailedRounding
         };
         return true;
 
@@ -124,7 +130,8 @@ define(['N/error', 'N/log', 'N/runtime', 'N/search', 'N/url', 'N/config', 'N/for
       let result = {
         detraction: '',
         rounding: '',
-        bank: ''
+        bank: '',
+        checkDetailedRounding:''
       };
 
       search.create({
@@ -134,6 +141,7 @@ define(['N/error', 'N/log', 'N/runtime', 'N/search', 'N/url', 'N/config', 'N/for
           'custrecord_lmry_pe_dec_ac_sales_acc_1',
           'custrecord_lmry_pe_dec_ac_sales_acc_2',
           'custrecord_lmry_pe_dec_ac_sales_acc_3',
+          'custrecord_lmry_pe_detailed_rounding',
           {
             name: 'internalid',
             sort: search.Sort.ASC
@@ -145,11 +153,13 @@ define(['N/error', 'N/log', 'N/runtime', 'N/search', 'N/url', 'N/config', 'N/for
         let det = line.getValue(line.columns[1]);
         let rounding = line.getValue(line.columns[2]);
         let bank = line.getValue(line.columns[3]);
+        let checkDetailedRounding = line.getValue(line.columns[4]);
 
         result = {
           detraction: det,
           rounding: rounding,
-          bank: bank
+          bank: bank,
+          checkDetailedRounding: checkDetailedRounding
         };
         return false;
 

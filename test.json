@@ -1,0 +1,21 @@
+{
+    "type": "error.SuiteScriptError",
+    "name": "INVALID_FLD_VALUE",
+    "message": "You have entered an Invalid Field Value 1914 for the following field: account",
+    "id": "",
+    "stack": [
+        "Error\n at RecordInvoker.setCurrentSublistValue (suitescript/resources/javascript/record/serverRecordService.js:411:5)\n at NetSuiteObject.thenableFunction() (suitescript/resources/javascript/record/proxy.js:115:24)\n at Object.createJournal (/SuiteBundles/Bundle 35754/LatamReady - PE Detracctions/lib/LMRY_detrac_batch_object_LBRY_v2.0.js:908:18)\n at Object.getInputData (/SuiteBundles/Bundle 35754/LatamReady - PE Detracctions/src/sales/LMRY_PE_generate_SalesDetractions_MPRD_2.0.js:77:38)"
+    ],
+    "cause": {
+        "type": "internal error",
+        "code": "INVALID_FLD_VALUE",
+        "details": "You have entered an Invalid Field Value 1914 for the following field: account",
+        "userEvent": null,
+        "stackTrace": [
+            "Error\n at RecordInvoker.setCurrentSublistValue (suitescript/resources/javascript/record/serverRecordService.js:411:5)\n at NetSuiteObject.thenableFunction() (suitescript/resources/javascript/record/proxy.js:115:24)\n at Object.createJournal (/SuiteBundles/Bundle 35754/LatamReady - PE Detracctions/lib/LMRY_detrac_batch_object_LBRY_v2.0.js:908:18)\n at Object.getInputData (/SuiteBundles/Bundle 35754/LatamReady - PE Detracctions/src/sales/LMRY_PE_generate_SalesDetractions_MPRD_2.0.js:77:38)"
+        ],
+        "notifyOff": false
+    },
+    "notifyOff": false,
+    "userFacing": true
+}

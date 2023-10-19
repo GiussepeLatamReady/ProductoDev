@@ -333,11 +333,16 @@ define(['N/error', 'N/log', 'N/runtime', 'N/search', 'N/url', 'N/config', 'N/for
 
           search.create({
             type: 'customrecord_lmry_pe_detrac_acc_sales',
+            filters:
+              [
+                ["custrecord_lmry_pe_dec_ac_sales_subsi.isinactive", "is", "F"]
+              ],
             columns: [
               'custrecord_lmry_pe_dec_ac_sales_subsi',
               'custrecord_lmry_pe_dec_ac_sales_acc_1',
               'custrecord_lmry_pe_dec_ac_sales_acc_2',
-              'custrecord_lmry_pe_dec_ac_sales_acc_3'
+              'custrecord_lmry_pe_dec_ac_sales_acc_3',
+              'custrecord_lmry_pe_detailed_rounding'
             ]
           }).run().each((line) => {
 
@@ -347,13 +352,14 @@ define(['N/error', 'N/log', 'N/runtime', 'N/search', 'N/url', 'N/config', 'N/for
             let det = line.getValue(line.columns[1]);
             let rounding = line.getValue(line.columns[2]);
             let bank = line.getValue(line.columns[3]);
-
+            let checkDetailedRounding = line.getValue(line.columns[4]);
             setupContext[subsidiary] = {
               name: subsidiaryName,
               setupId: id,
               detraction: det,
               rounding: rounding,
-              bank: bank
+              bank: bank,
+              checkDetailedRounding: checkDetailedRounding
             };
             return true;
 
@@ -364,11 +370,16 @@ define(['N/error', 'N/log', 'N/runtime', 'N/search', 'N/url', 'N/config', 'N/for
 
           search.create({
             type: 'customrecord_lmry_pe_detrac_acc_sales',
+            filters:
+              [
+                ["custrecord_lmry_pe_dec_ac_sales_subsi.isinactive", "is", "F"]
+              ],
             columns: [
               'custrecord_lmry_pe_dec_ac_sales_subsi',
               'custrecord_lmry_pe_dec_ac_sales_acc_1',
               'custrecord_lmry_pe_dec_ac_sales_acc_2',
-              'custrecord_lmry_pe_dec_ac_sales_acc_3'
+              'custrecord_lmry_pe_dec_ac_sales_acc_3',
+              'custrecord_lmry_pe_detailed_rounding'
             ]
           }).run().each((line) => {
 
@@ -376,12 +387,13 @@ define(['N/error', 'N/log', 'N/runtime', 'N/search', 'N/url', 'N/config', 'N/for
             let det = line.getValue(line.columns[1]);
             let rounding = line.getValue(line.columns[2]);
             let bank = line.getValue(line.columns[3]);
-
+            let checkDetailedRounding = line.getValue(line.columns[4]);
             setupContext = {
               setupId: line.id,
               detraction: det,
               rounding: rounding,
-              bank: bank
+              bank: bank,
+              checkDetailedRounding:checkDetailedRounding
             };
             return false;
 
@@ -393,7 +405,8 @@ define(['N/error', 'N/log', 'N/runtime', 'N/search', 'N/url', 'N/config', 'N/for
         this.fieldWrapper = {
             detraction: 'custrecord_lmry_pe_dec_ac_sales_acc_1',
             rounding: 'custrecord_lmry_pe_dec_ac_sales_acc_2',
-            bank: 'custrecord_lmry_pe_dec_ac_sales_acc_3'
+            bank: 'custrecord_lmry_pe_dec_ac_sales_acc_3',
+            checkDetailedRounding: 'custrecord_lmry_pe_detailed_rounding'
           },
           this.type = 'customrecord_lmry_pe_detrac_acc_sales';
       }
@@ -447,6 +460,7 @@ define(['N/error', 'N/log', 'N/runtime', 'N/search', 'N/url', 'N/config', 'N/for
         let detAcc = updateContext.detraction;
         let roundingAcc = updateContext.rounding;
         let bankAcc = updateContext.bank;
+        let checkDetailedRounding = updateContext.checkDetailedRounding
 
         let currentContext = {};
 
@@ -464,6 +478,7 @@ define(['N/error', 'N/log', 'N/runtime', 'N/search', 'N/url', 'N/config', 'N/for
         currentContext.detraction = detAcc;
         currentContext.rounding = roundingAcc;
         currentContext.bank = bankAcc;
+        currentContext.checkDetailedRounding = checkDetailedRounding;
 
         let type = this.type;
 

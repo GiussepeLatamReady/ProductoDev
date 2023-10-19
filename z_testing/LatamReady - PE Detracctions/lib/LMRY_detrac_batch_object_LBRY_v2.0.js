@@ -769,6 +769,7 @@ define([
       var commissionAccount = journalContext.account.commission;
 
       var roundingAccount = journalContext.account.rounding;
+      var checkDetailedRounding = journalContext.account.checkDetailedRounding;
 
       var clasification = journalContext.clasification;
 
@@ -935,6 +936,133 @@ define([
         _journal.commitLine({
           sublistId: 'line'
         });
+
+        if (checkDetailedRounding === "T" || checkDetailedRounding === true) {
+          /*--------------------------------------------------------------*
+            ROUDING LINE (ROUNDING LINE)
+          /*--------------------------------------------------------------*/
+          if (DecimalAmount != 0) {
+            _journal.selectNewLine('line');
+
+            _journal.setCurrentSublistValue({
+              sublistId: 'line',
+              fieldId: 'account',
+              value: detracAccount
+            });
+
+            if (isSales == true) {
+
+              if (DecimalAmount < 0) {
+                _journal.setCurrentSublistValue({
+                  sublistId: 'line',
+                  fieldId: 'debit',
+                  value: (-1 * DecimalAmount).toFixed(2)
+                });
+              } else if (DecimalAmount > 0) {
+                _journal.setCurrentSublistValue({
+                  sublistId: 'line',
+                  fieldId: 'credit',
+                  value: (DecimalAmount).toFixed(2)
+                });
+              }
+
+            } else {
+
+              if (DecimalAmount < 0) {
+                _journal.setCurrentSublistValue({
+                  sublistId: 'line',
+                  fieldId: 'credit',
+                  value: (-1 * DecimalAmount).toFixed(2)
+                });
+              } else if (DecimalAmount > 0) {
+                _journal.setCurrentSublistValue({
+                  sublistId: 'line',
+                  fieldId: 'debit',
+                  value: (DecimalAmount).toFixed(2)
+                });
+              }
+
+            }
+
+            setClasificationValues(_journal, clasification);
+
+            _journal.setCurrentSublistValue({
+              sublistId: 'line',
+              fieldId: 'custcol_lmry_es_detraccion_masiva',
+              value: true
+            });
+
+            
+
+            _journal.commitLine({
+              sublistId: 'line'
+            });
+
+            /*--------------------------------------------------------------*
+                ROUDING LINE (ROUNDING LINE)
+            /*--------------------------------------------------------------*/
+            _journal.selectNewLine('line');
+
+            _journal.setCurrentSublistValue({
+              sublistId: 'line',
+              fieldId: 'account',
+              value: roundingAccount
+            });
+
+            if (isSales == true) {
+
+              if (DecimalAmount < 0) {
+                _journal.setCurrentSublistValue({
+                  sublistId: 'line',
+                  fieldId: 'credit',
+                  value: (-1 * DecimalAmount).toFixed(2)
+                });
+              } else if (DecimalAmount > 0) {
+                _journal.setCurrentSublistValue({
+                  sublistId: 'line',
+                  fieldId: 'debit',
+                  value: (DecimalAmount).toFixed(2)
+                });
+              }
+
+            } else {
+
+              if (DecimalAmount < 0) {
+                _journal.setCurrentSublistValue({
+                  sublistId: 'line',
+                  fieldId: 'debit',
+                  value: (-1 * DecimalAmount).toFixed(2)
+                });
+              } else if (DecimalAmount > 0) {
+                _journal.setCurrentSublistValue({
+                  sublistId: 'line',
+                  fieldId: 'credit',
+                  value: (DecimalAmount).toFixed(2)
+                });
+              }
+
+            }
+
+            setClasificationValues(_journal, clasification);
+
+            _journal.setCurrentSublistValue({
+              sublistId: 'line',
+              fieldId: 'custcol_lmry_es_detraccion_masiva',
+              value: true
+            });
+
+            _journal.setCurrentSublistValue({
+              sublistId: 'line',
+              fieldId: 'entity',
+              value: entity
+            });
+
+            _journal.commitLine({
+              sublistId: 'line'
+            });
+          }
+        }
+
       }
 
       log.debug('Transactions Lines', '- End -');
@@ -1011,119 +1139,121 @@ define([
       /*--------------------------------------------------------------*
           ROUDING LINE (DETRACTION LINE)
       /*--------------------------------------------------------------*/
-
-      if (totalDecimalAmount != 0) {
-        _journal.selectNewLine('line');
-
-        _journal.setCurrentSublistValue({
-          sublistId: 'line',
-          fieldId: 'account',
-          value: detracAccount
-        });
-
-        if (isSales == true) {
-
-          if (totalDecimalAmount < 0) {
-            _journal.setCurrentSublistValue({
-              sublistId: 'line',
-              fieldId: 'debit',
-              value: (-1 * totalDecimalAmount).toFixed(2)
-            });
-          } else if (totalDecimalAmount > 0) {
-            _journal.setCurrentSublistValue({
-              sublistId: 'line',
-              fieldId: 'credit',
-              value: (totalDecimalAmount).toFixed(2)
-            });
+      if (checkDetailedRounding === "F" || checkDetailedRounding === false){
+        if (totalDecimalAmount != 0) {
+          _journal.selectNewLine('line');
+  
+          _journal.setCurrentSublistValue({
+            sublistId: 'line',
+            fieldId: 'account',
+            value: detracAccount
+          });
+  
+          if (isSales == true) {
+  
+            if (totalDecimalAmount < 0) {
+              _journal.setCurrentSublistValue({
+                sublistId: 'line',
+                fieldId: 'debit',
+                value: (-1 * totalDecimalAmount).toFixed(2)
+              });
+            } else if (totalDecimalAmount > 0) {
+              _journal.setCurrentSublistValue({
+                sublistId: 'line',
+                fieldId: 'credit',
+                value: (totalDecimalAmount).toFixed(2)
+              });
+            }
+  
+          } else {
+  
+            if (totalDecimalAmount < 0) {
+              _journal.setCurrentSublistValue({
+                sublistId: 'line',
+                fieldId: 'credit',
+                value: (-1 * totalDecimalAmount).toFixed(2)
+              });
+            } else if (totalDecimalAmount > 0) {
+              _journal.setCurrentSublistValue({
+                sublistId: 'line',
+                fieldId: 'debit',
+                value: (totalDecimalAmount).toFixed(2)
+              });
+            }
+  
           }
-
-        } else {
-
-          if (totalDecimalAmount < 0) {
-            _journal.setCurrentSublistValue({
-              sublistId: 'line',
-              fieldId: 'credit',
-              value: (-1 * totalDecimalAmount).toFixed(2)
-            });
-          } else if (totalDecimalAmount > 0) {
-            _journal.setCurrentSublistValue({
-              sublistId: 'line',
-              fieldId: 'debit',
-              value: (totalDecimalAmount).toFixed(2)
-            });
+  
+          setClasificationValues(_journal, clasification);
+  
+          _journal.setCurrentSublistValue({
+            sublistId: 'line',
+            fieldId: 'custcol_lmry_es_detraccion_masiva',
+            value: true
+          });
+  
+          _journal.commitLine({
+            sublistId: 'line'
+          });
+  
+          /*--------------------------------------------------------------*
+              ROUDING LINE (ROUNDING LINE)
+          /*--------------------------------------------------------------*/
+          _journal.selectNewLine('line');
+  
+          _journal.setCurrentSublistValue({
+            sublistId: 'line',
+            fieldId: 'account',
+            value: roundingAccount
+          });
+  
+          if (isSales == true) {
+  
+            if (totalDecimalAmount < 0) {
+              _journal.setCurrentSublistValue({
+                sublistId: 'line',
+                fieldId: 'credit',
+                value: (-1 * totalDecimalAmount).toFixed(2)
+              });
+            } else if (totalDecimalAmount > 0) {
+              _journal.setCurrentSublistValue({
+                sublistId: 'line',
+                fieldId: 'debit',
+                value: (totalDecimalAmount).toFixed(2)
+              });
+            }
+  
+          } else {
+  
+            if (totalDecimalAmount < 0) {
+              _journal.setCurrentSublistValue({
+                sublistId: 'line',
+                fieldId: 'debit',
+                value: (-1 * totalDecimalAmount).toFixed(2)
+              });
+            } else if (totalDecimalAmount > 0) {
+              _journal.setCurrentSublistValue({
+                sublistId: 'line',
+                fieldId: 'credit',
+                value: (totalDecimalAmount).toFixed(2)
+              });
+            }
+  
           }
-
+  
+          setClasificationValues(_journal, clasification);
+  
+          _journal.setCurrentSublistValue({
+            sublistId: 'line',
+            fieldId: 'custcol_lmry_es_detraccion_masiva',
+            value: true
+          });
+  
+          _journal.commitLine({
+            sublistId: 'line'
+          });
         }
-
-        setClasificationValues(_journal, clasification);
-
-        _journal.setCurrentSublistValue({
-          sublistId: 'line',
-          fieldId: 'custcol_lmry_es_detraccion_masiva',
-          value: true
-        });
-
-        _journal.commitLine({
-          sublistId: 'line'
-        });
-
-        /*--------------------------------------------------------------*
-            ROUDING LINE (ROUNDING LINE)
-        /*--------------------------------------------------------------*/
-        _journal.selectNewLine('line');
-
-        _journal.setCurrentSublistValue({
-          sublistId: 'line',
-          fieldId: 'account',
-          value: roundingAccount
-        });
-
-        if (isSales == true) {
-
-          if (totalDecimalAmount < 0) {
-            _journal.setCurrentSublistValue({
-              sublistId: 'line',
-              fieldId: 'credit',
-              value: (-1 * totalDecimalAmount).toFixed(2)
-            });
-          } else if (totalDecimalAmount > 0) {
-            _journal.setCurrentSublistValue({
-              sublistId: 'line',
-              fieldId: 'debit',
-              value: (totalDecimalAmount).toFixed(2)
-            });
-          }
-
-        } else {
-
-          if (totalDecimalAmount < 0) {
-            _journal.setCurrentSublistValue({
-              sublistId: 'line',
-              fieldId: 'debit',
-              value: (-1 * totalDecimalAmount).toFixed(2)
-            });
-          } else if (totalDecimalAmount > 0) {
-            _journal.setCurrentSublistValue({
-              sublistId: 'line',
-              fieldId: 'credit',
-              value: (totalDecimalAmount).toFixed(2)
-            });
-          }
-
-        }
-
-        setClasificationValues(_journal, clasification);
-
-        _journal.setCurrentSublistValue({
-          sublistId: 'line',
-          fieldId: 'custcol_lmry_es_detraccion_masiva',
-          value: true
-        });
-
-        _journal.commitLine({
-          sublistId: 'line'
-        });
       }
+      
 
       log.debug('Rouding Lines', '- End -');
 

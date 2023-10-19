@@ -287,8 +287,10 @@ define(['N/error', 'N/log', 'N/runtime', 'N/ui/serverWidget', 'N/record', 'N/ui/
       var columns = this.columns;
       var line = this.lines;
       for (var i = 0; i < columns.length; i++) {
-
+        
         var value = arrayValues[i];
+        
+        value = value === true ? "T" : value === false ? "F" : value;
 
         if (value) {
 

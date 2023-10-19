@@ -129,6 +129,7 @@ define([
         _GROUP_B.addField("custpage_acc_2", 'select', 'account').isMandatory(true).isOnlyRead(true);
 
         _GROUP_B.addField("custpage_acc_3", 'select', 'account').isMandatory(true).isOnlyRead(true);
+        _GROUP_B.addField("custpage_detailed_rounding", 'checkbox').isMandatory(true).isOnlyRead(true);
 
         _GROUP_B.addField("custpage_i_date", 'date').isMandatory(true).isNewColumn(true);
 
@@ -238,11 +239,13 @@ define([
 
 
           let currentPeriod = operations.getCurrentPeriod();
+          subsidiaryInformation.checkDetailedRounding = subsidiaryInformation.checkDetailedRounding ? "T" : "F";
 
           customWidget.setFieldValues({
             'custpage_acc_1': subsidiaryInformation.detraction,
             'custpage_acc_2': subsidiaryInformation.bank,
             'custpage_acc_3': subsidiaryInformation.rounding,
+            'custpage_detailed_rounding': subsidiaryInformation.checkDetailedRounding,
             'custpage_i_date': currentPeriod.date,
             'custpage_i_period': currentPeriod.period
           });

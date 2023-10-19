@@ -61,7 +61,7 @@ define(['N/error', 'N/log', 'N/runtime'],
       ["custpage_acc_2", "Bank Commission Account", "Cuenta Contable de la Comisión"],
       ["custpage_acc_3", "Rounding Account", "Cuenta Contable de Redondeo"],
       ["custpage_acc_4", "Bank Account", "Cuenta Contable Bancaria"],
-
+      ["custpage_detailed_rounding", "Detailed rounding deduction", "Deducción detallada por redondeo"],
       ["custfilter_subsi", "Subsidiary", "Subsidiaria"],
       ["custfilter_date_from", "Date From", "Fecha Desde"],
       ["custfilter_date_to", "To", "Hasta"],
@@ -132,7 +132,7 @@ define(['N/error', 'N/log', 'N/runtime'],
       ["custpopup_acc_2", "Bank Commission Account", "Cuenta Contable de la Comisión"],
       ["custpopup_acc_3", "Rounding Account", "Cuenta Contable de Redondeo"],
       ["custpopup_acc_4", "Bank Account", "Cuenta Contable Bancaria"],
-
+      ["custpopup_detailed_rounding", "Detailed rounding deduction", "Deducción detallada por redondeo"],
       ['custpopup_tab', "General Information", "Información General"],
 
       ['custtitle_popup', "Subsidiary Setup", "Configuración de la Subsidiaria"],
@@ -175,6 +175,8 @@ define(['N/error', 'N/log', 'N/runtime'],
       ['custtitle_sales_setup', 'LatamReady - Subsidiary Setup (Detraction)', 'LatamReady - Configuracion por Subsidiaria (Detracción)'],
 
       ['custlist_subsidiaries', 'Subsidiaries', 'Subsidiarias'],
+
+      ['custpage_col_detailed_rounding', 'Detailed rounding deduction', 'Deducción detallada por redondeo'],
 
       ['custpage_col_sales_subsidiary', 'Subsidiary', 'Subsidiaria'],
 

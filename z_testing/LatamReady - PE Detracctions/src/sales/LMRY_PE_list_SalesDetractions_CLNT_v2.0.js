@@ -60,6 +60,9 @@ define(['N/url', 'N/runtime', 'LR/popup', 'detraction/metadata'],
           objForm.addField('custpopup_acc_4', _dao.getName('custpopup_acc_4'), 'select',
             'custpopup_tab', accountList.bank);
 
+          objForm.addField('custpopup_detailed_rounding', _dao.getName('custpopup_detailed_rounding'), 'checkbox',
+            'custpopup_tab', accountList.bank);
+
           objForm.writeForm();
 
           var setupCompany = getSetup();
