@@ -167,11 +167,11 @@ define(['N/record', 'N/log', 'N/search', 'N/runtime'],
 
 
                 var transactionField = getTransactionField(transaction.id);
-                if (!transaction.secondClient && !transactionField) {
+                if (!transaction.secondClient) {
                     return false;
                 }
                 log.debug("transactionField", transactionField);
-                initializeSecondClient(transactionField, transaction);
+                saveRecordSecondClient(transactionField, transaction);
                 log.debug("debug", "saveSecondClient end");
             } catch (error) {
                 log.error("Error [setSecondClient] ", error);
@@ -180,34 +180,36 @@ define(['N/record', 'N/log', 'N/search', 'N/runtime'],
 
 
         function getTransactionField(idTransaction) {
-            var secondCustomerSearch = search.create({
-                type: "customrecord_lmry_br_transaction_fields",
-                filters:
-                    [
-                        ["custrecord_lmry_br_related_transaction", "anyof", idTransaction]
-                    ],
-                columns:
-                    [
-                        search.createColumn({ name: "custrecord_lmry_br_cliente_remessa" }),
-                        search.createColumn({ name: "internalid" })
-                    ]
-            });
-            var secondCustomerResult = secondCustomerSearch.run().getRange(0, 1);
-            if (secondCustomerResult.length > 0) {
-
-
-                return {
-                    id: secondCustomerResult[0].getValue("internalid"),
-                    secondClient: secondCustomerResult[0].getValue("custrecord_lmry_br_cliente_remessa")
-                };
-
-
+            if (idTransaction) {
+                var secondCustomerSearch = search.create({
+                    type: "customrecord_lmry_br_transaction_fields",
+                    filters:
+                        [
+                            ["custrecord_lmry_br_related_transaction", "anyof", idTransaction]
+                        ],
+                    columns:
+                        [
+                            search.createColumn({ name: "custrecord_lmry_br_cliente_remessa" }),
+                            search.createColumn({ name: "internalid" })
+                        ]
+                });
+                var secondCustomerResult = secondCustomerSearch.run().getRange(0, 1);
+                if (secondCustomerResult.length > 0) {
+    
+    
+                    return {
+                        id: secondCustomerResult[0].getValue("internalid"),
+                        secondClient: secondCustomerResult[0].getValue("custrecord_lmry_br_cliente_remessa")
+                    };
+    
+    
+                }
             }
             log.debug("debug", "No tiene el campo completado o no existe el transaction field")
             return false;
         }
 
-        function initializeSecondClient(updateTransactionField, transaction) {
+        function saveRecordSecondClient(updateTransactionField, transaction) {
             log.error("debug", "initializeSecondClient start")
             if (updateTransactionField) {
 
