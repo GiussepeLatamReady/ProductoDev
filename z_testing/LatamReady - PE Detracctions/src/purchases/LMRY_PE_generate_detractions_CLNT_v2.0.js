@@ -70,6 +70,9 @@ define(['N/currentRecord', 'N/url', 'N/record', 'N/search',
       objForm.addField('custpopup_acc_4', _dao.getName('custpopup_acc_4'), 'select',
         'custpopup_tab', arrayAccounts.bank);
 
+      objForm.addField('custpopup_detailed_rounding', _dao.getName('custpopup_detailed_rounding'), 'checkbox',
+        'custpopup_tab');
+
       objForm.writeForm();
 
       var subsi = _current.getValue('custfilter_subsi');
@@ -77,12 +80,15 @@ define(['N/currentRecord', 'N/url', 'N/record', 'N/search',
       var acc2 = _current.getValue('custpage_acc_2');
       var acc3 = _current.getValue('custpage_acc_3');
       var acc4 = _current.getValue('custpage_acc_4');
+      var chexkDetailedRounding = _current.getValue('custpage_detailed_rounding');
 
       try {
         objForm.setValue('custpopup_acc_1', acc1);
         objForm.setValue('custpopup_acc_2', acc2);
         objForm.setValue('custpopup_acc_3', acc3);
         objForm.setValue('custpopup_acc_4', acc4);
+        objForm.setValue('custpopup_detailed_rounding', chexkDetailedRounding);
+        
       } catch (err) {
         console.log(err);
       }
@@ -95,6 +101,7 @@ define(['N/currentRecord', 'N/url', 'N/record', 'N/search',
         var acc2 = objForm.getValue('custpopup_acc_2');
         var acc3 = objForm.getValue('custpopup_acc_3');
         var acc4 = objForm.getValue('custpopup_acc_4');
+        
 
         if (acc1 && acc2 && acc3 && acc4) {
 
@@ -122,6 +129,7 @@ define(['N/currentRecord', 'N/url', 'N/record', 'N/search',
             _setup.setValue('custrecord_lmry_det_ac_account_2', objForm.getValue('custpopup_acc_2'));
             _setup.setValue('custrecord_lmry_det_ac_account_3', objForm.getValue('custpopup_acc_3'));
             _setup.setValue('custrecord_lmry_det_ac_account_4', objForm.getValue('custpopup_acc_4'));
+            _setup.setValue('custrecord_lmry_pe_detailed_rounding', objForm.getValue('custpopup_detailed_rounding'));
 
             _setup.save({
               disableTriggers: true,

@@ -102,6 +102,8 @@ define([
 
         _GROUP_B.addField("custpage_acc_4", 'select', 'account').isOnlyRead(true);
 
+        _GROUP_B.addField("custpage_detailed_rounding", 'checkbox').isOnlyRead(true);
+
         _GROUP_B.addField("custpage_i_date", 'date').isMandatory(true).isNewColumn(true);
 
         _GROUP_B.addField("custpage_i_period", 'select').isMandatory(true)
