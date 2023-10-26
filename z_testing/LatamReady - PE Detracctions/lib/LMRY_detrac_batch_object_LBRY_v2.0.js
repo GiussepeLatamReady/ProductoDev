@@ -387,7 +387,8 @@ define([
           'custrecord_lmry_det_ac_account_1',
           'custrecord_lmry_det_ac_account_2',
           'custrecord_lmry_det_ac_account_3',
-          'custrecord_lmry_det_ac_account_4'
+          'custrecord_lmry_det_ac_account_4',
+          'custrecord_lmry_pe_detailed_rounding_pur'
         ],
         filters: [
           ['custrecord_lmry_pe_dec_ac_subsi', 'anyof', subsidiary]
@@ -397,6 +398,7 @@ define([
         result.commission = line.getValue('custrecord_lmry_det_ac_account_2');
         result.rounding = line.getValue('custrecord_lmry_det_ac_account_3');
         result.bank = line.getValue('custrecord_lmry_det_ac_account_4');
+        result.checkDetailedRounding = line.getValue('custrecord_lmry_pe_detailed_rounding_pur');
       });
 
       return result;
@@ -824,12 +826,15 @@ define([
         var transCurrency = transactions[i].currency;
 
         var RealAmount = parseFloat(amount).toFixed(0);
-
+        log.error("amount",amount)
+        log.error("RealAmount",RealAmount)
         var DecimalAmount = (amount - RealAmount).toFixed(2);
 
         if (transactions[i].decimal != '-')
           DecimalAmount = transactions[i].decimal;
 
+          DecimalAmount = parseFloat(DecimalAmount);
+        log.error("DecimalAmount typeof",typeof DecimalAmount)
         //totalRealAmount += parseFloat(parseFloat(amount).toFixed(2));
 
         // totalRealAmount += parseFloat(RealAmount);

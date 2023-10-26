@@ -129,7 +129,7 @@ define(['N/currentRecord', 'N/url', 'N/record', 'N/search',
             _setup.setValue('custrecord_lmry_det_ac_account_2', objForm.getValue('custpopup_acc_2'));
             _setup.setValue('custrecord_lmry_det_ac_account_3', objForm.getValue('custpopup_acc_3'));
             _setup.setValue('custrecord_lmry_det_ac_account_4', objForm.getValue('custpopup_acc_4'));
-            _setup.setValue('custrecord_lmry_pe_detailed_rounding', objForm.getValue('custpopup_detailed_rounding'));
+            _setup.setValue('custrecord_lmry_pe_detailed_rounding_pur', objForm.getValue('custpopup_detailed_rounding'));
 
             _setup.save({
               disableTriggers: true,
