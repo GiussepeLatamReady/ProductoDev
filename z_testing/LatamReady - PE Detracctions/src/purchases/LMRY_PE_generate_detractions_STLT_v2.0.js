@@ -223,7 +223,7 @@ define([
 
           }
 
-
+          
           customWidget.setFieldValues(accounts);
 
           customWidget.setFieldValues(loader.getCurrentPeriod());

@@ -388,7 +388,7 @@ define([
           'custrecord_lmry_det_ac_account_2',
           'custrecord_lmry_det_ac_account_3',
           'custrecord_lmry_det_ac_account_4',
-          'custrecord_lmry_pe_detailed_rounding_pur'
+          'custrecord_smc_pe_detailed_rounding_pur'
         ],
         filters: [
           ['custrecord_lmry_pe_dec_ac_subsi', 'anyof', subsidiary]
@@ -398,7 +398,7 @@ define([
         result.commission = line.getValue('custrecord_lmry_det_ac_account_2');
         result.rounding = line.getValue('custrecord_lmry_det_ac_account_3');
         result.bank = line.getValue('custrecord_lmry_det_ac_account_4');
-        result.checkDetailedRounding = line.getValue('custrecord_lmry_pe_detailed_rounding_pur');
+        result.checkDetailedRounding = line.getValue('custrecord_smc_pe_detailed_rounding_pur');
       });
 
       return result;

@@ -26,7 +26,7 @@ Se requiere que dentro del módulo de pago de detracciones, se popule en las lí
     + **Create** 
         + **Core:** Field record
         + **Name:** Latam - Detailed rounding deduction.
-        + **id:** custrecord_lmry_pe_detailed_rounding_pur.
+        + **id:** custrecord_lmry_pe_detailed_rounding_pur.  custrecord_smc_pe_detailed_rounding_pur
         + **es:** Latam - Deducción detallada por redondeo.
         + **pt:** Latam - Dedução detalhada por arredondamento.
         + **Description:** If this field is enabled, the related entity is populated in the rounding lines of the Journal Entry; otherwise, the rounding will accumulate without populating the entity.

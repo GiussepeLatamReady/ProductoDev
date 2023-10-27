@@ -1,21 +1,28 @@
 {
     "type": "error.SuiteScriptError",
     "name": "INVALID_FLD_VALUE",
-    "message": "You have entered an Invalid Field Value 1914 for the following field: account",
+    "message": "You have entered an Invalid Field Value false for the following field: custpage_detailed_rounding",
     "id": "",
     "stack": [
-        "Error\n at RecordInvoker.setCurrentSublistValue (suitescript/resources/javascript/record/serverRecordService.js:411:5)\n at NetSuiteObject.thenableFunction() (suitescript/resources/javascript/record/proxy.js:115:24)\n at Object.createJournal (/SuiteBundles/Bundle 35754/LatamReady - PE Detracctions/lib/LMRY_detrac_batch_object_LBRY_v2.0.js:908:18)\n at Object.getInputData (/SuiteBundles/Bundle 35754/LatamReady - PE Detracctions/src/sales/LMRY_PE_generate_SalesDetractions_MPRD_2.0.js:77:38)"
+        "Error\n at Object.setFieldValues (/SuiteBundles/Bundle 35754/LatamReady - PE Detracctions/lib/LMRY_detrac_ServerWidget_LBRY_v2.0.js:107:11)\n at Object.onRequest (/SuiteBundles/Bundle 35754/LatamReady - PE Detracctions/src/purchases/LMRY_PE_generate_detractions_STLT_v2.0.js:227:24)"
     ],
     "cause": {
         "type": "internal error",
         "code": "INVALID_FLD_VALUE",
-        "details": "You have entered an Invalid Field Value 1914 for the following field: account",
+        "details": "You have entered an Invalid Field Value false for the following field: custpage_detailed_rounding",
         "userEvent": null,
         "stackTrace": [
-            "Error\n at RecordInvoker.setCurrentSublistValue (suitescript/resources/javascript/record/serverRecordService.js:411:5)\n at NetSuiteObject.thenableFunction() (suitescript/resources/javascript/record/proxy.js:115:24)\n at Object.createJournal (/SuiteBundles/Bundle 35754/LatamReady - PE Detracctions/lib/LMRY_detrac_batch_object_LBRY_v2.0.js:908:18)\n at Object.getInputData (/SuiteBundles/Bundle 35754/LatamReady - PE Detracctions/src/sales/LMRY_PE_generate_SalesDetractions_MPRD_2.0.js:77:38)"
+            "Error\n at Object.setFieldValues (/SuiteBundles/Bundle 35754/LatamReady - PE Detracctions/lib/LMRY_detrac_ServerWidget_LBRY_v2.0.js:107:11)\n at Object.onRequest (/SuiteBundles/Bundle 35754/LatamReady - PE Detracctions/src/purchases/LMRY_PE_generate_detractions_STLT_v2.0.js:227:24)"
         ],
         "notifyOff": false
     },
     "notifyOff": false,
     "userFacing": true
+}
+
+{
+    "type": "error.SuiteScriptModuleLoaderError",
+    "name": "UNEXPECTED_ERROR",
+    "message": "missing ; after for-loop initializer (SS_SCRIPT_FOR_METADATA#28)",
+    "stack": []
 }
