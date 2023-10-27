@@ -103,7 +103,7 @@ define(['N/error', 'N/log', 'N/runtime', 'N/search', 'N/url', 'N/config', 'N/for
           'custrecord_lmry_pe_dec_ac_sales_acc_1',
           'custrecord_lmry_pe_dec_ac_sales_acc_2',
           'custrecord_lmry_pe_dec_ac_sales_acc_3',
-          'custrecord_lmry_pe_detailed_rounding'
+          'custrecord_smc_pe_detailed_rounding'
         ]
       }).run().each((line) => {
 
@@ -141,7 +141,7 @@ define(['N/error', 'N/log', 'N/runtime', 'N/search', 'N/url', 'N/config', 'N/for
           'custrecord_lmry_pe_dec_ac_sales_acc_1',
           'custrecord_lmry_pe_dec_ac_sales_acc_2',
           'custrecord_lmry_pe_dec_ac_sales_acc_3',
-          'custrecord_lmry_pe_detailed_rounding',
+          'custrecord_smc_pe_detailed_rounding',
           {
             name: 'internalid',
             sort: search.Sort.ASC

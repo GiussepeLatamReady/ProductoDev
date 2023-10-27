@@ -342,7 +342,7 @@ define(['N/error', 'N/log', 'N/runtime', 'N/search', 'N/url', 'N/config', 'N/for
               'custrecord_lmry_pe_dec_ac_sales_acc_1',
               'custrecord_lmry_pe_dec_ac_sales_acc_2',
               'custrecord_lmry_pe_dec_ac_sales_acc_3',
-              'custrecord_lmry_pe_detailed_rounding'
+              'custrecord_smc_pe_detailed_rounding'
             ]
           }).run().each((line) => {
 
@@ -379,7 +379,7 @@ define(['N/error', 'N/log', 'N/runtime', 'N/search', 'N/url', 'N/config', 'N/for
               'custrecord_lmry_pe_dec_ac_sales_acc_1',
               'custrecord_lmry_pe_dec_ac_sales_acc_2',
               'custrecord_lmry_pe_dec_ac_sales_acc_3',
-              'custrecord_lmry_pe_detailed_rounding'
+              'custrecord_smc_pe_detailed_rounding'
             ]
           }).run().each((line) => {
 
@@ -406,7 +406,7 @@ define(['N/error', 'N/log', 'N/runtime', 'N/search', 'N/url', 'N/config', 'N/for
             detraction: 'custrecord_lmry_pe_dec_ac_sales_acc_1',
             rounding: 'custrecord_lmry_pe_dec_ac_sales_acc_2',
             bank: 'custrecord_lmry_pe_dec_ac_sales_acc_3',
-            checkDetailedRounding: 'custrecord_lmry_pe_detailed_rounding'
+            checkDetailedRounding: 'custrecord_smc_pe_detailed_rounding'
           },
           this.type = 'customrecord_lmry_pe_detrac_acc_sales';
       }

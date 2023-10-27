@@ -27,11 +27,15 @@ Se requiere que dentro del módulo de pago de detracciones, se popule en las lí
     + **Create** 
         + **Core:** Field record
         + **Name:** Latam - Detailed rounding deduction.
-        + **id:** custrecord_lmry_pe_detailed_rounding.
+        + **id:** custrecord_lmry_pe_detailed_rounding. custrecord_smc_pe_detailed_rounding
         + **es:** Latam - Deducción detallada por redondeo.
         + **pt:** Latam - Dedução detalhada por arredondamento.
         + **Description:** If this field is enabled, the related entity is populated in the rounding lines of the Journal Entry; otherwise, the rounding will accumulate without populating the entity.
         + **type:** chexbox
+        + script que participa
+           LMRY_detrac_sales_operations_LBRY_v2.0.js
+           LMRY_detrac_sales_server_LBRY_v2.1.js
+
     + **Update**
         + Show in List a todos los campos.
 
