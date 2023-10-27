@@ -31,6 +31,11 @@ Se requiere que dentro del módulo de pago de detracciones, se popule en las lí
         + **pt:** Latam - Dedução detalhada por arredondamento.
         + **Description:** If this field is enabled, the related entity is populated in the rounding lines of the Journal Entry; otherwise, the rounding will accumulate without populating the entity.
         + **type:** chexbox
+
+        + script que participa:
+            LMRY_detrac_batch_object_LBRY_v2.0.js
+            LMRY_detrac_loader_LBRY_v2.0.js
+            LMRY_PE_generate_detractions_CLNT_v2.0.js
     + **Update**
         + Show in List a todos los campos.
 
