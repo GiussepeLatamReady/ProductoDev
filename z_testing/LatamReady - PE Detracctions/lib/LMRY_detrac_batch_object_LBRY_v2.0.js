@@ -997,7 +997,11 @@ define([
               value: true
             });
 
-            
+            _journal.setCurrentSublistValue({
+              sublistId: 'line',
+              fieldId: 'entity',
+              value: entity
+            });
 
             _journal.commitLine({
               sublistId: 'line'
