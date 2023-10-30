@@ -61,8 +61,8 @@ define(['N/error', 'N/log', 'N/runtime', 'N/search', 'N/url', 'N/config', 'N/for
       let exRateSearch = search.create({
         type: "currencyrate",
         filters: [
-          ["transactioncurrency", "anyof"].concat(from),
-          "AND",
+          //["transactioncurrency", "anyof"].concat(from),
+          //"AND",
           ["basecurrency", "anyof"].concat(to),
           'AND',
           ["effectivedate", "within", startDate, endDate]
@@ -94,6 +94,9 @@ define(['N/error', 'N/log', 'N/runtime', 'N/search', 'N/url', 'N/config', 'N/for
           let currentFrom = row.getValue(columns[2]);
           let currentRate = row.getValue(columns[3]);
           let currentFormatDate = Number(row.getValue(columns[4]));
+          if (!rates[currentFrom]) {
+            rates[currentFrom] = []
+          }
           rates[currentFrom].push({
             date: currentFormatDate,
             rate: currentRate
@@ -105,8 +108,8 @@ define(['N/error', 'N/log', 'N/runtime', 'N/search', 'N/url', 'N/config', 'N/for
         let exRateSearch = search.create({
           type: "currencyrate",
           filters: [
-            ["transactioncurrency", "anyof"].concat(from),
-            "AND",
+            //["transactioncurrency", "anyof"].concat(from),
+            //"AND",
             ["basecurrency", "anyof"].concat(to),
           ],
           columns: [{
@@ -136,6 +139,9 @@ define(['N/error', 'N/log', 'N/runtime', 'N/search', 'N/url', 'N/config', 'N/for
             let currentFrom = row.getValue(columns[2]);
             let currentRate = row.getValue(columns[3]);
             let currentFormatDate = Number(row.getValue(columns[4]));
+            if (!rates[currentFrom]) {
+              rates[currentFrom] = []
+            }
             rates[currentFrom].push({
               date: currentFormatDate,
               rate: currentRate
@@ -146,8 +152,8 @@ define(['N/error', 'N/log', 'N/runtime', 'N/search', 'N/url', 'N/config', 'N/for
         let lastRate = search.create({
           type: "currencyrate",
           filters: [
-            ["transactioncurrency", "anyof"].concat(from),
-            "AND",
+            //["transactioncurrency", "anyof"].concat(from),
+            //"AND",
             ["basecurrency", "anyof"].concat(to),
             'AND',
             ["effectivedate", "before", startDate]
@@ -171,6 +177,9 @@ define(['N/error', 'N/log', 'N/runtime', 'N/search', 'N/url', 'N/config', 'N/for
           let currentFrom = lastRate.getValue(columns[2]);
           let currentRate = lastRate.getValue(columns[3]);
           let currentFormatDate = Number(lastRate.getValue(columns[4]));
+          if (!rates[currentFrom]) {
+            rates[currentFrom] = []
+          }
           rates[currentFrom].push({
             date: currentFormatDate,
             rate: currentRate
@@ -185,7 +194,6 @@ define(['N/error', 'N/log', 'N/runtime', 'N/search', 'N/url', 'N/config', 'N/for
     exchangeRateContext.prototype.getRate = function (currency, date) {
 
       let currentRates = this.rates[currency];
-
       let dateDate = "" + date.getDate();
       dateDate = dateDate.length == 1 ? "0" + dateDate : dateDate;
 
