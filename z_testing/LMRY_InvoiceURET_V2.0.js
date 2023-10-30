@@ -851,7 +851,7 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
         if (LMRY_Result[0]=='AR') {
           Library_AutoPercepcionDesc.removePerceptionLines(RCD_OBJ);
         }
-        if (LMRY_Result[0]=='BR' && (scriptContext.type=="create"||scriptContext.type=="edit"||scriptContext.type=="view")) {
+        if (LMRY_Result[0]=='BR' && (scriptContext.type=="create"||scriptContext.type=="edit"||scriptContext.type=="view"||scriptContext.type=="copy")) {
           librarySecondClient.setSecondClient(RCD_OBJ,OBJ_FORM,scriptContext.type);
         }
 

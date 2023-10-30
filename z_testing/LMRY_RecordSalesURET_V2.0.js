@@ -597,7 +597,7 @@ define(['N/config', 'N/currency', 'N/record', 'N/runtime', 'N/search', 'N/ui/ser
           Library_AutoPercepcionDesc.removePerceptionLines(RCD_OBJ);
         }
 
-        if (LMRY_countr[0]=='BR' && (scriptContext.type=="create"||scriptContext.type=="edit"||scriptContext.type=="view")) {
+        if (LMRY_countr[0]=='BR' && (scriptContext.type=="create"||scriptContext.type=="edit"||scriptContext.type=="view"||scriptContext.type=="copy")) {
           librarySecondClient.setSecondClient(RCD_OBJ,OBJ_FORM,scriptContext.type);
         }
 

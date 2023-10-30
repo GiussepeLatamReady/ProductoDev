@@ -135,7 +135,7 @@ define(['N/runtime', 'N/log', 'N/search', 'N/record', 'N/ui/serverWidget', './La
         }
         
 
-        if (LMRY_Result[0]=='BR' && (context.type=="create"||context.type=="edit"||context.type=="view")) {
+        if (LMRY_Result[0]=='BR' && (context.type=="create"||context.type=="edit"||context.type=="view"||context.type=="copy")) {
           librarySecondClient.setSecondClient(recordObj,OBJ_FORM,context.type);
         }
 
