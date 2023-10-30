@@ -1,9 +1,9 @@
-# [PE: Pago de Detracciones incluir entidad en las líneas de redondeo del Journal Entry (Compras) C1017 -2](https://docs.google.com/document/d/1KGKd3uSz04AfABCBtdibHk2JdjK8XxuGntnsatZLq7c/edit#heading=h.1mllta7bdj39)
+# [MX:EI - Validacion VOID D1214]()
 
 
 ## Description of the Requirement
 
-Se requiere que dentro del módulo de pago de detracciones, se popule en las líneas de redondeo del Journal Entry la entidad relacionada a fin de que el cliente pueda realizar su conciliación bancaria de manera correcta.
+Realizar la validacion de creacion de notas de credito al momento de anular Electronicamente, para no generar una nueva nota de credito si esta ya existe.
 
 ## Description of the solution
 
@@ -11,33 +11,11 @@ Se requiere que dentro del módulo de pago de detracciones, se popule en las lí
 ## Scripts
 + Create
 + Update
-    + LMRY_detrac_loader_LBRY_v2.0.js
-    + LMRY_detrac_metadata_LBRY_v2.0.js (Este file se modificó en ventas pero tuvimos suerte que tmb es valido para compras)
-    + LMRY_PE_BatchDetraction_URET_v2.0.js
-    + LMRY_PE_generate_detractions_CLNT_v2.0.js
-    + LMRY_PE_generate_detractions_STLT_v2.0.js
-    + LMRY_detrac_batch_object_LBRY_v2.0.js 
 
 + Delete
 
 ## Records
 
-+ **LatamReady - PE Detractions Account**
-    + **Create** 
-        + **Core:** Field record
-        + **Name:** Latam - Detailed rounding deduction.
-        + **id:** custrecord_lmry_pe_detailed_rounding_pur.  custrecord_smc_pe_detailed_rounding_pur
-        + **es:** Latam - Deducción detallada por redondeo.
-        + **pt:** Latam - Dedução detalhada por arredondamento.
-        + **Description:** If this field is enabled, the related entity is populated in the rounding lines of the Journal Entry; otherwise, the rounding will accumulate without populating the entity.
-        + **type:** chexbox
-
-        + script que participa:
-            LMRY_detrac_batch_object_LBRY_v2.0.js
-            LMRY_detrac_loader_LBRY_v2.0.js
-            LMRY_PE_generate_detractions_CLNT_v2.0.js
-    + **Update**
-        + Show in List a todos los campos.
 
 ## Fields
 + Create
