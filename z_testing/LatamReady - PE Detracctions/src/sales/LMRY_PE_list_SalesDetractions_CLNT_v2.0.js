@@ -30,8 +30,8 @@ define(['N/url', 'N/runtime', 'LR/popup', 'detraction/metadata'],
 
       if (isOneWorld()) {
         var scriptContext = {
-          scriptId: 'customscript_lmry_pe_det_salesetup_stlt',
-          deploymentId: 'customdeploy_lmry_pe_det_salesetup_stlt'
+          scriptId: 'customscript_smc_pe_det_salesetup_stlt',
+          deploymentId: 'customdeploy_smc_pe_det_salesetup_stlt'
         };
 
         var path = url.resolveScript(scriptContext);
@@ -126,8 +126,8 @@ define(['N/url', 'N/runtime', 'LR/popup', 'detraction/metadata'],
     function openCreate() {
 
       var scriptContext = {
-        scriptId: 'customscript_lmry_pe_det_salesgene_stlt',
-        deploymentId: 'customdeploy_lmry_pe_det_salesgene_stlt'
+        scriptId: 'customscript_smc_pe_det_salesgene_stlt',
+        deploymentId: 'customdeploy_smc_pe_det_salesgene_stlt'
       };
 
       var path = url.resolveScript(scriptContext);

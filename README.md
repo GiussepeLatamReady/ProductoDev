@@ -19,6 +19,15 @@ Se requiere que dentro del módulo de pago de detracciones, se popule en las lí
     + LMRY_PE_generate_SalesDetractions_STLT_v2.0.js
     + LMRY_PE_list_SalesDetractions_CLNT_v2.0.js
     + LMRY_PE_setup_SalesDetractions_STLT_v2.0.js
+
+    SMC
+        + SMC_PE_generate_SalesDetractions_STLT_v2.0.js _smc_pe_det_salesgene_stlt
+        + SMC_PE_setup_SalesDetractions_STLT_v2.0.js _smc_pe_det_salesetup_stlt
+
+    SCRIPTS MODIFICADO POR SMC
+        + LMRY_PE_generate_SalesDetractions_CLNT_v2.0.js
+        + LMRY_PE_list_SalesDetractions_CLNT_v2.0.js
+
 + Delete
 
 ## Records

@@ -17,8 +17,8 @@ define([
       Universal Variables
     ********/
     var suiteletScript = {
-      scriptId: 'customscript_lmry_pe_det_salesgene_stlt',
-      deploymentId: 'customdeploy_lmry_pe_det_salesgene_stlt'
+      scriptId: 'customscript_smc_pe_det_salesgene_stlt',
+      deploymentId: 'customdeploy_smc_pe_det_salesgene_stlt'
     };
 
     var fieldsValues = {
