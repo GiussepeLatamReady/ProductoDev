@@ -210,8 +210,8 @@ define(['N/currentRecord', 'N/url', 'N/record', 'N/search',
         }
 
         var path = url.resolveScript({
-          scriptId: 'customscript_lmry_pe_gene_det_stlt',
-          deploymentId: 'customdeploy_lmry_pe_gene_det_stlt',
+          scriptId: 'customscript_smc_pe_gene_det_stlt',
+          deploymentId: 'customdeploy_smc_pe_gene_det_stlt',
           returnExternalUrl: false,
           params: jsonContext
         });

@@ -18,6 +18,14 @@ Se requiere que dentro del módulo de pago de detracciones, se popule en las lí
     + LMRY_PE_generate_detractions_STLT_v2.0.js
     + LMRY_detrac_batch_object_LBRY_v2.0.js 
 
+
+    SMC
+        + SMC_PE_BatchDetraction_URET_v2.0.js _smc_pe_batch_det_uret
+        + SMC_PE_generate_detractions_STLT_v2.0.js _smc_pe_gene_det_stlt
+        
+    SCRIPTS MODIFICADOS POR SMC
+        + LMRY_PE_generate_detractions_CLNT_v2.0.js
+
 + Delete
 
 ## Records
