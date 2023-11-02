@@ -8,19 +8,37 @@ Se requiere que dentro del módulo de pago de detracciones, se popule en las lí
 ## Description of the solution
 
 
-## Scripts
+## Scripts (Purchase)
 + Create
 + Update
     + LMRY_detrac_loader_LBRY_v2.0.js
+    + LMRY_detrac_batch_object_LBRY_v2.0.js 
     + LMRY_detrac_metadata_LBRY_v2.0.js (Este file se modificó en ventas pero tuvimos suerte que tmb es valido para compras)
+
+
     + LMRY_PE_BatchDetraction_URET_v2.0.js
     + LMRY_PE_generate_detractions_CLNT_v2.0.js
     + LMRY_PE_generate_detractions_STLT_v2.0.js
-    + LMRY_detrac_batch_object_LBRY_v2.0.js 
+    
 
 + Delete
 
-## Records
+
+## Scripts (Sales)
++ Create
++ Update
+    + LMRY_detrac_batch_object_LBRY_v2.0.js
+    + LMRY_detrac_metadata_LBRY_v2.0.js
+    + LMRY_detrac_sales_operations_LBRY_v2.0.js
+    + LMRY_detrac_sales_server_LBRY_v2.1.js
+    + LMRY_detrac_ServerWidget_LBRY_v2.0.js
+
+    + LMRY_PE_generate_SalesDetractions_STLT_v2.0.js
+    + LMRY_PE_list_SalesDetractions_CLNT_v2.0.js
+    + LMRY_PE_setup_SalesDetractions_STLT_v2.0.js
+
+    
+## Records (Purchase)
 
 + **LatamReady - PE Detractions Account**
     + **Create** 
@@ -34,6 +52,19 @@ Se requiere que dentro del módulo de pago de detracciones, se popule en las lí
     + **Update**
         + Show in List a todos los campos.
 
+## Records (Sales)
+
++ **LatamReady - PE Detrac. Account (Sales)**
+    + **Create** 
+        + **Core:** Field record
+        + **Name:** Latam - Detailed rounding deduction.
+        + **id:** custrecord_lmry_pe_detailed_rounding.
+        + **es:** Latam - Deducción detallada por redondeo.
+        + **pt:** Latam - Dedução detalhada por arredondamento.
+        + **Description:** If this field is enabled, the related entity is populated in the rounding lines of the Journal Entry; otherwise, the rounding will accumulate without populating the entity.
+        + **type:** chexbox
+    + **Update**
+        + Show in List a todos los campos.
 ## Fields
 + Create
 + Update 
