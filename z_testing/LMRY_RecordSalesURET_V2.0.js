@@ -20,7 +20,7 @@ define(['N/config', 'N/currency', 'N/record', 'N/runtime', 'N/search', 'N/ui/ser
   './WTH_Library/LMRY_MX_TAX_Withholding_LBRY_V2.0', './Latam_Library/LMRY_BR_UPDATE_Flete_Transaction_Field_LBRY_2.0',
   './Latam_Library/LMRY_MX_STE_Sales_Tax_Transaction_LBRY_V2.0',
   './Latam_Library/LMRY_Custom_ExchangeRate_Field_LBRY_V2.0.js', './WTH_Library/LMRY_AutoPercepcionDesc_LBRY_V2.0',
-  './Latam_Library/LMRY_second_Entity_LBR_V2.0'
+  './Latam_Library/LMRY_second_Entity_LBRY_V2.0'
 ],
 
   function (config, currencyModule, record, runtime, search, serverWidget, log,

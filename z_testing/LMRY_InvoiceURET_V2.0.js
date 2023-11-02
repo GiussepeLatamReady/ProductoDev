@@ -32,7 +32,7 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
   './WTH_Library/LMRY_MX_Withholding_Sales_LBRY_V2.0', './WTH_Library/LMRY_TransferIva_Subtype_LBRY', './Latam_Library/LMRY_libToolsFunctionsLBRY_V2.0',
   './Latam_Library/LMRY_BR_UPDATE_Flete_Transaction_Field_LBRY_2.0', './WTH_Library/LMRY_BO_Taxes_LBRY_V2.0',
   './Latam_Library/LMRY_PE_STE_Sales_Tax_Transaction_LBRY_V2.0', './WTH_Library/LMRY_CR_STE_WhtTransactionOnSalesByTotal_LBRY_V2.0',
-  './Latam_Library/LMRY_Custom_ExchangeRate_Field_LBRY_V2.0.js','./Latam_Library/LMRY_second_Entity_LBR_V2.0'
+  './Latam_Library/LMRY_Custom_ExchangeRate_Field_LBRY_V2.0.js','./Latam_Library/LMRY_second_Entity_LBRY_V2.0'
 ],
 
   function (library_Uni_Setting, library_hideview3, Library_BoletoBancario, Library_Mail, Library_Number,
