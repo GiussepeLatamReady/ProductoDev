@@ -161,6 +161,12 @@ define(['N/record', 'N/runtime', 'N/log', 'N/search', 'N/format', 'N/transaction
                         response['standardvoid'] = true;
                     } else {
                         // 2022.06.23 ONE WORLD/MID MARKET
+                        // Evalua si existe anulacion de invoice para Mexico
+                        var country = invoice.custbody_lmry_subsidiary_country[0].value;
+                        if (country == 157 && isThereCancellation(id_invoice)) {
+                            log.error("Anulacion", "La transaccion ya esta anulada. El proceso se ha cancelado");
+                            return false;
+                        }
                         var idSubsidiary = 1;
                         if (F_SUBSIDIAR == true || F_SUBSIDIAR == 'T') {
                             idSubsidiary = invoice.subsidiary[0].value;
@@ -171,7 +177,9 @@ define(['N/record', 'N/runtime', 'N/log', 'N/search', 'N/format', 'N/transaction
 
                         //Si tiene retenciones se crea un invoice para cancelar el credit memo de retencion
                         var idWHTInvoice = createVoidWHTInvoice(id_invoice, whtObject, customSegments, forms);
+                        
 
+                       
                         //Se crea el credit memo de anulacion
                         var idVoidCreditMemo = createVoidCreditMemo(id_invoice, invoice, idWHTInvoice, forms);
                         response['idcreditmemo'] = idVoidCreditMemo;
@@ -1493,6 +1501,36 @@ define(['N/record', 'N/runtime', 'N/log', 'N/search', 'N/format', 'N/transaction
                     }
                 }
             }
+        }
+
+        function isThereCancellation(invoiceId){
+
+            var idCreditmemo = [];
+            var creditmemoSearchObj = search.create({
+                type: "creditmemo",
+                filters:
+                [
+                   ["type","anyof","CustCred"], 
+                   "AND", 
+                   ["createdfrom.internalid","anyof",invoiceId], 
+                   "AND", 
+                   ["mainline","is","T"]
+                ],
+                columns:
+                [
+                   search.createColumn({
+                      name: "internalid",
+                      sort: search.Sort.DESC,
+                      label: "Internal ID"
+                   })
+                ]
+             });
+
+             creditmemoSearchObj.run().each(function(result){              
+                idCreditmemo.push(result.getValue("internalid"));
+             });
+
+             return idCreditmemo.length != 0;
         }
 
         return {
