@@ -65,7 +65,10 @@ define(['N/currentRecord', 'N/url', 'N/record', 'N/search',
         'custpopup_tab', arrayAccounts.expense);
 
       objForm.addField('custpopup_acc_3', _dao.getName('custpopup_acc_3'), 'select',
-        'custpopup_tab', arrayAccounts.expense.concat(arrayAccounts.income));
+        'custpopup_tab', arrayAccounts.expense);
+
+      objForm.addField('custpopup_acc_5', _dao.getName('custpopup_acc_5'), 'select',
+        'custpopup_tab', arrayAccounts.income);
 
       objForm.addField('custpopup_acc_4', _dao.getName('custpopup_acc_4'), 'select',
         'custpopup_tab', arrayAccounts.bank);
@@ -80,6 +83,7 @@ define(['N/currentRecord', 'N/url', 'N/record', 'N/search',
       var acc2 = _current.getValue('custpage_acc_2');
       var acc3 = _current.getValue('custpage_acc_3');
       var acc4 = _current.getValue('custpage_acc_4');
+      var acc5 = _current.getValue('custpage_acc_5');
       var chexkDetailedRounding = _current.getValue('custpage_detailed_rounding');
 
       try {
@@ -87,6 +91,7 @@ define(['N/currentRecord', 'N/url', 'N/record', 'N/search',
         objForm.setValue('custpopup_acc_2', acc2);
         objForm.setValue('custpopup_acc_3', acc3);
         objForm.setValue('custpopup_acc_4', acc4);
+        objForm.setValue('custpopup_acc_5', acc5);
         objForm.setValue('custpopup_detailed_rounding', chexkDetailedRounding);
         
       } catch (err) {
@@ -101,9 +106,10 @@ define(['N/currentRecord', 'N/url', 'N/record', 'N/search',
         var acc2 = objForm.getValue('custpopup_acc_2');
         var acc3 = objForm.getValue('custpopup_acc_3');
         var acc4 = objForm.getValue('custpopup_acc_4');
+        var acc5 = objForm.getValue('custpopup_acc_5');
         
 
-        if (acc1 && acc2 && acc3 && acc4) {
+        if (acc1 && acc2 && acc3 && acc4 && acc5) {
 
           search.create({
             type: 'customrecord_lmry_pe_detractions_acc',
@@ -129,6 +135,7 @@ define(['N/currentRecord', 'N/url', 'N/record', 'N/search',
             _setup.setValue('custrecord_lmry_det_ac_account_2', objForm.getValue('custpopup_acc_2'));
             _setup.setValue('custrecord_lmry_det_ac_account_3', objForm.getValue('custpopup_acc_3'));
             _setup.setValue('custrecord_lmry_det_ac_account_4', objForm.getValue('custpopup_acc_4'));
+            _setup.setValue('custrecord_lmry_det_ac_account_5', objForm.getValue('custpopup_acc_5'));
             _setup.setValue('custrecord_lmry_pe_detailed_rounding_pur', objForm.getValue('custpopup_detailed_rounding'));
 
             _setup.save({
@@ -160,6 +167,9 @@ define(['N/currentRecord', 'N/url', 'N/record', 'N/search',
 
           if (!acc4)
             error += '-' + _dao.getName('custpopup_acc_4') + '\n';
+
+          if (!acc5)
+            error += '-' + _dao.getName('custpopup_acc_5') + '\n';
 
           alert(error);
 

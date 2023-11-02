@@ -100,6 +100,8 @@ define([
 
         _GROUP_B.addField("custpage_acc_3", 'select', 'account').isOnlyRead(true);
 
+        _GROUP_B.addField("custpage_acc_5", 'select', 'account').isOnlyRead(true);
+
         _GROUP_B.addField("custpage_acc_4", 'select', 'account').isOnlyRead(true);
 
         _GROUP_B.addField("custpage_detailed_rounding", 'checkbox').isOnlyRead(true);

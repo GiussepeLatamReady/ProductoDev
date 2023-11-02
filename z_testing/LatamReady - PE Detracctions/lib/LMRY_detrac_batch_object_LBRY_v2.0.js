@@ -375,6 +375,7 @@ define([
       var result = {
         commission: '',
         rounding: '',
+        roundingCredit: '',
         bank: ''
       };
 
@@ -388,7 +389,8 @@ define([
           'custrecord_lmry_det_ac_account_2',
           'custrecord_lmry_det_ac_account_3',
           'custrecord_lmry_det_ac_account_4',
-          'custrecord_lmry_pe_detailed_rounding_pur'
+          'custrecord_lmry_pe_detailed_rounding_pur',
+          'custrecord_lmry_det_ac_account_5',
         ],
         filters: [
           ['custrecord_lmry_pe_dec_ac_subsi', 'anyof', subsidiary]
@@ -397,6 +399,7 @@ define([
         result.detraction = line.getValue('custrecord_lmry_det_ac_account_1');
         result.commission = line.getValue('custrecord_lmry_det_ac_account_2');
         result.rounding = line.getValue('custrecord_lmry_det_ac_account_3');
+        result.roundingCredit = line.getValue('custrecord_lmry_det_ac_account_5');
         result.bank = line.getValue('custrecord_lmry_det_ac_account_4');
         result.checkDetailedRounding = line.getValue('custrecord_lmry_pe_detailed_rounding_pur');
       });
@@ -771,6 +774,7 @@ define([
       var commissionAccount = journalContext.account.commission;
 
       var roundingAccount = journalContext.account.rounding;
+      var roundingAccountCredit = journalContext.account.roundingCredit;
       var checkDetailedRounding = journalContext.account.checkDetailedRounding;
 
       var clasification = journalContext.clasification;
@@ -1012,21 +1016,27 @@ define([
             /*--------------------------------------------------------------*/
             _journal.selectNewLine('line');
 
-            _journal.setCurrentSublistValue({
-              sublistId: 'line',
-              fieldId: 'account',
-              value: roundingAccount
-            });
+            
 
             if (isSales == true) {
 
               if (DecimalAmount < 0) {
                 _journal.setCurrentSublistValue({
                   sublistId: 'line',
+                  fieldId: 'account',
+                  value: roundingAccountCredit
+                });
+                _journal.setCurrentSublistValue({
+                  sublistId: 'line',
                   fieldId: 'credit',
                   value: (-1 * DecimalAmount).toFixed(2)
                 });
               } else if (DecimalAmount > 0) {
+                _journal.setCurrentSublistValue({
+                  sublistId: 'line',
+                  fieldId: 'account',
+                  value: roundingAccount
+                });
                 _journal.setCurrentSublistValue({
                   sublistId: 'line',
                   fieldId: 'debit',
@@ -1039,10 +1049,20 @@ define([
               if (DecimalAmount < 0) {
                 _journal.setCurrentSublistValue({
                   sublistId: 'line',
+                  fieldId: 'account',
+                  value: roundingAccount
+                });
+                _journal.setCurrentSublistValue({
+                  sublistId: 'line',
                   fieldId: 'debit',
                   value: (-1 * DecimalAmount).toFixed(2)
                 });
               } else if (DecimalAmount > 0) {
+                _journal.setCurrentSublistValue({
+                  sublistId: 'line',
+                  fieldId: 'account',
+                  value: roundingAccountCredit
+                });
                 _journal.setCurrentSublistValue({
                   sublistId: 'line',
                   fieldId: 'credit',
@@ -1209,21 +1229,27 @@ define([
           /*--------------------------------------------------------------*/
           _journal.selectNewLine('line');
   
-          _journal.setCurrentSublistValue({
-            sublistId: 'line',
-            fieldId: 'account',
-            value: roundingAccount
-          });
+         
   
           if (isSales == true) {
   
             if (totalDecimalAmount < 0) {
               _journal.setCurrentSublistValue({
                 sublistId: 'line',
+                fieldId: 'account',
+                value: roundingAccountCredit
+              });
+              _journal.setCurrentSublistValue({
+                sublistId: 'line',
                 fieldId: 'credit',
                 value: (-1 * totalDecimalAmount).toFixed(2)
               });
             } else if (totalDecimalAmount > 0) {
+              _journal.setCurrentSublistValue({
+                sublistId: 'line',
+                fieldId: 'account',
+                value: roundingAccount
+              });
               _journal.setCurrentSublistValue({
                 sublistId: 'line',
                 fieldId: 'debit',
@@ -1236,10 +1262,20 @@ define([
             if (totalDecimalAmount < 0) {
               _journal.setCurrentSublistValue({
                 sublistId: 'line',
+                fieldId: 'account',
+                value: roundingAccount
+              });
+              _journal.setCurrentSublistValue({
+                sublistId: 'line',
                 fieldId: 'debit',
                 value: (-1 * totalDecimalAmount).toFixed(2)
               });
             } else if (totalDecimalAmount > 0) {
+              _journal.setCurrentSublistValue({
+                sublistId: 'line',
+                fieldId: 'account',
+                value: roundingAccountCredit
+              });
               _journal.setCurrentSublistValue({
                 sublistId: 'line',
                 fieldId: 'credit',

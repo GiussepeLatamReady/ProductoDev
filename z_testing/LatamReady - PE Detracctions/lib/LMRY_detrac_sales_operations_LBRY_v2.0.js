@@ -103,7 +103,8 @@ define(['N/error', 'N/log', 'N/runtime', 'N/search', 'N/url', 'N/config', 'N/for
           'custrecord_lmry_pe_dec_ac_sales_acc_1',
           'custrecord_lmry_pe_dec_ac_sales_acc_2',
           'custrecord_lmry_pe_dec_ac_sales_acc_3',
-          'custrecord_lmry_pe_detailed_rounding'
+          'custrecord_lmry_pe_detailed_rounding',
+          'custrecord_lmry_pe_dec_ac_sales_acc_4',
         ]
       }).run().each((line) => {
 
@@ -112,12 +113,15 @@ define(['N/error', 'N/log', 'N/runtime', 'N/search', 'N/url', 'N/config', 'N/for
         let rounding = line.getValue(line.columns[2]);
         let bank = line.getValue(line.columns[3]);
         let checkDetailedRounding = line.getValue(line.columns[4]);
+        let roundingCredit = line.getValue(line.columns[5]);
         result[subsididary] = {
           subsidiary: subsididary,
           detraction: det,
           rounding: rounding,
+          roundingCredit:roundingCredit,
           bank: bank,
           checkDetailedRounding:checkDetailedRounding
+          
         };
         return true;
 
@@ -130,6 +134,7 @@ define(['N/error', 'N/log', 'N/runtime', 'N/search', 'N/url', 'N/config', 'N/for
       let result = {
         detraction: '',
         rounding: '',
+        roundingCredit: '',
         bank: '',
         checkDetailedRounding:''
       };
@@ -142,6 +147,7 @@ define(['N/error', 'N/log', 'N/runtime', 'N/search', 'N/url', 'N/config', 'N/for
           'custrecord_lmry_pe_dec_ac_sales_acc_2',
           'custrecord_lmry_pe_dec_ac_sales_acc_3',
           'custrecord_lmry_pe_detailed_rounding',
+          'custrecord_lmry_pe_dec_ac_sales_acc_4',
           {
             name: 'internalid',
             sort: search.Sort.ASC
@@ -154,12 +160,15 @@ define(['N/error', 'N/log', 'N/runtime', 'N/search', 'N/url', 'N/config', 'N/for
         let rounding = line.getValue(line.columns[2]);
         let bank = line.getValue(line.columns[3]);
         let checkDetailedRounding = line.getValue(line.columns[4]);
+        let roundingCredit = line.getValue(line.columns[5]);
 
         result = {
           detraction: det,
           rounding: rounding,
+          roundingCredit:roundingCredit,
           bank: bank,
           checkDetailedRounding: checkDetailedRounding
+          
         };
         return false;
 
@@ -188,6 +197,7 @@ define(['N/error', 'N/log', 'N/runtime', 'N/search', 'N/url', 'N/config', 'N/for
       let resultContext = {
         bank: [],
         rounding: [],
+        roundingCredit: [],
         detraction: [],
       };
 
@@ -240,10 +250,10 @@ define(['N/error', 'N/log', 'N/runtime', 'N/search', 'N/url', 'N/config', 'N/for
               resultContext.rounding.push(context);
               break;
             case "Income":
-              resultContext.rounding.push(context);
+              resultContext.roundingCredit.push(context);
               break;
             case "OthIncome":
-              resultContext.rounding.push(context);
+              resultContext.roundingCredit.push(context);
               break;
             case "OthExpense":
               resultContext.rounding.push(context);

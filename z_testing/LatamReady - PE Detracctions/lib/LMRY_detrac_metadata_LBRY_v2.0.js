@@ -59,8 +59,9 @@ define(['N/error', 'N/log', 'N/runtime'],
 
       ["custpage_acc_1", "Detractions Account", "Cuenta Contable de Detracciones"],
       ["custpage_acc_2", "Bank Commission Account", "Cuenta Contable de la Comisión"],
-      ["custpage_acc_3", "Rounding Account", "Cuenta Contable de Redondeo"],
+      ["custpage_acc_3", "Rounding Account (Debit)", "Cuenta Contable de Redondeo (Debe)"],
       ["custpage_acc_4", "Bank Account", "Cuenta Contable Bancaria"],
+      ["custpage_acc_5", "Rounding Account (Credit)", "Cuenta Contable de Redondeo (Haber)"],
       ["custpage_detailed_rounding", "Detailed rounding deduction", "Deducción detallada por redondeo"],
       ["custfilter_subsi", "Subsidiary", "Subsidiaria"],
       ["custfilter_date_from", "Date From", "Fecha Desde"],
@@ -130,8 +131,9 @@ define(['N/error', 'N/log', 'N/runtime'],
 
       ["custpopup_acc_1", "Detractions Account", "Cuenta Contable de Detracciones"],
       ["custpopup_acc_2", "Bank Commission Account", "Cuenta Contable de la Comisión"],
-      ["custpopup_acc_3", "Rounding Account", "Cuenta Contable de Redondeo"],
+      ["custpopup_acc_3", "Rounding Account (Debit)", "Cuenta Contable de Redondeo (Debe)"],
       ["custpopup_acc_4", "Bank Account", "Cuenta Contable Bancaria"],
+      ["custpopup_acc_5", "Rounding Account (Credit)", "Cuenta Contable de Redondeo (Haber)"],
       ["custpopup_detailed_rounding", "Detailed rounding deduction", "Deducción detallada por redondeo"],
       ['custpopup_tab', "General Information", "Información General"],
 
@@ -182,7 +184,9 @@ define(['N/error', 'N/log', 'N/runtime'],
 
       ['custpage_col_sales_det_acc', 'Detraction Account', 'Cuenta de Detración'],
 
-      ['custpage_col_sales_rounding_acc', 'Rounding Account', 'Cuenta de Redondeo'],
+      ['custpage_col_sales_rounding_acc', 'Rounding Account (Debit)', 'Cuenta de Redondeo (Debe)'],
+
+      ['custpage_col_sales_rounding_accc', 'Rounding Account (Credit)', 'Cuenta de Redondeo (Haber)'],
 
       ['custpage_col_sales_bank_acc', 'Bank Account', 'Cuenta de Banco'],
 

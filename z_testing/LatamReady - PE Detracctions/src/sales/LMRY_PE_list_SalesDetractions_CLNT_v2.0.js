@@ -57,6 +57,9 @@ define(['N/url', 'N/runtime', 'LR/popup', 'detraction/metadata'],
           objForm.addField('custpopup_acc_3', _dao.getName('custpopup_acc_3'), 'select',
             'custpopup_tab', accountList.rounding);
 
+          objForm.addField('custpopup_acc_5', _dao.getName('custpopup_acc_5'), 'select',
+            'custpopup_tab', accountList.roundingCredit);
+
           objForm.addField('custpopup_acc_4', _dao.getName('custpopup_acc_4'), 'select',
             'custpopup_tab', accountList.bank);
 
@@ -70,6 +73,7 @@ define(['N/url', 'N/runtime', 'LR/popup', 'detraction/metadata'],
           try {
             objForm.setValue('custpopup_acc_1', setupCompany.detraction);
             objForm.setValue('custpopup_acc_3', setupCompany.rounding);
+            objForm.setValue('custpopup_acc_5', setupCompany.roundingCredit);
             objForm.setValue('custpopup_acc_4', setupCompany.bank);
           } catch (err) {
             console.log(err);
@@ -82,10 +86,11 @@ define(['N/url', 'N/runtime', 'LR/popup', 'detraction/metadata'],
             var acc1 = objForm.getValue('custpopup_acc_1');
             var acc3 = objForm.getValue('custpopup_acc_3');
             var acc4 = objForm.getValue('custpopup_acc_4');
+            var acc5 = objForm.getValue('custpopup_acc_5');
 
-            if (acc1 && acc3 && acc4) {
+            if (acc1 && acc3 && acc4 && acc5) {
 
-              var result = updateSetup(acc1, acc3, acc4);
+              var result = updateSetup(acc1, acc3, acc4, acc5);
 
               if (result.isCompleted) {
                 alert(result.value);
@@ -109,6 +114,9 @@ define(['N/url', 'N/runtime', 'LR/popup', 'detraction/metadata'],
 
               if (!acc4)
                 error += '-' + _dao.getName('custpopup_acc_4') + '\n';
+
+              if (!acc5)
+                error += '-' + _dao.getName('custpopup_acc_5') + '\n';
 
               alert(error);
 
@@ -189,7 +197,7 @@ define(['N/url', 'N/runtime', 'LR/popup', 'detraction/metadata'],
 
     }
 
-    function updateSetup(detraction, rounding, bank) {
+    function updateSetup(detraction, rounding, bank, roundingCredit) {
 
       var httpRequest = new XMLHttpRequest();
 
@@ -202,6 +210,7 @@ define(['N/url', 'N/runtime', 'LR/popup', 'detraction/metadata'],
         content: {
           detraction: detraction,
           rounding: rounding,
+          roundingCredit: roundingCredit,
           bank: bank
         }
       }));

@@ -129,6 +129,9 @@ define([
         _GROUP_B.addField("custpage_acc_2", 'select', 'account').isMandatory(true).isOnlyRead(true);
 
         _GROUP_B.addField("custpage_acc_3", 'select', 'account').isMandatory(true).isOnlyRead(true);
+
+        _GROUP_B.addField("custpage_acc_5", 'select', 'account').isMandatory(true).isOnlyRead(true);
+
         _GROUP_B.addField("custpage_detailed_rounding", 'checkbox').isMandatory(true).isOnlyRead(true);
 
         _GROUP_B.addField("custpage_i_date", 'date').isMandatory(true).isNewColumn(true);
@@ -227,7 +230,7 @@ define([
           } else {
             subsidiaryInformation = detractionSetup.getInformation();
 
-            if (subsidiaryInformation.detraction && subsidiaryInformation.bank && subsidiaryInformation.rounding) {
+            if (subsidiaryInformation.detraction && subsidiaryInformation.bank && subsidiaryInformation.rounding && subsidiaryInformation.roundingCredit) {
               isConfiguredMidMarket = true;
             }
 
@@ -245,6 +248,7 @@ define([
             'custpage_acc_1': subsidiaryInformation.detraction,
             'custpage_acc_2': subsidiaryInformation.bank,
             'custpage_acc_3': subsidiaryInformation.rounding,
+            'custpage_acc_5': subsidiaryInformation.roundingCredit,
             'custpage_detailed_rounding': subsidiaryInformation.checkDetailedRounding,
             'custpage_i_date': currentPeriod.date,
             'custpage_i_period': currentPeriod.period

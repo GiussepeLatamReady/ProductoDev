@@ -58,8 +58,13 @@ define(["detraction/serverWidget", "detraction/metadata", 'detraction/loader', "
         customWidget.addField('custpage_acc_3', 'select', 'account').
         insertBefore('custrecord_lmry_pe_det_b_user').isOnlyRead(true);;
 
+        customWidget.addField('custpage_acc_5', 'select', 'account').
+        insertBefore('custrecord_lmry_pe_det_b_user').isOnlyRead(true);
+
         customWidget.addField('custpage_acc_4', 'select', 'account').
         insertBefore('custrecord_lmry_pe_det_b_user').isOnlyRead(true);;
+
+        
 
         customWidget.addField('custpage_detailed_rounding', 'checkbox').
         insertBefore('custrecord_lmry_pe_det_b_user').isOnlyRead(true);

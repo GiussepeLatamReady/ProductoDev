@@ -62,6 +62,9 @@ define([
         subsidiaryTable.addColumn('custpage_col_sales_rounding_acc', 'select')
           .setOptions(searchResult.rounding).isMandatory(true);
 
+        subsidiaryTable.addColumn('custpage_col_sales_rounding_accc', 'select')
+          .setOptions(searchResult.roundingCredit).isMandatory(true);
+
         subsidiaryTable.addColumn('custpage_col_detailed_rounding', 'checkbox')
           .isMandatory(true);
 
@@ -75,7 +78,9 @@ define([
           currentRow[1] = line.detraction;
           currentRow[2] = line.bank;
           currentRow[3] = line.rounding;
-          currentRow[4] = line.checkDetailedRounding;
+          currentRow[4] = line.roundingCredit;
+          currentRow[5] = line.checkDetailedRounding;
+          
 
           subsidiaryTable.addRow(currentRow);
 
@@ -96,6 +101,7 @@ define([
             'custpage_col_sales_det_acc',
             'custpage_col_sales_bank_acc',
             'custpage_col_sales_rounding_acc',
+            'custpage_col_sales_rounding_accc',
             'custpage_col_detailed_rounding'
           ],
           output: [
@@ -103,6 +109,7 @@ define([
             'detraction',
             'bank',
             'rounding',
+            'roundingCredit',
             'checkDetailedRounding'
           ]
         });

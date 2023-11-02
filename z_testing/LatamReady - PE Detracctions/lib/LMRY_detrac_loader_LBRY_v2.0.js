@@ -325,7 +325,8 @@ define(['N/error', 'N/log', 'N/runtime', 'N/search', 'N/url', 'N/config', 'N/for
           'custrecord_lmry_det_ac_account_2',
           'custrecord_lmry_det_ac_account_3',
           'custrecord_lmry_det_ac_account_4',
-          'custrecord_lmry_pe_detailed_rounding_pur'
+          'custrecord_lmry_pe_detailed_rounding_pur',
+          'custrecord_lmry_det_ac_account_5',
         ],
         filters: [
           ['custrecord_lmry_pe_dec_ac_subsi', 'anyof', subsidiary]
@@ -336,6 +337,7 @@ define(['N/error', 'N/log', 'N/runtime', 'N/search', 'N/url', 'N/config', 'N/for
         result["custpage_acc_2"] = line.getValue('custrecord_lmry_det_ac_account_2');
         result["custpage_acc_3"] = line.getValue('custrecord_lmry_det_ac_account_3');
         result["custpage_acc_4"] = line.getValue('custrecord_lmry_det_ac_account_4');
+        result["custpage_acc_5"] = line.getValue('custrecord_lmry_det_ac_account_5');
         var detailedRounding = line.getValue('custrecord_lmry_pe_detailed_rounding_pur');
         result["custpage_detailed_rounding"] = detailedRounding === true ? "T" : detailedRounding === false ? "F" : detailedRounding;
 
