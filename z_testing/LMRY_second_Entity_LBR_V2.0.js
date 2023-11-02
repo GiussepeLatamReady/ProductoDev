@@ -167,10 +167,12 @@ define(['N/record', 'N/log', 'N/search', 'N/runtime'],
 
 
                 var transactionField = getTransactionField(transaction.id);
+                log.debug("transactionField", transactionField);
+                log.debug("transaction", transaction);
                 if (!transaction.secondClient) {
                     return false;
                 }
-                log.debug("transactionField", transactionField);
+                
                 saveRecordSecondClient(transactionField, transaction);
                 log.debug("debug", "saveSecondClient end");
             } catch (error) {
@@ -212,7 +214,7 @@ define(['N/record', 'N/log', 'N/search', 'N/runtime'],
         function saveRecordSecondClient(updateTransactionField, transaction) {
             log.error("debug", "initializeSecondClient start")
             if (updateTransactionField) {
-
+                log.debug("debug", "actualizando transation field start")
                 //Actualiza el record
                 var updateTransactionField = record.load({
                     type: "customrecord_lmry_br_transaction_fields",
@@ -229,8 +231,9 @@ define(['N/record', 'N/log', 'N/search', 'N/runtime'],
                     disableTriggers: true,
                     ignoreMandatoryFields: true
                 });
+                log.debug("debug", "actualizando transation field end")
             } else {
-                log.debug("debug", "creando transation field")
+                log.debug("debug", "creando transation field start")
                 //Crea el record
                 var newTransactionField = record.create({
                     type: 'customrecord_lmry_br_transaction_fields',
@@ -253,6 +256,7 @@ define(['N/record', 'N/log', 'N/search', 'N/runtime'],
                     disableTriggers: true,
                     ignoreMandatoryFields: true
                 });
+                log.debug("debug", "creando transation fiel end")
             }
             log.debug("debug", "initializeSecondClient end")
         }

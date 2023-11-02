@@ -413,6 +413,73 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
             if ((scriptContext.type == 'create' || scriptContext.type == 'copy') && Library_Mail.getAuthorization(289, licenses)) {
               library_ExchRate.createFieldURET(scriptContext, serverWidget);
             }
+             //Addendas por Feature
+                 var addendaType = RCD_OBJ.getValue('custbody_lmry_timbre_electronico_cl');
+                 if (!Library_Mail.getAuthorization("1001", licenses)||addendaType!='7') {
+                    OBJ_FORM.getSublist({
+                        id: "recmachcustrecord_lmry_transac_costco"
+                    }).displayType='hidden';
+                }
+                if (!Library_Mail.getAuthorization("1002", licenses)||addendaType!='11') {
+                    OBJ_FORM.getSublist({
+                        id: "recmachcustrecord_lmry_mx_coppel_transaction"
+                    }).displayType='hidden';
+                }
+                if (!Library_Mail.getAuthorization("1035", licenses)||(addendaType!='3'&&addendaType!='4')) {
+                    OBJ_FORM.getSublist({
+                        id: "recmachcustrecord_lmry_mx_add_chedraui_city_fre"
+                    }).displayType='hidden';
+                }
+                if (!Library_Mail.getAuthorization("1036", licenses)||addendaType!='2') {
+                    OBJ_FORM.getSublist({
+                        id: "recmachcustrecord_lmry_mx_soriana_transaction"
+                    }).displayType='hidden';
+                }
+                if (!Library_Mail.getAuthorization("1037", licenses)||addendaType!='14') {
+                    OBJ_FORM.getSublist({
+                        id: "recmachcustrecord_lmry_mx_addenda_transaction"
+                    }).displayType='hidden';
+                }
+                if (!Library_Mail.getAuthorization("1038", licenses)||addendaType!='15') {
+                    OBJ_FORM.getSublist({
+                        id: "recmachcustrecord_lmry_mx_vkwg_transaction"
+                    }).displayType='hidden';
+                }
+                if (!Library_Mail.getAuthorization("1039", licenses)||addendaType!='1') {
+                    OBJ_FORM.getSublist({
+                        id: "recmachcustrecord_lmry_mx_walmart_transaction"
+                    }).displayType='hidden';
+                }
+                if (!Library_Mail.getAuthorization("1040", licenses)||addendaType!='6') {
+                    OBJ_FORM.getSublist({
+                        id: "recmachcustrecord_lmry_mx_casa_transaction"
+                    }).displayType='hidden';
+                }
+                if (!Library_Mail.getAuthorization("1041", licenses)||addendaType!='9') {
+                    OBJ_FORM.getSublist({
+                        id: "recmachcustrecord_lmry_mx_add_amz_transaction"
+                    }).displayType='hidden';
+                }
+                if (!Library_Mail.getAuthorization("1042", licenses)||addendaType!='10') {
+                    OBJ_FORM.getSublist({
+                        id: "recmachcustrecord_lmry_mx_audi_transaction"
+                    }).displayType='hidden';
+                }
+                if (!Library_Mail.getAuthorization("1043", licenses)||(addendaType!='8'&&addendaType!='5')) {
+                    OBJ_FORM.getSublist({
+                        id: "recmachcustrecord_lmry_mx_addenda_w_transaction"
+                    }).displayType='hidden';
+                }
+                if (!Library_Mail.getAuthorization("1044", licenses)||addendaType!='13') {
+                    OBJ_FORM.getSublist({
+                        id: "recmachcustrecord_lmry_mx_add_transac_loreal"
+                    }).displayType='hidden';
+                }
+                if (!Library_Mail.getAuthorization("1045", licenses)||addendaType!='12') {
+                    OBJ_FORM.getSublist({
+                        id: "recmachcustrecord_lmry_mx_addenda_g_transaction"
+                    }).displayType='hidden';
+                }
           }
 
           if (LMRY_Result[0] == 'BR') {
@@ -1681,9 +1748,6 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
             //boleto bancario
             var urlboleto = Library_BoletoBancario.obtenerURLPdfBoletoBancario(LMRY_Intern, 1, 1);
 
-            librarySecondClient.saveSecondClient(RCD);
-
-
           }
         }
 
@@ -1839,6 +1903,12 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
             if (Library_Mail.getAuthorization(920, licenses)) {
               libTools.createAdjustmentJournal(RCD, scriptContext.type);
             }
+          }
+        }
+
+        if (LMRY_Result[0] == 'BR') {
+          if (["create", "edit", "copy"].indexOf(scriptContext.type) != -1) {
+            librarySecondClient.saveSecondClient(RCD);
           }
         }
         /*****************************************************/
