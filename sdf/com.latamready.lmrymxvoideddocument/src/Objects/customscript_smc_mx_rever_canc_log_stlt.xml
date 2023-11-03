@@ -1,0 +1,25 @@
+<suitelet scriptid="customscript_smc_mx_rever_canc_log_stlt">
+  <description></description>
+  <isinactive>F</isinactive>
+  <name>SMC - MX Reverse Cancellations Log STLT</name>
+  <notifyadmins>F</notifyadmins>
+  <notifyemails></notifyemails>
+  <notifyowner>T</notifyowner>
+  <notifyuser>F</notifyuser>
+  <scriptfile>[/SuiteApps/com.latamready.lmrymxvoideddocument/SMC_MX_Reverse_Cancellation_Log_STLT_V2.1.js]</scriptfile>
+  <scriptdeployments>
+    <scriptdeployment scriptid="customdeploy_smc_mx_rever_canc_log_stlt">
+      <allemployees>T</allemployees>
+      <allpartners>F</allpartners>
+      <allroles>T</allroles>
+      <audslctrole></audslctrole>
+      <eventtype></eventtype>
+      <isdeployed>T</isdeployed>
+      <isonline>F</isonline>
+      <loglevel>DEBUG</loglevel>
+      <runasrole>ADMINISTRATOR</runasrole>
+      <status>RELEASED</status>
+      <title>SMC - MX Canceled Documents Reversed Log STLT</title>
+    </scriptdeployment>
+  </scriptdeployments>
+</suitelet>
