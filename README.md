@@ -1,4 +1,4 @@
-# [MX - Reversa Contable de Docs anulados incorrectamente (2da versión) C1010 - 2]()
+# [MX - Reversa Contable de Docs anulados incorrectamente (2da versión) C1010 - 2](https://docs.google.com/document/d/153LO2A7RervBt7Hn1hrgDwuAZyc2SxwPr-XQuU6sIHg/edit)
 
 
 ## Description of the Requirement
@@ -40,7 +40,7 @@ Se realizara la reversa contable para la anulacion del credit memo y custoemr pa
     + LR - MX Canceled Documents Reversed Log
         + id: customrecord_lmry_mx_rever_cancel_log
         + Fields:
-            Subsidiary	        custrecord_lmry_mx_rcd_log_subsi	        List/Record	Subsidiary	 	        Yes
+            Subsidiary	        custrecord_lmry_mx_rcd_log_subsi	    List/Record	Subsidiary	 	        Yes
  	        Transaction type	custrecord_lmry_mx_rcd_log_type	        List/Record	Transaction Type	 	Yes
  	        Account	            custrecord_lmry_mx_rcd_log_account	    List/Record	Account	 	            Yes
  	        Start Date	        custrecord_lmry_mx_rcd_log_start_date	Date	 	 	                    No
@@ -63,6 +63,10 @@ Se realizara la reversa contable para la anulacion del credit memo y custoemr pa
 ## Bundles involved
 + 37714 (production environment)
 + 35754 (development environment)
+
+## Observations
+
+va pasr por el bundle de facturacion EI all
 
 
 
