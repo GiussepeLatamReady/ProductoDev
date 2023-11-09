@@ -681,7 +681,9 @@ define(['N/error', 'N/log', 'N/runtime', 'N/search', 'N/url', 'N/config', 'N/for
         "AND",
         ["status", "anyof", "VendBill:B", "VendBill:A", "VendBill:F"],
         "AND",
-        ['custcol_4601_witaxrate', 'isnotempty', '']
+        ['custcol_4601_witaxrate', 'isnotempty', ''],
+        "AND",
+        ["amount","notequalto","0.00"]
       ]
 
       if (isOneWorld()) {

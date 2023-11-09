@@ -681,7 +681,9 @@ define(['N/error', 'N/log', 'N/runtime', 'N/search', 'N/url', 'N/config', 'N/for
         "AND",
         ["status", "anyof", "CustInvc:A", "CustInvc:D", "CustInvc:B"],
         'AND',
-        ['custbody_lmry_carga_inicial', 'is', 'F']
+        ['custbody_lmry_carga_inicial', 'is', 'F'],
+        'AND',
+        ["amount","notequalto","0.00"]
       ];
 
       if (Array.isArray(filters)) {
