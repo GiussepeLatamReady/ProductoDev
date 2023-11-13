@@ -18,29 +18,146 @@ define(["N/search","N/record", "N/log","N/query", "N/runtime"],
         function execute(Context) {
             // ID de la transacción que deseas duplicar
             try {
-                var invoiceId = "1041271"
+                //var invoiceId = "1041271"
                 //var result = record.create({ type:"customtransaction_lmry_ei_voided_transac"});
                 //log.error("type",result.getValue("type"));
-                //voidCreditMemo("1041271",true);
-                for (var i = 0; i < 5; i++) {
-                    copyCreditMemo();
+                 /*
+                for (var i = 0; i < 25; i++) {
+                    copyCreditMemo("3939035");
                 }
+                */
+                //voidCreditMemo("3939157",true);
+
+
+
+                
             } catch (error) {
                 log.error("error",error)
             }
 
         }
 
-        function copyCreditMemo(){
-            var objRecord = record.copy({
-                type: record.Type.CREDIT_MEMO,
-                id: 3938616,
-                isDynamic: true,
-                defaultValues: {
-                    custbody_lmry_pe_estado_sf: "Procesando"
-                }
+        function searchTest(){
+            var transactionSearchObj = search.create({
+                type: "transaction",
+                filters:
+                [
+                   ["type","anyof","Custom126"], 
+                   "AND", 
+                   ["custbody_lmry_reference_transaction","anyof","3939152"], 
+                   "AND", 
+                   ["mainline","is","T"]
+                ],
+                columns:
+                [
+                   search.createColumn({
+                      name: "ordertype",
+                      sort: search.Sort.ASC,
+                      label: "Order Type"
+                   }),
+                   search.createColumn({name: "mainline", label: "*"}),
+                   search.createColumn({name: "trandate", label: "Date"}),
+                   search.createColumn({name: "asofdate", label: "As-Of Date"}),
+                   search.createColumn({name: "postingperiod", label: "Period"}),
+                   search.createColumn({name: "taxperiod", label: "Tax Period"}),
+                   search.createColumn({name: "type", label: "Type"}),
+                   search.createColumn({name: "tranid", label: "Document Number"}),
+                   search.createColumn({name: "entity", label: "Name"}),
+                   search.createColumn({name: "account", label: "Account"}),
+                   search.createColumn({name: "memo", label: "Memo"}),
+                   search.createColumn({name: "amount", label: "Amount"}),
+                   search.createColumn({name: "debitamount", label: "Amount (Debit)"})
+                ]
+             });
+             var searchResultCount = transactionSearchObj.runPaged().count;
+             log.debug("transactionSearchObj result count",searchResultCount);
+             transactionSearchObj.run().each(function(result){
+                // .run().each has a limit of 4,000 results
+                return true;
+             });
+        }
+        function createTransaction() {
+            var ids = getSearch();
+            ids = ids.slice(0,5);   
+            ids.forEach(function(id){
+                voidCreditMemo(id,true);
             });
-            log.error("transaccion creada",objRecord);
+        }
+
+        function getSearch(){
+            var data = [];
+            var columns = [];
+            columns.push(search.createColumn({ name: 'internalid', sort: search.Sort.DESC }));
+
+            var filters = [
+                ['custbody_lmry_pe_estado_sf', 'is', 'Procesando'],
+                'AND',
+                ['mainline', 'is', 'T']
+            ];
+
+            var settings = [];
+            if (this.FEAT_SUBS == true || this.FEAT_SUBS == 'T') {
+                filters.push('AND', ['subsidiary', 'anyof',"6","23"]);
+                settings = [search.createSetting({ name: 'consolidationtype', value: 'NONE' })];
+            }
+            //startDate = format.parse({ value: startDate, type: format.Type.DATE });
+            //endDate = format.parse({ value: endDate, type: format.Type.DATE });
+
+            
+            //var typeVoidTransaction = record.create({ type:"customtransaction_lmry_ei_voided_transac"}).getValue("type");
+            //filters.push('AND');
+            //filters.push(["appliedtotransaction.type","anyof",typeVoidTransaction]);
+            
+            var searchTransactions = search.create({
+                type: "creditmemo",
+                filters: filters,
+                columns: columns,
+                settings: settings
+            });
+
+            var pageData = searchTransactions.runPaged({ pageSize: 1000 });
+            if (pageData) {
+                pageData.pageRanges.forEach(function (pageRange) {
+                    var page = pageData.fetch({ index: pageRange.index });
+                    page.data.forEach(function (result) {
+                        data.push(result.getValue('internalid'));
+                    });
+                });
+            }
+
+            log.error("data [getTransactions]",data);
+            log.error("data length [getTransactions]",data.length);
+            return data;
+
+        }
+
+        function copyCreditMemo(transactionId){
+             // Duplicar la transacción
+             var duplicatedTransaction = record.copy({
+                type: record.Type.CREDIT_MEMO, // Reemplaza con el tipo de transacción adecuado
+                id: transactionId,
+            });
+
+            // Puedes realizar modificaciones en la transacción duplicada si es necesario
+            duplicatedTransaction.setValue({
+               fieldId: 'custbody_lmry_pe_estado_sf',
+               value: 'Procesando',
+            });
+
+            duplicatedTransaction.setValue({
+                fieldId: 'memo',
+                value: 'Copias generadas gadp',
+            });
+
+            duplicatedTransaction.setValue({
+                fieldId: 'approvalstatus',
+                value: '2',
+            });
+
+            // Guardar la transacción duplicada
+            var newTransactionId = duplicatedTransaction.save();
+
+            log.error('Transacción duplicada', 'Nueva transacción ID: ' + newTransactionId);
         }
 
 
@@ -82,7 +199,7 @@ define(["N/search","N/record", "N/log","N/query", "N/runtime"],
 
 
                 var creditMemoValues = getTransactionValues(recordId,search.Type.CREDIT_MEMO);
-
+                log.error("creditMemoValues",creditMemoValues);
                 //-------------- validate dept, class, loct
                 lineFields['department'] = creditMemoValues.department;
                 lineFields['class'] = creditMemoValues.class_;
@@ -160,7 +277,7 @@ define(["N/search","N/record", "N/log","N/query", "N/runtime"],
                 });
                 voidCreditMemo.setCurrentSublistValue({
                     sublistId: 'line',
-                    fieldId: "debit",
+                    fieldId: "credit",
                     value: lineAmount
                 });
                 voidCreditMemo.setCurrentSublistValue({
@@ -198,7 +315,7 @@ define(["N/search","N/record", "N/log","N/query", "N/runtime"],
                 });
                 voidCreditMemo.setCurrentSublistValue({
                     sublistId: 'line',
-                    fieldId: "credit",
+                    fieldId: "debit",
                     value: lineAmount
                 })
                 voidCreditMemo.setCurrentSublistValue({
@@ -227,7 +344,7 @@ define(["N/search","N/record", "N/log","N/query", "N/runtime"],
                 });
 
                 var trasactionVoid = voidCreditMemo.save({ enableSourcing: true, ignoreMandatoryFields: true, disableTriggers: true });
-                log.debug("End Void Credit Memo", result);
+                log.debug("End Void Credit Memo", trasactionVoid);
                 unapplyAndApplyTransaction (recordId,"creditmemo",trasactionVoid);
                 
             } catch (error) {
@@ -322,6 +439,12 @@ define(["N/search","N/record", "N/log","N/query", "N/runtime"],
             var count_invoice = creditmemoRecord.getLineCount({
                 sublistId: 'apply'
             });
+
+            creditmemoRecord.setValue({
+                fieldId: 'custbody_lmry_pe_estado_sf',
+                value: 'Cancelado',
+            });
+
             for (i = 0; i < count_invoice; i++) {
                 if (creditmemoRecord.getSublistValue('apply', 'apply', i)) {
                     creditmemoRecord.setSublistValue({

@@ -61,12 +61,15 @@ define([
             ],
             columns: [
                 'custrecord_lmry_mx_rcd_log_transact',
-                'custrecord_lmry_mx_rcd_log_account'
+                'custrecord_lmry_mx_rcd_log_account',
+                'custrecord_lmry_mx_rcd_log_type'
+                
             ]
         })
         searchRecordLog.run().each(function (result) {
             recordLog.idTransaction = result.getValue('custrecord_lmry_mx_rcd_log_transact');
             recordLog.accountSetup = result.getValue('custrecord_lmry_mx_rcd_log_account');
+            recordLog.typeTransaction = result.getValue('custrecord_lmry_mx_rcd_log_type');
         });
 
         return recordLog;
@@ -101,20 +104,91 @@ define([
     * Esta funcion permite revertir la anulacion; reservando y desaplicandolo .
     * --------------------------------------------------------------------------------------------------- */
     let reverseCancellation = (cancellations) => {
-        const { idTransaction, accountSetup } = cancellations;
-        const creditMemo = getCreditMemo(idTransaction);
-        const newJournal = createJournal(creditMemo, accountSetup, idTransaction);
-        applyAndDisapply(creditMemo, newJournal);
+        
+        if (cancellations.typeTransaction == 7) { // invoice
+            processInvoice(cancellations);
+        } else if(cancellations.typeTransaction == 7){ // Credit memo
 
-        record.submitFields({
-            type: 'invoice',
-            id: idTransaction,
-            values: {
-                custbody_lmry_pe_estado_sf: "Procesando"
-            },
-            options: { ignoreMandatoryFields: true, disableTriggers: true }
+        }
+        
+
+    }
+
+    let processCreditMemo = () => {
+        const { idTransaction, accountSetup } = cancellations;
+        const transactionVoided = getTransactionVoided(idTransaction);
+        const newTransactionReverse = createLatamTransactionVoid(transactionVoided,accountSetup,idTransaction);
+        applyAndDisapply(transactionVoided, newTransactionReverse);
+    }
+
+    let getTransactionVoided = (idTransaction) => {
+        let transactionVoided = {};
+        let features = getFeatures();
+
+        let searchCreditMemo = search.create({
+            type: "customtransaction_lmry_ei_voided_transac",
+            filters:
+                [
+                    ["custbody_lmry_reference_transaction", "anyof", idTransaction],
+                    "AND",
+                    ["mainline", "is", "T"]
+                ],
+            columns:
+                [
+                    search.createColumn({ name: "internalid", label: "Internalid" }),
+                    search.createColumn({ name: "subsidiary", label: "Subsidiary" }),
+                    search.createColumn({ name: "currency", label: "Currency" }),
+                    search.createColumn({ name: "account", label: "Account" }),
+                    search.createColumn({ name: "exchangerate", label: "exchangerate" }),
+                    search.createColumn({ name: "fxamount", label: "amount" }),
+                    search.createColumn({ name: "mainname", label: "Internal ID" }),
+                    search.createColumn({ name: "trandate", label: "trandate" }),
+                    search.createColumn({ name: "postingperiod", label: "postingperiod" })
+                ],
+            settings: []
         });
 
+        if (features.subsidiary == true || features.subsidiary == 'T') {
+            searchCreditMemo.settings.push(search.createSetting({ name: 'consolidationtype', value: 'NONE' }));
+        }
+        if (features.department == true || features.department == 'T') {
+            searchCreditMemo.columns.push(search.createColumn({ name: "department", label: "department" }))
+        }
+        if (features.class == true || features.class == 'T') {
+            searchCreditMemo.columns.push(search.createColumn({ name: "class", label: "class" }))
+        }
+        if (features.location == true || features.location == 'T') {
+            searchCreditMemo.columns.push(search.createColumn({ name: "location", label: "location" }))
+        }
+
+
+        searchCreditMemo.run().each(function (result) {
+            transactionVoided.id = result.getValue('internalid');
+            transactionVoided.subsidiary = result.getValue('subsidiary');
+            transactionVoided.currency = result.getValue('currency');
+            transactionVoided.account = result.getValue('account');
+            transactionVoided.exchangerate = result.getValue('exchangerate');
+            transactionVoided.amount = Math.abs(result.getValue('fxamount'));
+            transactionVoided.customer = result.getValue('mainname');
+            transactionVoided.department = result.getValue('department') || '';
+            transactionVoided.class = result.getValue('class') || '';
+            transactionVoided.location = result.getValue('location') || '';
+            transactionVoided.date = result.getValue('trandate') || '';
+            transactionVoided.period = result.getValue('postingperiod') || '';
+
+        });
+        return transactionVoided;
+    }
+
+
+
+    
+    let processInvoice = (cancellations)=>{
+        const { idTransaction, accountSetup } = cancellations;
+        const creditMemo = getCreditMemo(idTransaction);
+        const newJournal = createTransactionReverse(creditMemo, accountSetup, idTransaction, record.Type.JOURNAL_ENTRY);
+        applyAndDisapply(creditMemo, newJournal);
+        updateStateTransaction('invoice',idTransaction);
     }
 
     /* ------------------------------------------------------------------------------------------------------
@@ -138,7 +212,6 @@ define([
                     search.createColumn({ name: "internalid", label: "Internalid" }),
                     search.createColumn({ name: "subsidiary", label: "Subsidiary" }),
                     search.createColumn({ name: "currency", label: "Currency" }),
-                    search.createColumn({ name: "custbody_lmry_subsidiary_country", label: "Latam - Subsidiary Country" }),
                     search.createColumn({ name: "account", label: "Account" }),
                     search.createColumn({ name: "exchangerate", label: "exchangerate" }),
                     search.createColumn({ name: "fxamount", label: "amount" }),
@@ -167,7 +240,6 @@ define([
             creditMemo.id = result.getValue('internalid');
             creditMemo.subsidiary = result.getValue('subsidiary');
             creditMemo.currency = result.getValue('currency');
-            creditMemo.country = result.getValue('country');
             creditMemo.account = result.getValue('account');
             creditMemo.exchangerate = result.getValue('exchangerate');
             creditMemo.amount = Math.abs(result.getValue('fxamount'));
@@ -177,10 +249,21 @@ define([
             creditMemo.location = result.getValue('location') || '';
             creditMemo.date = result.getValue('trandate') || '';
             creditMemo.period = result.getValue('postingperiod') || '';
-
+            return true;
         });
         return creditMemo;
 
+    }
+
+    let updateStateTransaction = (type,idTransaction) => {
+        record.submitFields({
+            type: type,
+            id: idTransaction,
+            values: {
+                custbody_lmry_pe_estado_sf: "Procesando"
+            },
+            options: { ignoreMandatoryFields: true, disableTriggers: true }
+        });
     }
 
     /* ------------------------------------------------------------------------------------------------------
@@ -232,7 +315,7 @@ define([
     /* ------------------------------------------------------------------------------------------------------
     * Esta funcion permite establecer los tipos de cambio por cada libro contable
     * --------------------------------------------------------------------------------------------------- */
-    let setAccountingBook = (idCreditMemo, newJournal) => {
+    let setExchangeRateBook = (idCreditMemo, newJournal) => {
         let features = getFeatures();
         let books = getAccountingBook(idCreditMemo, features);
         newJournal.setValue({ fieldId: 'exchangerate', value: books["1"] });
@@ -297,14 +380,14 @@ define([
     }
 
     /* ------------------------------------------------------------------------------------------------------
-    * Esta funcion permite crear una reserva contable (Journal) de la anulación (Credit Memo)
+    * Esta funcion permite crear una reserva contable de la anulación 
     * --------------------------------------------------------------------------------------------------- */
-    let createJournal = (creditMemo, accountSetup, idInvoice) => {
+    let createTransactionReverse = (transactionVoid, accountSetup, idTransactionMain, newType) => {
 
         let preference = getPreference();
-        let newJournal = record.create({ type: record.Type.JOURNAL_ENTRY, isDynamic: true });
+        let newReverseTransaction = record.create({ type: newType, isDynamic: true });
 
-        newJournal.setValue({ fieldId: 'subsidiary', value: creditMemo.subsidiary });
+        newReverseTransaction.setValue({ fieldId: 'subsidiary', value: transactionVoid.subsidiary });
 
         
         let dateFormat = format.parse({ value: new Date(), type: format.Type.DATE });
@@ -312,21 +395,21 @@ define([
         
         let postingPeriod = getAccountingperiod(dateFormat)
         
-        newJournal.setValue({ fieldId: 'trandate', value: dateFormat });
-        newJournal.setValue({ fieldId: 'postingperiod', value: postingPeriod });
-        newJournal.setValue({ fieldId: 'currency', value: creditMemo.currency });
-        newJournal.setValue({ fieldId: 'custbody_lmry_reference_transaction', value: idInvoice });
-        newJournal.setValue({ fieldId: 'memo', value: "Latam - Reversión de anulación" });
-        setAccountingBook(creditMemo.id, newJournal);
-        let setupTaxSubsidiary = getSetupTaxSubsidiary(creditMemo.subsidiary);
+        newReverseTransaction.setValue({ fieldId: 'trandate', value: dateFormat });
+        newReverseTransaction.setValue({ fieldId: 'postingperiod', value: postingPeriod });
+        newReverseTransaction.setValue({ fieldId: 'currency', value: transactionVoid.currency });
+        newReverseTransaction.setValue({ fieldId: 'custbody_lmry_reference_transaction', value: idTransactionMain });
+        newReverseTransaction.setValue({ fieldId: 'memo', value: "Latam - Reversión de anulación" });
+        setExchangeRateBook(transactionVoid.id, newReverseTransaction);
+        let setupTaxSubsidiary = getSetupTaxSubsidiary(transactionVoid.subsidiary);
 
-        setLineJournal(newJournal, 'debit', creditMemo, creditMemo.account, setupTaxSubsidiary);
-        setLineJournal(newJournal, 'credit', creditMemo, accountSetup, setupTaxSubsidiary);
+        setLineNewReverseTransaction(newReverseTransaction, 'debit', transactionVoid, transactionVoid.account, setupTaxSubsidiary);
+        setLineNewReverseTransaction(newReverseTransaction, 'credit', transactionVoid, accountSetup, setupTaxSubsidiary);
         if (preference.journal == true || preference.journal == 'T') {
-            newJournal.setValue({ fieldId: 'approvalstatus', value: 2 });
+            newReverseTransaction.setValue({ fieldId: 'approvalstatus', value: 2 });
         }
 
-        return newJournal.save({ enableSourcing: true, ignoreMandatoryFields: true, disableTriggers: true });
+        return newReverseTransaction.save({ enableSourcing: true, ignoreMandatoryFields: true, disableTriggers: true });
     }
 
 
@@ -355,29 +438,29 @@ define([
     /* ------------------------------------------------------------------------------------------------------
     * Esta funcion permite llenar los valores a cada linra de un Journal con las configuraciones correspondientes.
     * --------------------------------------------------------------------------------------------------- */
-    let setLineJournal = (newJournal, typeLine, creditMemo, accountLine, setupTaxSubsidiary) => {
+    let setLineNewReverseTransaction = (newReverseTransaction, typeLine, creditMemo, accountLine, setupTaxSubsidiary) => {
         let features = getFeatures();
         let preferences = getPreference();
-        newJournal.selectNewLine({
+        newReverseTransaction.selectNewLine({
             sublistId: 'line'
         });
 
-        newJournal.setCurrentSublistValue({
+        newReverseTransaction.setCurrentSublistValue({
             sublistId: 'line',
             fieldId: 'account',
             value: accountLine
         });
-        newJournal.setCurrentSublistValue({
+        newReverseTransaction.setCurrentSublistValue({
             sublistId: 'line',
             fieldId: typeLine,
             value: creditMemo.amount
         });
-        newJournal.setCurrentSublistValue({
+        newReverseTransaction.setCurrentSublistValue({
             sublistId: 'line',
             fieldId: 'entity',
             value: creditMemo.customer
         });
-        newJournal.setCurrentSublistValue({
+        newReverseTransaction.setCurrentSublistValue({
             sublistId: 'line',
             fieldId: 'memo',
             value: 'Latam - Reversión de anulación'
@@ -389,7 +472,7 @@ define([
                 department = setupTaxSubsidiary.department;
             }
 
-            newJournal.setCurrentSublistValue({
+            newReverseTransaction.setCurrentSublistValue({
                 sublistId: 'line',
                 fieldId: 'department',
                 value: department
@@ -403,7 +486,7 @@ define([
                 classs = setupTaxSubsidiary.class;
             }
 
-            newJournal.setCurrentSublistValue({
+            newReverseTransaction.setCurrentSublistValue({
                 sublistId: 'line',
                 fieldId: 'class',
                 value: classs
@@ -417,7 +500,7 @@ define([
                 location = setupTaxSubsidiary.location;
             }
 
-            newJournal.setCurrentSublistValue({
+            newReverseTransaction.setCurrentSublistValue({
                 sublistId: 'line',
                 fieldId: 'location',
                 value: location
@@ -426,7 +509,7 @@ define([
 
         }
 
-        newJournal.commitLine({
+        newReverseTransaction.commitLine({
             sublistId: 'line'
         });
 

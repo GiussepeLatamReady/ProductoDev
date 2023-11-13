@@ -1406,7 +1406,7 @@ define(['N/record', 'N/runtime', 'N/log', 'N/search', 'N/format', 'N/transaction
                 });
                 voidCreditMemo.setCurrentSublistValue({
                     sublistId: 'line',
-                    fieldId: "debit",
+                    fieldId: "credit",
                     value: lineAmount
                 });
                 voidCreditMemo.setCurrentSublistValue({
@@ -1444,7 +1444,7 @@ define(['N/record', 'N/runtime', 'N/log', 'N/search', 'N/format', 'N/transaction
                 });
                 voidCreditMemo.setCurrentSublistValue({
                     sublistId: 'line',
-                    fieldId: "credit",
+                    fieldId: "debit",
                     value: lineAmount
                 })
                 voidCreditMemo.setCurrentSublistValue({
@@ -1473,7 +1473,7 @@ define(['N/record', 'N/runtime', 'N/log', 'N/search', 'N/format', 'N/transaction
                 });
 
                 var trasactionVoid = voidCreditMemo.save({ enableSourcing: true, ignoreMandatoryFields: true, disableTriggers: true });
-                log.debug("End Void Credit Memo", result);
+                //log.debug("End Void Credit Memo", result);
                 unapplyAndApplyTransaction (recordId,"creditmemo",trasactionVoid);
                 
             } catch (error) {

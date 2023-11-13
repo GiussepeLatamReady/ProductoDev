@@ -22,8 +22,10 @@ define([
     'N/url',
     'N/task',
     'N/format',
-    'SuiteBundles/Bundle 37714/Latam_Library/LMRY_libSendingEmailsLBRY_V2.0'
-], function (log, search, runtime, redirect, serverWidget, url, task, format, LibraryMail) {
+    'N/record',
+    'SuiteBundles/Bundle 37714/Latam_Library/LMRY_libSendingEmailsLBRY_V2.0',
+    
+], function (log, search, runtime, redirect, serverWidget, url, task, format,record, LibraryMail) {
     const LMRY_script = 'LMRY - MX Canceled Documents Reversed LBRY';
     /* var LANGUAGE = runtime.getCurrentScript().getParameter({ name: "LANGUAGE" });
         LANGUAGE = LANGUAGE.substring(0, 2); */

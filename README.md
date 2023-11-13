@@ -69,6 +69,9 @@ Se realizara la reversa contable para la anulacion del credit memo y custoemr pa
 va pasr por el bundle de facturacion EI all
 
 
+LMRY_MX_Reverse_Cancellation_LBRY_V2.1.js
+LMRY_MX_Reverse_Cancellation_CLNT_LBRY_V2.1.js
+
 
 
 
