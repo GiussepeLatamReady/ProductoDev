@@ -284,8 +284,8 @@ define([
 
         getTypeTransaction(typeText) {
             let typeTransaction = {
-                "CustInvc": 7,
-                "CustCredit": 10,
+                "invoice": 7,
+                "creditmemo": 10,
                 "customerpayment": 9
             }
             return typeTransaction[typeText]

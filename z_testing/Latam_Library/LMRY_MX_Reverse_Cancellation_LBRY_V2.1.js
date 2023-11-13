@@ -199,10 +199,10 @@ define([
                     help: 'custpage_type_transaction'
                 });
 
-            //typeTransaction.isMandatory = true;
+            typeTransaction.isMandatory = true;
             // Para la etapa 1 solo quedará invoice, en la etapa 2 se agrega credit memo y payment.
-            typeTransaction.addSelectOption({ value: 'CustInvc', text: this.typesTransaction['CustInvc'] });
-            typeTransaction.updateDisplayType({ displayType: serverWidget.FieldDisplayType.DISABLED });
+            //typeTransaction.addSelectOption({ value: 'CustInvc', text: this.typesTransaction['CustInvc'] });
+            //typeTransaction.updateDisplayType({ displayType: serverWidget.FieldDisplayType.DISABLED });
             form.addFieldGroup({
                 id: 'dateRangeGroup',
                 label: 'Rango de fechas'
@@ -313,7 +313,7 @@ define([
             if (this.FEAT_SUBS == true || this.FEAT_SUBS == 'T') {
                 this.fillSubsidiaries();
             }
-            //this.fillTransactionType();
+            this.fillTransactionType();
         }
 
         fillSubsidiaries() {
@@ -353,18 +353,10 @@ define([
 
         getTypeTransaction() {
             return {
-                "CustInvc": "Invoice",
-                //"creditmemo": "Credit Memo",
+                "invoice": "Invoice",
+                "creditmemo": "Credit Memo",
                 "customerpayment": "Payment"
             }
-        }
-        getRecordType(type) {
-            var recordType = {
-                "CustInvc": "invoice",
-                "CustCredit": "creditmemo",
-                "customerpayment": "customerpayment"
-            }
-            return recordType[type];
         }
 
         getRedirectParams() {
@@ -519,7 +511,7 @@ define([
                     sublist.setSublistValue({ id: 'tranid', line: i, value: transaction.tranid });
                     sublist.setSublistValue({ id: 'type_transaction', line: i, value: transaction.typeName });
                     sublist.setSublistValue({ id: 'legal_document_type', line: i, value: transaction.legalDocumentType });
-                    let tranUrl = url.resolveRecord({ recordType: this.getRecordType(transaction.typeID), recordId: transaction.id, isEditMode: false });
+                    let tranUrl = url.resolveRecord({ recordType: transaction.typeID, recordId: transaction.id, isEditMode: false });
                     let urlID = `<a class="dottedlink" href=${tranUrl} target="_blank">${transaction.id}</a>`;
                     sublist.setSublistValue({ id: 'internalid', line: i, value: urlID });
                     sublist.setSublistValue({ id: 'total_amt', line: i, value: transaction.amount });
@@ -536,17 +528,23 @@ define([
             let data = [];
             //let { vendor, multivendor, currency, ap_account, subsidiary, date } = this.params;
             let { subsidiary, typeTransaction, endDate, startDate } = this.params
+
             let filters = [
-                ['type', 'anyof', typeTransaction],
-                'AND',
                 ['custbody_lmry_pe_estado_sf', 'is', 'Cancelado'],
                 'AND',
-                ['mainline', 'is', 'T'],
-                'AND',
-                ["applyingtransaction", "noneof", "@NONE@"]
+                ['mainline', 'is', 'T']
             ];
             //startDate = format.parse({ value: startDate, type: format.Type.DATE });
             //endDate = format.parse({ value: endDate, type: format.Type.DATE });
+
+            if (typeTransaction=="invoice") {
+                filters.push('AND');
+                filters.push(['applyingtransaction', 'noneof', "@NONE@"]);
+            } else {
+                let typeVoidTransaction = record.create({ type:"customtransaction_lmry_ei_voided_transac"}).getValue("type");
+                filters.push('AND');
+                filters.push(["appliedtotransaction.type","anyof",typeVoidTransaction]);
+            }
             if (startDate != null && startDate != '') {
                 filters.push('AND');
                 filters.push(['trandate', 'onorafter', startDate]);
@@ -570,9 +568,10 @@ define([
             columns.push(search.createColumn({ name: 'custbody_lmry_document_type' }));
             columns.push(search.createColumn({ name: 'formulatext', formula: '{tranid}' }));
             columns.push(search.createColumn({ name: 'amount' }));
-
+            columns.push(search.createColumn({ name: 'recordtype' }));
+            
             let searchTransactions = search.create({
-                type: 'transaction',
+                type: typeTransaction,
                 filters: filters,
                 columns: columns,
                 settings: settings
@@ -586,7 +585,7 @@ define([
                         let transaction = {};
                         transaction.id = result.getValue('internalid');
                         transaction.typeName = result.getText('type');
-                        transaction.typeID = result.getValue('type');
+                        transaction.typeID = result.getValue('recordtype');
                         transaction.legalDocumentType = result.getText('custbody_lmry_document_type') || '';
                         transaction.tranid = result.getValue('formulatext') || '';
                         transaction.amount = Number(result.getValue('amount'));
@@ -595,7 +594,7 @@ define([
                     });
                 });
             }
-
+            log.error("data [getTransactions]",data);
             return data;
         }
 
