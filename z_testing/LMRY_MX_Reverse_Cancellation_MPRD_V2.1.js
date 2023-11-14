@@ -32,7 +32,7 @@ define(['N/log', 'N/runtime', 'N/search', './EI_Library/LMRY_MX_Reverse_Cancella
                 const parameters = lbryRCD.getParameters();
                 const recordLog = lbryRCD.getRecordsLog(parameters);
                 lbryRCD.updateState(parameters, 'Procesando', 'Se ha comenzado a revertir las anulaciones...');
-                const cancellations = JSON.parse(recordLog.idTransaction).map(id => ({ idTransaction: id, accountSetup: recordLog.accountSetup }));
+                const cancellations = JSON.parse(recordLog.idTransaction).map(id => ({ idTransaction: id, accountSetup: recordLog.accountSetup ,typeTransaction: recordLog.typeTransaction}));
                 return cancellations;
             } catch (error) {
                 log.error("Error [getInputData]", error);

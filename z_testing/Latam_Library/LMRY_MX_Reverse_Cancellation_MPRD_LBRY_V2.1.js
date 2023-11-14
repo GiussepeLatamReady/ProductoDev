@@ -104,26 +104,40 @@ define([
     * Esta funcion permite revertir la anulacion; reservando y desaplicandolo .
     * --------------------------------------------------------------------------------------------------- */
     let reverseCancellation = (cancellations) => {
-        
-        if (cancellations.typeTransaction == 7) { // invoice
+        cancellations.typeTransaction = getTypeTransaction(cancellations.typeTransaction);
+        if (cancellations.typeTransaction == "invoice") { // invoice
             processInvoice(cancellations);
-        } else if(cancellations.typeTransaction == 7){ // Credit memo
+        } else if(cancellations.typeTransaction == "creditmemo"){ // Credit memo
+            processCreditMemo(cancellations);
+        } 
+    }
 
+    let getTypeTransaction = (type) => {
+        let typeTransaction = {
+            7: "invoice",
+            10: "creditmemo",
+            9: "customerpayment"
         }
-        
-
+        return typeTransaction[type]
     }
 
-    let processCreditMemo = () => {
-        const { idTransaction, accountSetup } = cancellations;
+    let processCreditMemo = (cancellations) => {
+        const { idTransaction, typeTransaction} = cancellations;
         const transactionVoided = getTransactionVoided(idTransaction);
-        const newTransactionReverse = createLatamTransactionVoid(transactionVoided,accountSetup,idTransaction);
-        applyAndDisapply(transactionVoided, newTransactionReverse);
+        const newTransactionReverse = createTransactionReverse(transactionVoided, cancellations);
+        applyAndDisapply(transactionVoided, newTransactionReverse, cancellations.typeTransaction);
+        updateStateTransaction(cancellations);
     }
 
-    let getTransactionVoided = (idTransaction) => {
+    let getTransactionVoided = (idTransaction,typeTransaction) => {
         let transactionVoided = {};
         let features = getFeatures();
+
+        let transactionMainAccount = search.lookupFields({
+            type: typeTransaction,
+            id: idTransaction,
+            columns: ["accountmain"]
+        }).accountmain[0].value;
 
         let searchCreditMemo = search.create({
             type: "customtransaction_lmry_ei_voided_transac",
@@ -141,23 +155,21 @@ define([
                     search.createColumn({ name: "account", label: "Account" }),
                     search.createColumn({ name: "exchangerate", label: "exchangerate" }),
                     search.createColumn({ name: "fxamount", label: "amount" }),
-                    search.createColumn({ name: "mainname", label: "Internal ID" }),
-                    search.createColumn({ name: "trandate", label: "trandate" }),
-                    search.createColumn({ name: "postingperiod", label: "postingperiod" })
+                    search.createColumn({ name: "entity", label: "Name" })
                 ],
             settings: []
         });
 
-        if (features.subsidiary == true || features.subsidiary == 'T') {
+        if (features.subsidiary == 'T'|| features.subsidiary == true) {
             searchCreditMemo.settings.push(search.createSetting({ name: 'consolidationtype', value: 'NONE' }));
         }
-        if (features.department == true || features.department == 'T') {
+        if (features.department == 'T' || features.department == true) {
             searchCreditMemo.columns.push(search.createColumn({ name: "department", label: "department" }))
         }
-        if (features.class == true || features.class == 'T') {
+        if (features.class == 'T' || features.class == true) {
             searchCreditMemo.columns.push(search.createColumn({ name: "class", label: "class" }))
         }
-        if (features.location == true || features.location == 'T') {
+        if (features.location == 'T' || features.location == true) {
             searchCreditMemo.columns.push(search.createColumn({ name: "location", label: "location" }))
         }
 
@@ -166,16 +178,17 @@ define([
             transactionVoided.id = result.getValue('internalid');
             transactionVoided.subsidiary = result.getValue('subsidiary');
             transactionVoided.currency = result.getValue('currency');
-            transactionVoided.account = result.getValue('account');
-            transactionVoided.exchangerate = result.getValue('exchangerate');
-            transactionVoided.amount = Math.abs(result.getValue('fxamount'));
-            transactionVoided.customer = result.getValue('mainname');
+            transactionVoided.customer = result.getValue('entity');
             transactionVoided.department = result.getValue('department') || '';
             transactionVoided.class = result.getValue('class') || '';
             transactionVoided.location = result.getValue('location') || '';
-            transactionVoided.date = result.getValue('trandate') || '';
-            transactionVoided.period = result.getValue('postingperiod') || '';
-
+            transactionVoided.debit.amount = Math.abs(result.getValue('fxamount'));
+            if (transactionMainAccount == result.getValue('account')) {
+                transactionVoided.debit.account = result.getValue('account');      
+            }else{
+                transactionVoided.credit.account = result.getValue('account');
+            }
+            return true;
         });
         return transactionVoided;
     }
@@ -184,11 +197,11 @@ define([
 
     
     let processInvoice = (cancellations)=>{
-        const { idTransaction, accountSetup } = cancellations;
+        const {idTransaction} = cancellations;
         const creditMemo = getCreditMemo(idTransaction);
-        const newJournal = createTransactionReverse(creditMemo, accountSetup, idTransaction, record.Type.JOURNAL_ENTRY);
-        applyAndDisapply(creditMemo, newJournal);
-        updateStateTransaction('invoice',idTransaction);
+        const newJournal = createTransactionReverse(creditMemo, cancellations);
+        applyAndDisapply(creditMemo, newJournal,cancellations.typeTransaction);
+        updateStateTransaction(cancellations);
     }
 
     /* ------------------------------------------------------------------------------------------------------
@@ -222,16 +235,16 @@ define([
             settings: []
         });
 
-        if (features.subsidiary == true || features.subsidiary == 'T') {
+        if (features.subsidiary == 'T'|| features.subsidiary == true) {
             searchCreditMemo.settings.push(search.createSetting({ name: 'consolidationtype', value: 'NONE' }));
         }
-        if (features.department == true || features.department == 'T') {
+        if (features.department == 'T' || features.department == true) {
             searchCreditMemo.columns.push(search.createColumn({ name: "department", label: "department" }))
         }
-        if (features.class == true || features.class == 'T') {
+        if (features.class == 'T' || features.class == true) {
             searchCreditMemo.columns.push(search.createColumn({ name: "class", label: "class" }))
         }
-        if (features.location == true || features.location == 'T') {
+        if (features.location == 'T' || features.location == true) {
             searchCreditMemo.columns.push(search.createColumn({ name: "location", label: "location" }))
         }
 
@@ -255,9 +268,10 @@ define([
 
     }
 
-    let updateStateTransaction = (type,idTransaction) => {
+    let updateStateTransaction = (cancellations) => {
+        const { idTransaction, typeTransaction} = cancellations;
         record.submitFields({
-            type: type,
+            type: typeTransaction,
             id: idTransaction,
             values: {
                 custbody_lmry_pe_estado_sf: "Procesando"
@@ -382,13 +396,14 @@ define([
     /* ------------------------------------------------------------------------------------------------------
     * Esta funcion permite crear una reserva contable de la anulación 
     * --------------------------------------------------------------------------------------------------- */
-    let createTransactionReverse = (transactionVoid, accountSetup, idTransactionMain, newType) => {
-
+    let createTransactionReverse = (transactionVoid, cancellations) => {
+        const { idTransaction, accountSetup, typeTransaction } = cancellations;
         let preference = getPreference();
+        let newType = typeTransaction == "invoice" ? record.Type.JOURNAL_ENTRY : "customtransaction_lmry_ei_voided_transac";
+
         let newReverseTransaction = record.create({ type: newType, isDynamic: true });
 
         newReverseTransaction.setValue({ fieldId: 'subsidiary', value: transactionVoid.subsidiary });
-
         
         let dateFormat = format.parse({ value: new Date(), type: format.Type.DATE });
         
@@ -398,16 +413,23 @@ define([
         newReverseTransaction.setValue({ fieldId: 'trandate', value: dateFormat });
         newReverseTransaction.setValue({ fieldId: 'postingperiod', value: postingPeriod });
         newReverseTransaction.setValue({ fieldId: 'currency', value: transactionVoid.currency });
-        newReverseTransaction.setValue({ fieldId: 'custbody_lmry_reference_transaction', value: idTransactionMain });
+        newReverseTransaction.setValue({ fieldId: 'custbody_lmry_reference_transaction', value: idTransaction }); // esta parte entra en obs
         newReverseTransaction.setValue({ fieldId: 'memo', value: "Latam - Reversión de anulación" });
         setExchangeRateBook(transactionVoid.id, newReverseTransaction);
         let setupTaxSubsidiary = getSetupTaxSubsidiary(transactionVoid.subsidiary);
-
-        setLineNewReverseTransaction(newReverseTransaction, 'debit', transactionVoid, transactionVoid.account, setupTaxSubsidiary);
-        setLineNewReverseTransaction(newReverseTransaction, 'credit', transactionVoid, accountSetup, setupTaxSubsidiary);
-        if (preference.journal == true || preference.journal == 'T') {
-            newReverseTransaction.setValue({ fieldId: 'approvalstatus', value: 2 });
+        
+        if (typeTransaction == "invoice") {
+            setLineNewReverseTransaction(newReverseTransaction, 'debit', transactionVoid, transactionVoid.account, setupTaxSubsidiary);
+            setLineNewReverseTransaction(newReverseTransaction, 'credit', transactionVoid, accountSetup, setupTaxSubsidiary);
+            if (preference.journal == 'T' ||  preference.journal == true) {
+                newReverseTransaction.setValue({ fieldId: 'approvalstatus', value: 2 });
+            }
+        }else{
+            setLineNewReverseTransaction(newReverseTransaction, 'debit', transactionVoid, transactionVoid.credit.account, setupTaxSubsidiary);
+            setLineNewReverseTransaction(newReverseTransaction, 'credit', transactionVoid, transactionVoid.debit.account, setupTaxSubsidiary);
         }
+        
+        
 
         return newReverseTransaction.save({ enableSourcing: true, ignoreMandatoryFields: true, disableTriggers: true });
     }
@@ -436,9 +458,9 @@ define([
     }
 
     /* ------------------------------------------------------------------------------------------------------
-    * Esta funcion permite llenar los valores a cada linra de un Journal con las configuraciones correspondientes.
+    * Esta funcion permite llenar los valores a cada lineas de la transaccion que revierte la anulacion con las configuraciones correspondientes.
     * --------------------------------------------------------------------------------------------------- */
-    let setLineNewReverseTransaction = (newReverseTransaction, typeLine, creditMemo, accountLine, setupTaxSubsidiary) => {
+    let setLineNewReverseTransaction = (newReverseTransaction, typeLine, transactionVoid, accountLine, setupTaxSubsidiary) => {
         let features = getFeatures();
         let preferences = getPreference();
         newReverseTransaction.selectNewLine({
@@ -453,12 +475,12 @@ define([
         newReverseTransaction.setCurrentSublistValue({
             sublistId: 'line',
             fieldId: typeLine,
-            value: creditMemo.amount
+            value: transactionVoid.amount
         });
         newReverseTransaction.setCurrentSublistValue({
             sublistId: 'line',
             fieldId: 'entity',
-            value: creditMemo.customer
+            value: transactionVoid.customer
         });
         newReverseTransaction.setCurrentSublistValue({
             sublistId: 'line',
@@ -467,7 +489,7 @@ define([
         });
         // Departament, Class, Location
         if ((features.department == true || features.department == 'T')) {
-            let department = creditMemo.department;
+            let department = transactionVoid.department;
             if (department == '' && (preferences.department == true || preferences.department == 'T')) {
                 department = setupTaxSubsidiary.department;
             }
@@ -481,7 +503,7 @@ define([
 
         }
         if ((features.class == true || features.class == 'T')) {
-            let classs = creditMemo.class;
+            let classs = transactionVoid.class;
             if (classs == '' && (preferences.class == true || preferences.class == 'T')) {
                 classs = setupTaxSubsidiary.class;
             }
@@ -495,7 +517,7 @@ define([
 
         }
         if ((features.location == true || features.location == 'T')) {
-            let location = creditMemo.location;
+            let location = transactionVoid.location;
             if (location == '' && (preferences.location == true || preferences.location == 'T')) {
                 location = setupTaxSubsidiary.location;
             }
@@ -518,33 +540,37 @@ define([
     /* ------------------------------------------------------------------------------------------------------
     * Esta funcion permite desaplicar la nota de credito de la anulacion y aplicar el journal creado
     * --------------------------------------------------------------------------------------------------- */
-    let applyAndDisapply = (creditmemo, newJournal) => {
-        const recordCreditMemo = record.load({ type: "creditmemo", id: creditmemo.id, isDynamic: true });
-        const countTransaction = recordCreditMemo.getLineCount({ sublistId: 'apply' });
+    let applyAndDisapply = (transactionVoid, transactionReverse , typeTransaction) => {
+        const recordtransactionVoid = record.load({ type: typeTransaction, id: transactionVoid.id, isDynamic: true });
+        const countTransaction = recordtransactionVoid.getLineCount({ sublistId: 'apply' });
         for (let i = 0; i < countTransaction; i++) {
-            recordCreditMemo.selectLine({ sublistId: 'apply', line: i });
+            recordtransactionVoid.selectLine({ sublistId: 'apply', line: i });
 
-            let isApply = recordCreditMemo.getSublistValue('apply', 'apply', i);
+            let isApply = recordtransactionVoid.getSublistValue('apply', 'apply', i);
             if (isApply == true || isApply == 'T') {
-                recordCreditMemo.setCurrentSublistValue({ sublistId: 'apply', fieldId: 'apply', value: false });
+                recordtransactionVoid.setCurrentSublistValue({ sublistId: 'apply', fieldId: 'apply', value: false });
                 break;
             }
         }
-        for (let i = 0; i < countTransaction; i++) {
-            recordCreditMemo.selectLine({ sublistId: 'apply', line: i });
-            if (newJournal) {
-                let transactionId = recordCreditMemo.getSublistValue("apply", "internalid", i);
-                if (transactionId == newJournal) {
-                    recordCreditMemo.setCurrentSublistValue({ sublistId: 'apply', fieldId: 'apply', value: true });
-                    break;
+        if (typeTransaction == "invoice") {
+            for (let i = 0; i < countTransaction; i++) {
+                recordtransactionVoid.selectLine({ sublistId: 'apply', line: i });
+                if (transactionReverse) {
+                    let transactionId = recordtransactionVoid.getSublistValue("apply", "internalid", i);
+                    if (transactionId == transactionReverse) {
+                        recordtransactionVoid.setCurrentSublistValue({ sublistId: 'apply', fieldId: 'apply', value: true });
+                        break;
+                    }
                 }
             }
         }
+        
 
 
-        recordCreditMemo.save({ enableSourcing: true, ignoreMandatoryFields: true, disableTriggers: true });
+        recordtransactionVoid.save({ enableSourcing: true, ignoreMandatoryFields: true, disableTriggers: true });
 
     }
+    
 
 
     return { getRecordsLog, getParameters, updateState, reverseCancellation, updateTransactionState };

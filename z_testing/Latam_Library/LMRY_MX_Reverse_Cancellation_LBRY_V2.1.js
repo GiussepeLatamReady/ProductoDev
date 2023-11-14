@@ -301,6 +301,7 @@ define([
                 endDateField.updateDisplayType({ displayType: serverWidget.FieldDisplayType.DISABLED });
 
                 account.updateDisplayType({ displayType: serverWidget.FieldDisplayType.DISABLED });
+                typeTransaction.updateDisplayType({ displayType: serverWidget.FieldDisplayType.DISABLED });
 
             }
 

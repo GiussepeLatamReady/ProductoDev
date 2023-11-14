@@ -28,6 +28,13 @@ define(["N/search","N/record", "N/log","N/query", "N/runtime"],
                 */
                 //voidCreditMemo("3939157",true);
 
+                var CreditMemoAccount = search.lookupFields({
+                    type: "creditmemo",
+                    id: "3939157",
+                    columns: ["accountmain"]
+                }).accountmain[0].value;
+                log.error("creditMemoSearch",creditMemoSearch);
+                log.error("account",creditMemoSearch.accountmain[0].value);
 
 
                 
@@ -38,43 +45,7 @@ define(["N/search","N/record", "N/log","N/query", "N/runtime"],
         }
 
         function searchTest(){
-            var transactionSearchObj = search.create({
-                type: "transaction",
-                filters:
-                [
-                   ["type","anyof","Custom126"], 
-                   "AND", 
-                   ["custbody_lmry_reference_transaction","anyof","3939152"], 
-                   "AND", 
-                   ["mainline","is","T"]
-                ],
-                columns:
-                [
-                   search.createColumn({
-                      name: "ordertype",
-                      sort: search.Sort.ASC,
-                      label: "Order Type"
-                   }),
-                   search.createColumn({name: "mainline", label: "*"}),
-                   search.createColumn({name: "trandate", label: "Date"}),
-                   search.createColumn({name: "asofdate", label: "As-Of Date"}),
-                   search.createColumn({name: "postingperiod", label: "Period"}),
-                   search.createColumn({name: "taxperiod", label: "Tax Period"}),
-                   search.createColumn({name: "type", label: "Type"}),
-                   search.createColumn({name: "tranid", label: "Document Number"}),
-                   search.createColumn({name: "entity", label: "Name"}),
-                   search.createColumn({name: "account", label: "Account"}),
-                   search.createColumn({name: "memo", label: "Memo"}),
-                   search.createColumn({name: "amount", label: "Amount"}),
-                   search.createColumn({name: "debitamount", label: "Amount (Debit)"})
-                ]
-             });
-             var searchResultCount = transactionSearchObj.runPaged().count;
-             log.debug("transactionSearchObj result count",searchResultCount);
-             transactionSearchObj.run().each(function(result){
-                // .run().each has a limit of 4,000 results
-                return true;
-             });
+           
         }
         function createTransaction() {
             var ids = getSearch();
