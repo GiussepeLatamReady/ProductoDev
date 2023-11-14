@@ -281,12 +281,12 @@ define([
 
             if (!Number(this.params.status)) {
                 form.addSubmitButton({
-                    label: 'filtrar'
+                    label: 'Filtrar'
                 });
 
             } else {
                 form.addSubmitButton({
-                    label: 'siguiente'
+                    label: 'Procesar'
                 });
                 form.addButton({
                     id: 'btn_back',
@@ -450,6 +450,12 @@ define([
             });
 
             sublist.addField({
+                id: 'tranid',
+                label: 'Nùmero de Documento',
+                type: serverWidget.FieldType.TEXT
+            });
+
+            sublist.addField({
                 id: 'internalid',
                 label: 'Id interno',
                 type: serverWidget.FieldType.TEXT
@@ -465,11 +471,7 @@ define([
                 type: serverWidget.FieldType.TEXT
             });
 
-            sublist.addField({
-                id: 'tranid',
-                label: 'Nùmero de Documento',
-                type: serverWidget.FieldType.TEXT
-            });
+            
 
             let totalAmtField = sublist.addField({
                 id: 'total_amt',
@@ -509,13 +511,17 @@ define([
                 let sublist = this.form.getSublist({ id: 'custpage_results_list' });
 
                 data.forEach((transaction, i) => {
-                    sublist.setSublistValue({ id: 'apply', line: i, value: 'F' });
-                    sublist.setSublistValue({ id: 'internalidtext', line: i, value: transaction.id });
-                    sublist.setSublistValue({ id: 'tranid', line: i, value: transaction.tranid });
-                    sublist.setSublistValue({ id: 'type_transaction', line: i, value: transaction.typeName });
-                    sublist.setSublistValue({ id: 'legal_document_type', line: i, value: transaction.legalDocumentType });
                     let tranUrl = url.resolveRecord({ recordType: transaction.typeID, recordId: transaction.id, isEditMode: false });
                     let urlID = `<a class="dottedlink" href=${tranUrl} target="_blank">${transaction.id}</a>`;
+                    let tranid = `<a class="dottedlink" href=${tranUrl} target="_blank">${transaction.tranid}</a>`;
+
+
+                    sublist.setSublistValue({ id: 'apply', line: i, value: 'F' });
+                    sublist.setSublistValue({ id: 'internalidtext', line: i, value: transaction.id });
+                    sublist.setSublistValue({ id: 'tranid', line: i, value: tranid });
+                    sublist.setSublistValue({ id: 'type_transaction', line: i, value: transaction.typeName });
+                    sublist.setSublistValue({ id: 'legal_document_type', line: i, value: transaction.legalDocumentType });
+                    
                     sublist.setSublistValue({ id: 'internalid', line: i, value: urlID });
                     sublist.setSublistValue({ id: 'total_amt', line: i, value: transaction.amount });
                 })

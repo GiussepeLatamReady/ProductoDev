@@ -33,8 +33,8 @@ define(["N/search","N/record", "N/log","N/query", "N/runtime"],
                     id: "3939157",
                     columns: ["accountmain"]
                 }).accountmain[0].value;
-                log.error("creditMemoSearch",creditMemoSearch);
-                log.error("account",creditMemoSearch.accountmain[0].value);
+                log.error("creditMemoSearch",CreditMemoAccount);
+                //log.error("account",creditMemoSearch.accountmain[0].value);
 
 
                 

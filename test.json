@@ -1,28 +1,21 @@
 {
-    "type": "error.SuiteScriptError",
-    "name": "INVALID_FLD_VALUE",
-    "message": "You have entered an Invalid Field Value false for the following field: custpage_detailed_rounding",
-    "id": "",
-    "stack": [
-        "Error\n at Object.setFieldValues (/SuiteBundles/Bundle 35754/LatamReady - PE Detracctions/lib/LMRY_detrac_ServerWidget_LBRY_v2.0.js:107:11)\n at Object.onRequest (/SuiteBundles/Bundle 35754/LatamReady - PE Detracctions/src/purchases/LMRY_PE_generate_detractions_STLT_v2.0.js:227:24)"
+    type: "error.SuiteScriptError",
+    name: "INVALID_TRANS_TYP",
+    message: "Transaction type specified is incorrect.",
+    id: "",
+    stack: [
+       "Error\n    at suitescript/resources/javascript/record/recordImpl.js:96:12\n    at Function.loadRecord_raw (suitescript/resources/javascript/record/recordImpl.js:94:24)\n    at suitescript/resources/javascript/record/recordImpl.js:82:27\n    at Object.loadRecord (suitescript/resources/javascript/record/recordImpl.js:80:24)\n    at applyAndDisapply (/SuiteBundles/Bundle 243159/EI_Library/LMRY_MX_Reverse_Cancellation_MPRD_LBRY_V2.1.js:560:46)\n    at processCreditMemo (/SuiteBundles/Bundle 243159/EI_Library/LMRY_MX_Reverse_Cancellation_MPRD_LBRY_V2.1.js:130:9)\n    at Object.reverseCancellation (/SuiteBundles/Bundle 243159/EI_Library/LMRY_MX_Reverse_Cancellation_MPRD_LBRY_V2.1.js:113:13)\n    at Object.map (/SuiteBundles/Bundle 243159/LMRY_MX_Reverse_Cancellation_MPRD_V2.1.js:74:33)"
     ],
-    "cause": {
-        "type": "internal error",
-        "code": "INVALID_FLD_VALUE",
-        "details": "You have entered an Invalid Field Value false for the following field: custpage_detailed_rounding",
-        "userEvent": null,
-        "stackTrace": [
-            "Error\n at Object.setFieldValues (/SuiteBundles/Bundle 35754/LatamReady - PE Detracctions/lib/LMRY_detrac_ServerWidget_LBRY_v2.0.js:107:11)\n at Object.onRequest (/SuiteBundles/Bundle 35754/LatamReady - PE Detracctions/src/purchases/LMRY_PE_generate_detractions_STLT_v2.0.js:227:24)"
-        ],
-        "notifyOff": false
+    cause: {
+       type: "internal error",
+       code: "INVALID_TRANS_TYP",
+       details: "Transaction type specified is incorrect.",
+       userEvent: null,
+       stackTrace: [
+          "Error\n    at suitescript/resources/javascript/record/recordImpl.js:96:12\n    at Function.loadRecord_raw (suitescript/resources/javascript/record/recordImpl.js:94:24)\n    at suitescript/resources/javascript/record/recordImpl.js:82:27\n    at Object.loadRecord (suitescript/resources/javascript/record/recordImpl.js:80:24)\n    at applyAndDisapply (/SuiteBundles/Bundle 243159/EI_Library/LMRY_MX_Reverse_Cancellation_MPRD_LBRY_V2.1.js:560:46)\n    at processCreditMemo (/SuiteBundles/Bundle 243159/EI_Library/LMRY_MX_Reverse_Cancellation_MPRD_LBRY_V2.1.js:130:9)\n    at Object.reverseCancellation (/SuiteBundles/Bundle 243159/EI_Library/LMRY_MX_Reverse_Cancellation_MPRD_LBRY_V2.1.js:113:13)\n    at Object.map (/SuiteBundles/Bundle 243159/LMRY_MX_Reverse_Cancellation_MPRD_V2.1.js:74:33)"
+       ],
+       notifyOff: false
     },
-    "notifyOff": false,
-    "userFacing": true
-}
-
-{
-    "type": "error.SuiteScriptModuleLoaderError",
-    "name": "UNEXPECTED_ERROR",
-    "message": "missing ; after for-loop initializer (SS_SCRIPT_FOR_METADATA#28)",
-    "stack": []
-}
+    notifyOff: false,
+    userFacing: true
+ }

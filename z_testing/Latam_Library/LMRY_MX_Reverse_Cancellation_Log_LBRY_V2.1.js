@@ -204,8 +204,8 @@ define(["N/log","N/search", "N/runtime", "N/redirect", "N/ui/serverWidget","N/ur
                 let sublist = this.form.getSublist({ id: "custpage_results_list_details" });
                 let ids = Object.keys(data);
                 ids.forEach((id,i)=>{
-                    let {internalid,tranid,account,entity,state} = data[id];
-                    let tranUrl = url.resolveRecord({ recordType: "invoice" , recordId: internalid, isEditMode: false });
+                    let {internalid,tranid,account,entity,state,type} = data[id];
+                    let tranUrl = url.resolveRecord({ recordType: type , recordId: internalid, isEditMode: false });
                     let urlID = `<a class="dottedlink" href=${tranUrl} target="_blank">${internalid}</a>`;
                     sublist.setSublistValue({ id: "internalid", line: i, value: urlID });
                     sublist.setSublistValue({ id: "tranid", line: i, value: tranid });
@@ -259,6 +259,7 @@ define(["N/log","N/search", "N/runtime", "N/redirect", "N/ui/serverWidget","N/ur
                             search.createColumn({ name: "account", label: "Account" }),
                             search.createColumn({ name: "mainname", label: "Internal ID" }),
                             search.createColumn({ name: "tranid", label: "trandid" }),
+                            search.createColumn({ name: "recordtype", label: "recordtype" })
                         ]
                 });
 
@@ -269,6 +270,7 @@ define(["N/log","N/search", "N/runtime", "N/redirect", "N/ui/serverWidget","N/ur
                         account : result.getText('account'),
                         entity : result.getText('mainname'),
                         tranid : result.getValue('tranid'),
+                        type : result.getValue('recordtype'),
                         state : "Procesando"
                     }
                     
