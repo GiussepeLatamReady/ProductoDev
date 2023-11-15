@@ -191,7 +191,9 @@ define([
             transactionVoided.class = result.getValue('class') || '';
             transactionVoided.location = result.getValue('location') || '';
             transactionVoided.amount = Math.abs(result.getValue('fxamount'));
+            transactionVoided.entity = result.getValue('entity');
             transactionVoided.debit.amount = result.getValue('debitamount');
+            
             log.error("transactionVoided.debit.amoun",transactionVoided.debit.amount);
             log.error("result.getValue('debitamount')",result.getValue('debitamount'));
             log.error("result.getValue('debitamount')",typeof result.getValue('debitamount'));
@@ -243,6 +245,7 @@ define([
                     search.createColumn({ name: "fxamount", label: "amount" }),
                     search.createColumn({ name: "mainname", label: "Internal ID" }),
                     search.createColumn({ name: "trandate", label: "trandate" }),
+                    search.createColumn({ name: "entity", label: "Name" }),
                     search.createColumn({ name: "postingperiod", label: "postingperiod" })
                 ],
             settings: []
@@ -273,6 +276,7 @@ define([
             creditMemo.department = result.getValue('department') || '';
             creditMemo.class = result.getValue('class') || '';
             creditMemo.location = result.getValue('location') || '';
+            creditMemo.entity = result.getValue('entity');
             creditMemo.date = result.getValue('trandate') || '';
             creditMemo.period = result.getValue('postingperiod') || '';
             return true;
@@ -427,7 +431,9 @@ define([
         newTransactionReserve.setValue({ fieldId: 'trandate', value: dateFormat });
         newTransactionReserve.setValue({ fieldId: 'postingperiod', value: postingPeriod });
         newTransactionReserve.setValue({ fieldId: 'currency', value: transactionVoid.currency });
-        newTransactionReserve.setValue({ fieldId: 'custbody_lmry_reference_transaction', value: idTransaction }); // esta parte entra en obs
+        newTransactionReserve.setValue({ fieldId: 'custbody_lmry_reference_transaction', value: idTransaction }); 
+        newTransactionReserve.setValue({ fieldId: 'custbody_lmry_reference_transaction_id', value: idTransaction });
+        newTransactionReserve.setValue({ fieldId: 'custbody_lmry_reference_entity', value: transactionVoid.entity});
         newTransactionReserve.setValue({ fieldId: 'memo', value: "Latam - Reversión de anulación" });
         setExchangeRateBook(transactionVoid.id, newTransactionReserve);
         let setupTaxSubsidiary = getSetupTaxSubsidiary(transactionVoid.subsidiary);
@@ -554,10 +560,12 @@ define([
     /* ------------------------------------------------------------------------------------------------------
     * Esta funcion permite desaplicar la nota de credito de la anulacion y aplicar el journal creado
     * --------------------------------------------------------------------------------------------------- */
-    let applyAndDisapply = (transactionVoid, transactionReverse) => {
+    let applyAndDisapply = (transactionVoid, transactionReverse, transactionMainId) => {
         
         const recordtransactionVoid = record.load({ type: "creditmemo", id: transactionVoid.id, isDynamic: true });
         const countTransaction = recordtransactionVoid.getLineCount({ sublistId: 'apply' });
+
+        
         for (let i = 0; i < countTransaction; i++) {
             recordtransactionVoid.selectLine({ sublistId: 'apply', line: i });
 
@@ -579,9 +587,15 @@ define([
             }
         }
 
+        changeReferenceTransaction(recordtransactionVoid, transactionMainId);
 
         recordtransactionVoid.save({ enableSourcing: true, ignoreMandatoryFields: true, disableTriggers: true });
 
+    }
+
+    let changeReferenceTransaction = (transactionVoid, transactionMainId) => {
+        transactionVoid.setValue({ fieldId: 'custbody_lmry_reference_transaction', value: transactionMainId }); 
+        transactionVoid.setValue({ fieldId: 'custbody_lmry_reference_transaction_id', value: transactionMainId });
     }
 
     let desapplyTransactionMain = (transactionMain) => {
@@ -604,6 +618,8 @@ define([
                     break;
                 }
             }
+
+            changeReferenceTransaction(recordtransactionVoid, idTransaction);
 
             recordtransactionVoid.save({ enableSourcing: true, ignoreMandatoryFields: true, disableTriggers: true });
         } catch (error) {
