@@ -163,7 +163,7 @@ define(['N/record', 'N/runtime', 'N/log', 'N/search', 'N/format', 'N/transaction
                         // 2022.06.23 ONE WORLD/MID MARKET
                         // Evalua si existe anulacion de invoice para Mexico
                         var country = invoice.custbody_lmry_subsidiary_country[0].value;
-                        if (country == 157 && isThereCancellation(id_invoice)) {
+                        if (isThereCancellation(id_invoice)) {
                             log.error("Anulacion", "La transaccion ya esta anulada. El proceso se ha cancelado");
                             return false;
                         }
@@ -1514,7 +1514,9 @@ define(['N/record', 'N/runtime', 'N/log', 'N/search', 'N/format', 'N/transaction
                    "AND", 
                    ["createdfrom.internalid","anyof",invoiceId], 
                    "AND", 
-                   ["mainline","is","T"]
+                   ["mainline","is","T"],
+                   "AND",
+                   ["memo","startwith","Reference VOID"]
                 ],
                 columns:
                 [
