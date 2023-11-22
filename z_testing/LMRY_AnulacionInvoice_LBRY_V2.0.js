@@ -164,8 +164,8 @@ define(['N/record', 'N/runtime', 'N/log', 'N/search', 'N/format', 'N/transaction
                         // Evalua si existe anulacion de invoice para Mexico
                         var country = invoice.custbody_lmry_subsidiary_country[0].value;
                         if (isThereCancellation(id_invoice)) {
-                            log.error("Anulacion", "La transaccion ya esta anulada. El proceso se ha cancelado");
-                            return false;
+                            response.error = "La transaccion ya esta anulada. El proceso se ha cancelado";
+                            return response;
                         }
                         var idSubsidiary = 1;
                         if (F_SUBSIDIAR == true || F_SUBSIDIAR == 'T') {
@@ -1516,7 +1516,7 @@ define(['N/record', 'N/runtime', 'N/log', 'N/search', 'N/format', 'N/transaction
                    "AND", 
                    ["mainline","is","T"],
                    "AND",
-                   ["memo","startwith","Reference VOID"]
+                   ["memo","startswith","Reference VOID"]
                 ],
                 columns:
                 [
