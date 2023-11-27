@@ -1,28 +1,38 @@
-# [MX:EI - Validacion VOID D1214]()
+# [BO: Modificacion wht C0995](https://docs.google.com/document/d/1I3NvteDPiYfCXt80L4dz7rQPSiD29Yfm/edit)
 
 
 ## Description of the Requirement
 
-Realizar la validacion de creacion de notas de credito al momento de anular Electronicamente, para no generar una nueva nota de credito si esta ya existe. PE BR MX
+Se necesita modificar la tarifa de retención en la etiqueta del Libro de retenciones para el campo IUE Servicios al ser mostrado en el reporte, en la que actualmente se indica “Retenciones IUE - Servicios 12.5%” por lo siguiente “Retenciones IVA - Servicios 13%”.
 
 ## Description of the solution
 
-Se agregó validaciones para las anulaciones para los paises PE BR MX
+
 
 ## Scripts
 + Create
 + Update
-  + BR
-    + LMRY_AnulacionInvoice_LBRY_V2.0 anularInvoice (MX)
-    + LMRY_BR_EI_Void_LBRY_V2.0.js voidBillCredit
-    + LMRY_AnulacionBill_LBRY_V2.0.js anularBill
-  + PE
-    + LMRY_PE_AnulacionInvoice_LBRY_V2.0.js anularTransaction
 
 + Delete
 
 ## Records
++ Create
+  + LatamReady - WHT Type (customrecord_lmry_wht_type)
+    + NAME                    : ReteIVA BO
+    + INACTIVE                : false
+    + NAME                    : ReteIVA
+    + DESCRIPTION             : Withholding tax of the IVA Tax
+    + ENTITY CUSTOM FIELD     : custpage_lmry_ety_bo_reteiva
+    + TRANSACTION CUSTOM FIELD: custpage_lmry_bo_reteiva
+    + WHT AMOUNT CUSTOM FIELD : custpage_lmry_bo_reteiva_whtamount
+    + COUNTRY                 : Bolivia (Plurinational State of)
+    + WHT SUBTYPE             :
 
+  + LatamReady - Setup WHT Sub Type (customrecord_lmry_ar_wht_type)
+    + NAME            : BO-ReteIVA
+    + INACTIVE        : false
+    + LATAM - COUNTRY : Bolivia (Plurinational State of)
+    + LATAM - TYPE    : Retencion BO
 
 ## Fields
 + Create
@@ -35,9 +45,17 @@ Se agregó validaciones para las anulaciones para los paises PE BR MX
 + Delete
 
 ## Bundles involved
-Bundle de EI
-  (Desarrollo) SuiteBundles : Bundle 245636 : EI_Library
-  (SuiteAPP) SuiteScripts : LatamReady2.0 : E.I. All Country : Electronic Invoicing : EI_Library
+
+
+## others
+items purchase - LatamReady - WHT Code
+https://tstdrv1774174.app.netsuite.com/app/common/item/item.nl?id=4247&whence=&cmid=1701041834085_720
+
+
+LatamReady - WHT Code
+https://tstdrv1774174.app.netsuite.com/app/common/custom/custrecordentry.nl?id=139&rectype=1069&whence=
+
+
 
 
 
