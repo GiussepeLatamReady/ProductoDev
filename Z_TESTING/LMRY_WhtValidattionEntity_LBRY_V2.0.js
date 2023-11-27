@@ -7,7 +7,7 @@
 ||  2.0     Oct 02 2023  LatamReady    Use Script 2.0           ||
  \= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = */
 /**
- * @NApiVersion 2.x
+ * @NApiVersion 2.0
  * @NModuleScope Public
  */
 define(['N/record', 'N/log', 'N/search', 'N/runtime'],
@@ -22,22 +22,20 @@ define(['N/record', 'N/log', 'N/search', 'N/runtime'],
         * @param {typeContext} scriptContext.type - Trigger type
         */
 
-        function setFieldWhtIVA(recordEntity, form, typeContext) {
+        function setFieldWhtIVA(recordEntity, form) {
             try {
-                log.debug("Debug", "Entro a setSecondClient");
-                log.debug("typeContext", typeContext);
-
-
+                log.debug("Debug", "Entro a setFieldWhtIVA");
+        
 
                 log.debug("Debug", "Creando campo");
-                var whtCodeIva = form.addField({
+                var whtCodeIvaField = form.addField({
                     id: 'custpage_lmry_ety_bo_reteiva',
                     type: 'select',
                     label: 'Latam Entity -  BO IVA'
                 });
 
 
-                whtCodeIva.addSelectOption({
+                whtCodeIvaField.addSelectOption({
                     value: '',
                     text: '&nbsp;'
                 });
@@ -46,7 +44,7 @@ define(['N/record', 'N/log', 'N/search', 'N/runtime'],
                 var idsCustomer = Object.keys(whtCodeIvaList);
 
                 idsCustomer.forEach(function (id) {
-                    whtCodeIva.addSelectOption({
+                    whtCodeIvaField.addSelectOption({
                         value: whtCodeIvaList[id].id,
                         text: whtCodeIvaList[id].name
                     });
@@ -54,15 +52,15 @@ define(['N/record', 'N/log', 'N/search', 'N/runtime'],
 
 
 
-                var entityField = getEntityField(recordEntity.id);
-                log.debug("transactionfield before ", entityField)
-                if (entityField && (entityField.whtCodeIva != "")) {
-                    recordEntity.setValue('custpage_lmry_ety_bo_reteiva', entityField.whtCodeIva);
+                var whtCodeIva = getIvaToEntityField(recordEntity.id);
+                log.debug("transactionfield before ", whtCodeIva)
+                if (whtCodeIva) {
+                    recordEntity.setValue('custpage_lmry_bo_reteiva', whtCodeIva);
                 }
 
-                log.debug("Debug", "Salio a setSecondClient");
+                log.debug("Debug", "Salio a setFieldWhtIVA");
             } catch (error) {
-                log.error(" error [setSecondClient]", error)
+                log.error(" error [setFieldWhtIVA]", error)
             }
 
 
@@ -101,10 +99,39 @@ define(['N/record', 'N/log', 'N/search', 'N/runtime'],
             
         }
 
-        function getEntityField(){
+        function getIvaToEntityField(entityId){
+            var whtCodeIva = null;
+            var entityFieldObj = search.create({
+                type: "customrecord_lmry_entity_fields",
+                filters:
+                    [
+                        ["custrecord_lmry_co_entity", "anyof", entityId]
+                    ],
+                columns:
+                    [
+                        search.createColumn({ name: "custrecord_lmry_bo_reteiva" })
+                    ]
+            });
+            entityFieldObj.run().each(function (result) {
+                whtCodeIva = result.getValue("custrecord_lmry_bo_reteiva");
+            }); 
+            return whtCodeIva;
+        }
+
+
+        function saveFieldWhtIva(recordEntity){
+            var vendor = {
+                id: recordEntity.id,
+                whtIva: recordEntity.getValue({ fieldId: 'custpage_lmry_ety_bo_reteiva' }) || ""
+            }
+
+            if (vendor.whtIva == "") {
+                return false;
+            }
+            
 
         }
         return {
-            setSecondClient: setFieldWhtIVA
+            setFieldWhtIVA: setFieldWhtIVA
         };
     });

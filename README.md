@@ -27,13 +27,10 @@ Se necesita modificar la tarifa de retención en la etiqueta del Libro de retenc
     + WHT AMOUNT CUSTOM FIELD : custpage_lmry_bo_reteiva_whtamount
     + COUNTRY                 : Bolivia (Plurinational State of)
     + WHT SUBTYPE             :
-
-  + LatamReady - Setup WHT Sub Type (customrecord_lmry_ar_wht_type)
-    + NAME            : BO-ReteIVA
-    + INACTIVE        : false
-    + LATAM - COUNTRY : Bolivia (Plurinational State of)
-    + LATAM - TYPE    : Retencion BO
-
++ Update
+    + LatamReady - Entity Fields (customrecord_lmry_entity_fields)
+      + Se creo el subtabs "Bolivia"
+      + Creacion del campo "Latam - BO IVA" (custrecord_lmry_bo_reteiva) y se ubica en el subtab bolivia.
 ## Fields
 + Create
 + Update 

@@ -13,9 +13,18 @@
 ||  2.0     17 ago 2018  LatamReady    Use Script 2.0           ||
  \= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = */
 
- define(['N/search', 'N/runtime', 'N/ui/serverWidget', 'N/log', './Latam_Library/LMRY_libSendingEmailsLBRY_V2.0', './Latam_Library/LMRY_HideViewLBRY_V2.0', './Latam_Library/LMRY_UniversalSetting_Purchase_LBRY'],
+ define([
+    'N/search', 
+    'N/runtime', 
+    'N/ui/serverWidget', 
+    'N/log', 
+    './Latam_Library/LMRY_libSendingEmailsLBRY_V2.0', 
+    './Latam_Library/LMRY_HideViewLBRY_V2.0', 
+    './Latam_Library/LMRY_UniversalSetting_Purchase_LBRY',
+    './Latam_Library/LMRY_WhtValidattionEntity_LBRY_V2.0'
+],
 
- function (search, runtime, serverWidget, log, Library_Mail, Library_HideView, library_Uni_Setting) {
+ function (search, runtime, serverWidget, log, Library_Mail, Library_HideView, library_Uni_Setting,library_WHT_Validation) {
 
      var LMRY_script = 'LMRY Vendor URET V2.0';
      var LMRY_access = false;
@@ -40,7 +49,7 @@
              isURET = scriptContext.type;
              FORM = scriptContext.form;
              RCD = scriptContext.newRecord;
-
+             var executionContext = runtime.executionContext;
              var subsidiary = RCD.getValue('subsidiary');
              licenses = Library_Mail.getLicenses(subsidiary);
 
@@ -193,6 +202,14 @@
                      }
                  }
              }
+
+            if (executionContext == "USERINTERFACE") {
+                if (['edit', 'view'].indexOf(isURET) > -1) {
+                    library_WHT_Validation.setFieldWhtIVA(RCD, FORM);
+                }
+            }
+
+
          } catch (err) {
              Library_Mail.sendemail('[beforeLoad] ' + err, LMRY_script);
          }
