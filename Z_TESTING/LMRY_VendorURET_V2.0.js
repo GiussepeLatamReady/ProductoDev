@@ -33,7 +33,7 @@
      var isURET = '';
      var FORM = '';
      var licenses = [];
-
+     var executionContext = '';
 
      /**
       * Function definition to be triggered before record is loaded.
@@ -49,7 +49,7 @@
              isURET = scriptContext.type;
              FORM = scriptContext.form;
              RCD = scriptContext.newRecord;
-             var executionContext = runtime.executionContext;
+             executionContext = runtime.executionContext;
              var subsidiary = RCD.getValue('subsidiary');
              licenses = Library_Mail.getLicenses(subsidiary);
 
@@ -108,7 +108,7 @@
                  }
              }
 
-             if (isURET == 'view' || isURET == 'edit') {
+             if (['edit', 'view', 'create', 'copy'].indexOf(isURET) > -1) {
                  // Valida el Acceso
                  ValidateAccessV(FORM, RCD.getValue({
                      fieldId: 'subsidiary'
@@ -203,10 +203,12 @@
                  }
              }
 
-            if (executionContext == "USERINTERFACE") {
-                if (['edit', 'view', 'create'].indexOf(isURET) > -1) {
-                    library_WHT_Validation.setFieldWhtIVA(RCD, FORM, isURET);
-                }
+             if (executionContext == "USERINTERFACE" &&
+                 LMRY_countr[0] == 'BO' &&
+                 ['edit', 'view', 'create', 'copy'].indexOf(isURET) > -1) {
+
+                 library_WHT_Validation.setFieldWhtIVA(RCD, FORM, isURET);
+
             }
 
 
@@ -240,6 +242,35 @@
       */
      function afterSubmit(scriptContext) {
         
+        try {
+            log.error("afterSubmit","start")
+            executionContext = runtime.executionContext;
+            isURET = scriptContext.type;
+            RCD = scriptContext.newRecord;
+            FORM = scriptContext.form;
+            var subsidiary = RCD.getValue('subsidiary');
+            licenses = Library_Mail.getLicenses(subsidiary);
+            log.error("afterSubmit","antes de la validacion")
+
+            if (['edit', 'view', 'create', 'copy'].indexOf(isURET) > -1) {
+                // Valida el Acceso
+                ValidateAccessV(FORM, RCD.getValue({
+                    fieldId: 'subsidiary'
+                }), licenses);
+            }
+            log.error("afterSubmit","antes de la condicion")
+            if (executionContext == "USERINTERFACE" &&
+                LMRY_countr[0] == 'BO' &&
+                ['edit', 'create', 'copy'].indexOf(isURET) > -1) {
+                    log.error("afterSubmit","en la condicion")
+                library_WHT_Validation.saveFieldWhtIva(RCD);
+                
+            }
+        } catch (err) {
+            Library_Mail.sendemail('[beforeLoad] ' + err, LMRY_script);
+            log.error("error",err);
+        }
+        return true;
      }
 
      /* ------------------------------------------------------------------------------------------------------
@@ -281,9 +312,9 @@
      }
 
      return {
-         beforeLoad: beforeLoad
+         beforeLoad: beforeLoad,
          // beforeSubmit: beforeSubmit,
-         // afterSubmit: afterSubmit
+         afterSubmit: afterSubmit
      };
 
  });

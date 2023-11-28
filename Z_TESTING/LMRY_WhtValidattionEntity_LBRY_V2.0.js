@@ -17,9 +17,9 @@ define(['N/record', 'N/log', 'N/search', 'N/runtime'],
         * Funcion que permite crear el campo ficticio "Latam - BO IVA" y setearlo
         * segun el valor del BO entity field field de la propia transaccion.
         *
-        * @param {recordTransaction} scriptContext.newRecord
+        * @param {recordEntity} scriptContext.newRecord
         * @param {form} scriptContext.form - New record
-        * @param {typeContext} scriptContext.type - Trigger type
+        * @param {isURE} scriptContext.type - Trigger type
         */
 
         function setFieldWhtIVA(recordEntity, form, isURET) {
@@ -52,9 +52,9 @@ define(['N/record', 'N/log', 'N/search', 'N/runtime'],
 
                 if (['edit', 'view'].indexOf(isURET) > -1) {
                     var entityField = getEntityField(recordEntity.id);
-                    log.debug("entityField ", entityField)
+                    log.error("entityField ", entityField)
                     if (entityField.exist && entityField.whtCodeIva != "") {
-                        recordEntity.setValue('custpage_lmry_bo_reteiva', entityField.whtCodeIva);
+                        recordEntity.setValue('custpage_lmry_ety_bo_reteiva', entityField.whtCodeIva);
                     }
                 }
 
@@ -128,13 +128,15 @@ define(['N/record', 'N/log', 'N/search', 'N/runtime'],
 
 
         function saveFieldWhtIva(recordEntity) {
+            log.error("debug","saveFieldWhtIva")
             var entity = {
                 id: recordEntity.id,
-                whtIva: recordEntity.getValue({ fieldId: 'custpage_lmry_ety_bo_reteiva' }) || "",
+                whtCodeIva: recordEntity.getValue({ fieldId: 'custpage_lmry_ety_bo_reteiva' }) || "",
                 subsidiary: recordEntity.getValue({ fieldId: 'subsidiary' }) || ""
             }
 
-            if (vendor.whtIva == "") {
+            if (entity.whtIva == "") {
+                log.error("afuera","no tiene retencion configurada")
                 return false;
             }
             saveRecordEntityField(entity);
@@ -143,8 +145,9 @@ define(['N/record', 'N/log', 'N/search', 'N/runtime'],
 
 
         function saveRecordEntityField(entity) {
+            log.error("debug","saveRecordEntityField")
             var entityField = getEntityField(entity.id);
-
+            log.error("entity",entity)
             if (entityField.exist) {
                 var updateEntityField = record.load({
                     type: "customrecord_lmry_entity_fields",
@@ -153,7 +156,7 @@ define(['N/record', 'N/log', 'N/search', 'N/runtime'],
 
                 updateEntityField.setValue({
                     fieldId: 'custrecord_lmry_bo_reteiva',
-                    value: entityField.whtCodeIva
+                    value: entity.whtCodeIva
                 });
 
                 updateEntityField.save({
@@ -161,30 +164,33 @@ define(['N/record', 'N/log', 'N/search', 'N/runtime'],
                     ignoreMandatoryFields: true
                 });
             } else {
-                var updateEntityField = record.create({
+                
+                var newEntityField = record.create({
                     type: "customrecord_lmry_entity_fields",
                     isDynamic: true
                 });
 
-                newTransactionField.setValue({
+                newEntityField.setValue({
                     fieldId: 'custrecord_lmry_co_entity',
                     value: entity.id
                 });
 
-                newTransactionField.setValue({
+                newEntityField.setValue({
                     fieldId: 'custrecord_lmry_co_subsi_reten',
                     value: entity.subsidiary
                 });
 
-                updateEntityField.setValue({
+                newEntityField.setValue({
                     fieldId: 'custrecord_lmry_bo_reteiva',
-                    value: entityField.whtCodeIva
+                    value: entity.whtCodeIva
                 });
-
-                updateEntityField.save({
+                log.error("debug","antes de guardar")
+                newEntityField.save({
                     disableTriggers: true,
                     ignoreMandatoryFields: true
                 });
+
+                log.error("debug","despues de guardar")
             }
         }
         return {

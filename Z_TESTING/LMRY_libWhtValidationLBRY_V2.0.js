@@ -2569,6 +2569,68 @@ define(['./LMRY_libSendingEmailsLBRY_V2.0', './LMRY_libNumberInWordsLBRY_V2.0', 
             return JsonValues[jsonBase[key]] || 0;
         }
 
+
+        function setFieldWhtIVA(recordTransaction, form, typeContext) {
+            try {
+                log.debug("Debug", "Entro a setFieldWhtIVA");
+                log.debug("typeContext", typeContext);
+                
+                var transaction = {
+                    id: recordTransaction.id,
+                    createdFrom: recordTransaction.getValue({ fieldId: 'createdfrom' }) || null
+                }
+                var clientRemesa;
+
+
+
+                log.debug("Debug", "Creando campo");
+                clientRemesa = form.addField({
+                    id: 'custpage_lmry_br_cliente_remessa',
+                    type: 'select',
+                    label: 'Latam - BR Cliente Remessa'
+                });
+
+
+                clientRemesa.addSelectOption({
+                    value: '',
+                    text: '&nbsp;'
+                });
+                var customers = getCustmers();
+
+                var idsCustomer = Object.keys(customers);
+
+                idsCustomer.forEach(function (id) {
+                    clientRemesa.addSelectOption({
+                        value: customers[id].internalid,
+                        text: customers[id].nameCustomer
+                    });
+                })
+
+
+
+                var idTransaction;
+
+                if (typeContext == "create" && transaction.createdFrom) {
+                    idTransaction = transaction.createdFrom
+                }
+                if (typeContext == "edit" || typeContext == "view") {
+                    idTransaction = transaction.id
+                }
+                var transactionfield = getTransactionField(idTransaction);
+                log.debug("transactionfield before ", transactionfield)
+                if (transactionfield && (transactionfield.secondClient != null && transactionfield.secondClient != "")) {
+                    recordTransaction.setValue('custpage_lmry_br_cliente_remessa', transactionfield.secondClient);
+                }
+
+                log.debug("Debug", "Salio a setSecondClient");
+            } catch (error) {
+                log.error(" error [setSecondClient]", error)
+            }
+
+
+
+        }
+
         return {
             Create_WHT_Latam: Create_WHT_Latam,
             Search_WHT: Search_WHT,
