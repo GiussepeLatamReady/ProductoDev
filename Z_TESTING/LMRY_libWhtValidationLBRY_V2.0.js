@@ -12,9 +12,18 @@
  * @NModuleScope Public
  */
 
-define(['./LMRY_libSendingEmailsLBRY_V2.0', './LMRY_libNumberInWordsLBRY_V2.0', 'N/log', 'N/record', 'N/search', 'N/runtime', 'N/format', './LMRY_CO_Duplicate_Credit_Memos_LBRY_V2.0'],
+define([
+        './LMRY_libSendingEmailsLBRY_V2.0', 
+        './LMRY_libNumberInWordsLBRY_V2.0', 
+        'N/log', 
+        'N/record', 
+        'N/search', 
+        'N/runtime', 
+        'N/format', 
+        './LMRY_CO_Duplicate_Credit_Memos_LBRY_V2.0',
+        './LMRY_WhtValidattionEntity_LBRY_V2.0'],
 
-    function (Library_Mail, Library_Number, log, record, search, runtime, format, Library_Duplicate) {
+    function (Library_Mail, Library_Number, log, record, search, runtime, format, Library_Duplicate, library_validation_entity) {
 
         var LMRY_script = 'LMRY_libWhtValidationLBRY V2.0';
         var MEMO_WHT = 'Latam - WHT';
@@ -147,13 +156,23 @@ define(['./LMRY_libSendingEmailsLBRY_V2.0', './LMRY_libNumberInWordsLBRY_V2.0', 
                 fieldId: 'custbody_lmry_bo_autoreteit'
             });
             Search_WHT(Transaction, ID, Obj_RCD, RETEIT);
+
             // Solo en Vendor
             var RETEIU = '';
+            var RETEBOIVA = '';
             if (Transaction == 'vendorbill' || Transaction == 'vendorcredit') {
                 RETEIU = Obj_RCD.getValue({
                     fieldId: 'custbody_lmry_bo_reteiue'
                 });
                 Search_WHT(Transaction, ID, Obj_RCD, RETEIU);
+
+                RETEBOIVA = Obj_RCD.getValue({
+                    fieldId: 'custpage_lmry_bo_reteiva'
+                });
+                Search_WHT(Transaction, ID, Obj_RCD, RETEBOIVA);
+
+                
+
             }
 
             // Custom Field for Paraguay
@@ -190,6 +209,7 @@ define(['./LMRY_libSendingEmailsLBRY_V2.0', './LMRY_libNumberInWordsLBRY_V2.0', 
                 // Solo en Vendor
                 if (Transaction == 'vendorbill') {
                     Create_WHT_1(ID, Obj_RCD, RETEIU, fAccPeriod);
+                    Create_WHT_1(ID, Obj_RCD, RETEBOIVA, fAccPeriod);
                 }
 
                 // Custom Field for Paraguay
@@ -218,15 +238,16 @@ define(['./LMRY_libSendingEmailsLBRY_V2.0', './LMRY_libNumberInWordsLBRY_V2.0', 
                 // Custom Field for Bolivia
                 arApply[4] = Create_WHT_2(ID, Obj_RCD, RETEIT, fAccPeriod);
                 arApply[5] = 0;
-
+                arApply[6] = 0;
                 // Solo en Vendor
                 if (Transaction == 'vendorcredit') {
                     arApply[5] = Create_WHT_2(ID, Obj_RCD, RETEIU, fAccPeriod);
+                    arApply[6] = Create_WHT_2(ID, Obj_RCD, RETEBOIVA, fAccPeriod);
                 }
 
                 // Custom Field for Paraguay
-                arApply[6] = Create_WHT_2(ID, Obj_RCD, RETEIR, fAccPeriod);
-                arApply[7] = Create_WHT_2(ID, Obj_RCD, RETEIV, fAccPeriod);
+                arApply[7] = Create_WHT_2(ID, Obj_RCD, RETEIR, fAccPeriod);
+                arApply[8] = Create_WHT_2(ID, Obj_RCD, RETEIV, fAccPeriod);
 
                 // Aplica la Bill y Invoice
                 ApplyInvoice(ID, Transaction, arApply, transToDelete);
@@ -2574,63 +2595,172 @@ define(['./LMRY_libSendingEmailsLBRY_V2.0', './LMRY_libNumberInWordsLBRY_V2.0', 
             try {
                 log.debug("Debug", "Entro a setFieldWhtIVA");
                 log.debug("typeContext", typeContext);
+
                 
-                var transaction = {
-                    id: recordTransaction.id,
-                    createdFrom: recordTransaction.getValue({ fieldId: 'createdfrom' }) || null
-                }
-                var clientRemesa;
+                var vendor = recordTransaction.getValue({ fieldId: 'entity' }) || ""
+                
 
-
-
-                log.debug("Debug", "Creando campo");
-                clientRemesa = form.addField({
-                    id: 'custpage_lmry_br_cliente_remessa',
-                    type: 'select',
-                    label: 'Latam - BR Cliente Remessa'
+                createFieldWhtCodeIva(form);
+                // Create amount Wht Iva
+                form.addField({
+                    id: 'custpage_lmry_bo_reteiva_whtamount',
+                    type: 'currency',
+                    label: 'Latam - BO IVA AMOUNT'
                 });
-
-
-                clientRemesa.addSelectOption({
-                    value: '',
-                    text: '&nbsp;'
-                });
-                var customers = getCustmers();
-
-                var idsCustomer = Object.keys(customers);
-
-                idsCustomer.forEach(function (id) {
-                    clientRemesa.addSelectOption({
-                        value: customers[id].internalid,
-                        text: customers[id].nameCustomer
-                    });
-                })
-
-
-
-                var idTransaction;
-
-                if (typeContext == "create" && transaction.createdFrom) {
-                    idTransaction = transaction.createdFrom
-                }
-                if (typeContext == "edit" || typeContext == "view") {
-                    idTransaction = transaction.id
-                }
-                var transactionfield = getTransactionField(idTransaction);
-                log.debug("transactionfield before ", transactionfield)
-                if (transactionfield && (transactionfield.secondClient != null && transactionfield.secondClient != "")) {
-                    recordTransaction.setValue('custpage_lmry_br_cliente_remessa', transactionfield.secondClient);
-                }
-
-                log.debug("Debug", "Salio a setSecondClient");
+                setFieldWhtCodeIva(recordTransaction, typeContext, vendor);
+            
             } catch (error) {
-                log.error(" error [setSecondClient]", error)
+                log.error(" error [setFieldWhtIVA]", error)
+            }
+        }
+
+        function createFieldWhtCodeIva(form){
+            var whtCodeIvaField = form.addField({
+                id: 'custpage_lmry_bo_reteiva',
+                type: 'select',
+                label: 'Latam - BO IVA'
+            });
+
+
+            whtCodeIvaField.addSelectOption({
+                value: '',
+                text: '&nbsp;'
+            });
+            var whtCodeIvaList = library_validation_entity.getWhtCodeList();
+
+            var idsWhtCodeList = Object.keys(whtCodeIvaList);
+
+            idsWhtCodeList.forEach(function (id) {
+                whtCodeIvaField.addSelectOption({
+                    value: whtCodeIvaList[id].id,
+                    text: whtCodeIvaList[id].name
+                });
+            })
+            
+            
+            
+        }
+
+        function setFieldWhtCodeIva(recordTransaction, typeContext, entityId){
+            if (typeContext == "create" || typeContext == "copy") {
+                var entityField = library_validation_entity.getEntityField(entityId);
+
+                if (entityField.exist && entityField.whtCodeIva != "") {
+                    recordTransaction.setValue('custpage_lmry_bo_reteiva', entityField.whtCodeIva);
+                }
+            } else { // view - edit
+                var transactionField = getBoTransactionField(recordTransaction.id);
+                if (transactionField.exist && transactionField.whtCodeIva != "") {
+                    recordTransaction.setValue('custpage_lmry_bo_reteiva', transactionField.whtCodeIva);
+                    recordTransaction.setValue('custpage_lmry_bo_reteiva_whtamount', transactionField.whtAmountIva);
+                }
+                // else{t
+                //     recordTransaction.setValue('custpage_lmry_bo_reteiva_whtamoun', 0.00);
+                // }
+
+
+            }
+        }
+
+        function getBoTransactionField(transactionId) {
+            var transactionField = {
+                exist: false
+            };
+            var transactionFieldObj = search.create({
+                type: "customrecord_lmry_bo_transaction_fields",
+                filters:
+                    [
+                        ["custrecord_lmry_bo_transaction", "anyof", transactionId]
+                    ],
+                columns:
+                    [
+                        search.createColumn({ name: "internalid" }),
+                        search.createColumn({ name: "custrecord_lmry_bo_reteiva" }),
+                        search.createColumn({ name: "custrecord_lmry_bo_reteiva_whtamount" })
+
+                    ]
+            });
+            transactionFieldObj.run().each(function (result) {
+                transactionField.id = result.getValue("internalid") || "";
+                transactionField.whtCodeIva = result.getValue("custrecord_lmry_bo_reteiva") || "";
+                transactionField.whtAmountIva = result.getValue("custrecord_lmry_bo_reteiva_whtamount") || 0.00;
+                transactionField.exist = true;
+            });
+            return transactionField;
+        }
+
+        
+        function saveWhtIva(recordTransaction){
+            var transaction = {
+                id: recordTransaction.id,
+                whtCodeIva: recordTransaction.getValue({ fieldId: 'custpage_lmry_bo_reteiva' }) || "",
+                whtAmountIva: recordTransaction.getValue({ fieldId: 'custpage_lmry_bo_reteiva_whtamount' }) || ""
             }
 
+            if (transaction.whtCodeIva == "") {
+                return false;
+            }
 
+            saveBOTransactionField(transaction);
 
         }
 
+        function saveBOTransactionField(transaction){
+            var transactionField = getBoTransactionField(transaction.id);
+
+            if (transactionField.exist) {
+                var updateTransactionField = record.load({
+                    type: "customrecord_lmry_bo_transaction_fields",
+                    id: transaction.id
+                });
+
+                updateTransactionField.setValue({
+                    fieldId: 'custpage_lmry_bo_reteiva',
+                    value: transaction.whtCodeIva,
+                    ignoreFieldChange: true
+                });
+
+                updateTransactionField.setValue({
+                    fieldId: 'custpage_lmry_bo_reteiva_whtamount',
+                    value: transaction.whtAmountIva,
+                    ignoreFieldChange: true
+                });
+
+                updateTransactionField.save({
+                    disableTriggers: true,
+                    ignoreMandatoryFields: true
+                });
+            }else{
+                var newTransactionField = record.create({
+                    type: 'customrecord_lmry_bo_transaction_fields',
+                    isDynamic: true
+                });
+
+                newTransactionField.setValue({
+                    fieldId: 'custrecord_lmry_bo_transaction',
+                    value: transaction.id,
+                    ignoreFieldChange: true
+                });
+
+                newTransactionField.setValue({
+                    fieldId: 'custpage_lmry_bo_reteiva',
+                    value: transaction.whtCodeIva,
+                    ignoreFieldChange: true
+                });
+
+                newTransactionField.setValue({
+                    fieldId: 'custpage_lmry_bo_reteiva_whtamount',
+                    value: transaction.whtAmountIva,
+                    ignoreFieldChange: true
+                });
+
+                newTransactionField.save({
+                    disableTriggers: true,
+                    ignoreMandatoryFields: true
+                });
+            }
+        }
+        
         return {
             Create_WHT_Latam: Create_WHT_Latam,
             Search_WHT: Search_WHT,
@@ -2645,7 +2775,9 @@ define(['./LMRY_libSendingEmailsLBRY_V2.0', './LMRY_libNumberInWordsLBRY_V2.0', 
             getTransactionsToDelete: getTransactionsToDelete,
             round2: round2,
             createFields: createFields,
-            setFieldValues: setFieldValues
+            setFieldValues: setFieldValues,
+            setFieldWhtIVA: setFieldWhtIVA,
+            saveWhtIva: saveWhtIva
         };
 
     });

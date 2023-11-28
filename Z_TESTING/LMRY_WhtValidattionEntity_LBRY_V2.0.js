@@ -41,9 +41,9 @@ define(['N/record', 'N/log', 'N/search', 'N/runtime'],
                 });
                 var whtCodeIvaList = getWhtCodeList();
 
-                var idsCustomer = Object.keys(whtCodeIvaList);
+                var idsWhtCodeList = Object.keys(whtCodeIvaList);
 
-                idsCustomer.forEach(function (id) {
+                idsWhtCodeList.forEach(function (id) {
                     whtCodeIvaField.addSelectOption({
                         value: whtCodeIvaList[id].id,
                         text: whtCodeIvaList[id].name
@@ -114,13 +114,13 @@ define(['N/record', 'N/log', 'N/search', 'N/runtime'],
                 columns:
                     [
                         search.createColumn({ name: "internalid" }),
-                        search.createColumn({ name: "custrecord_lmry_bo_reteiva" }),
+                        search.createColumn({ name: "custrecord_lmry_bo_ety_reteiva" }),
 
                     ]
             });
             entityFieldObj.run().each(function (result) {
                 entityField.id = result.getValue("internalid") || "";
-                entityField.whtCodeIva = result.getValue("custrecord_lmry_bo_reteiva") || "";
+                entityField.whtCodeIva = result.getValue("custrecord_lmry_bo_ety_reteiva") || "";
                 entityField.exist = true;
             });
             return entityField;
@@ -155,7 +155,7 @@ define(['N/record', 'N/log', 'N/search', 'N/runtime'],
                 });
 
                 updateEntityField.setValue({
-                    fieldId: 'custrecord_lmry_bo_reteiva',
+                    fieldId: 'custrecord_lmry_bo_ety_reteiva',
                     value: entity.whtCodeIva
                 });
 
@@ -181,7 +181,7 @@ define(['N/record', 'N/log', 'N/search', 'N/runtime'],
                 });
 
                 newEntityField.setValue({
-                    fieldId: 'custrecord_lmry_bo_reteiva',
+                    fieldId: 'custrecord_lmry_bo_ety_reteiva',
                     value: entity.whtCodeIva
                 });
                 log.error("debug","antes de guardar")
