@@ -205,7 +205,7 @@
 
             if (executionContext == "USERINTERFACE") {
                 if (['edit', 'view', 'create'].indexOf(isURET) > -1) {
-                    library_WHT_Validation.setFieldWhtIVA(RCD, FORM, executionContext);
+                    library_WHT_Validation.setFieldWhtIVA(RCD, FORM, isURET);
                 }
             }
 
