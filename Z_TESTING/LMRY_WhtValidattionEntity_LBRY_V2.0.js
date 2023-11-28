@@ -14,18 +14,18 @@ define(['N/record', 'N/log', 'N/search', 'N/runtime'],
     function (record, log, search, runtime) {
 
         /**
-        * Funcion que permite crear el campo ficticio "LATAM - BR CLIENTE REMESSA" y setearlo
-        * segun el valor del BR trasactions field de la propia transaccion.
+        * Funcion que permite crear el campo ficticio "Latam - BO IVA" y setearlo
+        * segun el valor del BO entity field field de la propia transaccion.
         *
         * @param {recordTransaction} scriptContext.newRecord
         * @param {form} scriptContext.form - New record
         * @param {typeContext} scriptContext.type - Trigger type
         */
 
-        function setFieldWhtIVA(recordEntity, form) {
+        function setFieldWhtIVA(recordEntity, form, isURET) {
             try {
                 log.debug("Debug", "Entro a setFieldWhtIVA");
-        
+
 
                 log.debug("Debug", "Creando campo");
                 var whtCodeIvaField = form.addField({
@@ -50,13 +50,15 @@ define(['N/record', 'N/log', 'N/search', 'N/runtime'],
                     });
                 })
 
-
-
-                var whtCodeIva = getIvaToEntityField(recordEntity.id);
-                log.debug("transactionfield before ", whtCodeIva)
-                if (whtCodeIva) {
-                    recordEntity.setValue('custpage_lmry_bo_reteiva', whtCodeIva);
+                if (['edit', 'view'].indexOf(isURET) > -1) {
+                    var entityField = getEntityField(recordEntity.id);
+                    log.debug("entityField ", entityField)
+                    if (entityField.exist && entityField.whtCodeIva != "") {
+                        recordEntity.setValue('custpage_lmry_bo_reteiva', entityField.whtCodeIva);
+                    }
                 }
+
+
 
                 log.debug("Debug", "Salio a setFieldWhtIVA");
             } catch (error) {
@@ -90,17 +92,19 @@ define(['N/record', 'N/log', 'N/search', 'N/runtime'],
             });
             codeSearchObj.run().each(function (result) {
                 var id = result.getValue("internalid");
-                whtCodeList [id] = {
+                whtCodeList[id] = {
                     id: id,
                     name: result.getValue("name")
                 }
-            }); 
+            });
             return whtCodeList;
-            
+
         }
 
-        function getIvaToEntityField(entityId){
-            var whtCodeIva = null;
+        function getEntityField(entityId) {
+            var entityField = {
+                exist: false
+            };
             var entityFieldObj = search.create({
                 type: "customrecord_lmry_entity_fields",
                 filters:
@@ -109,29 +113,82 @@ define(['N/record', 'N/log', 'N/search', 'N/runtime'],
                     ],
                 columns:
                     [
-                        search.createColumn({ name: "custrecord_lmry_bo_reteiva" })
+                        search.createColumn({ name: "internalid" }),
+                        search.createColumn({ name: "custrecord_lmry_bo_reteiva" }),
+
                     ]
             });
             entityFieldObj.run().each(function (result) {
-                whtCodeIva = result.getValue("custrecord_lmry_bo_reteiva");
-            }); 
-            return whtCodeIva;
+                entityField.id = result.getValue("internalid") || "";
+                entityField.whtCodeIva = result.getValue("custrecord_lmry_bo_reteiva") || "";
+                entityField.exist = true;
+            });
+            return entityField;
         }
 
 
-        function saveFieldWhtIva(recordEntity){
-            var vendor = {
+        function saveFieldWhtIva(recordEntity) {
+            var entity = {
                 id: recordEntity.id,
-                whtIva: recordEntity.getValue({ fieldId: 'custpage_lmry_ety_bo_reteiva' }) || ""
+                whtIva: recordEntity.getValue({ fieldId: 'custpage_lmry_ety_bo_reteiva' }) || "",
+                subsidiary: recordEntity.getValue({ fieldId: 'subsidiary' }) || ""
             }
 
             if (vendor.whtIva == "") {
                 return false;
             }
-            
+            saveRecordEntityField(entity);
 
         }
+
+
+        function saveRecordEntityField(entity) {
+            var entityField = getEntityField(entity.id);
+
+            if (entityField.exist) {
+                var updateEntityField = record.load({
+                    type: "customrecord_lmry_entity_fields",
+                    id: entityField.id
+                });
+
+                updateEntityField.setValue({
+                    fieldId: 'custrecord_lmry_bo_reteiva',
+                    value: entityField.whtCodeIva
+                });
+
+                updateEntityField.save({
+                    disableTriggers: true,
+                    ignoreMandatoryFields: true
+                });
+            } else {
+                var updateEntityField = record.create({
+                    type: "customrecord_lmry_entity_fields",
+                    isDynamic: true
+                });
+
+                newTransactionField.setValue({
+                    fieldId: 'custrecord_lmry_co_entity',
+                    value: entity.id
+                });
+
+                newTransactionField.setValue({
+                    fieldId: 'custrecord_lmry_co_subsi_reten',
+                    value: entity.subsidiary
+                });
+
+                updateEntityField.setValue({
+                    fieldId: 'custrecord_lmry_bo_reteiva',
+                    value: entityField.whtCodeIva
+                });
+
+                updateEntityField.save({
+                    disableTriggers: true,
+                    ignoreMandatoryFields: true
+                });
+            }
+        }
         return {
-            setFieldWhtIVA: setFieldWhtIVA
+            setFieldWhtIVA: setFieldWhtIVA,
+            saveFieldWhtIva: saveFieldWhtIva
         };
     });

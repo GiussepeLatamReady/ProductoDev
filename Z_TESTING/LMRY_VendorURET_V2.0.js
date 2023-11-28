@@ -204,8 +204,8 @@
              }
 
             if (executionContext == "USERINTERFACE") {
-                if (['edit', 'view'].indexOf(isURET) > -1) {
-                    library_WHT_Validation.setFieldWhtIVA(RCD, FORM);
+                if (['edit', 'view', 'create'].indexOf(isURET) > -1) {
+                    library_WHT_Validation.setFieldWhtIVA(RCD, FORM, executionContext);
                 }
             }
 
@@ -239,7 +239,7 @@
       * @Since 2015.2
       */
      function afterSubmit(scriptContext) {
-
+        
      }
 
      /* ------------------------------------------------------------------------------------------------------
