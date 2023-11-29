@@ -1136,7 +1136,8 @@ define(['require', './Latam_Library/LMRY_UniversalSetting_Purchase_LBRY', 'N/rec
         }
 
         if ((type == 'create' || type == 'edit' || type == 'copy' || type == 'view') && LMRY_Result[0] == 'BO') {
-          library1.setFieldWhtIVA(recordObj, form, type);
+          var useOnlyAtmainLevel = library.getAuthorization(46, licenses);
+          library1.setFieldWhtIVA(recordObj, form, type, useOnlyAtmainLevel);
         }
 
         if (type == "copy" && LMRY_Result[0] == "BO" && library.getAuthorization(828, licenses)) {
@@ -1860,6 +1861,11 @@ define(['require', './Latam_Library/LMRY_UniversalSetting_Purchase_LBRY', 'N/rec
           libBoTaxes.calculateBoTaxes(recordObj, type);
         }
 
+
+        if ((type == 'create' || type == 'edit' || type == 'copy' || type == 'view') && LMRY_Result[0] == 'BO') {
+          library1.saveWhtIva(recordObj);
+        }
+
         if (type == 'create' || type == 'edit') {
           // Nueva logica Retenciones Guatemala
           Library_WHT_GT.afterSubmitTransaction(type, recordObj.id, recordObj.type, licenses);
@@ -1919,7 +1925,7 @@ define(['require', './Latam_Library/LMRY_UniversalSetting_Purchase_LBRY', 'N/rec
           if (LMRY_Result[0] == 'BO') {
             if (library.getAuthorization(46, licenses) && approvalStatus == 2) {
               // Aplicacion de WHT Latam
-              BO_libWHTLines.createWHTbyLines(LMRY_Intern, 'vendorbill');
+              BO_libWHTLines.createWHTbyLines(LMRY_Intern, 'vendorbill',recordObj);
             }
           }
           // Para Paraguay - Enabled Feature WHT Latam
@@ -1932,6 +1938,8 @@ define(['require', './Latam_Library/LMRY_UniversalSetting_Purchase_LBRY', 'N/rec
           //******************* Fin de Modificacion 6 de Setiembre 2019 ***************************
 
         }
+
+        
 
         /******************************
          * Nueva logica de colombia

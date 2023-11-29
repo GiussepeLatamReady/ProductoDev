@@ -882,7 +882,8 @@ define(['N/record', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/log', 'N/co
         }
 
         if ((type == 'create' || type == 'edit' || type == 'copy' || type == 'view') && LMRY_Result[0] == 'BO') {
-          library1.setFieldWhtIVA(recordObj, form, type);
+          var useOnlyAtmainLevel = library.getAuthorization(46, licenses);
+          library1.setFieldWhtIVA(recordObj, form, type, useOnlyAtmainLevel);
         }
 
       } catch (err) {
@@ -1574,6 +1575,10 @@ define(['N/record', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/log', 'N/co
           libBoTaxes.calculateBoTaxes(recordObj, type);
         }
 
+        if ((type == 'create' || type == 'edit' || type == 'copy' || type == 'view') && LMRY_Result[0] == 'BO') {
+          library1.saveWhtIva(recordObj);
+        }
+
 
         if (type == 'create' || type == 'edit') {
           if (type == 'create') {
@@ -1606,6 +1611,8 @@ define(['N/record', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/log', 'N/co
             if (library.getAuthorization(46, licenses)) {
               // Realiza la redireccion de cuentas
               BO_libWHTLines.createWHTbyLines(LMRY_Intern, 'vendorcredit');
+
+
             }
           }
           if (LMRY_Result[0] == 'PY') {
@@ -1615,6 +1622,9 @@ define(['N/record', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/log', 'N/co
             }
           }
         }
+
+
+        
 
         // Nueva logica de colombia
         switch (LMRY_Result[0]) {

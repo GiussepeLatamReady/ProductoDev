@@ -195,6 +195,8 @@ define(['N/record', 'N/log', 'N/search', 'N/runtime'],
         }
         return {
             setFieldWhtIVA: setFieldWhtIVA,
-            saveFieldWhtIva: saveFieldWhtIva
+            saveFieldWhtIva: saveFieldWhtIva,
+            getWhtCodeList: getWhtCodeList,
+            getEntityField: getEntityField
         };
     });

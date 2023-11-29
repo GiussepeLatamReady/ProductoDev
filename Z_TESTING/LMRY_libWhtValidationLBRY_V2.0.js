@@ -262,6 +262,7 @@ define([
          * --------------------------------------------------------------------------------------------------- */
         function Search_WHT(Transaction, ID, Obj_RCD, WHTID) {
             try {
+                log.error("WHTID",WHTID)
                 if (WHTID == '' || WHTID == null) {
                     return 0;
                 }
@@ -396,41 +397,50 @@ define([
                         parseFloat(amountresult) > 0) {
 
                         log.error('amountresult1 : ' + amountresult, 'amountresult2 : ' + amountresult);
-
-                        var arrJSon = '{"' + Field_Custom + '":"' + amountresult + '"}';
-                        arrJSon = JSON.parse(arrJSon);
-
-                        /* * * * * * * * * * * * * * * * * * * * * * * * * * *
-                         * Fecha : 08 de Mayo de 2020
-                         * Se agrego el siguiente parametro disableTriggers:true
-                         * para evita le ejecucion de users events.
-                         * * * * * * * * * * * * * * * * * * * * * * * * * * */
-                        // Actualiza el campo WHT Amout
-                        record.submitFields({
-                            type: Transaction,
-                            id: ID,
-                            values: arrJSon,
-                            options: { enableSourcing: true, ignoreMandatoryFields: true, disableTriggers: true }
-                        });
+                        
+                        
 
                     } else {
-                        var arrJSon = '{"' + Field_Custom + '":"0"}';
-                        arrJSon = JSON.parse(arrJSon);
+                        amountresult = 0;
+                        
+                        amount_base = 0;
+                    }
 
-                        /* * * * * * * * * * * * * * * * * * * * * * * * * * *
-                         * Fecha : 08 de Mayo de 2020
-                         * Se agrego el siguiente parametro disableTriggers:true
-                         * para evita le ejecucion de users events.
-                         * * * * * * * * * * * * * * * * * * * * * * * * * * */
-                        // Actualiza el campo WHT Amout
+
+                    var arrJSon = '{"' + Field_Custom + '":"' + amountresult + '"}';
+                    arrJSon = JSON.parse(arrJSon);
+
+                    /* * * * * * * * * * * * * * * * * * * * * * * * * * *
+                     * Fecha : 08 de Mayo de 2020
+                     * Se agrego el siguiente parametro disableTriggers:true
+                     * para evita le ejecucion de users events.
+                     * * * * * * * * * * * * * * * * * * * * * * * * * * */
+                    // Actualiza el campo WHT Amout
+                    log.error("antes de guardar amount {search_wht}",amountresult)
+                    log.error("Field_Custom.slice(0,8)",Field_Custom.slice(0,8))
+                    if (Field_Custom.slice(0,8) == "custpage") {
+                        if (amountresult > 0) {
+                            var transactionField = getBoTransactionField(ID);
+                            log.error("transactionField {search_wht}",transactionField)
+                            record.submitFields({
+                                type: "customrecord_lmry_bo_transaction_fields",
+                                id: transactionField.id,
+                                values: {
+                                    custrecord_lmry_bo_reteiva_whtamount: amountresult
+                                },
+                                options: { enableSourcing: true, ignoreMandatoryFields: true, disableTriggers: true }
+                            });
+                        }
+                        
+                    }else {
                         record.submitFields({
                             type: Transaction,
                             id: ID,
                             values: arrJSon,
                             options: { enableSourcing: true, ignoreMandatoryFields: true, disableTriggers: true }
                         });
-                        amount_base = 0;
                     }
+                   
 
                     // var usage = runtime.getCurrentScript().getRemainingUsage();
                     // log.error('Head : getRemainingUsage ', usage);
@@ -2526,7 +2536,7 @@ define([
                     { name: "custpage_lmry_retecree_rate", type: serverWidget.FieldType.PERCENT, label: "Latam - CO ReteCREE New Rate"}
                 ]
                 var valueData = recordObj.getValue("custbody_lmry_features_active");
-                log.debug("custbody_lmry_features_active", valueData);
+                
                 var dataJSON = valueData ? JSON.parse(valueData) : {};
                 for (var i = 0; i < fieldNames.length; i++) {
                     var fieldObj = form.addField({ id: fieldNames[i].name, type: fieldNames[i].type, label: fieldNames[i].label });
@@ -2541,8 +2551,7 @@ define([
         }
 
         function setFieldValues(recordObj) {
-            log.debug("runtime.executionContext", runtime.executionContext);
-            log.debug("runtime.ContextType.USER_INTERFACE", runtime.ContextType.USER_INTERFACE);
+            
             if (runtime.executionContext === runtime.ContextType.USER_INTERFACE) {
                 var rfte_amount = recordObj.getValue("custbody_lmry_co_retefte_amount");
                 var riva_amount = recordObj.getValue("custbody_lmry_co_reteiva_amount");
@@ -2565,7 +2574,7 @@ define([
                 if (rica_rate) dataJSON["custpage_lmry_reteica_rate"] = rica_rate;
                 if (rcree_base) dataJSON["custpage_lmry_retecree_base"] = rcree_base;
                 if (rcree_rate) dataJSON["custpage_lmry_retecree_rate"] = rcree_rate;
-                log.debug("dataJSON", JSON.stringify(dataJSON));
+               
                 if (Object.keys(dataJSON).length) {
                     recordObj.setValue("custbody_lmry_features_active", JSON.stringify(dataJSON));
                 } else {
@@ -2577,7 +2586,7 @@ define([
         }
 
         function getBase(key, recordObj) {
-            log.debug("key", key);
+            
             var JsonValues = recordObj.getValue("custbody_lmry_features_active");
             JsonValues = JsonValues ? JSON.parse(JsonValues) : {};
             var jsonBase = {
@@ -2586,12 +2595,12 @@ define([
                 "custbody_lmry_co_reteica_amount": "custpage_lmry_reteica_base",
                 "custbody_lmry_co_retecree_amount": "custpage_lmry_retecree_base"
             }
-            log.debug("getBase", jsonBase[key]);
+            
             return JsonValues[jsonBase[key]] || 0;
         }
 
 
-        function setFieldWhtIVA(recordTransaction, form, typeContext) {
+        function setFieldWhtIVA(recordTransaction, form, typeContext, useOnlyAtmainLevel) {
             try {
                 log.debug("Debug", "Entro a setFieldWhtIVA");
                 log.debug("typeContext", typeContext);
@@ -2607,7 +2616,11 @@ define([
                     type: 'currency',
                     label: 'Latam - BO IVA AMOUNT'
                 });
-                setFieldWhtCodeIva(recordTransaction, typeContext, vendor);
+
+                if (useOnlyAtmainLevel) {
+                    setFieldWhtCodeIva(recordTransaction, typeContext, vendor);
+                }
+                
             
             } catch (error) {
                 log.error(" error [setFieldWhtIVA]", error)
@@ -2642,22 +2655,24 @@ define([
         }
 
         function setFieldWhtCodeIva(recordTransaction, typeContext, entityId){
+            var entityField = library_validation_entity.getEntityField(entityId);
             if (typeContext == "create" || typeContext == "copy") {
-                var entityField = library_validation_entity.getEntityField(entityId);
-
+                
+                log.error("entityField {setFieldWhtCodeIva}",entityField)
                 if (entityField.exist && entityField.whtCodeIva != "") {
                     recordTransaction.setValue('custpage_lmry_bo_reteiva', entityField.whtCodeIva);
+                    recordTransaction.setValue('custpage_lmry_bo_reteiva_whtamount', 0.00);
                 }
             } else { // view - edit
                 var transactionField = getBoTransactionField(recordTransaction.id);
+                log.error("transactionField {setFieldWhtCodeIva}",transactionField)
                 if (transactionField.exist && transactionField.whtCodeIva != "") {
                     recordTransaction.setValue('custpage_lmry_bo_reteiva', transactionField.whtCodeIva);
                     recordTransaction.setValue('custpage_lmry_bo_reteiva_whtamount', transactionField.whtAmountIva);
+                }else{
+                    recordTransaction.setValue('custpage_lmry_bo_reteiva', entityField.whtCodeIva);
+                    recordTransaction.setValue('custpage_lmry_bo_reteiva_whtamount', 0);
                 }
-                // else{t
-                //     recordTransaction.setValue('custpage_lmry_bo_reteiva_whtamoun', 0.00);
-                // }
-
 
             }
         }
@@ -2711,20 +2726,20 @@ define([
             if (transactionField.exist) {
                 var updateTransactionField = record.load({
                     type: "customrecord_lmry_bo_transaction_fields",
-                    id: transaction.id
+                    id: transactionField.id
                 });
 
                 updateTransactionField.setValue({
-                    fieldId: 'custpage_lmry_bo_reteiva',
+                    fieldId: 'custrecord_lmry_bo_reteiva',
                     value: transaction.whtCodeIva,
                     ignoreFieldChange: true
                 });
 
-                updateTransactionField.setValue({
-                    fieldId: 'custpage_lmry_bo_reteiva_whtamount',
-                    value: transaction.whtAmountIva,
-                    ignoreFieldChange: true
-                });
+                // updateTransactionField.setValue({
+                //     fieldId: 'custrecord_lmry_bo_reteiva_whtamount',
+                //     value: transaction.whtAmountIva,
+                //     ignoreFieldChange: true
+                // });
 
                 updateTransactionField.save({
                     disableTriggers: true,
@@ -2743,16 +2758,16 @@ define([
                 });
 
                 newTransactionField.setValue({
-                    fieldId: 'custpage_lmry_bo_reteiva',
+                    fieldId: 'custrecord_lmry_bo_reteiva',
                     value: transaction.whtCodeIva,
                     ignoreFieldChange: true
                 });
 
-                newTransactionField.setValue({
-                    fieldId: 'custpage_lmry_bo_reteiva_whtamount',
-                    value: transaction.whtAmountIva,
-                    ignoreFieldChange: true
-                });
+                // newTransactionField.setValue({
+                //     fieldId: 'custrecord_lmry_bo_reteiva_whtamount',
+                //     value: transaction.whtAmountIva,
+                //     ignoreFieldChange: true
+                // });
 
                 newTransactionField.save({
                     disableTriggers: true,
