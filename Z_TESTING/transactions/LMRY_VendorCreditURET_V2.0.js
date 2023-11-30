@@ -1610,8 +1610,7 @@ define(['N/record', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/log', 'N/co
           if (LMRY_Result[0] == 'BO') {
             if (library.getAuthorization(46, licenses)) {
               // Realiza la redireccion de cuentas
-              BO_libWHTLines.createWHTbyLines(LMRY_Intern, 'vendorcredit');
-
+              BO_libWHTLines.createWHTbyLines(LMRY_Intern, 'vendorcredit', recordObj);
 
             }
           }

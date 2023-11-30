@@ -2735,12 +2735,6 @@ define([
                     ignoreFieldChange: true
                 });
 
-                // updateTransactionField.setValue({
-                //     fieldId: 'custrecord_lmry_bo_reteiva_whtamount',
-                //     value: transaction.whtAmountIva,
-                //     ignoreFieldChange: true
-                // });
-
                 updateTransactionField.save({
                     disableTriggers: true,
                     ignoreMandatoryFields: true
@@ -2762,13 +2756,6 @@ define([
                     value: transaction.whtCodeIva,
                     ignoreFieldChange: true
                 });
-
-                // newTransactionField.setValue({
-                //     fieldId: 'custrecord_lmry_bo_reteiva_whtamount',
-                //     value: transaction.whtAmountIva,
-                //     ignoreFieldChange: true
-                // });
-
                 newTransactionField.save({
                     disableTriggers: true,
                     ignoreMandatoryFields: true
