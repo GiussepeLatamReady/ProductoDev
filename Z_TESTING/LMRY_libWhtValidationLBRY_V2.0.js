@@ -18,12 +18,13 @@ define([
         'N/log', 
         'N/record', 
         'N/search', 
-        'N/runtime', 
+        'N/runtime',
+        'N/ui/serverWidget', 
         'N/format', 
         './LMRY_CO_Duplicate_Credit_Memos_LBRY_V2.0',
         './LMRY_WhtValidattionEntity_LBRY_V2.0'],
 
-    function (Library_Mail, Library_Number, log, record, search, runtime, format, Library_Duplicate, library_validation_entity) {
+    function (Library_Mail, Library_Number, log, record, search, runtime,serverWidget, format, Library_Duplicate, library_validation_entity) {
 
         var LMRY_script = 'LMRY_libWhtValidationLBRY V2.0';
         var MEMO_WHT = 'Latam - WHT';
@@ -2611,15 +2612,23 @@ define([
 
                 createFieldWhtCodeIva(form);
                 // Create amount Wht Iva
-                form.addField({
+                var whtCodeIvaFieldAmount = form.addField({
                     id: 'custpage_lmry_bo_reteiva_whtamount',
                     type: 'currency',
                     label: 'Latam - BO IVA AMOUNT'
                 });
 
+                
+
                 if (useOnlyAtmainLevel) {
+                    whtCodeIvaFieldAmount.updateDisplayType({
+                        displayType : serverWidget.FieldDisplayType.DISABLED
+                    });
                     setFieldWhtCodeIva(recordTransaction, typeContext, vendor);
+                    
                 }
+
+                
                 
             
             } catch (error) {
@@ -2634,6 +2643,7 @@ define([
                 label: 'Latam - BO IVA'
             });
 
+            
 
             whtCodeIvaField.addSelectOption({
                 value: '',
