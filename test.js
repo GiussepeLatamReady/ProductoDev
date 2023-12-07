@@ -1,12 +1,4 @@
+var numeroDecimal = 3.433;
+var redondeado = (Math.round(numeroDecimal * 10) / 10).toFixed(2);
 
-
-var arrayTransacciones = "12345 6789 42 99";
-let aux_arrayTransacciones = arrayTransacciones.match(/\b\d*\b/g);
-var arrayTransacciones = [];
-if (aux_arrayTransacciones) {
-    for (i = 0; i < aux_arrayTransacciones.length; i++) {
-        if (aux_arrayTransacciones[i]) arrayTransacciones.push(aux_arrayTransacciones[i]);
-    }
-}
-console.log(arrayTransacciones);
-console.log(arrayTransacciones.length);
+console.log(redondeado); // Salida: 3.15
