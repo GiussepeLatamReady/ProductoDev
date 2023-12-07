@@ -1642,22 +1642,40 @@ define([
                 log.error("debug", "Start transaction")
 
 
-                var numberItems = currentRecord.getLineCount({ sublistId: "item" });
+                var numberItems = currentRecord.getLineCount({
+                    sublistId: "item"
+                });
                 if (numberItems) {
                     for (var i = 0; i < numberItems; i++) {
 
-                        if (currentRecord.type == 'itemfulfillment') {
-                            var amountLine = currentRecord.getSublistValue({ sublistId: "item", fieldId: "itemfxamount", line: i });
-                            log.error("amountLine", amountLine);
-                        } else {
-                            var rate = currentRecord.getSublistValue({ sublistId: "item", fieldId: "rate", line: i }) || 0;
-                            var quantity = currentRecord.getSublistValue({ sublistId: "item", fieldId: "quantity", line: i }) || 0;
-                            var amount = quantity * rate;
-                            var roundedAmount = (Math.round(rate * 10) / 10).toFixed(2);
-                            log.error("amount", amount);
-                            log.error("roundedAmount", roundedAmount);
-                            currentRecord.setSublistValue({ sublistId: "item", fieldId: "custcol_lmry_sales_discount_unit_real", value: roundedAmount, line: i });
-                        }
+
+                        var rate = currentRecord.getSublistValue({
+                            sublistId: "item",
+                            fieldId: "rate",
+                            line: i
+                        }) || 0;
+                        var quantity = currentRecord.getSublistValue({
+                            sublistId: "item",
+                            fieldId: "quantity",
+                            line: i
+                        }) || 0;
+                        var amount = quantity * rate;
+                        var roundedAmount = (Math.round(rate * 10) / 10).toFixed(2);
+                        log.error("amount", amount);
+                        log.error("roundedAmount", roundedAmount);
+                        currentRecord.setSublistValue({
+                            sublistId: "item",
+                            fieldId: "custcol_lmry_prec_unit_so",
+                            value: rate,
+                            line: i
+                        });
+                        currentRecord.setSublistValue({
+                            sublistId: "item",
+                            fieldId: "custcol_lmry_sales_discount_unit_real",
+                            value: roundedAmount,
+                            line: i
+                        });
+
 
                     }
                 }
