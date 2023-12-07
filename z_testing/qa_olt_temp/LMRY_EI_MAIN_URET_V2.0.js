@@ -31,7 +31,8 @@ define([
     'N/ui/serverWidget',
     'SuiteBundles/Bundle 245636/EI_Library/LMRY_EI_libSendingEmailsLBRY_V2.0',
     './EI_Library/LMRY_EI_createInvoiceByItemFul_LBRY_v2.0.js',
-    './EI_Library/LMRY_NumberPreprinted_LBRY_V2.0.js'
+    './EI_Library/LMRY_NumberPreprinted_LBRY_V2.0.js',
+    './EI_Library/LMRY_EI_PriceUnit_LBRY_V2.0'
 ],
 
     function (
@@ -48,7 +49,8 @@ define([
         ui,
         ei_library,
         itemFulFillmentLibrary,
-        Library_NumberPreprinted
+        Library_NumberPreprinted,
+        Library_unitPrice
     ) {
 
         var FEATURE_SENDCUSTOMER = '';
@@ -829,13 +831,16 @@ define([
             }
 
             var featureRoundedDecimal = true;
-            
+            log.error("type_event",type_event)
             if (type_event == scriptContext.UserEventType.CREATE || type_event == scriptContext.UserEventType.EDIT || type_event == scriptContext.UserEventType.COPY) {
+                
                 var transactionTypes = ['estimate', 'salesorder', 'itemfulfillment'];
-
+                log.error("doc_country ",doc_country);
+                log.error("featureRoundedDecimal ",featureRoundedDecimal);
+                log.error("rec.type",rec.type);
                 if (doc_country == "CL" && featureRoundedDecimal && transactionTypes.indexOf(rec.type) != 1) {
-
-                    roundedDecimalUnitPrice(rec);
+                    log.error("debug","entre");
+                    Library_unitPrice.setCLAmountLines(rec);
                 }
 
             }
@@ -1634,55 +1639,6 @@ define([
                     }
                 }
             }
-        }
-
-        function roundedDecimalUnitPrice(currentRecord) {
-            try {
-                log.error("Type Transaction", currentRecord.type)
-                log.error("debug", "Start transaction")
-
-
-                var numberItems = currentRecord.getLineCount({
-                    sublistId: "item"
-                });
-                if (numberItems) {
-                    for (var i = 0; i < numberItems; i++) {
-
-
-                        var rate = currentRecord.getSublistValue({
-                            sublistId: "item",
-                            fieldId: "rate",
-                            line: i
-                        }) || 0;
-                        var quantity = currentRecord.getSublistValue({
-                            sublistId: "item",
-                            fieldId: "quantity",
-                            line: i
-                        }) || 0;
-                        var amount = quantity * rate;
-                        var roundedAmount = (Math.round(rate * 10) / 10).toFixed(2);
-                        log.error("amount", amount);
-                        log.error("roundedAmount", roundedAmount);
-                        currentRecord.setSublistValue({
-                            sublistId: "item",
-                            fieldId: "custcol_lmry_prec_unit_so",
-                            value: rate,
-                            line: i
-                        });
-                        currentRecord.setSublistValue({
-                            sublistId: "item",
-                            fieldId: "custcol_lmry_sales_discount_unit_real",
-                            value: roundedAmount,
-                            line: i
-                        });
-
-
-                    }
-                }
-            } catch (error) {
-                log.error("roundedDecimalUnitPrice [error]", error);
-            }
-
         }
 
         return {
