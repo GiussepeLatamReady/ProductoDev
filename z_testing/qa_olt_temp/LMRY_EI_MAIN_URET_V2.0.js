@@ -801,6 +801,8 @@ define([
             var id_itemShip = rec.getValue('custpage_idship');
             var addenda_select = rec.getValue('custpage_addenda_items');
             var type_event = scriptContext.type;
+            var doc_subsi = rec.getValue('subsidiary');
+            all_Licenses = ei_library.getLicenses(doc_subsi);
             if (doc_country == 'MX' && (rec.type == 'invoice' || rec.type == 'creditmemo') && (addenda_select != '' && addenda_select != null)) {
                 rec.setValue('custbody_lmry_timbre_electronico_cl', addenda_select);
             }
@@ -835,9 +837,8 @@ define([
                 
                 var transactionTypes = ['salesorder', 'itemfulfillment'];
                 
-                if (doc_country == "CL" && featureRoundedDecimal && transactionTypes.indexOf(rec.type) != -1) {
+                if (doc_country == "CL" && transactionTypes.indexOf(rec.type) != -1) {
                     var featureRoundedDecimal = "1076";
-                    log.error("featureRoundedDecimal",getAuthTxnVal(all_Licenses, featureRoundedDecimal))
                     if (getAuthTxnVal(all_Licenses, featureRoundedDecimal)) {
                         Library_unitPrice.setCLAmountLines(rec);
                     }
