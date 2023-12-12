@@ -14,10 +14,12 @@ define([
         'N/format',
         'N/log',
         'N/search',
+        'N/runtime',
         'N/currency',
-        './EI_Library/LMRY_EI_libSendingEmailsLBRY_V2.0'
+        './LMRY_EI_libSendingEmailsLBRY_V2.0',
+        
     ],
-    function (format, log, search, currencyApi, ei_library) {
+    function (format, log, search,runtime, currencyApi, ei_library) {
 
         /**
          * Funcion que permite calcular el precio unitario y mnto taotal de una linea de transaccion
@@ -35,29 +37,39 @@ define([
                 });
                 if (numberItems) {
                     for (var i = 0; i < numberItems; i++) {
-                        var rate = currentRecord.getSublistValue({
-                            sublistId: "item",
-                            fieldId: "rate",
-                            line: i
-                        }) || 0;
+                        var unitPrice = 0;
+                        if (currentRecord.type == 'itemfulfillment') {
+                            unitPrice = currentRecord.getSublistValue({
+                                sublistId: "item",
+                                fieldId: "itemunitprice",
+                                line: i
+                            }) || 0;
+                        } else{
+                            unitPrice = currentRecord.getSublistValue({
+                                sublistId: "item",
+                                fieldId: "rate",
+                                line: i
+                            }) || 0;
+                        }
+                        
                         var quantity = currentRecord.getSublistValue({
                             sublistId: "item",
                             fieldId: "quantity",
                             line: i
                         }) || 0;
-                        var amount = quantity * rate * getExchangeRate(currentRecord);
-                        var roundedAmount = Math.round(rate * 100) / 100;
+                        var amount = quantity * unitPrice * getExchangeRate(currentRecord);
+                        var roundedAmount = Math.round(amount);
                         log.error("amount", amount);
                         log.error("roundedAmount", roundedAmount);
                         currentRecord.setSublistValue({
                             sublistId: "item",
                             fieldId: "custcol_lmry_prec_unit_so",
-                            value: rate,
+                            value: unitPrice,
                             line: i
                         });
                         currentRecord.setSublistValue({
                             sublistId: "item",
-                            fieldId: "custcol_lmry_sales_discount_unit_real",
+                            fieldId: "custcol_lmry_local_amount",
                             value: roundedAmount,
                             line: i
                         });
@@ -69,19 +81,20 @@ define([
         }
 
         function getExchangeRate(currentRCD) {
-
+            var featureSubsidiary = runtime.isFeatureInEffect({
+                feature: "SUBSIDIARIES"
+              });
             var localmoneda = localCurrency(currentRCD);
-            if (subsi) {
+            if (featureSubsidiary) {
                 var subsimoneda = subsiCurrency(currentRCD);
             } else {
                 var doc_subsi = currentRCD.getValue('subsidiary');
                 var objCountry = ei_library.getCountryID(doc_subsi);
                 var subsimoneda = objCountry.currency;
             }
-            log.error("subsi-localmoneda-subsimoneda", subsi + '-' + localmoneda + '-' + subsimoneda)
-            if (subsimoneda == localmoneda) {
-                return 1;
-            } else if (currentRCD.getValue('currency') == localmoneda) {
+            var transactionCurrency = currentRCD.getValue('currency');
+            log.error("subsi-localmoneda-subsimoneda", featureSubsidiary + '-' + localmoneda + '-' + subsimoneda)
+            if (subsimoneda == transactionCurrency) {
                 return 1;
             } else {
                 var bookExchangeRate = '';

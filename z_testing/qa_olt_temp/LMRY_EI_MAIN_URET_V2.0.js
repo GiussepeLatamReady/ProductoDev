@@ -830,17 +830,18 @@ define([
                 }
             }
 
-            var featureRoundedDecimal = true;
-            log.error("type_event",type_event)
+            
             if (type_event == scriptContext.UserEventType.CREATE || type_event == scriptContext.UserEventType.EDIT || type_event == scriptContext.UserEventType.COPY) {
                 
-                var transactionTypes = ['estimate', 'salesorder', 'itemfulfillment'];
-                log.error("doc_country ",doc_country);
-                log.error("featureRoundedDecimal ",featureRoundedDecimal);
-                log.error("rec.type",rec.type);
-                if (doc_country == "CL" && featureRoundedDecimal && transactionTypes.indexOf(rec.type) != 1) {
-                    log.error("debug","entre");
-                    Library_unitPrice.setCLAmountLines(rec);
+                var transactionTypes = ['salesorder', 'itemfulfillment'];
+                
+                if (doc_country == "CL" && featureRoundedDecimal && transactionTypes.indexOf(rec.type) != -1) {
+                    var featureRoundedDecimal = "1076";
+                    log.error("featureRoundedDecimal",getAuthTxnVal(all_Licenses, featureRoundedDecimal))
+                    if (getAuthTxnVal(all_Licenses, featureRoundedDecimal)) {
+                        Library_unitPrice.setCLAmountLines(rec);
+                    }
+                    
                 }
 
             }
