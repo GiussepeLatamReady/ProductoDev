@@ -2719,12 +2719,10 @@ define([
             var transaction = {
                 id: recordTransaction.id,
                 whtCodeIva: recordTransaction.getValue({ fieldId: 'custpage_lmry_bo_reteiva' }) || "",
-                whtAmountIva: recordTransaction.getValue({ fieldId: 'custpage_lmry_bo_reteiva_whtamount' }) || ""
+                whtAmountIva: recordTransaction.getValue({ fieldId: 'custpage_lmry_bo_reteiva_whtamount' }) || 0
             }
 
-            if (transaction.whtCodeIva == "") {
-                return false;
-            }
+           
 
             saveBOTransactionField(transaction);
 
@@ -2745,11 +2743,32 @@ define([
                     ignoreFieldChange: true
                 });
 
+                if (transaction.whtCodeIva == "") {
+
+                    updateTransactionField.setValue({
+                        fieldId: 'custrecord_lmry_bo_reteiva',
+                        value: 1,
+                        ignoreFieldChange: true
+                    });
+                    
+                    updateTransactionField.setValue({
+                        fieldId: 'custrecord_lmry_bo_reteiva_whtamount',
+                        value: 0,
+                        ignoreFieldChange: true
+                    });
+                }
+
+
                 updateTransactionField.save({
                     disableTriggers: true,
                     ignoreMandatoryFields: true
                 });
             }else{
+                if (transaction.whtCodeIva == "") {
+                    log.error
+                    log.error("debug gadp","upssss")
+                    return false;
+                }
                 var newTransactionField = record.create({
                     type: 'customrecord_lmry_bo_transaction_fields',
                     isDynamic: true

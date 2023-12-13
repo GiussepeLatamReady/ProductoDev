@@ -11,6 +11,7 @@ Se necesita modificar la tarifa de retención en la etiqueta del Libro de retenc
 
 ## Scripts
 + Create
+  LMRY_WhtValidattionEntity_LBRY_V2.0.js
 + Update
 
 + Delete
