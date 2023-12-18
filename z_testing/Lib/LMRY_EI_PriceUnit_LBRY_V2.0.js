@@ -35,18 +35,38 @@ define([
                 var numberItems = currentRecord.getLineCount({
                     sublistId: "item"
                 });
-                var transactionCurrency = currentRecord.getValue('kcurrency');
+                var transactionCurrency;
+                
+                if (currentRecord.type == 'itemfulfillment') {
+                    transactionCurrency = currentRecord.getValue('kcurrency');
+
+                }else{
+                    transactionCurrency = currentRecord.getValue('currency');
+                }
+
                 var exchangeRate = getExchangeRate(currentRecord,transactionCurrency);
+
+                if (currentRecord.type == 'itemfulfillment') {
+
+                }
+
                 if (numberItems) {
                     for (var i = 0; i < numberItems; i++) {
                         var unitPrice = 0;
-                        
+                        var amount = 0;
+                        var quantity = currentRecord.getSublistValue({
+                            sublistId: "item",
+                            fieldId: "quantity",
+                            line: i
+                        }) || 0;
                         if (currentRecord.type == 'itemfulfillment') {
                             unitPrice = currentRecord.getSublistValue({
                                 sublistId: "item",
                                 fieldId: "itemunitprice",
                                 line: i
                             }) || 0;
+                            amount = quantity * unitPrice;
+                            unitPrice/=exchangeRate;
                             
                         } else {
                             unitPrice = currentRecord.getSublistValue({
@@ -54,15 +74,8 @@ define([
                                 fieldId: "rate",
                                 line: i
                             }) || 0;
-                            transactionCurrency = currentRecord.getValue('currency');
+                            amount = quantity * unitPrice * exchangeRate;
                         }
-
-                        var quantity = currentRecord.getSublistValue({
-                            sublistId: "item",
-                            fieldId: "quantity",
-                            line: i
-                        }) || 0;
-                        var amount = quantity * unitPrice * exchangeRate;
                         var roundedAmount = Math.round(amount);
                         log.error("quantity",quantity)
                         log.error("unitPrice",unitPrice)
