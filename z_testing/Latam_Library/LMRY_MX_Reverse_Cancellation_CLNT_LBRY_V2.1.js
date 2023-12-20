@@ -62,6 +62,9 @@ define([
                     if (!this.validateDates()) {
                         return false;
                     }
+                    if (!this.validateFeature()) {
+                        return false;
+                    }
                 } else {
                     if (!this.validateSublist()) {
                         return false;
@@ -231,6 +234,16 @@ define([
             return true;
         }
 
+        validateFeature(){
+            var FEAT_REVERSALVOIDING = runtime.getCurrentScript().getParameter({ name: 'REVERSALVOIDING' });
+            if (FEAT_REVERSALVOIDING == "T"||FEAT_REVERSALVOIDING == true) {
+                return true;
+            }else{
+                alert("Activa el feature VOID TRANSACTIONS USING REVERSING JOURNALS");
+                return false;
+            }
+        }
+
         createRecordLog() {
             let currentRecord = this.currentRecord;
             let form = {
@@ -249,7 +262,7 @@ define([
 
                 let isApplied = currentRecord.getSublistValue({
                     sublistId: 'custpage_results_list',
-                    fieldId: 'apply',
+                    fiefeldId: 'apply',
                     line: i
                 });
 
