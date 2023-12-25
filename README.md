@@ -17,15 +17,18 @@ Se realizara la reversa contable para la anulacion del credit memo y custoemr pa
         + LMRY_MX_Reverse_Cancellation_Log_LBRY_V2.1.js
         + LMRY_MX_Reverse_Cancellation_MPRD_LBRY_V2.1.js
 
-    + LR - MX Reverse Cancellations Log STLT
+    + LR - MX Reverse Cancellations Log STLT - Released
         + id: _lmry_mx_rever_canc_log_stlt
         + File: LMRY_MX_Reverse_Cancellation_Log_STLT_V2.1.js
 
-    + LR - MX Reverse Cancellations MPRD
+    + LR - MX Reverse Cancellations MPRD - Not sheduled
         + id: _lmry_mx_rever_canc_mprd
         + File: LMRY_MX_Reverse_Cancellation_MPRD_V2.1.js
+        + Parameters
+            User	custscript_lmry_mx_rcd_user	    Free-Form Text	 	 
+            State	custscript_lmry_mx_rcd_state	Free-Form Text
 
-    + LR - MX Reverse Cancellations STLT
+    + LR - MX Reverse Cancellations STLT - Released
         + id: _lmry_mx_rever_canc_stlt
         + File: LMRY_MX_Reverse_Cancellation_STLT_V2.1.js
 

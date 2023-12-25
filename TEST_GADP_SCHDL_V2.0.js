@@ -12,7 +12,7 @@
  * @NScriptType ScheduledScript
  * @NModuleScope Public
  */
-define(["N/search","N/record", "N/log","N/query", "N/runtime"],
+define(["N/search", "N/record", "N/log", "N/query", "N/runtime"],
     function (search, record, log, query, runtime) {
 
         function execute(Context) {
@@ -21,11 +21,11 @@ define(["N/search","N/record", "N/log","N/query", "N/runtime"],
                 //var invoiceId = "1041271"
                 //var result = record.create({ type:"customtransaction_lmry_ei_voided_transac"});
                 //log.error("type",result.getValue("type"));
-                 /*
-                for (var i = 0; i < 25; i++) {
-                    copyCreditMemo("3939035");
-                }
-                */
+                /*
+               for (var i = 0; i < 25; i++) {
+                   copyCreditMemo("3939035");
+               }
+               
                 //voidCreditMemo("3939157",true);
 
                 var CreditMemoAccount = search.lookupFields({
@@ -33,29 +33,35 @@ define(["N/search","N/record", "N/log","N/query", "N/runtime"],
                     id: "3939157",
                     columns: ["accountmain"]
                 }).accountmain[0].value;
-                log.error("creditMemoSearch",CreditMemoAccount);
+                log.error("creditMemoSearch", CreditMemoAccount);
+
+                */
                 //log.error("account",creditMemoSearch.accountmain[0].value);
 
+                //copyPayment("3889623");
 
-                
+                log.error("TEst","Prueba de envio")
+                //Remove_Trans(nInternalid, nTypeRec, void_feature);
+
+
             } catch (error) {
-                log.error("error",error)
+                log.error("error", error)
             }
 
         }
 
-        function searchTest(){
-           
+        function searchTest() {
+
         }
         function createTransaction() {
             var ids = getSearch();
-            ids = ids.slice(0,5);   
-            ids.forEach(function(id){
-                voidCreditMemo(id,true);
+            ids = ids.slice(0, 5);
+            ids.forEach(function (id) {
+                voidCreditMemo(id, true);
             });
         }
 
-        function getSearch(){
+        function getSearch() {
             var data = [];
             var columns = [];
             columns.push(search.createColumn({ name: 'internalid', sort: search.Sort.DESC }));
@@ -68,17 +74,17 @@ define(["N/search","N/record", "N/log","N/query", "N/runtime"],
 
             var settings = [];
             if (this.FEAT_SUBS == true || this.FEAT_SUBS == 'T') {
-                filters.push('AND', ['subsidiary', 'anyof',"6","23"]);
+                filters.push('AND', ['subsidiary', 'anyof', "6", "23"]);
                 settings = [search.createSetting({ name: 'consolidationtype', value: 'NONE' })];
             }
             //startDate = format.parse({ value: startDate, type: format.Type.DATE });
             //endDate = format.parse({ value: endDate, type: format.Type.DATE });
 
-            
+
             //var typeVoidTransaction = record.create({ type:"customtransaction_lmry_ei_voided_transac"}).getValue("type");
             //filters.push('AND');
             //filters.push(["appliedtotransaction.type","anyof",typeVoidTransaction]);
-            
+
             var searchTransactions = search.create({
                 type: "creditmemo",
                 filters: filters,
@@ -96,23 +102,23 @@ define(["N/search","N/record", "N/log","N/query", "N/runtime"],
                 });
             }
 
-            log.error("data [getTransactions]",data);
-            log.error("data length [getTransactions]",data.length);
+            log.error("data [getTransactions]", data);
+            log.error("data length [getTransactions]", data.length);
             return data;
 
         }
 
-        function copyCreditMemo(transactionId){
-             // Duplicar la transacción
-             var duplicatedTransaction = record.copy({
+        function copyCreditMemo(transactionId) {
+            // Duplicar la transacción
+            var duplicatedTransaction = record.copy({
                 type: record.Type.CREDIT_MEMO, // Reemplaza con el tipo de transacción adecuado
                 id: transactionId,
             });
 
             // Puedes realizar modificaciones en la transacción duplicada si es necesario
             duplicatedTransaction.setValue({
-               fieldId: 'custbody_lmry_pe_estado_sf',
-               value: 'Procesando',
+                fieldId: 'custbody_lmry_pe_estado_sf',
+                value: 'Procesando',
             });
 
             duplicatedTransaction.setValue({
@@ -131,17 +137,41 @@ define(["N/search","N/record", "N/log","N/query", "N/runtime"],
             log.error('Transacción duplicada', 'Nueva transacción ID: ' + newTransactionId);
         }
 
+        function copyPayment(transactionId) {
+            // Duplicar la transacción
+            var duplicatedTransaction = record.copy({
+                type: record.Type.CUSTOMER_PAYMENT, // Reemplaza con el tipo de transacción adecuado
+                id: transactionId,
+            });
 
-        function voidCreditMemo(recordId,void_feature) {
+            // Puedes realizar modificaciones en la transacción duplicada si es necesario
+            duplicatedTransaction.setValue({
+                fieldId: 'custbody_lmry_pe_estado_sf',
+                value: 'no generado',
+            });
+
+            duplicatedTransaction.setValue({
+                fieldId: 'memo',
+                value: 'Copias generadas gadp',
+            });
+
+            // Guardar la transacción duplicada
+            var newTransactionId = duplicatedTransaction.save();
+
+            log.error('Transacción duplicada', 'Nueva transacción ID: ' + newTransactionId);
+        }
+
+
+        function voidCreditMemo(recordId, void_feature) {
 
             if (void_feature == "T" || void_feature == true) {
                 voidCreditMemoNonStandar(recordId);
-            }else{
+            } else {
                 voidCreditMemoStandar(recordId);
             }
         }
-        
-        function voidCreditMemoNonStandar(recordId){
+
+        function voidCreditMemoNonStandar(recordId) {
             try {
                 var result = {
                     trans: '',
@@ -169,8 +199,8 @@ define(["N/search","N/record", "N/log","N/query", "N/runtime"],
                 F_CLASSMANDATORY = runtime.getCurrentUser().getPreference({ name: 'CLASSMANDATORY' });
 
 
-                var creditMemoValues = getTransactionValues(recordId,search.Type.CREDIT_MEMO);
-                log.error("creditMemoValues",creditMemoValues);
+                var creditMemoValues = getTransactionValues(recordId, search.Type.CREDIT_MEMO);
+                log.error("creditMemoValues", creditMemoValues);
                 //-------------- validate dept, class, loct
                 lineFields['department'] = creditMemoValues.department;
                 lineFields['class'] = creditMemoValues.class_;
@@ -316,8 +346,8 @@ define(["N/search","N/record", "N/log","N/query", "N/runtime"],
 
                 var trasactionVoid = voidCreditMemo.save({ enableSourcing: true, ignoreMandatoryFields: true, disableTriggers: true });
                 log.debug("End Void Credit Memo", trasactionVoid);
-                unapplyAndApplyTransaction (recordId,"creditmemo",trasactionVoid);
-                
+                unapplyAndApplyTransaction(recordId, "creditmemo", trasactionVoid);
+
             } catch (error) {
                 log.error('LMRY_AnulacionInvoice_LBRY_V2 - [voidCreditMemoNonStandar]', error);
                 libraryEmail.sendemail(' [ reversalJournal ] ' + error, LMRY_script);
@@ -325,7 +355,7 @@ define(["N/search","N/record", "N/log","N/query", "N/runtime"],
         }
 
 
-        function getTransactionValues(transactionId,recordType) {
+        function getTransactionValues(transactionId, recordType) {
             var F_DEPARTMENTS = runtime.isFeatureInEffect({
                 feature: "DEPARTMENTS"
             });
@@ -374,8 +404,8 @@ define(["N/search","N/record", "N/log","N/query", "N/runtime"],
 
             return null;
         }
- 
-        function voidCreditMemoStandar(recordId){
+
+        function voidCreditMemoStandar(recordId) {
 
             try {
 
@@ -394,15 +424,15 @@ define(["N/search","N/record", "N/log","N/query", "N/runtime"],
                         type: transaction.Type.CREDIT_MEMO,
                         id: recordId
                     });
-                } else{
-                    log.error("Anulacion detenida","La elimacion se ha detenido debido a que el peirodo de la transaccion esta cerrado.")
+                } else {
+                    log.error("Anulacion detenida", "La elimacion se ha detenido debido a que el peirodo de la transaccion esta cerrado.")
                 }
-                
+
             } catch (error) {
                 log.error('LMRY_AnulacionInvoice_LBRY_V2 - [voidCreditMemoStandar]', error);
                 libraryEmail.sendemail(' [ reversalJournal ] ' + error, LMRY_script);
             }
-            
+
         }
         function unapplyAndApplyTransaction(transactionId, transactionType, relatedTransactionId) {
             var creditmemoRecord = record.load({ type: transactionType, id: transactionId });
@@ -424,7 +454,7 @@ define(["N/search","N/record", "N/log","N/query", "N/runtime"],
                         line: i,
                         value: false
                     });
-                } 
+                }
                 if (relatedTransactionId) {
                     var transactionId = creditmemoRecord.getSublistValue("apply", "internalid", i);
                     if (transactionId == relatedTransactionId) {
@@ -442,7 +472,111 @@ define(["N/search","N/record", "N/log","N/query", "N/runtime"],
                 enableSourcing: true,
             });
         }
-       
+
+
+        function Remove_Trans(_recordId, recordType, void_feature) {
+            if (recordType == 'customtransaction_lmry_payment_complemnt') {
+                _rec = record.load({
+                    type: recordType,
+                    id: _recordId,
+                    isDynamic: false
+                });
+
+                var count_invoice = _rec.getLineCount({
+                    sublistId: 'recmachcustrecord_lmry_factoring_rel_pymnt_cust'
+                });
+                for (var i = 0; i < count_invoice; i++) {
+                    _rec.setSublistValue({
+                        sublistId: 'recmachcustrecord_lmry_factoring_rel_pymnt_cust',
+                        fieldId: 'custrecord_lmry_factoring_apply_compensa',
+                        line: i,
+                        value: false
+                    });
+                    _rec.setSublistValue({
+                        sublistId: 'recmachcustrecord_lmry_factoring_rel_pymnt_cust',
+                        fieldId: 'custrecord_lmry_factoring_apply_invoice',
+                        line: i,
+                        value: false
+                    });
+                }
+
+                var count_bills = _rec.getLineCount({
+                    sublistId: 'recmachcustrecord_lmry_factoring_rel_pymnt_vend'
+                });
+                for (var i = 0; i < count_bills; i++) {
+                    _rec.setSublistValue({
+                        sublistId: 'recmachcustrecord_lmry_factoring_rel_pymnt_vend',
+                        fieldId: 'custrecord_lmry_factoring_apply_bill',
+                        line: i,
+                        value: false
+                    });
+                }
+                _rec.setValue('custpage_amount_deposited', 0)
+                _rec.setValue('custpage_vendor_subtotal', 0);
+                _rec.setValue('custpage_vendor_total', 0);
+                _rec.setValue('custpage_apply_total', 0);
+
+                var count_accounts = _rec.getLineCount({
+                    sublistId: 'line'
+                });
+                for (var i = 0; i < count_accounts; i++) {
+                    _rec.setSublistValue('line', 'credit', i, 0);
+                    _rec.setSublistValue('line', 'debit', i, 0);
+                }
+                _rec.save({
+                    ignoreMandatoryFields: true,
+                    enableSourcing: true
+                });
+
+            } else if (recordType == 'customerpayment') {
+                var validJournal = true, journalId = "";
+                if (void_feature == true || void_feature == 'T') {
+                    var resultJournal = library_AnulacionInvoice.reversalJournal(_recordId);
+                    log.debug('resultJournal', resultJournal);
+                    validJournal = (resultJournal.fields.length == 0);
+                    journalId = resultJournal.trans || "";
+                }
+
+                if (validJournal) {
+                    var _rec = record.load({
+                        type: "customerpayment",
+                        id: _recordId
+                    });
+
+                    var count_invoice = _rec.getLineCount({
+                        sublistId: 'apply'
+                    });
+                    for (i = 0; i < count_invoice; i++) {
+                        if (_rec.getSublistValue('apply', 'apply', i)) {
+                            _rec.setSublistValue({
+                                sublistId: 'apply',
+                                fieldId: 'apply',
+                                line: i,
+                                value: false
+                            });
+                        }
+                        if (journalId) {
+                            var transactionId = _rec.getSublistValue("apply", "internalid", i);
+                            if (transactionId == journalId) {
+                                _rec.setSublistValue({
+                                    sublistId: "apply",
+                                    fieldId: "apply",
+                                    line: i,
+                                    value: true
+                                })
+                            }
+                        }
+                    }
+                    _rec.save({
+                        ignoreMandatoryFields: true,
+                        enableSourcing: true,
+                    });
+                }
+            }
+        }
+
+
+
 
         return {
             execute: execute

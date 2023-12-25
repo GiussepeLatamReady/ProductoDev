@@ -1,5 +1,5 @@
 
-
+/*
 var arrayTransacciones = "12345 6789 42 99";
 let aux_arrayTransacciones = arrayTransacciones.match(/\b\d*\b/g);
 var arrayTransacciones = [];
@@ -10,3 +10,11 @@ if (aux_arrayTransacciones) {
 }
 console.log(arrayTransacciones);
 console.log(arrayTransacciones.length);
+*/
+
+
+let val = "";
+
+let arr = ["asdad","asdad"];
+
+console.log(arr.indexOf(val)==-1);
