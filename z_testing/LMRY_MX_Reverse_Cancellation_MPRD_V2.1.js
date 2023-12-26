@@ -66,17 +66,18 @@ define(['N/log', 'N/runtime', 'N/search', './EI_Library/LMRY_MX_Reverse_Cancella
                         value: mapContext.value
                     });
                 } else {
+                    let transactionsResult;
                     const parameters = lbryRCD.getParameters();
 
                     const cancellations = JSON.parse(mapContext.value);
                     
                     if (parameters.reversalVoiding == 'T' || parameters.reversalVoiding == true) {
-                        lbryRCD.reverseCancellation(cancellations);
+                        transactionsResult = lbryRCD.reverseCancellation(cancellations);
                     }
 
                     mapContext.write({
                         key: mapContext.key,
-                        value: [cancellations.idTransaction,"T"]
+                        value: [cancellations.idTransaction,"T",transactionsResult.void,transactionsResult.reverse]
                     });
 
                 }
@@ -121,19 +122,27 @@ define(['N/log', 'N/runtime', 'N/search', './EI_Library/LMRY_MX_Reverse_Cancella
                 let recordLog = lbryRCD.getRecordsLog(parameters);
                 let transactionIds = JSON.parse(recordLog.idTransaction);
                 let idsSuccess = [];
+                let idsSuccessObject = [];
                 results.forEach(transaction => {
                     if (transaction[1] == 'T') {
                         idsSuccess.push(transaction[0]);
+                        idsSuccessObject.push({main: transaction[0],void: transaction[2],reverse: transaction[3]});
                     }
                 });
                 
                 const idsError = transactionIds.filter(idTransaction => !idsSuccess.includes(idTransaction));
                 
                 let transactions = [];
-                idsSuccess.forEach(id => {
-                    transactions.push({id : id , state : 'Procesada con exito'});
+                idsSuccessObject.forEach( transaction => {
+                    transactions.push(
+                        {
+                            id : transaction.main, 
+                            state : 'Procesada con exito',
+                            transactionVoid: transaction.void,
+                            transactionReserve: transaction.reverse
+                        });
                 });
-                idsError.forEach(id => {
+                idsError.forEach( id => {
                     transactions.push({id : id , state : 'Error'});
                 });
     

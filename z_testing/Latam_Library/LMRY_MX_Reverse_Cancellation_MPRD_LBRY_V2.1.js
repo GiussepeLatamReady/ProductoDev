@@ -104,14 +104,16 @@ define([
     * Esta funcion permite revertir la anulacion; reservando y desaplicandolo .
     * --------------------------------------------------------------------------------------------------- */
     let reverseCancellation = (transactionMain) => {
+        let transactionsResult;
         transactionMain.typeTransaction = getTypeTransaction(transactionMain.typeTransaction);
         log.error("cancellations",transactionMain)
-        if (transactionMain.typeTransaction == "invoice") { // invoice
+        if (transactionMain.typeTransaction == "invoice") { 
             log.error("debug","entro al proceso de invoice")
-            processInvoice(transactionMain);
-        } else if(transactionMain.typeTransaction == "creditmemo"){ // Credit memo
-            processCreditMemo(transactionMain);
-        } 
+            transactionsResult = processInvoice(transactionMain);
+        } else if(transactionMain.typeTransaction == "creditmemo" || transactionMain.typeTransaction == "customerpayment"){ 
+            transactionsResult = processOtherTransaction(transactionMain);
+        }
+        return transactionsResult;
     }
 
     let getTypeTransaction = (type) => {
@@ -123,29 +125,24 @@ define([
         return typeTransaction[type]
     }
 
-    let processCreditMemo = (transactionMain) => {
+    let processOtherTransaction = (transactionMain) => {
         const transactionVoided = getTransactionVoided(transactionMain);
-        const newTransactionReverse = createTransactionReserve(transactionVoided, transactionMain);
+        const transactionReserve = createTransactionReserve(transactionVoided, transactionMain);
         desapplyTransactionMain(transactionMain);
         updateStateTransaction(transactionMain);
+        return {void: transactionVoided, reverse: transactionReserve };
     }
 
     let getTransactionVoided = (cancellations) => {
-        const { idTransaction, typeTransaction} = cancellations;
+        const { idTransaction, typeTransaction } = cancellations;
         let transactionVoided = {
             debit:{},
             credit:{}
         };
         let features = getFeatures();
-
-        let transactionMainAccount = search.lookupFields({
-            type: typeTransaction,
-            id: idTransaction,
-            columns: ["account"]
-        }).account[0].value;
-
+        let searchType = typeTransaction == "creditmemo" ? "customtransaction_lmry_ei_voided_transac" : search.Type.JOURNAL_ENTRY;
         let searchCreditMemo = search.create({
-            type: "customtransaction_lmry_ei_voided_transac",
+            type: searchType,
             filters:
                 [
                     ["custbody_lmry_reference_transaction", "anyof", idTransaction],
@@ -182,7 +179,6 @@ define([
 
         searchCreditMemo.run().each(function (result) {
             log.error("result",result);
-            log.error("transactionMainAccount",transactionMainAccount);
             transactionVoided.id = result.getValue('internalid');
             transactionVoided.subsidiary = result.getValue('subsidiary');
             transactionVoided.currency = result.getValue('currency');
@@ -217,6 +213,7 @@ define([
         const newJournal = createTransactionReserve(creditMemo, transactionMain);
         applyAndDisapply(creditMemo, newJournal);
         updateStateTransaction(transactionMain);
+        return {void: creditMemo, reverse: newJournal};
     }
 
     /* ------------------------------------------------------------------------------------------------------

@@ -12,8 +12,8 @@
  * @NScriptType ScheduledScript
  * @NModuleScope Public
  */
-define(["N/search", "N/record", "N/log", "N/query", "N/runtime"],
-    function (search, record, log, query, runtime) {
+define(["N/search", "N/record", "N/log", "N/query", "N/runtime",'/SuiteBundles/Bundle 245636/EI_Library/LMRY_AnulacionInvoice_LBRY_V2.0'],
+    function (search, record, log, query, runtime,library_AnulacionInvoice) {
 
         function execute(Context) {
             // ID de la transacción que deseas duplicar
@@ -35,14 +35,32 @@ define(["N/search", "N/record", "N/log", "N/query", "N/runtime"],
                 }).accountmain[0].value;
                 log.error("creditMemoSearch", CreditMemoAccount);
 
-                */
+                
                 //log.error("account",creditMemoSearch.accountmain[0].value);
 
-                //copyPayment("3889623");
 
-                log.error("TEst","Prueba de envio")
+                for (var i = 0; i < 10; i++) {
+                    var newTransactionId = copyPayment("604361");
+                    Remove_Trans(newTransactionId,'customerpayment',true);
+                    changeStatus(newTransactionId)
+                }
+                log.error("TEst","Process end");   
                 //Remove_Trans(nInternalid, nTypeRec, void_feature);
-
+                */
+                var payments = ["1054526",
+                "1054528",
+                "1054530",
+                "1054532",
+                "1054534",
+                "1054536",
+                "1054538",
+                "1054540",
+                "1054542",
+                "1054544"];
+                payments.forEach(function(id) {
+                    changeStatus(id);
+                });
+                
 
             } catch (error) {
                 log.error("error", error)
@@ -136,6 +154,21 @@ define(["N/search", "N/record", "N/log", "N/query", "N/runtime"],
 
             log.error('Transacción duplicada', 'Nueva transacción ID: ' + newTransactionId);
         }
+        function changeStatus(payment){
+            var paymentTransaction = record.load({
+                type: record.Type.CUSTOMER_PAYMENT, // Reemplaza con el tipo de transacción adecuado
+                id: payment,
+            });
+
+            paymentTransaction.setValue({
+                fieldId: 'custbody_lmry_pe_estado_sf',
+                value: 'Cancelado',
+            });
+
+            paymentTransaction.save();
+
+            log.error('Transacción cambiado', 'Transacción cambiado');
+        }
 
         function copyPayment(transactionId) {
             // Duplicar la transacción
@@ -147,7 +180,12 @@ define(["N/search", "N/record", "N/log", "N/query", "N/runtime"],
             // Puedes realizar modificaciones en la transacción duplicada si es necesario
             duplicatedTransaction.setValue({
                 fieldId: 'custbody_lmry_pe_estado_sf',
-                value: 'no generado',
+                value: 'generado',
+            });
+
+            duplicatedTransaction.setValue({
+                fieldId: 'payment',
+                value: 200.00 * Math.random(),
             });
 
             duplicatedTransaction.setValue({
@@ -159,6 +197,7 @@ define(["N/search", "N/record", "N/log", "N/query", "N/runtime"],
             var newTransactionId = duplicatedTransaction.save();
 
             log.error('Transacción duplicada', 'Nueva transacción ID: ' + newTransactionId);
+            return newTransactionId;
         }
 
 

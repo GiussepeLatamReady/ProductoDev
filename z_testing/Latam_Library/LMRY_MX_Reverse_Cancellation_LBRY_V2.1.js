@@ -24,8 +24,8 @@ define([
     'N/format',
     'N/record',
     'SuiteBundles/Bundle 37714/Latam_Library/LMRY_libSendingEmailsLBRY_V2.0',
-    
-], function (log, search, runtime, redirect, serverWidget, url, task, format,record, LibraryMail) {
+
+], function (log, search, runtime, redirect, serverWidget, url, task, format, record, LibraryMail) {
     const LMRY_script = 'LMRY - MX Canceled Documents Reversed LBRY';
     /* var LANGUAGE = runtime.getCurrentScript().getParameter({ name: "LANGUAGE" });
         LANGUAGE = LANGUAGE.substring(0, 2); */
@@ -94,7 +94,7 @@ define([
                 }
             }
 
-            
+
             this.subsidiaries = subsidiaries;
             return anysubsidiary;
         }
@@ -349,7 +349,7 @@ define([
                 for (let type in this.typesTransaction) {
                     typeTransactionField.addSelectOption({ value: type, text: this.typesTransaction[type] });
                 }
-                
+
             }
         }
 
@@ -401,7 +401,7 @@ define([
             }
             // 20 : Mexico	Basic	Localization
             featureLatam = LibraryMail.getAuthorization(20, licenses);
-            
+
 
             let featureLatamField = form.getField({ id: 'custpage_feature_latam' });
             featureLatamField.defaultValue = featureLatam ? 'T' : 'F';
@@ -471,7 +471,7 @@ define([
                 type: serverWidget.FieldType.TEXT
             });
 
-            
+
 
             let totalAmtField = sublist.addField({
                 id: 'total_amt',
@@ -521,7 +521,7 @@ define([
                     sublist.setSublistValue({ id: 'tranid', line: i, value: tranid });
                     sublist.setSublistValue({ id: 'type_transaction', line: i, value: transaction.typeName });
                     sublist.setSublistValue({ id: 'legal_document_type', line: i, value: transaction.legalDocumentType });
-                    
+
                     sublist.setSublistValue({ id: 'internalid', line: i, value: urlID });
                     sublist.setSublistValue({ id: 'total_amt', line: i, value: transaction.amount });
                 })
@@ -543,16 +543,21 @@ define([
                 'AND',
                 ['mainline', 'is', 'T']
             ];
-            //startDate = format.parse({ value: startDate, type: format.Type.DATE });
-            //endDate = format.parse({ value: endDate, type: format.Type.DATE });
 
-            if (typeTransaction=="invoice") {
+
+
+            if (typeTransaction == "invoice") {
                 filters.push('AND');
                 filters.push(['applyingtransaction', 'noneof', "@NONE@"]);
-            } else {
-                let typeVoidTransaction = record.create({ type:"customtransaction_lmry_ei_voided_transac"}).getValue("type");
+            } else if (typeTransaction == "customerpayment") {
+                let paymentsIds = this.getPaymentsIds(subsidiary);
                 filters.push('AND');
-                filters.push(["appliedtotransaction.type","anyof",typeVoidTransaction]);
+                filters.push(["internalid", "anyof", paymentsIds]);
+            } else {
+
+                let typeVoidTransaction = record.create({ type: "customtransaction_lmry_ei_voided_transac" }).getValue("type");
+                filters.push('AND');
+                filters.push(["appliedtotransaction.type", "anyof", typeVoidTransaction]);
             }
             if (startDate != null && startDate != '') {
                 filters.push('AND');
@@ -561,7 +566,7 @@ define([
             if (endDate != null && endDate != '') {
                 filters.push('AND');
                 filters.push(['trandate', 'onorbefore', endDate]);
-                
+
             }
 
             let settings = [];
@@ -578,7 +583,7 @@ define([
             columns.push(search.createColumn({ name: 'formulatext', formula: '{tranid}' }));
             columns.push(search.createColumn({ name: 'amount' }));
             columns.push(search.createColumn({ name: 'recordtype' }));
-            
+
             let searchTransactions = search.create({
                 type: typeTransaction,
                 filters: filters,
@@ -603,10 +608,47 @@ define([
                     });
                 });
             }
-            log.error("data [getTransactions]",data);
+
+            log.error("data [getTransactions]", data);
             return data;
         }
+        getPaymentsIds(subsidiary) {
+            let paymentIds = [];
+            let saerchPaymentIds = search.create({
+                type: "journalentry",
+                filters:
+                    [
+                        ["type", "anyof", "Journal"],
+                        "AND",
+                        ["mainline", "is", "T"],
+                        "AND",
+                        ["subsidiary", "anyof",subsidiary],
+                        "AND",
+                        ["memomain", "is", "Latam - Journal Reverse"]
+                    ],
+                columns:
+                    [
+                        search.createColumn({
+                            name: "internalid",
+                            join: "CUSTBODY_LMRY_REFERENCE_TRANSACTION",
+                            label: "Internal ID"
+                        })
+                    ]
+            });
 
+            saerchPaymentIds.run().each(function (result) {
+                let columns = result.columns;
+                let paymentId = result.getValue(columns[0]);
+                log.error("paymentId antes",paymentId)
+                if (!paymentIds.includes(paymentId)) {
+                    paymentIds.push(paymentId)
+                    log.error("paymentId push",paymentId)
+                }
+                return true;
+            });
+            log.error("paymentIds",paymentIds)    
+            return paymentIds;
+        }
         runMapReduce(parametros) {
             let allLicenses = {};
             let licenses = [];

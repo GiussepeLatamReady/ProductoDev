@@ -262,7 +262,7 @@ define([
 
                 let isApplied = currentRecord.getSublistValue({
                     sublistId: 'custpage_results_list',
-                    fiefeldId: 'apply',
+                    fieldId: 'apply',
                     line: i
                 });
 

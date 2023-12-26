@@ -18,3 +18,4 @@ let val = "";
 let arr = ["asdad","asdad"];
 
 console.log(arr.indexOf(val)==-1);
+
