@@ -110,9 +110,10 @@ define(['N/log', 'N/runtime', 'N/search', './EI_Library/LMRY_MX_Reverse_Cancella
          * @since 2015.2
          */
         const summarize = (summaryContext) => {
-            const parameters = lbryRCD.getParameters();
-            let results = [];
+            
             try {
+                const parameters = lbryRCD.getParameters();
+                let results = [];
                 summaryContext.output.iterator().each(function (key, value) {
                     results.push(JSON.parse(value));
                     return true;

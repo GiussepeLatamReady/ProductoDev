@@ -211,26 +211,19 @@ define(["N/log","N/search", "N/runtime", "N/redirect", "N/ui/serverWidget","N/ur
                 let ids = Object.keys(data);
                 ids.forEach((id,i)=>{
                     let {internalid,tranid,account,entity,state,type, transVoid, transReverse} = data[id];
-                    let typeVoid = "creditmemo";
-                    let typeReverse = "journalentry";
+                    
                     
                     let tranUrl = url.resolveRecord({ recordType: type , recordId: internalid, isEditMode: false });
                     let urlID = `<a class="dottedlink" href=${tranUrl} target="_blank">${tranid}</a>`;
                     sublist.setSublistValue({ id: "tranid", line: i, value: urlID });
-                    if (type == "creditmemo") {
-                        typeVoid = "customtransaction_lmry_ei_voided_transac"
-                        typeReverse = "customtransaction_lmry_ei_voided_transac"
-                    } else if(type == "customerpayment"){
-                        typeVoid = "journalentry"
-                        typeReverse = "customtransaction_lmry_ei_voided_transac"
-                    }
-                    let tranUrlVoid = url.resolveRecord({ recordType: typeVoid , recordId: transVoid, isEditMode: false });
-                    let urlIDVoid = `<a class="dottedlink" href=${tranUrlVoid} target="_blank">${transVoid}</a>`;
-                    sublist.setSublistValue({ id: "id_void", line: i, value: urlIDVoid });
+                    if (transVoid) {
+                        sublist.setSublistValue({ id: "id_void", line: i, value: transVoid });
+                    }  
 
-                    let tranUrlReverse = url.resolveRecord({ recordType: typeReverse , recordId: transReverse, isEditMode: false });
-                    let urlIDReverse = `<a class="dottedlink" href=${tranUrlReverse} target="_blank">${tranUrlReverse}</a>`;
-                    sublist.setSublistValue({ id: "id_reverse", line: i, value: urlIDReverse });
+                    if (transReverse) {
+                        sublist.setSublistValue({ id: "id_reverse", line: i, value: transReverse });
+                    }
+                    
 
                     sublist.setSublistValue({ id: "account", line: i, value: account });
                     sublist.setSublistValue({ id: "entity", line: i, value: entity });
@@ -303,9 +296,11 @@ define(["N/log","N/search", "N/runtime", "N/redirect", "N/ui/serverWidget","N/ur
                 if (state != "Procesando") {
                     
                     transactionsState.forEach(transaction => {
+                        log.error("transaction ehac",transaction)
+                        log.error("reverse type",typeof transaction.transactionReserve)
                         transactions[transaction.id]['state'] = transaction.state;
                         transactions[transaction.id]['transVoid'] = transaction.transactionVoid;
-                        transactions[transaction.id]['transReverse'] = transaction.transactionReverse;
+                        transactions[transaction.id]['transReverse'] = transaction.transactionReserve;
                     });
                 }else{
                     

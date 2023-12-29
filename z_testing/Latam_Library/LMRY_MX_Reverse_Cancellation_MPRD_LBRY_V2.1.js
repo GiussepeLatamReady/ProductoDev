@@ -130,7 +130,7 @@ define([
         const transactionReserve = createTransactionReserve(transactionVoided, transactionMain);
         desapplyTransactionMain(transactionMain);
         updateStateTransaction(transactionMain);
-        return {void: transactionVoided, reverse: transactionReserve };
+        return {void: transactionVoided.id, reverse: transactionReserve };
     }
 
     let getTransactionVoided = (cancellations) => {
@@ -211,9 +211,9 @@ define([
         const {idTransaction} = transactionMain;
         const creditMemo = getCreditMemo(idTransaction);
         const newJournal = createTransactionReserve(creditMemo, transactionMain);
-        applyAndDisapply(creditMemo, newJournal);
+        applyAndDisapply(creditMemo, newJournal,idTransaction);
         updateStateTransaction(transactionMain);
-        return {void: creditMemo, reverse: newJournal};
+        return {void: creditMemo.id, reverse: newJournal};
     }
 
     /* ------------------------------------------------------------------------------------------------------
