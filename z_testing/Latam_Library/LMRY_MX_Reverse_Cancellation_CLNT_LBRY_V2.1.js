@@ -96,14 +96,17 @@ define([
             if (this.FEAT_SUBS === true || this.FEAT_SUBS === 'T') {
                 mandatoryFields.unshift('custpage_subsidiary');
             }
-            console.log(mandatoryFields)
-
+            let type = recordObj.getValue({ fieldId:'custpage_type_transaction' });
             for (let i = 0; i < mandatoryFields.length; i++) {
                 let fieldObj = recordObj.getField({ fieldId: mandatoryFields[i] });
                 if (fieldObj) {
                     let value = recordObj.getValue({ fieldId: mandatoryFields[i] });
-                    if (value == 0 || !value) {
+                    if (value == 0 || !value ) {
                         // Please enter value(s) for: {1}
+                        
+                        if (mandatoryFields[i] == "custpage_account" && type != "invoice") {
+                            return true;
+                        }
                         alert('Ingrese un valor para :' + [fieldObj.label]);
                         return false;
                     }
@@ -148,6 +151,17 @@ define([
             this.currentRecord = scriptContext.currentRecord;
             if (scriptContext.fieldId == 'custpage_subsidiary'){
                 this.fillterAccount();
+            }
+
+            if (scriptContext.fieldId == 'custpage_type_transaction') {
+                let typeTransaction = this.currentRecord.getValue({ fieldId: 'custpage_type_transaction' });
+                let account = this.currentRecord.getField({ fieldId: 'custpage_account' });
+                if (typeTransaction == "invoice") { 
+                    account.isDisplay = true;
+                }else{
+                    account.isDisplay = false;
+                }
+                
             }
             return true
         }

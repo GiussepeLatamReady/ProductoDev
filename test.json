@@ -1,21 +1,25 @@
-{
-    type: "error.SuiteScriptError",
-    name: "INVALID_TRANS_TYP",
-    message: "Transaction type specified is incorrect.",
-    id: "",
-    stack: [
-       "Error\n    at suitescript/resources/javascript/record/recordImpl.js:96:12\n    at Function.loadRecord_raw (suitescript/resources/javascript/record/recordImpl.js:94:24)\n    at suitescript/resources/javascript/record/recordImpl.js:82:27\n    at Object.loadRecord (suitescript/resources/javascript/record/recordImpl.js:80:24)\n    at applyAndDisapply (/SuiteBundles/Bundle 243159/EI_Library/LMRY_MX_Reverse_Cancellation_MPRD_LBRY_V2.1.js:560:46)\n    at processCreditMemo (/SuiteBundles/Bundle 243159/EI_Library/LMRY_MX_Reverse_Cancellation_MPRD_LBRY_V2.1.js:130:9)\n    at Object.reverseCancellation (/SuiteBundles/Bundle 243159/EI_Library/LMRY_MX_Reverse_Cancellation_MPRD_LBRY_V2.1.js:113:13)\n    at Object.map (/SuiteBundles/Bundle 243159/LMRY_MX_Reverse_Cancellation_MPRD_V2.1.js:74:33)"
-    ],
-    cause: {
-       type: "internal error",
-       code: "INVALID_TRANS_TYP",
-       details: "Transaction type specified is incorrect.",
-       userEvent: null,
-       stackTrace: [
-          "Error\n    at suitescript/resources/javascript/record/recordImpl.js:96:12\n    at Function.loadRecord_raw (suitescript/resources/javascript/record/recordImpl.js:94:24)\n    at suitescript/resources/javascript/record/recordImpl.js:82:27\n    at Object.loadRecord (suitescript/resources/javascript/record/recordImpl.js:80:24)\n    at applyAndDisapply (/SuiteBundles/Bundle 243159/EI_Library/LMRY_MX_Reverse_Cancellation_MPRD_LBRY_V2.1.js:560:46)\n    at processCreditMemo (/SuiteBundles/Bundle 243159/EI_Library/LMRY_MX_Reverse_Cancellation_MPRD_LBRY_V2.1.js:130:9)\n    at Object.reverseCancellation (/SuiteBundles/Bundle 243159/EI_Library/LMRY_MX_Reverse_Cancellation_MPRD_LBRY_V2.1.js:113:13)\n    at Object.map (/SuiteBundles/Bundle 243159/LMRY_MX_Reverse_Cancellation_MPRD_V2.1.js:74:33)"
-       ],
-       notifyOff: false
-    },
-    notifyOff: false,
-    userFacing: true
- }
+type: "error.SuiteScriptError",
+name: "VALID_PRD_REQD",
+message: "Insert Transaction Failure: No valid, open, posting period for date - 01/01/2024.  Please visit Setup > Manage Accounting Periods to set up a new accounting period.",
+id: "",
+stack: [
+   "Error\n    at RecordInvoker.save (suitescript/resources/javascript/record/serverRecordService.js:371:13)\n    
+   at NetSuiteObject.thenableFunction() (suitescript/resources/javascript/record/proxy.js:115:24)\n    
+   at createTransactionReserve (/SuiteBundles/Bundle 245636/EI_Library/LMRY_MX_Reverse_Cancellation_MPRD_LBRY_V2.1.js:451:38)\n    
+   at processInvoice (/SuiteBundles/Bundle 245636/EI_Library/LMRY_MX_Reverse_Cancellation_MPRD_LBRY_V2.1.js:213:28)\n    
+   at Object.reverseCancellation (/SuiteBundles/Bundle 245636/EI_Library/LMRY_MX_Reverse_Cancellation_MPRD_LBRY_V2.1.js:112:34)\n    
+   at Object.map (/SuiteBundles/Bundle 245636/LMRY_MX_Reverse_Cancellation_MPRD_V2.1.js:75:54)"
+],
+cause: {
+   type: "internal error",
+   code: "VALID_PRD_REQD",
+   details: "Insert Transaction Failure: No valid, open, posting period for date - 01/01/2024.  Please visit Setup > Manage Accounting Periods to set up a new accounting period.",
+   userEvent: null,
+   stackTrace: [
+      "Error\n    at RecordInvoker.save (suitescript/resources/javascript/record/serverRecordService.js:371:13)\n    at NetSuiteObject.thenableFunction() (suitescript/resources/javascript/record/proxy.js:115:24)\n    at createTransactionReserve (/SuiteBundles/Bundle 245636/EI_Library/LMRY_MX_Reverse_Cancellation_MPRD_LBRY_V2.1.js:451:38)\n    at processInvoice (/SuiteBundles/Bundle 245636/EI_Library/LMRY_MX_Reverse_Cancellation_MPRD_LBRY_V2.1.js:213:28)\n    at Object.reverseCancellation (/SuiteBundles/Bundle 245636/EI_Library/LMRY_MX_Reverse_Cancellation_MPRD_LBRY_V2.1.js:112:34)\n    at Object.map (/SuiteBundles/Bundle 245636/LMRY_MX_Reverse_Cancellation_MPRD_V2.1.js:75:54)"
+   ],
+   notifyOff: false
+},
+notifyOff: false,
+userFacing: true
+}

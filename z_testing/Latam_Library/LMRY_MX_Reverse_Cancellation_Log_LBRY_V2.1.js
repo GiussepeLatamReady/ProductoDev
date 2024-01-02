@@ -99,13 +99,13 @@ define(["N/log","N/search", "N/runtime", "N/redirect", "N/ui/serverWidget","N/ur
 
                 sublist.addField({
                     id: "id_void",
-                    label: "Transacción de reversión",
+                    label: "Transacción de anulación",
                     type: serverWidget.FieldType.TEXT
                 });
 
                 sublist.addField({
                     id: "id_reverse",
-                    label: "Transacción de corrección",
+                    label: "Transacción de reversión",
                     type: serverWidget.FieldType.TEXT
                 });
 
@@ -211,17 +211,36 @@ define(["N/log","N/search", "N/runtime", "N/redirect", "N/ui/serverWidget","N/ur
                 let ids = Object.keys(data);
                 ids.forEach((id,i)=>{
                     let {internalid,tranid,account,entity,state,type, transVoid, transReverse} = data[id];
-                    
-                    
+                    let transactionType = {
+                        void: "creditmemo",
+                        reverse: "journal"
+                    };
+                    if (type == "creditmemp") {
+                        transactionType = {
+                            void: "customtransaction",
+                            reverse: "customtransaction"
+                        }
+                    } else if (type == "customerpayment"){
+                        transactionType = {
+                            void: "journalentry",
+                            reverse: "customtransaction_lmry_ei_voided_transac"
+                        }
+                    }
                     let tranUrl = url.resolveRecord({ recordType: type , recordId: internalid, isEditMode: false });
                     let urlID = `<a class="dottedlink" href=${tranUrl} target="_blank">${tranid}</a>`;
                     sublist.setSublistValue({ id: "tranid", line: i, value: urlID });
                     if (transVoid) {
-                        sublist.setSublistValue({ id: "id_void", line: i, value: transVoid });
+                        log.error("seteo campo void",transVoid)
+                        const voidTranUrl = url.resolveRecord({ recordType: transactionType.void , recordId: transVoid, isEditMode: false });
+                        const voidUrlID = `<a class="dottedlink" href=${voidTranUrl} target="_blank">${transVoid}</a>`;
+                        sublist.setSublistValue({ id: "id_void", line: i, value: voidUrlID });
                     }  
 
                     if (transReverse) {
-                        sublist.setSublistValue({ id: "id_reverse", line: i, value: transReverse });
+                        log.error("seteo campo reverse",transVoid)
+                        const reverseTranUrl = url.resolveRecord({ recordType: transactionType.reverse , recordId: transReverse, isEditMode: false });
+                        const reverseUrlID = `<a class="dottedlink" href=${reverseTranUrl} target="_blank">${transReverse}</a>`;
+                        sublist.setSublistValue({ id: "id_reverse", line: i, value: reverseUrlID });
                     }
                     
 
