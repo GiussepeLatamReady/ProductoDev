@@ -52,6 +52,7 @@ function(search, record, runtime, libWhtValidation, libSendingEmail) {
             libWhtValidation.Search_WHT(tranType, tranId, recordObj, reteiu);
             libWhtValidation.Search_WHT(tranType, tranId, recordObj, reteiva);
             if (tranType == 'vendorbill') {
+                log.error("createWHTbyLines","vendorbill")
                 if (isWHTline && Object.keys(transactionLines).length > 0) {
                     createWHT(recordObj, transactionLines, reteit, bookRates);
                     createWHT(recordObj, transactionLines, reteiu, bookRates);  
