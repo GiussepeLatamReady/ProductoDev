@@ -1,9 +1,9 @@
-# [CL - Ludipek Chile - Redondeo de montos a nivel de línea en XML de FEL - Guia Electrónica C1040](https://docs.google.com/document/d/1hnVVs4NZ1Y-Iee3Ow-BAYRael2XuykRdsVTbuPsHr6E/edit)
+# [LatamReport CO : Proceso de conversión de retenciones de cabecera a retenciones de línea](https://docs.google.com/document/d/1P9MjA5JI8RvMxJUlVrZL8JGWRH1uMkadaboHXIdARrc/edit)
 
 
 ## Description of the Requirement
 
- En el user events LatamReady - EI Main URET popular la columna Latam Col - Sales Discount Unitario Real (custcol_lmry_sales_discount_unit_real) con el valor de la columna Amount, aplicar el User evemts a Estimate y Sales Order, el campo se debe ver para Estimate, Sales Order, en el Item Fulfillment solo se mostrara el campos con el importe previamente cargado en las trasacciones Sales Order y Estimate
+ En Colombia las retenciones se hacen por 2 procesos: retenciones por cabecera y retenciones por línea. Las retenciones de línea generan un tax result que se usa en los reportes de medios magnéticos. De estos tax result se obtiene el concepto de la cuenta, el tipo de retención y el monto de la retención. Las retenciones de cabecera no generan tax result y todo el monto de la retención recae en el WHT code que esté asociado a la transacción. Esto es un problema al momento de querer obtener los conceptos de las cuentas asociadas.
 
 ## Description of the solution
 
@@ -17,15 +17,9 @@
 
 ## Records
 + Create
-    + LatamReady - Setup Fields View
-        + Name: custcol_lmry_sales_discount_unit_real
-        + ON ESTIMATE : Check
-        + ON SALES ORDER : check
-        + ON ITEM FULLFILMENT : check
+    
 + Update
-    + Transaction Line Field
-        + Latam Col - Sales Discount Unitario Real (custcol_lmry_sales_discount_unit_real)
-        + ITEM FULFILLMENT : check activado
+    
 
 ## Fields
 + Create
