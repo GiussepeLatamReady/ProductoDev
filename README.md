@@ -19,6 +19,8 @@
     + LMRY_CO_Header_WHT_calculation_CLNT_LBRY_V2.1.js
     + LMRY_CO_Header_WHT_calculation_CLNT_V2.1.js
 
+    + LMRY_CO_Header_WHT_calculation_URET_V2.1.js
+
     + LMRY_CO_Header_WHT_calculation_LBRY_V2.1.js
     + LMRY_CO_Header_WHT_calculation_MPRD_V2.1.js
         + scriptMapReduce: customscript_lmry_co_head_wht_calc_mprd
@@ -26,6 +28,11 @@
         + parameters: 
             + User: custscript_lmry_co_head_wht_calc_user
             + State: custscript_lmry_co_head_wht_calc_state
+
+    + LMRY_CO_Header_WHT_calculation_STLT_LOG_LBRY_V2.1.js
+    + LMRY_CO_Header_WHT_calculation_STLT_LOG_V2.1.js
+        + Name: LatamReady - CO Header WHT calculation STLT LOG
+        + Id: _lmry_co_head_wht_calc_stlt_log
     
 + Update
 
@@ -33,7 +40,21 @@
 
 ## Records
 + Create
-    
+    Name: LatamReady - CO Header WHT calculation Log
+    id: customrecord_lmry_co_head_wht_cal_log
+        Fields
+            Subsidiary	        custrecord_lmry_co_hwht_log_subsi	    List/Record	Subsidiary	 	        Yes
+            Process          	custrecord_lmry_co_hwht_log_process	    text	 	                        Yes
+            Wht Calculation type custrecord_lmry_co_hwht_log_whttype	text	 	                        Yes
+            Period Type         custrecord_lmry_co_hwht_log_period_type	    text	 	                        Yes
+            Period          	custrecord_lmry_co_hwht_log_period	    List/Record	Accouting period	 	Yes
+            Start Date	        custrecord_lmry_co_hwht_log_start_date	Date	 	 	                    No
+            End Date	        custrecord_lmry_co_hwht_log_end_date	    Date	 	 	                    No
+            Employee	        custrecord_lmry_co_hwht_log_employee	    List/Record	Employee	 	        No
+            State	            custrecord_lmry_co_hwht_log_state	    Free-Form Text	 	 	            Yes
+            Execution Type   custrecord_lmry_co_hwht_log_exect       text
+            Process details 	custrecord_lmry_co_hwht_log_details	    Long Text	 	 	                No
+        
 + Update
     
 
