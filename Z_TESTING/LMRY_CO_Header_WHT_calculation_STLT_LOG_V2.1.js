@@ -43,7 +43,7 @@ define([
         constructor(options) {
             this.params = options.params || {};
             this.method = options.method;
-            const language = runtime.getCurrentScript().getParameter({ name: "LANGUAGE" }).substring(0, 2);
+            let language = runtime.getCurrentScript().getParameter({ name: "LANGUAGE" }).substring(0, 2);
             language = language === "es" ? language : "en";
             this.translations = this.getTranslations(language);
             this.FEAT_SUBS = runtime.isFeatureInEffect({ feature: "SUBSIDIARIES" });

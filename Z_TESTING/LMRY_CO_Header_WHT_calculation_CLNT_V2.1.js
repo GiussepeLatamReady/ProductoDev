@@ -50,7 +50,7 @@ define(['N/runtime',
         class ClientUIManager {
             constructor(options) {
                 this.FEAT_SUBS = this.isValid(runtime.isFeatureInEffect({ feature: 'SUBSIDIARIES' }));
-                const language = runtime.getCurrentScript().getParameter({ name: "LANGUAGE" }).substring(0, 2);
+                let language = runtime.getCurrentScript().getParameter({ name: "LANGUAGE" }).substring(0, 2);
                 language = language === "es" ? language : "en";
                 this.deploy = options.deployid;
                 this.names = this.getNames(this.deploy);
@@ -82,6 +82,7 @@ define(['N/runtime',
                     const endDateField = this.currentRecord.getField({ fieldId: 'custpage_end_date' });
                     const accountingperiodField = this.currentRecord.getField({ fieldId: 'custpage_period' });
                     this.hiddenFields();
+                    console.log("periodTypeValue",periodTypeValue)
                     if (periodTypeValue == "month") {
                         accountingperiodField.isDisplay = true;
                         this.setPeriod();
@@ -128,16 +129,15 @@ define(['N/runtime',
             }
 
             setPeriod() {
+                let filters = [
+                    ['isadjust', 'is', 'F'],
+                    'AND',
+                    ["isquarter", "is", "F"],
+                    'AND',
+                    ["isyear", "is", "F"]
+                ];
                 if (this.FEAT_SUBS) {
-                    // Filtros básicos consolidados
-                    let filters = [
-                        ['isadjust', 'is', 'F'],
-                        'AND',
-                        ["isquarter", "is", "F"],
-                        'AND',
-                        ["isyear", "is", "F"]
-                    ];
-
+                    
                     const subsidiary = this.currentRecord.getValue({ fieldId: 'custpage_subsidiary' });
                     const { fiscalcalendar } = search.lookupFields({
                         type: search.Type.SUBSIDIARY,
@@ -145,20 +145,19 @@ define(['N/runtime',
                         columns: ['fiscalcalendar']
                     });
 
-                    // Añadir filtro de fiscalcalendar si está presente
                     if (fiscalcalendar && fiscalcalendar.length > 0) {
+                        filters.push('AND');
                         filters.push(['fiscalcalendar', 'anyof', fiscalcalendar[0].value]);
                     }
                 }
-                // Creación de la búsqueda de periodos
                 const periodSearch = search.create({
                     type: "accountingperiod",
                     filters: filters,
                     columns: [
-                        "internalid",
-                        "periodname",
-                        { name: "startdate", sort: search.Sort.ASC }
-                    ].map(name => search.createColumn({ name, summary: "GROUP" }))
+                        search.createColumn({ name: "internalid", summary: "GROUP", label: "Internal ID" }),
+                        search.createColumn({ name: "periodname", summary: "GROUP", label: "Name" }),
+                        search.createColumn({ name: "startdate", summary: "GROUP", sort: search.Sort.DESC, label: "Start Date" })
+                    ]
                 });
 
                 // Obtención de periodos
@@ -206,26 +205,16 @@ define(['N/runtime',
                 return !mandatoryFields.some(isFieldInvalid);
             }
 
-            validateDates() {
-                let recordObj = this.currentRecord;
-                let startDate = recordObj.getValue('custpage_start_date');
-                if (startDate) {
-                    startDate = format.parse({ value: startDate, type: format.Type.DATE });
+            addFieldMandatory(fields, id){
+                if (!fields.includes(id)) {
+                    fields.push(id);
                 }
-                let endDate = recordObj.getValue('custpage_end_date');
-                if (endDate) {
-                    endDate = format.parse({ value: endDate, type: format.Type.DATE });
-
-                    if (startDate > endDate) {
-                        // The date in "{1}" must be on or before the date in "{2}".
-                        let fieldStartDate = recordObj.getField({ fieldId: 'custpage_start_date' });
-                        let fieldEndDate = recordObj.getField({ fieldId: 'custpage_end_date' });
-                        alert(`La ${fieldStartDate.label} debe ser igual o anterior a la ${fieldEndDate.label}`);
-                        return false;
-                    }
-                }
-                return true;
+                return fields
             }
+            removeFieldMandatory(fields, id) {
+                return fields.filter(element => element !== id);
+            }
+
 
             validateDates() {
                 const { getValue, getField } = this.currentRecord;
@@ -314,10 +303,10 @@ define(['N/runtime',
 
 
                 form.subsidiary = Number(currentRecord.getValue({ fieldId: 'custpage_subsidiary' })) || '';
-                form.typeProcess = currentRecord.getValue({ fieldId: 'custpage_wth_process' });
+                form.typeProcess = currentRecord.getValue({ fieldId: 'custpage_wht_process' });
                 form.startDate = currentRecord.getValue({ fieldId: 'custpage_start_date' });
                 form.endDate = currentRecord.getValue({ fieldId: 'custpage_end_date' });
-                form.whtType = currentRecord.getValue({ fieldId: 'custpage_wth_type' });
+                form.whtType = currentRecord.getValue({ fieldId: 'custpage_wht_type' });
                 form.periodType = currentRecord.getValue({ fieldId: 'custpage_period_type' });
                 form.accoutingPeriod = currentRecord.getValue({ fieldId: 'custpage_period' });
                 form.executionType = "UI";
@@ -381,7 +370,7 @@ define(['N/runtime',
 
             handleError(functionName, err) {
                 console.error(functionName, err);
-                lbryLog.doLog({ title: functionName, message: err, relatedScript: ScriptName });
+                lbryLog.doLog({ title: functionName, message: err, relatedScript: "LMRY_CO_Header_WHT_calculation_CLNT_V2.1.js" });
                 alert(functionName + '\n' + JSON.stringify({ name: err.name, message: err.message }));
             }
 

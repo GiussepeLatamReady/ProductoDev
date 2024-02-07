@@ -80,6 +80,8 @@ define([
                 this.params = options.params || {};
                 this.method = options.method;
                 this.FEAT_SUBS = this.isValid(runtime.isFeatureInEffect({ feature: 'SUBSIDIARIES' }));
+                let language = runtime.getCurrentScript().getParameter({ name: "LANGUAGE" }).substring(0, 2);
+                language = language === "es" ? language : "en";
                 this.translations = this.getTranslations(language);
                 this.subsidiaries = [];
                 this.deploy = runtime.getCurrentScript().deploymentId;
@@ -150,8 +152,8 @@ define([
                 if (this.FEAT_SUBS == 'T' || this.FEAT_SUBS == true) {
                     this.addSelectField('custpage_subsidiary', this.translations.LMRY_SUBSIDIARY, 'mainGroup').isMandatory();
                 }
-                this.addSelectField('custpage_wth_process', this.translations.LMRY_TYPE_PROCESS, 'mainGroup').isMandatory();
-                this.addSelectField('custpage_wth_type', this.translations.LMRY_WTH_TYPE, 'mainGroup').isMandatory();
+                this.addSelectField('custpage_wht_process', this.translations.LMRY_TYPE_PROCESS, 'mainGroup').isMandatory();
+                this.addSelectField('custpage_wht_type', this.translations.LMRY_WTH_TYPE, 'mainGroup').isMandatory();
 
                 this.addGroup('dateRangeGroup', this.translations.LMRY_PERIOD_INTERVAL);
                 this.addSelectField('custpage_period_type', this.translations.LMRY_PERIOD, 'dateRangeGroup').isMandatory();
@@ -179,11 +181,14 @@ define([
                     label: label,
                     container: container
                 });
-                field.isMandatory = true;
                 return {
                     field: field,
                     isMandatory: function () {
                         this.field.isMandatory = true;
+                        return this;
+                    },
+                    setHelpText: function (help) {
+                        this.field.setHelpText(help);
                         return this;
                     }
                 };
@@ -227,7 +232,7 @@ define([
 
 
             disableFields() {
-                const fieldsToDisable = ['custpage_subsidiary', 'custpage_start_date', 'custpage_end_date', 'custpage_period', 'custpage_wth_type', 'custpage_period_type'];
+                const fieldsToDisable = ['custpage_subsidiary', 'custpage_start_date', 'custpage_end_date', 'custpage_period', 'custpage_wht_type', 'custpage_period_type'];
                 fieldsToDisable.forEach(fieldId => {
                     let field = this.form.getField({ id: fieldId });
                     if (field) {
@@ -330,6 +335,7 @@ define([
                 }
                 this.fillWhtType();
                 this.fillPeriodType();
+                this.fillProcess();
             }
 
             fillSubsidiaries() {
@@ -343,7 +349,7 @@ define([
             }
 
             fillWhtType() {
-                let whtTypeField = this.form.getField({ id: 'custpage_wth_type' });
+                let whtTypeField = this.form.getField({ id: 'custpage_wht_type' });
                 whtTypeField.addSelectOption({ value: 0, text: '&nbsp;' });
                 whtTypeField.addSelectOption({ value: "header", text: this.translations.LMRY_WHT_HEADER });
                 whtTypeField.addSelectOption({ value: "line", text: this.translations.LMRY_WHT_LINE });
@@ -355,7 +361,7 @@ define([
                 periodTypeField.addSelectOption({ value: "month", text: this.translations.LMRY_PERIOD });
             }
             fillProcess() {
-                let typeProcessField = this.form.getField({ id: 'custpage_wth_process' });
+                let typeProcessField = this.form.getField({ id: 'custpage_wht_process' });
                 typeProcessField.addSelectOption({ value: 0, text: '&nbsp;' });
                 typeProcessField.addSelectOption({ value: "sales", text: this.translations.LMRY_SALES });
                 typeProcessField.addSelectOption({ value: "purchases", text: this.translations.LMRY_PURCHASES });
@@ -395,10 +401,10 @@ define([
                     custpage_start_date: startDate || '',
                     custpage_end_date: endDate || '',
                     custpage_status: '1',
-                    custpage_wth_type: whtType || '',
+                    custpage_wht_type: whtType || '',
                     custpage_period: accoutingPeriod || '',
                     custpage_period_type: typePeriod || '',
-                    custpage_wth_process: typeProcess || ''
+                    custpage_wht_process: typeProcess || ''
                 });
             }
 
@@ -681,10 +687,10 @@ define([
                     subsidiary: params.custpage_subsidiary || '',
                     startDate: params.custpage_start_date || '',
                     endDate: params.custpage_end_date || '',
-                    whtType: params.custpage_wth_type || '',
+                    whtType: params.custpage_wht_type || '',
                     accoutingPeriod: params.custpage_period || '',
                     typePeriod: params.custpage_period_type || '',
-                    typeProcess: params.custpage_wth_process || '',
+                    typeProcess: params.custpage_wht_process || '',
                     status: '1'
                 };
             }
@@ -750,7 +756,7 @@ define([
                         "LMRY_AMOUNT": "Amount",
                         "LMRY_SELECT_ALL": "Select all",
                         "LMRY_DESELECT_ALL": "Deselect all",
-                        "LMRY_WHT_HEADER": "header",
+                        "LMRY_WHT_HEADER": "Header",
                         "LMRY_WHT_LINE": "Line",
                         "LMRY_DATE_RANGE": "Date range",
                         "LMRY_TYPE_PROCESS": "Process",

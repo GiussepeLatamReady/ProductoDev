@@ -13,13 +13,15 @@
 
     + LMRY_CO_Header_WHT_calculation_STLT_LBRY_V2.1.js
     + LMRY_CO_Header_WHT_calculation_STLT_V2.1.js
-        + Name: LatamReady - CO Header WHT calculation STLT
+        + Name: LatamReady - CO Header WHT calc STLT
         + Id: _lmry_co_head_wht_calc_stlt
 
     + LMRY_CO_Header_WHT_calculation_CLNT_LBRY_V2.1.js
     + LMRY_CO_Header_WHT_calculation_CLNT_V2.1.js
 
     + LMRY_CO_Header_WHT_calculation_URET_V2.1.js
+        + Name: LatamReady - CO Header WHT Calc URET
+        + Id: _lmry_co_head_wht_calc_uret
 
     + LMRY_CO_Header_WHT_calculation_LBRY_V2.1.js
     + LMRY_CO_Header_WHT_calculation_MPRD_V2.1.js
@@ -40,7 +42,7 @@
 
 ## Records
 + Create
-    Name: LatamReady - CO Header WHT calculation Log
+    Name: LatamReady - WHT Calc CO Header Log
     id: customrecord_lmry_co_head_wht_cal_log
         Fields
             Subsidiary	        custrecord_lmry_co_hwht_log_subsi	    List/Record	Subsidiary	 	        Yes
