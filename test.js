@@ -1,33 +1,10 @@
-/**
- * @NApiVersion 2.1
- * @NScriptType Suitelet
- * @NModuleScope Public
- * @Name LMRY_CO_Header_WHT_calculation_STLT_V2.1.js
- * @Author LatamReady - Giussepe Delgado
- * @Date 29/01/2024
- */
-define([],(runtime) => {
-    
+function getRetentionName(text) {
+    return text.split(/Latam - WHT Reclasification\s?/)[1]?.trim() || "Retention name not found";
+}
 
-    const beforeLoad = (scriptContext) => {
-        
-    };
+// Example options
+let option1 = "Latam - WHT ReclasificationAutoReteCREE0.4%";
+let option2 = "Latam - WHT Reclasification AutoReteCREE0.4%";
 
-
-    class SuiteletFormManager {
-        constructor(options) {
-            this.params = options.params || {};
-            this.method = options.method;
-            this.FEAT_SUBS = this.isValid(runtime.isFeatureInEffect({ feature: 'SUBSIDIARIES' }));
-            this.translations = this.getTranslations(language);
-            this.subsidiaries = [];
-            this.deploy = runtime.getCurrentScript().deploymentId;
-            this.names = this.getNames(this.deploy);
-            log.debug('this.names', this.names);
-        }
-
-
-    }
-
-    return { beforeLoad };
-});
+console.log(getRetentionName(option1)); // Should return "AutoReteCREE0.4%"
+console.log(getRetentionName(option2)); // Should return "AutoReteCREE0.4%"

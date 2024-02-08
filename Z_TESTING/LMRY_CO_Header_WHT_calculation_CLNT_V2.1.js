@@ -38,6 +38,15 @@ define(['N/runtime',
             window.location.href = urlSuitelet;
         };
 
+        const backLog = () => {
+            const urlSuitelet = urlApi.resolveScript({
+                scriptId: "customscript_lmry_co_head_calc_stlt_log",
+                deploymentId: "customdeploy_lmry_co_head_calc_stlt_log",
+                returnExternalUrl: false
+            });
+            window.location.href = urlSuitelet;
+        };
+
         const toggleCheckBoxes = isApplied => {
             const recordObj = currentRecord.get();
             const numberLines = recordObj.getLineCount({ sublistId: 'custpage_results_list' });
@@ -180,8 +189,8 @@ define(['N/runtime',
                 const recordObj = this.currentRecord;
                 const periodTypeValue = this.currentRecord.getValue({ fieldId: 'custpage_period_type' });
                 let mandatoryFields = [
-                    'custpage_wth_process',
-                    'custpage_wth_type'
+                    'custpage_wht_process',
+                    'custpage_wht_type'
                 ];
 
                 if (this.FEAT_SUBS) {
@@ -193,8 +202,10 @@ define(['N/runtime',
                     mandatoryFields.push('custpage_start_date');
                     mandatoryFields.push('custpage_end_date');
                 }
+                
                 const isFieldInvalid = (fieldId) => {
                     const value = recordObj.getValue({ fieldId });
+                    console.log(fieldId,value)
                     if (value == 0 || !value) {
                         const fieldLabel = recordObj.getField({ fieldId }).label;
                         alert(`Ingrese un valor para: ${fieldLabel}`);
@@ -202,6 +213,7 @@ define(['N/runtime',
                     }
                     return false;
                 };
+                console.log("mandatoryFields",mandatoryFields)
                 return !mandatoryFields.some(isFieldInvalid);
             }
 
@@ -249,9 +261,20 @@ define(['N/runtime',
 
 
             hiddenFields() {
-
                 const fields = ['custpage_start_date', 'custpage_end_date', 'custpage_period'];
                 fields.forEach(id => this.currentRecord.getField({ fieldId: id }).isDisplay = false);
+                const status = this.currentRecord.getValue('custpage_status');
+                const periodType = this.currentRecord.getValue('custpage_period_type');
+                if (status == 1 || status == "1") {
+                    if (periodType == "range") {
+                        this.currentRecord.getField({ fieldId: 'custpage_start_date' }).isDisplay = true;
+                        this.currentRecord.getField({ fieldId: 'custpage_end_date' }).isDisplay = true;
+                    }else{
+                        this.setPeriod();
+                        this.currentRecord.getField({ fieldId: 'custpage_period' }).isDisplay = true;
+                    }
+                }
+
             }
 
 
@@ -336,7 +359,7 @@ define(['N/runtime',
                 recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_subsi', value: form.subsidiary });
                 recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_start_date', value: form.startDate });
                 recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_end_date', value: form.endDate });
-                recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_state', value: this.translations.LMRY_LOADING_DATA });
+                recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_state', value: "Cargando datos" });
                 recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_employee', value: runtime.getCurrentUser().id });
                 recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_transactions', value: JSON.stringify(form.ids) });
                 recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_process', value: form.typeProcess });
@@ -376,5 +399,5 @@ define(['N/runtime',
 
         }
 
-        return { pageInit, validateField, saveRecord, back, toggleCheckBoxes };
+        return { pageInit, validateField, saveRecord, back,backLog, toggleCheckBoxes };
     });

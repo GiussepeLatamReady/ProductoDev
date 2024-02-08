@@ -11,13 +11,17 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/url'], (runtime, server
 
 
     const beforeLoad = (scriptContext) => {
-        let mainUIManager = new UIManager(scriptContext);
-        if (mainUIManager.isUserInterface()) {
-            //mainUIManager.hiddenFields();
-            mainUIManager.buildTable();
-            mainUIManager.loadTable();
+        try {
+            let mainUIManager = new UIManager(scriptContext);
+            if (mainUIManager.isUserInterface()) {
+                //mainUIManager.hiddenFields();
+                mainUIManager.buildTable();
+                mainUIManager.loadTable();
+            }
+        } catch (error) {
+           log.error('Error beforeLoad ', error)
         }
-
+        
     };
 
 
@@ -30,7 +34,6 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/url'], (runtime, server
             this.subsidiaries = [];
             this.scriptContext = scriptContext;
             this.form = scriptContext.form;
-            log.debug('this.names', this.names);
         }
 
         buildTable() {
@@ -55,8 +58,6 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/url'], (runtime, server
                 { id: 'custpage_col_state', label: this.translations.LMRY_STATE, type: serverWidget.FieldType.TEXT, displayType: serverWidget.FieldDisplayType.DISABLED },
                 { id: 'custpage_col_internalidtext', label: 'internal_id', type: serverWidget.FieldType.TEXT, displayType: serverWidget.FieldDisplayType.HIDDEN }
             ];
-            log.error("translations",this.translations)
-            log.error("fields:",fields)
             fields.forEach(fieldInfo => {
                 let field = this.sublist.addField(fieldInfo);
                 if (fieldInfo.displayType) {
@@ -73,7 +74,6 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/url'], (runtime, server
             //const data = [];
             const sublist = this.form.getSublist({ id: "custpage_custlist_transactions" });
             const ids = Object.keys(data);
-            log.error("data",data)
             ids.forEach((id, i) => {
                 const { internalid, tranid, legalDocument, entityName, entityValue, state, type, recordType, amount, currency } = data[id];
                 sublist.setSublistValue({ id: "custpage_col_number", line: i, value: i + 1 });
@@ -101,7 +101,6 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/url'], (runtime, server
 
 
         getTransactions() {
-            log.error("transactions",this.scriptContext.newRecord.getValue('custrecord_lmry_co_hwht_log_transactions'))
             const transactionsState = JSON.parse(
                 this.scriptContext.newRecord.getValue('custrecord_lmry_co_hwht_log_transactions'));
 
@@ -148,7 +147,7 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/url'], (runtime, server
                 };
                 return true;
             });
-
+            log.error("state",state)
             if (!state) {
                 transactionsState.forEach(({ id, state }) => {
                     Object.assign(transactions[id], { state: state });

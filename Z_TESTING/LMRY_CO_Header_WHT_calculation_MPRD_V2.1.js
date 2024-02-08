@@ -16,25 +16,14 @@ define([
 
     (record, runtime, search, log, lbryWHTHeader) => {
 
-        /**
-         * Defines the function that is executed at the beginning of the map/reduce process and generates the input data.
-         * @param {Object} inputContext
-         * @param {boolean} inputContext.isRestarted - Indicates whether the current invocation of this function is the first
-         *     invocation (if true, the current invocation is not the first invocation and this function has been restarted)
-         * @param {Object} inputContext.ObjectRef - Object that references the input data
-         * @typedef {Object} ObjectRef
-         * @property {string|number} ObjectRef.id - Internal ID of the record instance that contains the input data
-         * @property {string} ObjectRef.type - Type of the record instance that contains the input data
-         * @returns {Array|Object|Search|ObjectRef|File|Query} The input data to use in the map/reduce process
-         * @since 2015.2
-         */
 
         const getInputData = (inputContext) => {
             try {
                 const parameters = getParameters();
+                log.error("getInputData parameters",parameters)
                 const transactions = getTransactions(parameters);
                 updateState(parameters, 'Procesando', 'Se ha comenzado a procesar las transacciones...');
-
+                log.error("transactions",transactions)
                 return transactions;
             } catch (error) {
                 log.error("Error [getInputData]", error);
@@ -45,7 +34,7 @@ define([
 
         const map = (mapContext) => {
             try {
-
+                log.error("value",JSON.parse(mapContext.value))
                 if (mapContext.value.indexOf("isError") != -1) {
                     mapContext.write({
                         key: mapContext.key,
@@ -76,9 +65,14 @@ define([
         }
 
         const summarize = summaryContext => {
+            const parameters = getParameters();
             try {
-                const parameters = getParameters();
-                const results = [...summaryContext.output.iterator()].map(([, value]) => JSON.parse(value));
+                
+                const results = [];
+                summaryContext.output.iterator().each(function (key, value) {
+                    results.push(JSON.parse(value));
+                    return true;
+                });
                 const errors = results.filter(([key]) => key === 'isError' || key === 'isErrorInput');
         
                 const transactionsData = getTransactions(parameters);
@@ -102,6 +96,7 @@ define([
                     updateState(parameters, 'Ocurrió un error', errors[0][1]);
                 }
             } catch (error) {
+                log.error("error Summarize [interno]", error.message);
                 updateState(parameters, 'Ocurrió un error', error.message);
             }
         };
@@ -109,10 +104,18 @@ define([
 
         let getParameters = () => {
 
+            
             return {
-                idUser: runtime.getCurrentScript().getParameter({ name: 'custscript_lmry_co_head_wht_calc_usery' }),
+                idUser: "9358",
+                idLog: "11"
+            }
+            /*
+            
+            return {
+                idUser: runtime.getCurrentScript().getParameter({ name: 'custscript_lmry_co_head_wht_calc_user' }),
                 idLog: runtime.getCurrentScript().getParameter({ name: 'custscript_lmry_co_head_wht_calc_state' }),
             }
+            */
         }
 
         let getPreference = () => {
@@ -152,8 +155,8 @@ define([
                 recordLog.idTransaction = result.getValue('custrecord_lmry_co_hwht_log_transactions');
                 recordLog.whtType = result.getValue('custrecord_lmry_co_hwht_log_whttype');
             });
-
-            return JSON.parse(recordLog.idTransaction).map(id => ({ id: id, whtType: recordLog.whtType }));
+            return [{"id":"3922802","whtType":"header"}]
+            //return JSON.parse(recordLog.idTransaction).map(id => ({ id: id, whtType: recordLog.whtType }));
         }
 
         /* ------------------------------------------------------------------------------------------------------

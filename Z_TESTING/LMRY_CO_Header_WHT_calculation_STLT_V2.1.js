@@ -7,16 +7,16 @@
  * @Date 29/01/2024
  */
 define([
-        'N/log',
-        'N/search', 
-        'N/redirect', 
-        'N/runtime',
-        'N/ui/serverWidget',
-        'N/url',
-        'N/task',
-        'SuiteBundles/Bundle 37714/Latam_Library/LMRY_libSendingEmailsLBRY_V2.0'
-    ],
-    (log, search,redirect, runtime, serverWidget, url, task, LibraryMail) => {
+    'N/log',
+    'N/search',
+    'N/redirect',
+    'N/runtime',
+    'N/ui/serverWidget',
+    'N/url',
+    'N/task',
+    'SuiteBundles/Bundle 37714/Latam_Library/LMRY_libSendingEmailsLBRY_V2.0'
+],
+    (log, search, redirect, runtime, serverWidget, url, task, LibraryMail) => {
         const CLIENT_SCRIPT_PATH = "./LMRY_CO_Header_WHT_calculation_CLNT_V2.1.js";
 
         const onRequest = (context) => {
@@ -38,6 +38,8 @@ define([
 
         const processGETRequest = (handler, { params, response }) => {
             try {
+
+                let tiempoInicio = new Date();
                 const status = Number(params.status);
                 const form = handler.createForm();
 
@@ -47,6 +49,11 @@ define([
 
                 form.clientScriptModulePath = CLIENT_SCRIPT_PATH;
                 response.writePage(form);
+
+                let tiempoFin = new Date();
+
+                let duracionEnSegundos = (tiempoFin - tiempoInicio) / 1000;
+                log.error("duracionEnSegundos",duracionEnSegundos)
             } catch (err) {
                 log.error("[ onRequest - GET ]", err);
             }
@@ -86,14 +93,13 @@ define([
                 this.subsidiaries = [];
                 this.deploy = runtime.getCurrentScript().deploymentId;
                 this.names = this.getNames(this.deploy);
-                log.debug('this.names', this.names);
             }
 
             getNames(deploy) {
                 let nameList = {
                     customdeploy_lmry_co_head_wht_calc_stlt: {
-                        scriptid: 'customscript_lmry_co_head_wht_calc_stlt_log',
-                        deployid: 'customdeploy_lmry_co_head_wht_calc_stlt_log',
+                        scriptid: 'customscript_lmry_co_head_calc_stlt_log',
+                        deployid: 'customdeploy_lmry_co_head_calc_stlt_log',
                         scriptMapReduce: 'customscript_lmry_co_head_wht_calc_mprd',
                         deployMapReduce: 'customdeploy_lmry_co_head_wht_calc_mprd',
                         paramuser: 'custscript_lmry_co_head_wht_calc_user',
@@ -148,6 +154,11 @@ define([
             }
 
             setupFormWithSubsidiaries() {
+                this.form.addButton({
+                    label: this.translations.LMRY_VIEW_LOG,
+                    id: "custpage_btn_log",
+                    functionName: "backLog"
+                });
                 this.addGroup('mainGroup', this.translations.LMRY_PRIMARY_INFO);
                 if (this.FEAT_SUBS == 'T' || this.FEAT_SUBS == true) {
                     this.addSelectField('custpage_subsidiary', this.translations.LMRY_SUBSIDIARY, 'mainGroup').isMandatory();
@@ -232,7 +243,7 @@ define([
 
 
             disableFields() {
-                const fieldsToDisable = ['custpage_subsidiary', 'custpage_start_date', 'custpage_end_date', 'custpage_period', 'custpage_wht_type', 'custpage_period_type'];
+                const fieldsToDisable = ['custpage_subsidiary', 'custpage_start_date', 'custpage_end_date', 'custpage_period', 'custpage_wht_type', 'custpage_period_type','custpage_wht_process'];
                 fieldsToDisable.forEach(fieldId => {
                     let field = this.form.getField({ id: fieldId });
                     if (field) {
@@ -295,13 +306,14 @@ define([
                     type: serverWidget.SublistType.LIST
                 });
 
-
+                
                 const fields = [
                     { id: 'apply', label: this.translations.LMRY_APPLY, type: serverWidget.FieldType.CHECKBOX },
                     { id: 'tranid', label: this.translations.LMRY_DOCUMENT_NUMBER, type: serverWidget.FieldType.TEXT },
-                    { id: 'internalid', label: this.translations.LMRY_INTERNALID, type: serverWidget.FieldType.TEXT },
+                    { id: 'entity', label: this.translations.LMRY_ENTITY, type: serverWidget.FieldType.TEXT },
                     { id: 'type_transaction', label: this.translations.LMRY_TRANSACTION_TYPE, type: serverWidget.FieldType.TEXT },
                     { id: 'legal_document_type', label: this.translations.LMRY_FISCAL_DOCUMENT, type: serverWidget.FieldType.TEXT },
+                    { id: 'currency', label: this.translations.LMRY_CURRENCY, type: serverWidget.FieldType.TEXT },
                     { id: 'total_amt', label: this.translations.LMRY_AMOUNT, type: serverWidget.FieldType.CURRENCY, displayType: serverWidget.FieldDisplayType.DISABLED },
                     { id: 'internalidtext', label: 'internal_id', type: serverWidget.FieldType.TEXT, displayType: serverWidget.FieldDisplayType.HIDDEN }
                 ];
@@ -411,34 +423,37 @@ define([
             loadTransactionSublist() {
 
 
-                let data = this.getTransactionsMain();
+                let data = this.getTransactions();
 
                 let sublist = this.form.getSublist({ id: 'custpage_results_list' });
 
                 data.forEach((transaction, i) => {
-                    let tranUrl = url.resolveRecord({ recordType: transaction.typeID, recordId: transaction.id, isEditMode: false });
-                    let urlID = `<a class="dottedlink" href=${tranUrl} target="_blank">${transaction.id}</a>`;
-                    let tranid = `<a class="dottedlink" href=${tranUrl} target="_blank">${transaction.tranid}</a>`;
+                    const { id, tranid, legalDocument, entityName, entityValue, type, recordType, amount, currency } = transaction;
+                    
+                    sublist.setSublistValue({ id: 'internalidtext', line: i, value: id});
+                    const tranUrl = url.resolveRecord({ recordType, recordId: id, isEditMode: false });
+                    sublist.setSublistValue({ id: "tranid", line: i, value: `<a class="dottedlink" href="${tranUrl}" target="_blank">${tranid}</a>` });
 
+                    const entityType = ["invoice", "creditmemo"].includes(recordType) ? "customer" : "vendor";
+                    const tranUrlEntity = url.resolveRecord({ recordType: entityType, recordId: entityValue, isEditMode: false });
+                    sublist.setSublistValue({ id: "entity", line: i, value: `<a class="dottedlink" href="${tranUrlEntity}" target="_blank">${entityName}</a>` });
 
-                    sublist.setSublistValue({ id: 'apply', line: i, value: 'F' });
-                    sublist.setSublistValue({ id: 'internalidtext', line: i, value: transaction.id });
-                    sublist.setSublistValue({ id: 'tranid', line: i, value: tranid });
-                    sublist.setSublistValue({ id: 'type_transaction', line: i, value: transaction.typeName });
-                    sublist.setSublistValue({ id: 'legal_document_type', line: i, value: transaction.legalDocumentType });
-
-                    sublist.setSublistValue({ id: 'internalid', line: i, value: urlID });
-                    sublist.setSublistValue({ id: 'total_amt', line: i, value: transaction.amount });
+                    
+                    const setSublistValue = (colId, value) => sublist.setSublistValue({ id: colId, line: i, value });
+                    setSublistValue("type_transaction", type);
+                    setSublistValue("legal_document_type", legalDocument);
+                    setSublistValue("currency", currency);
+                    setSublistValue("total_amt", Number(amount).toFixed(2));
                 })
 
                 if (data.length) {
                     sublist.label = `${sublist.label} (${data.length})`;
                 }
 
-
             }
 
             getTransactions() {
+                
                 let dataIds = [];
                 let {
                     subsidiary,
@@ -459,45 +474,69 @@ define([
 
                 if (typeProcess == "sales") {
                     filters.push('AND');
-                    filters.push(
-                        [
-                            ["type", "anyof", "CustCred", "CustInvc"]
-                        ]
-                    );
-                    filters.push('OR');
-                    filters.push(
+                    filters.push([
                         [
                             [
-                                ["type", "anyof", "Journal"],
+                                "type",
+                                "anyof",
+                                "CustCred",
+                                "CustInvc"
+                            ]
+                        ],
+                        "OR",
+                        [
+                            [
+                                [
+                                    "type",
+                                    "anyof",
+                                    "Journal"
+                                ],
                                 "AND",
-                                ["formulatext: CASE WHEN  {custbody_lmry_reference_transaction.recordType} = 'invoice'  OR {custbody_lmry_reference_transaction.recordType} = 'creditmemo' THEN 1 ELSE 0 END", "is", "1"]
+                                [
+                                    "formulatext: CASE WHEN  {custbody_lmry_reference_transaction.recordType} = 'invoice'  OR {custbody_lmry_reference_transaction.recordType} = 'creditmemo' THEN 1 ELSE 0 END",
+                                    "is",
+                                    "1"
+                                ]
                             ]
                         ]
-                    );
+                    ]);
                 } else {
                     filters.push('AND');
-                    filters.push(
-                        [
-                            ["type", "anyof", "VendBill", "VendCred"]
-                        ]
-                    );
-                    filters.push('OR');
-                    filters.push(
+                    filters.push([
                         [
                             [
-                                ["type", "anyof", "Journal"],
+                                "type",
+                                "anyof",
+                                "VendBill",
+                                "VendCred"
+                            ]
+                        ],
+                        "OR",
+                        [
+                            [
+                                [
+                                    "type",
+                                    "anyof",
+                                    "Journal"
+                                ],
                                 "AND",
-                                ["formulatext: CASE WHEN  {custbody_lmry_reference_transaction.recordType} = 'vendorbill'  OR {custbody_lmry_reference_transaction.recordType} = 'vendorcredit' THEN 1 ELSE 0 END", "is", "1"]
+                                [
+                                    "formulatext: CASE WHEN  {custbody_lmry_reference_transaction.recordType} = 'vendorbill'  OR {custbody_lmry_reference_transaction.recordType} = 'vendorcredit' THEN 1 ELSE 0 END",
+                                    "is",
+                                    "1"
+                                ]
                             ]
                         ]
-                    );
+                    ]);
                 }
 
                 if (whtType == "header") {
                     filters.push('AND');
                     filters.push(
                         [
-                            ["formulatext: {memomain}", "startswith", "Latam - WHT"]
+                            ["formulatext: {memomain}","startswith","Latam - WHT"],
+                            "AND",
+                            ["formulatext: {memomain}","doesnotstartwith","Latam - WHT Reverse"]
                         ]
                     );
 
@@ -517,24 +556,23 @@ define([
                 if (startDate != null && startDate != '' && endDate != null && endDate != '') {
                     filters.push('AND');
                     const periodFourmulaids = this.getPeriods(subsidiary, startDate, endDate);
-                    filters.push(search.createFilter({
-                        name: "formulatext",
-                        formula: periodFourmulaids,
-                        operator: search.Operator.IS,
-                        values: "1"
-                    }));
+                    filters.push([
+                        "formulatext:" + periodFourmulaids,
+                        search.Operator.IS,
+                        "1"
+                    ]);
                 }
 
                 if (accoutingPeriod != null && accoutingPeriod != '') {
                     filters.push('AND');
                     const periodFourmulaids = this.generatePeriodFormula([accoutingPeriod]);
-                    filters.push(search.createFilter({
-                        name: "formulatext",
-                        formula: periodFourmulaids,
-                        operator: search.Operator.IS,
-                        values: "1"
-                    }));
+                    filters.push([
+                        "formulatext:" + periodFourmulaids,
+                        search.Operator.IS,
+                        "1"
+                    ]);
                 }
+
 
 
 
@@ -548,7 +586,7 @@ define([
                 let columns = [];
                 columns.push(search.createColumn({ name: 'formulatext', formula: '{custbody_lmry_reference_transaction.internalid}', sort: search.Sort.DESC }));
 
-
+                //log.error("filters", filters)
 
                 let searchTransactionsWht = search.create({
                     type: "transaction",
@@ -570,20 +608,25 @@ define([
                         });
                     });
                 }
-
+                
 
                 const transactionValues = Object.values(jsonData);
+                
                 dataIds.push(...transactionValues);
 
                 return this.getTransactionsMain(dataIds, whtType);
             }
 
             getTransactionsMain(ids, whtType) {
+                
+                if (ids.length == 0) {
+                    return ids;
+                }
                 let data = [];
                 let filters = [
-                    ["mainline", "is", "T"],
+                    ["internalid", "anyof", ids],
                     "AND",
-                    ["internalid", "anyof", ids]
+                    ["mainline", "is", "T"]
 
                 ];
 
@@ -595,10 +638,13 @@ define([
                 let columns = [];
                 columns.push(search.createColumn({ name: 'formulatext', formula: '{internalid}', sort: search.Sort.DESC }));
                 columns.push(search.createColumn({ name: 'formulatext', formula: '{type}' }));
+                columns.push(search.createColumn({ name: 'formulatext', formula: '{entity}' }));
                 columns.push(search.createColumn({ name: 'formulatext', formula: '{recordType}' }));
                 columns.push(search.createColumn({ name: 'formulatext', formula: '{custbody_lmry_document_type}' }));
                 columns.push(search.createColumn({ name: 'formulatext', formula: '{tranid}' }));
-                columns.push(search.createColumn({ name: 'formulatext', formula: '{amount}' }));
+                columns.push(search.createColumn({ name: 'formulatext', formula: '{fxamount}' }));
+                columns.push(search.createColumn({ name: 'formulatext', formula: '{currency}' }));
+                columns.push(search.createColumn({ name: 'formulatext', formula: '{entity.id}' }));
 
 
                 let settings = [];
@@ -620,20 +666,21 @@ define([
                         page.data.forEach(function (result) {
                             const columns = result.columns;
                             let transaction = {};
-                            transaction.id = result.getValue(columns[0]);
-                            transaction.typeName = result.getValue(columns[1]);
-                            transaction.typeID = result.getValue(columns[2]);
-                            transaction.legalDocumentType = result.getValue(columns[3]);
-                            transaction.tranid = result.getValue(columns[4]);
-                            transaction.amount = Number(result.getValue(columns[5]));
-
+                            transaction.id = result.getValue(columns[0]) || " ";
+                            transaction.legalDocument = result.getValue(columns[4]) || " ";
+                            transaction.entityName = result.getValue(columns[2])|| " ";
+                            transaction.entityValue = result.getValue(columns[8])|| " ";
+                            transaction.tranid = result.getValue(columns[5])|| " - ";
+                            transaction.type = result.getValue(columns[1])|| " ";
+                            transaction.recordType = result.getValue(columns[3])|| " ";
+                            transaction.amount = Math.abs(result.getValue(columns[6]))|| 0;
+                            transaction.currency = result.getValue(columns[7])|| " ";
                             data.push(transaction);
-
                         });
                     });
                 }
 
-                log.error("data [getTransactions]", data);
+                
                 return data;
             }
 
@@ -729,6 +776,9 @@ define([
                         "LMRY_TYPE_PROCESS": "Proceso",
                         "LMRY_SALES": "Ventas",
                         "LMRY_PURCHASES": "Compras",
+                        "LMRY_ENTITY": "Entidad",
+                        "LMRY_CURRENCY": "Moneda",
+                        "LMRY_VIEW_LOG": "Ver registro",
                     },
                     "en": {
                         "LMRY_MESSAGE": "Message",
@@ -762,6 +812,9 @@ define([
                         "LMRY_TYPE_PROCESS": "Process",
                         "LMRY_SALES": "Sales",
                         "LMRY_PURCHASES": "Purchases",
+                        "LMRY_ENTITY": "Entity",
+                        "LMRY_CURRENCY": "Currency",
+                        "LMRY_VIEW_LOG": "View Log",
                     }
                 }
                 return translatedFields[country];
@@ -783,8 +836,8 @@ define([
                 const featureLatam = LibraryMail.getAuthorization(26, licenses);
                 const { scriptMapReduce: MPRD_SCRIPT_ID, deployMapReduce: MPRD_DEPLOY_ID } = this.names;
                 const parameters = featureLatam ? {
-                    custscript_lmry_co_head_wht_calc_user: state,
-                    custscript_lmry_co_head_wht_calc_state: user
+                    custscript_lmry_co_head_wht_calc_user: user,
+                    custscript_lmry_co_head_wht_calc_state: state
                 } : {};
 
                 task.create({

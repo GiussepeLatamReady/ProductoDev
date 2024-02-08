@@ -33,8 +33,8 @@
 
     + LMRY_CO_Header_WHT_calculation_STLT_LOG_LBRY_V2.1.js
     + LMRY_CO_Header_WHT_calculation_STLT_LOG_V2.1.js
-        + Name: LatamReady - CO Header WHT calculation STLT LOG
-        + Id: _lmry_co_head_wht_calc_stlt_log
+        + Name: LatamReady - CO Header WHT calc STLT Log
+        + Id: _lmry_co_head_calc_stlt_log
     
 + Update
 
@@ -75,6 +75,8 @@
 + 35754 (development environment)
 
 ## Observations
+
+
 
 
 
