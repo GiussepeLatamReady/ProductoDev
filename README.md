@@ -58,7 +58,15 @@
             Process details 	custrecord_lmry_co_hwht_log_details	    Long Text	 	 	                No
         
 + Update
-    
+    + Name: LatamReady - TAX Results
+    + id: customrecord_lmry_br_transaction
+        + subtab : Colombia
+            + Latam - Retention Applied
+                id:custrecord_lmry_co_wht_applied - list/record transaction
+            + Latam - Date Retention Applied
+                id:custrecord_lmry_co_date_wht_applied
+            + Latam - Account Exogenous Concept
+                id:custrecord_lmry_co_acc_exo_concept
 
 ## Fields
 + Create

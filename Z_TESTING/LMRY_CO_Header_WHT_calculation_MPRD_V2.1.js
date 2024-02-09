@@ -155,8 +155,8 @@ define([
                 recordLog.idTransaction = result.getValue('custrecord_lmry_co_hwht_log_transactions');
                 recordLog.whtType = result.getValue('custrecord_lmry_co_hwht_log_whttype');
             });
-            return [{"id":"3922802","whtType":"header"}]
-            //return JSON.parse(recordLog.idTransaction).map(id => ({ id: id, whtType: recordLog.whtType }));
+            //return [{"id":"3947913","whtType":"header"}]
+            return JSON.parse(recordLog.idTransaction).map(id => ({ id: id, whtType: recordLog.whtType }));
         }
 
         /* ------------------------------------------------------------------------------------------------------
