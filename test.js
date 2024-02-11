@@ -1,90 +1,65 @@
-{
-    id: "3907739",
-    wht: {
-       ica: {
-          id: "123",
-          name: "AutoReteICA10%",
-          rate: 0.1,
-          salesbase: "subtotal",
-          puchasebase: "subtotal",
-          subtype: "ReteICA",
-          subtypeId: "19",
-          relatedTransactionId: "3952026"
-       },
-       iva: {
-          id: "120",
-          name: "AutoReteIVA 5%",
-          rate: 0.05,
-          salesbase: "subtotal",
-          puchasebase: "subtotal",
-          subtype: "ReteIVA",
-          subtypeId: "18",
-          relatedTransactionId: "3952027"
-       },
-       fte: {
-          id: "121",
-          name: "AutoReteFTE25%",
-          rate: 0.25,
-          salesbase: "subtotal",
-          puchasebase: "subtotal",
-          subtype: "ReteFTE",
-          subtypeId: "21",
-          relatedTransactionId: "3952028"
-       },
-       "cree": {}
-    },
-    recordtype: "vendorcredit",
-    total: 2010,
-    taxtotal: 0,
-    subtotal: 2010,
-    exchangeRate: 1,
-    items: {
-       13995365: {
-          id: "387",
-          amount: 1000,
-          lineuniquekey: "13995365",
-          account:205,
-          itemType: "InvtPart"
-       },
-       13995368: {
-          id: "387",
-          amount: 1000,
-          lineuniquekey: "13995368",
-          account:205,
-          itemType: "InvtPart"
-       }
-    },
-    expense: {
-       14168827: {
-          amount: 10,
-          lineuniquekey: "14168827",
-          account:1979
-       }
-    },
-    relatedRecords: [
-       {
-          id: "3952026",
-          tranid: "JOU04402309",
-          trandate: "07/08/2023",
-          memo: "Latam - WHT AutoReteICA10%",
-          amount: "-201",
-          subtypeKey: "ica"
-       },
-       {
-          id: "3952027",
-          tranid: "JOU04402310",
-          trandate: "07/08/2023",
-          memo: "Latam - WHT AutoReteIVA 5%",
-          amount: "-100.5",
-          subtypeKey: "iva"
-       },
-       {
-          id: "3952028",
-          tranid: "JOU04402311",
-          trandate: "07/08/2023",
-          memo: "Latam - WHT AutoReteFTE25%",
-          amount: "-502.5",
-          subtypeKey: "fte"
-       }
-    ]
- }
+function getTransactions() {
+   let {
+       subsidiary,
+       startDate,
+       endDate,
+       whtType,
+       accoutingPeriod,
+       typeProcess
+   } = this.params;
+
+   let filters = [
+       ["mainline", "is", "T"],
+       "AND",
+       ["custbody_lmry_reference_transaction", "noneof", "@NONE@"]
+   ];
+
+   let typeFilters = [
+       "OR",
+       ["type", "anyof", typeProcess === "sales" ? ["CustCred", "CustInvc"] : ["VendBill", "VendCred"]],
+       ["type", "anyof", "Journal", "AND", ["formulatext", "is", "1", "formulatext", `CASE WHEN {custbody_lmry_reference_transaction.recordType} = '${typeProcess === "sales" ? "invoice" : "vendorbill"}' OR {custbody_lmry_reference_transaction.recordType} = '${typeProcess === "sales" ? "creditmemo" : "vendorcredit"}' THEN 1 ELSE 0 END`]]
+   ];
+   filters.push(...typeFilters);
+
+   let whtFilters = [
+       "AND",
+       ["memomain", "startswith", whtType === "header" ? "Latam - WHT" : "Latam - CO WHT (Lines)"]
+   ];
+   if (whtType === "header") {
+       whtFilters.push("AND", ["memomain", "doesnotstartwith", "Latam - WHT Reverse"]);
+   }
+   filters.push(...whtFilters);
+
+   if (startDate && endDate) {
+       filters.push('AND', ["formulatext:" + this.getPeriods(subsidiary, startDate, endDate), search.Operator.IS, "1"]);
+   }
+
+   if (accoutingPeriod) {
+       filters.push('AND', ["formulatext:" + this.generatePeriodFormula([accoutingPeriod]), search.Operator.IS, "1"]);
+   }
+
+   if (this.FEAT_SUBS) {
+       filters.push('AND', ['subsidiary', 'anyof', subsidiary]);
+   }
+
+   let columns = [search.createColumn({
+       name: 'formulatext',
+       formula: '{custbody_lmry_reference_transaction.internalid}',
+       sort: search.Sort.DESC
+   })];
+
+   let searchSettings = this.FEAT_SUBS ? [search.createSetting({ name: 'consolidationtype', value: 'NONE' })] : [];
+   let searchTransactionsWht = search.create({ type: "transaction", filters, columns, settings: searchSettings });
+
+   let jsonData = {};
+   let pageData = searchTransactionsWht.runPaged({ pageSize: 1000 });
+   pageData.pageRanges.forEach(pageRange => {
+       let page = pageData.fetch({ index: pageRange.index });
+       page.data.forEach(result => {
+           let id = result.getValue(result.columns[0]);
+           jsonData[id] = true;
+       });
+   });
+
+   return this.getTransactionsMain(Object.keys(jsonData), whtType);
+}

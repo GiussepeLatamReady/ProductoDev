@@ -454,7 +454,6 @@ define([
 
             getTransactions() {
                 
-                let dataIds = [];
                 let {
                     subsidiary,
                     startDate,
@@ -600,28 +599,26 @@ define([
                     pageData.pageRanges.forEach(function (pageRange) {
                         let page = pageData.fetch({ index: pageRange.index });
                         page.data.forEach(function (result) {
-                            const columns = result.columns;
-                            let transaction = {};
-                            transaction.id = result.getValue(columns[0]);
-                            jsonData[transaction.id] = transaction.id;
-
+                            let id = result.getValue(result.columns[0]);
+                            jsonData[id] = true;
                         });
                     });
                 }
-                
 
-                const transactionValues = Object.values(jsonData);
-                
-                dataIds.push(...transactionValues);
-
-                return this.getTransactionsMain(dataIds, whtType);
+                return this.getTransactionsMain(Object.keys(jsonData), whtType);
             }
 
             getTransactionsMain(ids, whtType) {
                 
+                if (whtType != "header") {
+                    ids = this.getIdsFilterTaxResult(ids);
+                }
+                
                 if (ids.length == 0) {
                     return ids;
                 }
+
+                
                 let data = [];
                 let filters = [
                     ["internalid", "anyof", ids],
@@ -633,8 +630,6 @@ define([
                 if (whtType == "header") {
                     filters.push('AND');
                     filters.push(["custrecord_lmry_br_transaction.internalid", "anyof", "@NONE@"]);
-                }else{
-                    
                 }
 
                 let columns = [];
@@ -684,6 +679,32 @@ define([
 
                 
                 return data;
+            }
+
+            getIdsFilterTaxResult = ids => {
+                if (ids.length == 0) {
+                    return ids;
+                }
+                let transactionIds = {}
+                let searchRecordLog = search.create({
+                    type: 'customrecord_lmry_br_transaction',
+                    filters: [
+                        ['custrecord_lmry_br_transaction', 'anyof', ids],
+                        "AND", 
+                        ["custrecord_lmry_co_wht_applied","anyof","@NONE@"]
+                    ],
+                    columns: [
+                        'custrecord_lmry_br_transaction.internalid'
+                    ]
+                })
+                searchRecordLog.run().each(function (result) {
+                    const id = result.getValue(result.columns[0]);
+                    transactionIds[id] = true;
+                    return true;
+                });
+                log.error("transactionIds",transactionIds)
+                return Object.keys(transactionIds);
+                
             }
 
 

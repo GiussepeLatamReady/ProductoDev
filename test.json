@@ -1,49 +1,90 @@
 {
-    "library_Uni_Setting": "./Latam_Library/LMRY_UniversalSetting_Purchase_LBRY",
-    "record": "N/record",
-    "runtime": "N/runtime",
-    "search": "N/search",
-    "log": "N/log",
-    "config": "N/config",
-    "https": "N/https",
-    "url": "N/url",
-    "serverWidget": "N/ui/serverWidget",
-    "library": "./Latam_Library/LMRY_libSendingEmailsLBRY_V2.0",
-    "library1": "./Latam_Library/LMRY_libWhtValidationLBRY_V2.0",
-    "libraryDIOT": "./Latam_Library/LMRY_libDIOTLBRY_V2.0",
-    "Library_WHT_Transaction": "./WTH_Library/LMRY_TAX_TransactionLBRY_V2.0",
-    "ST_Library_Transaction": "./WTH_Library/LMRY_ST_Tax_TransactionLBRY_V2.0",
-    "libraryGLImpact": "./Latam_Library/LMRY_GLImpact_LBRY_V2.0",
-    "Library_HideView": "./Latam_Library/LMRY_HideViewLBRY_V2.0",
-    "library_hideview3": "./Latam_Library/LMRY_HideView3LBRY_V2.0",
-    "libWHTLines": "./WTH_Library/LMRY_Country_WHT_Lines_LBRY_V2.0",
-    "library_ExchRate": "./Latam_Library/LMRY_ExchangeRate_LBRY_V2.0",
-    "Library_RetencionesEcuador": "./WTH_Library/LMRY_RetencionesEcuador_LBRY",
-    "Library_WHT_GT": "./WTH_Library/LMRY_GT_Withholding_Line_LBRY_V2.0",
-    "library_GLImpact_Popup": "./WTH_Library/LMRY_BR_GLImpact_Popup_LBRY",
-    "LibraryTransferIva": "./WTH_Library/LMRY_TransferIva_LBRY",
-    "MX_ST_TaxLibrary": "./Latam_Library/LMRY_MX_STE_Purchases_Tax_Transaction_LBRY_V2.0",
-    "MX_ST_DIOT_Library": "./Latam_Library/LMRY_MX_ST_DIOT_LBRY_V2.0",
-    "CL_ST_TaxLibrary": "./Latam_Library/LMRY_CL_ST_Purchases_Tax_Transaction_LBRY_V2.0",
-    "libraryEcBaseAmounts": "./WTH_Library/LMRY_EC_BaseAmounts_TaxCode_LBRY",
-    "Library_BRDup": "./Latam_Library/LMRY_BR_ValidateDuplicate_LBRY_V2.0",
-    "libraryNewWHTLines": "./WTH_Library/LMRY_New_Country_WHT_Lines_LBRY",
-    "CO_STE_TaxLibrary": "./Latam_Library/LMRY_CO_STE_Purchase_Tax_Transaction_LBRY_V2.0",
-    "CO_STE_WhtLibrary_Total": "./WTH_Library/LMRY_CO_STE_WHT_Total_LBRY_V2.0",
-    "libraryTranIdCSV": "./Latam_Library/LMRY_TranID_CSV_LBRY_V2.0",
-    "AR_ST_TaxLibrary": "./Latam_Library/LMRY_AR_ST_Purchase_Tax_Transaction_LBRY_V2.0",
-    "AR_ST_Perception": "./Latam_Library/LMRY_AR_ST_Purchases_Perception_LBRY_V2.0",
-    "AR_ST_TransFields": "./Latam_Library/LMRY_AR_ST_WHT_TransactionFields_LBRY_V2.0",
-    "LibraryValidatePeriod": "./Latam_Library/LMRY_ValidateClosePeriod_LBRY_V2.0",
-    "library_UY_Retencion": "./WTH_Library/LMRY_UY_WHT_Total_LBRY_V2.0.js",
-    "CO_STE_WhtLibrary_Lines": "./WTH_Library/LMRY_CO_STE_Bill_WHT_Lines_LBRY_V2.0",
-    "errorAPI": "N/error",
-    "CL_ST_WhtLibrary_Total": "./Latam_Library/LMRY_CL_ST_Purchases_WHT_Transaction_LBRY_V2.0",
-    "MX_TaxLibrary": "./Latam_Library/LMRY_MX_LatamTax_Purchase_LBRY_V2.0",
-    "PA_ST_TaxLibrary": "./Latam_Library/LMRY_PA_ST_Purchases_Tax_Transaction_LBRY_V2.0",
-    "libraryIGVNoDom": "./Latam_Library/LMRY_PE_IGVNoDomiciliciado_LBRY",
-    "MX_WhtLibrary": "./Latam_Library/LMRY_MX_Withholding_Purchase_LBRY_V2.0",
-    "libraryFleteGlobales": "./Latam_Library/LMRY_BR_UPDATE_Flete_Transaction_Field_LBRY_2.0",
-    "libLog": "./Latam_Library/LMRY_Log_LBRY_V2.0",
-    "libBoTaxes": "./WTH_Library/LMRY
-  
+    id: "3907739",
+    wht: {
+       ica: {
+          id: "123",
+          name: "AutoReteICA10%",
+          rate: 0.1,
+          salesbase: "subtotal",
+          puchasebase: "subtotal",
+          subtype: "ReteICA",
+          subtypeId: "19",
+          relatedTransactionId: "3952026"
+       },
+       iva: {
+          id: "120",
+          name: "AutoReteIVA 5%",
+          rate: 0.05,
+          salesbase: "subtotal",
+          puchasebase: "subtotal",
+          subtype: "ReteIVA",
+          subtypeId: "18",
+          relatedTransactionId: "3952027"
+       },
+       fte: {
+          id: "121",
+          name: "AutoReteFTE25%",
+          rate: 0.25,
+          salesbase: "subtotal",
+          puchasebase: "subtotal",
+          subtype: "ReteFTE",
+          subtypeId: "21",
+          relatedTransactionId: "3952028"
+       },
+       "cree": {}
+    },
+    recordtype: "vendorcredit",
+    total: 2010,
+    taxtotal: 0,
+    subtotal: 2010,
+    exchangeRate: 1,
+    items: {
+       13995365: {
+          id: "387",
+          amount: 1000,
+          lineuniquekey: "13995365",
+          account:205,
+          itemType: "InvtPart"
+       },
+       13995368: {
+          id: "387",
+          amount: 1000,
+          lineuniquekey: "13995368",
+          account:205,
+          itemType: "InvtPart"
+       }
+    },
+    expense: {
+       14168827: {
+          amount: 10,
+          lineuniquekey: "14168827",
+          account:1979
+       }
+    },
+    relatedRecords: [
+       {
+          id: "3952026",
+          tranid: "JOU04402309",
+          trandate: "07/08/2023",
+          memo: "Latam - WHT AutoReteICA10%",
+          amount: "-201",
+          subtypeKey: "ica"
+       },
+       {
+          id: "3952027",
+          tranid: "JOU04402310",
+          trandate: "07/08/2023",
+          memo: "Latam - WHT AutoReteIVA 5%",
+          amount: "-100.5",
+          subtypeKey: "iva"
+       },
+       {
+          id: "3952028",
+          tranid: "JOU04402311",
+          trandate: "07/08/2023",
+          memo: "Latam - WHT AutoReteFTE25%",
+          amount: "-502.5",
+          subtypeKey: "fte"
+       }
+    ]
+ }
