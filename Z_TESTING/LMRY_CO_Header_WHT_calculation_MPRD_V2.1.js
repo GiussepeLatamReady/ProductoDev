@@ -56,7 +56,7 @@ define([
 
                 }
             } catch (error) {
-                log.error("Error", error);
+                log.error("Error [map]", error);
                 mapContext.write({
                     key: mapContext.key,
                     value: ["isError", error.message]
@@ -96,6 +96,7 @@ define([
                     updateState(parameters, 'Ocurrió un error', errors[0][1]);
                 }
             } catch (error) {
+                log.error("error Summarize [interno]", error);
                 log.error("error Summarize [interno]", error.message);
                 updateState(parameters, 'Ocurrió un error', error.message);
             }
@@ -104,18 +105,19 @@ define([
 
         let getParameters = () => {
 
-            
+            /*
             return {
                 idUser: "9358",
                 idLog: "11"
             }
-            /*
             
+            
+            
+            */
             return {
                 idUser: runtime.getCurrentScript().getParameter({ name: 'custscript_lmry_co_head_wht_calc_user' }),
                 idLog: runtime.getCurrentScript().getParameter({ name: 'custscript_lmry_co_head_wht_calc_state' }),
             }
-            */
         }
 
         let getPreference = () => {
@@ -156,6 +158,7 @@ define([
                 recordLog.whtType = result.getValue('custrecord_lmry_co_hwht_log_whttype');
             });
             //return [{"id":"3947913","whtType":"header"}]
+            log.error("recordLog.idTransaction",recordLog.idTransaction);
             return JSON.parse(recordLog.idTransaction).map(id => ({ id: id, whtType: recordLog.whtType }));
         }
 

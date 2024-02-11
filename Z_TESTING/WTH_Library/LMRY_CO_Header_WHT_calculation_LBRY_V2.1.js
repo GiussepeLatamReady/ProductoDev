@@ -105,86 +105,6 @@ define([
             return true;
         });
     }
-    /*
-    const createTaxResults = transaction => {
-
-
-
-        for (let item in transaction.items) {
-
-            for (let retention in transaction.wht) {
-                if (Object.keys(transaction.wht[retention]).length === 0) break;
-                var recordSummary = record.create({ type: 'customrecord_lmry_br_transaction', isDynamic: false });
-
-                recordSummary.setValue({ fieldId: 'custrecord_lmry_br_related_id', value: String(transaction.id) });
-                recordSummary.setValue({ fieldId: 'custrecord_lmry_br_transaction', value: transaction.id });
-
-                recordSummary.setValue({ fieldId: 'custrecord_lmry_br_type', value: transaction.wht[retention].subtype });
-                recordSummary.setValue({ fieldId: 'custrecord_lmry_br_type_id', value: transaction.wht[retention].subtypeId });
-                const baseAmount = transaction.items[item].amount;
-                recordSummary.setValue({ fieldId: 'custrecord_lmry_base_amount', value: baseAmount });
-                const retentionAmount = parseFloat(transaction.items[item].amount * transaction.wht[retention].rate);
-                recordSummary.setValue({ fieldId: 'custrecord_lmry_br_total', value: retentionAmount.toFixed(2) });
-                recordSummary.setValue({ fieldId: 'custrecord_lmry_br_percent', value: parseFloat(transaction.wht[retention].rate) / 100 });
-                recordSummary.setValue({ fieldId: 'custrecord_lmry_total_item', value: 'Line - Item' });
-                recordSummary.setValue({ fieldId: 'custrecord_lmry_item', value: transaction.items[item].id });
-
-
-                recordSummary.setValue({ fieldId: 'custrecord_lmry_total_base_currency', value: (baseAmount * transaction.exchangeRate).toFixed(2) });
-                recordSummary.setValue({ fieldId: 'custrecord_lmry_base_amount_local_currc', value: (retentionAmount * transaction.exchangeRate).toFixed(2) });
-                recordSummary.setValue({ fieldId: 'custrecord_lmry_amount_local_currency', value: (baseAmount * transaction.exchangeRate).toFixed(2) });
-                recordSummary.setValue({ fieldId: 'custrecord_lmry_tax_type', value: '1' });
-                recordSummary.setValue({ fieldId: 'custrecord_lmry_lineuniquekey', value: item });
-
-                recordSummary.setValue({ fieldId: 'custrecord_lmry_co_wht_applied', value: transaction.wht[retention].relatedTransaction.id });
-                recordSummary.setValue({ fieldId: 'custrecord_lmry_co_date_wht_applied', value: transaction.wht[retention].relatedTransaction.trandate });
-                recordSummary.setValue({ fieldId: 'custrecord_lmry_co_acc_exo_concept', value: transaction.items[item].account });
-
-                var idRecordSummary = recordSummary.save({ disableTriggers: true, ignoreMandatoryFields: true });
-
-                log.debug('idRecordSummary - item', idRecordSummary);
-            }
-        }
-
-        if (transaction.expense) {
-            for (let expense in transaction.expense) {
-                for (let retention in transaction.wht) {
-                    if (Object.keys(transaction.wht[retention]).length === 0) break;
-                    var recordSummary = record.create({ type: 'customrecord_lmry_br_transaction', isDynamic: false });
-
-                    recordSummary.setValue({ fieldId: 'custrecord_lmry_br_related_id', value: String(transaction.id) });
-                    recordSummary.setValue({ fieldId: 'custrecord_lmry_br_transaction', value: transaction.id });
-
-                    recordSummary.setValue({ fieldId: 'custrecord_lmry_br_type', value: transaction.wht[retention].subtype });
-                    recordSummary.setValue({ fieldId: 'custrecord_lmry_br_type_id', value: transaction.wht[retention].subtypeId });
-                    const baseAmount = transaction.expense[expense].amount;
-                    recordSummary.setValue({ fieldId: 'custrecord_lmry_base_amount', value: baseAmount });
-                    const retentionAmount = parseFloat(transaction.expense[expense].amount * transaction.wht[retention].rate);
-                    recordSummary.setValue({ fieldId: 'custrecord_lmry_br_total', value: retentionAmount.toFixed(2) });
-                    recordSummary.setValue({ fieldId: 'custrecord_lmry_br_percent', value: parseFloat(transaction.wht[retention].rate) / 100 });
-                    recordSummary.setValue({ fieldId: 'custrecord_lmry_total_item', value: 'Line - expense' });
-                    recordSummary.setValue({ fieldId: 'custrecord_lmry_account', value: transaction.expense[expense].account });
-
-
-                    recordSummary.setValue({ fieldId: 'custrecord_lmry_total_base_currency', value: (baseAmount * transaction.exchangeRate).toFixed(2)});
-                    recordSummary.setValue({ fieldId: 'custrecord_lmry_base_amount_local_currc', value: (retentionAmount * transaction.exchangeRate).toFixed(2) });
-                    recordSummary.setValue({ fieldId: 'custrecord_lmry_amount_local_currency', value: (baseAmount * transaction.exchangeRate).toFixed(2) });
-                    recordSummary.setValue({ fieldId: 'custrecord_lmry_tax_type', value: '1' });
-                    recordSummary.setValue({ fieldId: 'custrecord_lmry_lineuniquekey', value: expense });
-
-                    recordSummary.setValue({ fieldId: 'custrecord_lmry_co_wht_applied', value: transaction.wht[retention].relatedTransaction.id });
-                    recordSummary.setValue({ fieldId: 'custrecord_lmry_co_date_wht_applied', value: transaction.wht[retention].relatedTransaction.trandate });
-                    recordSummary.setValue({ fieldId: 'custrecord_lmry_co_acc_exo_concept', value: transaction.expense[expense].account });
-
-                    var idRecordSummary = recordSummary.save({ disableTriggers: true, ignoreMandatoryFields: true });
-
-                    log.debug('idRecordSummary - expense', idRecordSummary);
-                }
-            }
-        }
-
-    }
-    */
 
     const createTaxResults = transaction => {
         const createAndSaveRecord = (amount, itemType, retentionKey, itemKey) => {
@@ -200,7 +120,7 @@ define([
                 custrecord_lmry_br_type_id: transaction.wht[retentionKey].subtypeId,
                 custrecord_lmry_base_amount: baseAmount,
                 custrecord_lmry_br_total: retentionAmount,
-                custrecord_lmry_br_percent: parseFloat(transaction.wht[retentionKey].rate) / 100,
+                custrecord_lmry_br_percent: parseFloat(transaction.wht[retentionKey].rate),
                 custrecord_lmry_total_item: `Line - ${itemType}`,
                 custrecord_lmry_item: itemType === 'Item' ? transaction.items[itemKey].id : undefined,
                 custrecord_lmry_account: itemType === 'Expense' ? transaction.expense[itemKey].account : undefined,

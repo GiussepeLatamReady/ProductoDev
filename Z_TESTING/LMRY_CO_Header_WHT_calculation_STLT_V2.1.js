@@ -633,6 +633,8 @@ define([
                 if (whtType == "header") {
                     filters.push('AND');
                     filters.push(["custrecord_lmry_br_transaction.internalid", "anyof", "@NONE@"]);
+                }else{
+                    
                 }
 
                 let columns = [];
