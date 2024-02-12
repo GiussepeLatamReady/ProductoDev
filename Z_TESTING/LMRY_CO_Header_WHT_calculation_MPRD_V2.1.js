@@ -47,7 +47,7 @@ define([
                     if (transaction.whtType == "header") {
                         lbryWHTHeader.calculateHeaderWHT(transaction.id);
                     } else {
-                        lbryWHTHeader.updateTaxResult(transaction.id);
+                        lbryWHTHeader.updateWthInformationByLine(transaction.id);
                     }
                     mapContext.write({
                         key: mapContext.key,

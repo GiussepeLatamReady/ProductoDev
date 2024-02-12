@@ -18,12 +18,91 @@ define([
     const calculateHeaderWHT = (id) => {
         getFeatures();
         const transaction = getTransaction(id);
+        createTaxResults(transaction);
+    }
 
+    const updateWthInformationByLine = (id) => {
+        log.error(updateWthInformationByLine.name, id)
+        const transaction = getTransactionLine(id);
+        updateTaxResults(transaction);
+    }
+
+    const getTransactionLine = (id) => {
+        //deleteTaxResults(id);
+        let transaction = {
+            id: id,
+            wht: {
+                ica: {},
+                iva: {},
+                fte: {},
+                cree: {}
+            }
+        };
+        let searchFilters = [
+            ["internalid", "anyof", id],
+            "AND",
+            ["mainline", "is", "T"]
+        ];
+
+        let searchColumns = new Array();
+        searchColumns.push(search.createColumn({ name: 'formulatext', formula: '{internalid}' }));
+        searchColumns.push(search.createColumn({ name: 'formulatext', formula: '{recordType}' }));
+
+        search.create({
+            type: 'transaction',
+            filters: searchFilters,
+            columns: searchColumns
+        }).run().each(result => {
+            transaction.recordtype = result.getValue(result.columns[1]);
+        });
+
+
+
+        let recordObj = record.load({ type: transaction.recordtype, id: id });
+        transaction.items = getItemsData(recordObj);
+        if (transaction.recordtype == "vendorbill" || transaction.recordtype == "vendorcredit") {
+            transaction.expense = getExpense(recordObj);
+        }
+        transaction.taxResults = getTaxResult(id);
+        transaction.relatedRecords = getRelatedRecord(id);
+
+
+        assignRetentionToTaxResults(transaction);
+        log.error("transaction", transaction);
+
+        return transaction;
+    }
+
+    const getTaxResult = id => {
+
+        let taxResults = {}
+        let searchRecordLog = search.create({
+            type: 'customrecord_lmry_br_transaction',
+            filters: [
+                ['custrecord_lmry_br_transaction', 'anyof', id]
+            ],
+            columns: [
+                'internalid',
+                'custrecord_lmry_br_type',
+                'custrecord_lmry_lineuniquekey'
+            ]
+        })
+        searchRecordLog.run().each(function (result) {
+            const id = result.getValue(result.columns[0]);
+            taxResults[id] = {
+                id: id,
+                subtype: result.getValue(result.columns[1]),
+                lineuniquekey: result.getValue(result.columns[2])
+            };
+            return true;
+        });
+
+        return taxResults;
 
     }
 
     const getTransaction = (id) => {
-        deleteTaxResults(id);
+        //deleteTaxResults(id);
         let transaction = {
             id: id,
             wht: {
@@ -78,9 +157,8 @@ define([
         transaction.relatedRecords = [...relatedRecords];
         setTransactionWht(transaction);
         log.error("transaction", transaction);
-        createTaxResults(transaction);
 
-
+        return transaction;
     }
 
 
@@ -96,7 +174,7 @@ define([
         })
         searchRecordLog.run().each(function (result) {
             const idTax = result.getValue(result.columns[0]);
-            
+
             const idTaxLog = record.delete({
                 type: 'customrecord_lmry_br_transaction',
                 id: idTax,
@@ -109,7 +187,7 @@ define([
     const createTaxResults = transaction => {
         const createAndSaveRecord = (amount, itemType, retentionKey, itemKey) => {
             if (Object.keys(transaction.wht[retentionKey]).length === 0) return;
-    
+
             const recordSummary = record.create({ type: 'customrecord_lmry_br_transaction', isDynamic: false });
             const retentionAmount = parseFloat(amount * transaction.wht[retentionKey].rate).toFixed(2);
             const baseAmount = parseFloat(amount).toFixed(2);
@@ -133,23 +211,23 @@ define([
                 custrecord_lmry_co_date_wht_applied: transaction.wht[retentionKey].relatedTransaction.trandate,
                 custrecord_lmry_co_acc_exo_concept: itemType === 'Expense' ? transaction.expense[itemKey].account : transaction.items[itemKey].account,
             };
-    
+
             for (const fieldId in commonValues) {
                 if (commonValues[fieldId] !== undefined) {
                     recordSummary.setValue({ fieldId, value: commonValues[fieldId] });
                 }
             }
-    
+
             const idRecordSummary = recordSummary.save({ disableTriggers: true, ignoreMandatoryFields: true });
             log.debug(`idRecordSummary - ${itemType}`, idRecordSummary);
         };
-    
+
         for (let item in transaction.items) {
             for (let retention in transaction.wht) {
                 createAndSaveRecord(transaction.items[item].amount, 'Item', retention, item);
             }
         }
-    
+
         if (transaction.expense) {
             for (let expense in transaction.expense) {
                 for (let retention in transaction.wht) {
@@ -158,7 +236,26 @@ define([
             }
         }
     };
-    
+
+
+    const updateTaxResults = transaction => {
+        const {taxResults, items, expense } = transaction;
+        log.error("taxResults",taxResults)
+        log.error("items",items)
+        log.error("expense",expense)
+        for (let retention in taxResults) {
+            let recordUpdate = record.load({ type: "customrecord_lmry_br_transaction", id: retention });
+            recordUpdate.setValue("custrecord_lmry_co_wht_applied",taxResults[retention].retentionApplied );
+            recordUpdate.setValue("custrecord_lmry_co_date_wht_applied", taxResults[retention].retentionDate );
+            const elementAccount = items[taxResults[retention].lineuniquekey]?items[taxResults[retention].lineuniquekey].account:expense[taxResults[retention].lineuniquekey].account;
+            recordUpdate.setValue("custrecord_lmry_co_acc_exo_concept", elementAccount );
+            const idRecordSummary = recordUpdate.save({ disableTriggers: true, ignoreMandatoryFields: true });     
+
+            log.debug(`idRecordSummary - ${retention.id} - ${retention.subtype}`, idRecordSummary);
+        }
+
+    };
+
 
     const setTransactionWht = transaction => {
         transaction.relatedRecords.forEach(record => {
@@ -289,7 +386,13 @@ define([
             }
             return true
         });
-        return filterTransactionsByMemo(transaction);
+        let transactionList = Object.values(transaction);
+        if (transactionList[0].memo.startsWith("Latam - WHT") || transactionList[0].memo.startsWith("Latam - WHT Reclasification")) {
+            return filterTransactionsHeaderByMemo(transaction);
+        } else {
+            return filterTransactionsLineByMemo(transaction);
+        }
+
     }
 
     const formatDate = (dateString) => {
@@ -301,9 +404,28 @@ define([
         });
     };
 
-    const filterTransactionsByMemo = transactions => {
+    /**
+     * Filtra las transacciones por la cabecera del memo, buscando primero por "Latam - WHT Reclasification"
+     * y, si no se encuentra ninguno, busca por "Latam - WHT".
+     * 
+     * @param {Object} transactions - Objeto que contiene las transacciones a filtrar.
+     * @returns {Array} Un array de transacciones filtradas según la condición del memo.
+     */
+    const filterTransactionsHeaderByMemo = transactions => {
         let filtered = Object.values(transactions).filter(t => t.memo.startsWith("Latam - WHT Reclasification"));
         return filtered.length ? filtered : Object.values(transactions).filter(t => t.memo.startsWith("Latam - WHT"));
+    };
+    /**
+     * Filtra las líneas de transacciones basadas en el memo específico relacionado con la reclasificación de WHT (Withholding Tax) en Latam - Colombia.
+     * La función primero intenta filtrar las transacciones que contienen el memo que comienza con "Latam - CO WHT (Lines) Reclasification".
+     * Si encuentra alguna transacción que cumpla con este criterio, las retorna; de lo contrario, busca transacciones con un memo que comience con "Latam - CO WHT (Lines)".
+     *
+     * @param {Object} transactions - Objeto que contiene las transacciones a filtrar. Se espera que cada transacción tenga una propiedad 'memo'.
+     * @returns {Array} - Un arreglo de transacciones filtradas basadas en el criterio del memo. Si no encuentra transacciones bajo el primer criterio, intenta con un segundo criterio más genérico.
+     */
+    const filterTransactionsLineByMemo = transactions => {
+        let filtered = Object.values(transactions).filter(t => t.memo.startsWith("Latam - CO WHT (Lines) Reclasification"));
+        return filtered.length ? filtered : Object.values(transactions).filter(t => t.memo.startsWith("Latam - CO WHT (Lines)"));
     };
 
 
@@ -366,9 +488,7 @@ define([
         return exchangerateTran;
     };
 
-    const updateTaxResult = (id) => {
-        log.error(updateTaxResult.name, id)
-    }
+
 
     const isValid = (bool) => {
         return (bool === "T" || bool === true);
@@ -414,6 +534,12 @@ define([
         return items;
     }
 
+    /**
+     * Obtiene el ID de la cuenta asociada a un artículo específico basándose en su tipo.
+     * 
+     * @param {string|number} id - El ID interno del artículo a buscar.
+     * @returns {string} El ID de la cuenta asociada al artículo.
+     */
     const getItemAccount = (id) => {
         let accountItem = "";
         let searchFilters = [
@@ -433,8 +559,28 @@ define([
         return accountItem;
     }
 
+    /**
+    * Asigna una retención a cada resultado de impuesto en un objeto de transacción, basándose en registros relacionados.
+    * 
+    * @param {Object} transaction - Contiene 'taxResults' (resultados de impuestos) y 'relatedRecords' (registros relacionados).
+    * Para cada 'taxResult', busca un 'relatedRecord' cuyo 'memo' incluya el 'subtype' de 'taxResult'.
+    * Si encuentra coincidencia, asigna el 'id' de 'relatedRecord' a 'retentionApplied' en 'taxResult'.
+    */
+    const assignRetentionToTaxResults = transaction => {
+        const { taxResults, relatedRecords } = transaction;
+
+        Object.values(taxResults).forEach(taxResult => {
+            const matchingRecord = relatedRecords.find(record => record.memo.includes(taxResult.subtype));
+
+            if (matchingRecord) {
+                taxResult.retentionApplied = matchingRecord.id;
+                taxResult.retentionDate = matchingRecord.trandate;
+            }
+        });
+    };
 
 
 
-    return { calculateHeaderWHT, updateTaxResult };
+
+    return { calculateHeaderWHT, updateWthInformationByLine };
 });

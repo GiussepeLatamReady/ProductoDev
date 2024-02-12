@@ -38,6 +38,12 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/url'], (runtime, server
 
         buildTable() {
 
+            this.form.clientScriptModulePath = './LMRY_CO_Header_WHT_calculation_CLNT_V2.1.js';
+            this.form.addButton({
+                id: "custpage_btn_reload",
+                label: "Refresh",
+                functionName: "reload()"
+            });
             this.tab = this.form.addTab({ id: 'custpage_tab_transactions', label: this.translations.LMRY_TRANSACTIONS });
             this.form.insertTab({ tab: this.tab, nexttab: 'notes' });
             this.sublist = this.form.addSublist({
@@ -64,8 +70,6 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/url'], (runtime, server
                     field.updateDisplayType({ displayType: fieldInfo.displayType });
                 }
             });
-
-            
 
         }
 

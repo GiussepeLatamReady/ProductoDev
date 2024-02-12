@@ -137,16 +137,26 @@ define([
         }
 
         validateSublist() {
-            let recordObj = this.currentRecord;
-            let numberLines = recordObj.getLineCount({ sublistId: 'custpage_results_list' });
+            const recordObj = this.currentRecord;
+            const numberLines = recordObj.getLineCount({ sublistId: 'custpage_results_list' });
+        
             if (numberLines < 1) {
-                // No transactions selected.
+                alert("No hay transacciones Filtradas");
+                return false;
+            }
+        
+            const numApplieds = Array.from({ length: numberLines }).reduce((count, _, i) =>
+                count + (recordObj.getSublistValue({ sublistId: 'custpage_results_list', fieldId: 'apply', line: i }) ? 1 : 0), 0);
+        
+            if (numApplieds === 0) {
                 alert("No hay transacciones Seleccionadas");
                 return false;
             }
-
+        
             return true;
         }
+
+        
         validateField(scriptContext){
             this.currentRecord = scriptContext.currentRecord;
             if (scriptContext.fieldId == 'custpage_subsidiary'){

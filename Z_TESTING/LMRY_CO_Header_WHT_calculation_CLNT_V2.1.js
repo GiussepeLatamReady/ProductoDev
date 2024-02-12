@@ -12,7 +12,7 @@ define(['N/runtime',
     'N/format',
     'N/ui/message',
     'SuiteBundles/Bundle 37714/Latam_Library/LMRY_Log_LBRY_V2.0'
-    ,'N/url', 
+    , 'N/url',
     'N/currentRecord'],
     (runtime, search, record, format, message, lbryLog, urlApi, currentRecord) => {
         const STLT_ID = 'customscript_lmry_co_head_wht_calc_stlt';
@@ -56,6 +56,21 @@ define(['N/runtime',
             }
         };
 
+        const reload = () => {
+
+            var _record = currentRecord.get();
+
+            var path = urlApi.resolveRecord({
+                recordType: _record.type,
+                recordId: _record.id,
+                isEditMode: false,
+            });
+
+            setWindowChanged(window, false);
+            window.location.href = path;
+
+        }
+
         class ClientUIManager {
             constructor(options) {
                 this.FEAT_SUBS = this.isValid(runtime.isFeatureInEffect({ feature: 'SUBSIDIARIES' }));
@@ -91,7 +106,7 @@ define(['N/runtime',
                     const endDateField = this.currentRecord.getField({ fieldId: 'custpage_end_date' });
                     const accountingperiodField = this.currentRecord.getField({ fieldId: 'custpage_period' });
                     this.hiddenFields();
-                    console.log("periodTypeValue",periodTypeValue)
+                    console.log("periodTypeValue", periodTypeValue)
                     if (periodTypeValue == "month") {
                         accountingperiodField.isDisplay = true;
                         this.setPeriod();
@@ -134,6 +149,7 @@ define(['N/runtime',
                     this.handleError('[ saveRecord ]', err);
                     return false;
                 }
+
                 return true;
             }
 
@@ -146,7 +162,7 @@ define(['N/runtime',
                     ["isyear", "is", "F"]
                 ];
                 if (this.FEAT_SUBS) {
-                    
+
                     const subsidiary = this.currentRecord.getValue({ fieldId: 'custpage_subsidiary' });
                     const { fiscalcalendar } = search.lookupFields({
                         type: search.Type.SUBSIDIARY,
@@ -202,10 +218,10 @@ define(['N/runtime',
                     mandatoryFields.push('custpage_start_date');
                     mandatoryFields.push('custpage_end_date');
                 }
-                
+
                 const isFieldInvalid = (fieldId) => {
                     const value = recordObj.getValue({ fieldId });
-                    console.log(fieldId,value)
+                    console.log(fieldId, value)
                     if (value == 0 || !value) {
                         const fieldLabel = recordObj.getField({ fieldId }).label;
                         alert(`Ingrese un valor para: ${fieldLabel}`);
@@ -213,11 +229,11 @@ define(['N/runtime',
                     }
                     return false;
                 };
-                console.log("mandatoryFields",mandatoryFields)
+                console.log("mandatoryFields", mandatoryFields)
                 return !mandatoryFields.some(isFieldInvalid);
             }
 
-            addFieldMandatory(fields, id){
+            addFieldMandatory(fields, id) {
                 if (!fields.includes(id)) {
                     fields.push(id);
                 }
@@ -247,10 +263,18 @@ define(['N/runtime',
             }
 
             validateSublist() {
-                let recordObj = this.currentRecord;
-                let numberLines = recordObj.getLineCount({ sublistId: 'custpage_results_list' });
+                const recordObj = this.currentRecord;
+                const numberLines = recordObj.getLineCount({ sublistId: 'custpage_results_list' });
+
                 if (numberLines < 1) {
-                    // No transactions selected.
+                    alert("No hay transacciones Filtradas");
+                    return false;
+                }
+
+                const numApplieds = Array.from({ length: numberLines }).reduce((count, _, i) =>
+                    count + (recordObj.getSublistValue({ sublistId: 'custpage_results_list', fieldId: 'apply', line: i }) ? 1 : 0), 0);
+
+                if (numApplieds === 0) {
                     alert("No hay transacciones Seleccionadas");
                     return false;
                 }
@@ -269,7 +293,7 @@ define(['N/runtime',
                     if (periodType == "range") {
                         this.currentRecord.getField({ fieldId: 'custpage_start_date' }).isDisplay = true;
                         this.currentRecord.getField({ fieldId: 'custpage_end_date' }).isDisplay = true;
-                    }else{
+                    } else {
                         this.setPeriod();
                         this.currentRecord.getField({ fieldId: 'custpage_period' }).isDisplay = true;
                     }
@@ -399,5 +423,5 @@ define(['N/runtime',
 
         }
 
-        return { pageInit, validateField, saveRecord, back,backLog, toggleCheckBoxes };
+        return { pageInit, validateField, saveRecord, back, backLog, toggleCheckBoxes,reload };
     });

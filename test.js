@@ -1,65 +1,225 @@
-function getTransactions() {
-   let {
-       subsidiary,
-       startDate,
-       endDate,
-       whtType,
-       accoutingPeriod,
-       typeProcess
-   } = this.params;
+const transaction = {
+   id: "3906039",
+   wht: {
+      "ica": {},
+      "iva": {},
+      "fte": {},
+      "cree": {}
+   },
+   recordtype: "vendorbill",
+   items: {
+      13989955: {
+         id: "387",
+         amount: 36,
+         lineuniquekey: "13989955",
+         account:205,
+         itemType: "InvtPart"
+      },
+      13989956: {
+         id: "387",
+         amount: 36,
+         lineuniquekey: "13989956",
+         account:205,
+         itemType: "InvtPart"
+      }
+   },
+   taxResults: {
+      401163: {
+         id: "401163",
+         subtype: "Auto ReteICA",
+         lineunikey: "13989955"
+      },
+      401164: {
+         id: "401164",
+         subtype: "Auto ReteCREE",
+         lineunikey: "13989955"
+      },
+      401165: {
+         id: "401165",
+         subtype: "Auto ReteIVA",
+         lineunikey: "13989955"
+      },
+      401166: {
+         id: "401166",
+         subtype: "Auto ReteFTE",
+         lineunikey: "13989955"
+      },
+      401167: {
+         id: "401167",
+         subtype: "Auto ReteICA",
+         lineunikey: "13989956"
+      },
+      401168: {
+         id: "401168",
+         subtype: "Auto ReteCREE",
+         lineunikey: "13989956"
+      },
+      401169: {
+         id: "401169",
+         subtype: "Auto ReteIVA",
+         lineunikey: "13989956"
+      },
+      401170: {
+         id: "401170",
+         subtype: "Auto ReteFTE",
+         lineunikey: "13989956"
+      }
+   },
+   relatedRecords: [
+      {
+         id: "3906042",
+         tranid: "JOU00033566",
+         trandate: "2023-08-02T07:00:00.000Z",
+         memo: "Latam - CO WHT (Lines) - Auto ReteICA",
+         amount: "0.001044",
+         subtypeKey: "Retention name not found"
+      },
+      {
+         id: "3906043",
+         tranid: "JOU00033567",
+         trandate: "2023-08-02T07:00:00.000Z",
+         memo: "Latam - CO WHT (Lines) - Auto ReteCREE",
+         amount: "0.001044",
+         subtypeKey: "Retention name not found"
+      },
+      {
+         id: "3906044",
+         tranid: "JOU00033568",
+         trandate: "2023-08-02T07:00:00.000Z",
+         memo: "Latam - CO WHT (Lines) - Auto ReteIVA",
+         amount: "0.002088",
+         subtypeKey: "Retention name not found"
+      },
+      {
+         id: "3906045",
+         tranid: "JOU00033569",
+         trandate: "2023-08-02T07:00:00.000Z",
+         memo: "Latam - CO WHT (Lines) - Auto ReteFTE",
+         amount: "0.000522",
+         subtypeKey: "Retention name not found"
+      }
+   ]
+}
 
-   let filters = [
-       ["mainline", "is", "T"],
-       "AND",
-       ["custbody_lmry_reference_transaction", "noneof", "@NONE@"]
-   ];
 
-   let typeFilters = [
-       "OR",
-       ["type", "anyof", typeProcess === "sales" ? ["CustCred", "CustInvc"] : ["VendBill", "VendCred"]],
-       ["type", "anyof", "Journal", "AND", ["formulatext", "is", "1", "formulatext", `CASE WHEN {custbody_lmry_reference_transaction.recordType} = '${typeProcess === "sales" ? "invoice" : "vendorbill"}' OR {custbody_lmry_reference_transaction.recordType} = '${typeProcess === "sales" ? "creditmemo" : "vendorcredit"}' THEN 1 ELSE 0 END`]]
-   ];
-   filters.push(...typeFilters);
+const assignRetentionToTaxResults = transaction => {
+   const { taxResults, relatedRecords } = transaction;
 
-   let whtFilters = [
-       "AND",
-       ["memomain", "startswith", whtType === "header" ? "Latam - WHT" : "Latam - CO WHT (Lines)"]
-   ];
-   if (whtType === "header") {
-       whtFilters.push("AND", ["memomain", "doesnotstartwith", "Latam - WHT Reverse"]);
-   }
-   filters.push(...whtFilters);
+   Object.values(taxResults).forEach(taxResult => {
+       const matchingRecord = relatedRecords.find(record => record.memo.includes(taxResult.subtype));
 
-   if (startDate && endDate) {
-       filters.push('AND', ["formulatext:" + this.getPeriods(subsidiary, startDate, endDate), search.Operator.IS, "1"]);
-   }
-
-   if (accoutingPeriod) {
-       filters.push('AND', ["formulatext:" + this.generatePeriodFormula([accoutingPeriod]), search.Operator.IS, "1"]);
-   }
-
-   if (this.FEAT_SUBS) {
-       filters.push('AND', ['subsidiary', 'anyof', subsidiary]);
-   }
-
-   let columns = [search.createColumn({
-       name: 'formulatext',
-       formula: '{custbody_lmry_reference_transaction.internalid}',
-       sort: search.Sort.DESC
-   })];
-
-   let searchSettings = this.FEAT_SUBS ? [search.createSetting({ name: 'consolidationtype', value: 'NONE' })] : [];
-   let searchTransactionsWht = search.create({ type: "transaction", filters, columns, settings: searchSettings });
-
-   let jsonData = {};
-   let pageData = searchTransactionsWht.runPaged({ pageSize: 1000 });
-   pageData.pageRanges.forEach(pageRange => {
-       let page = pageData.fetch({ index: pageRange.index });
-       page.data.forEach(result => {
-           let id = result.getValue(result.columns[0]);
-           jsonData[id] = true;
-       });
+       if (matchingRecord) {
+           taxResult.retentionApplied = matchingRecord.id;
+       }
    });
 
-   return this.getTransactionsMain(Object.keys(jsonData), whtType);
-}
+   return transaction;
+};
+
+console.log(assignRetentionToTaxResults(transaction));
+
+{
+   id: '3906039',
+   wht: { ica: {}, iva: {}, fte: {}, cree: {} },
+   recordtype: 'vendorbill',
+   items: {
+     '13989955': {
+       id: '387',
+       amount: 36,
+       lineuniquekey: '13989955',
+       account: 205,
+       itemType: 'InvtPart'
+     },
+     '13989956': {
+       id: '387',
+       amount: 36,
+       lineuniquekey: '13989956',
+       account: 205,
+       itemType: 'InvtPart'
+     }
+   },
+   taxResults: {
+     '401163': {
+       id: '401163',
+       subtype: 'Auto ReteICA',
+       lineunikey: '13989955',
+       retentionApplied: '3906042'
+     },
+     '401164': {
+       id: '401164',
+       subtype: 'Auto ReteCREE',
+       lineunikey: '13989955',
+       retentionApplied: '3906043'
+     },
+     '401165': {
+       id: '401165',
+       subtype: 'Auto ReteIVA',
+       lineunikey: '13989955',
+       retentionApplied: '3906044'
+     },
+     '401166': {
+       id: '401166',
+       subtype: 'Auto ReteFTE',
+       lineunikey: '13989955',
+       retentionApplied: '3906045'
+     },
+     '401167': {
+       id: '401167',
+       subtype: 'Auto ReteICA',
+       lineunikey: '13989956',
+       retentionApplied: '3906042'
+     },
+     '401168': {
+       id: '401168',
+       subtype: 'Auto ReteCREE',
+       lineunikey: '13989956',
+       retentionApplied: '3906043'
+     },
+     '401169': {
+       id: '401169',
+       subtype: 'Auto ReteIVA',
+       lineunikey: '13989956',
+       retentionApplied: '3906044'
+     },
+     '401170': {
+       id: '401170',
+       subtype: 'Auto ReteFTE',
+       lineunikey: '13989956',
+       retentionApplied: '3906045'
+     }
+   },
+   relatedRecords: [
+     {
+       id: '3906042',
+       tranid: 'JOU00033566',
+       trandate: '2023-08-02T07:00:00.000Z',
+       memo: 'Latam - CO WHT (Lines) - Auto ReteICA',
+       amount: '0.001044',
+       subtypeKey: 'Retention name not found'
+     },
+     {
+       id: '3906043',
+       tranid: 'JOU00033567',
+       trandate: '2023-08-02T07:00:00.000Z',
+       memo: 'Latam - CO WHT (Lines) - Auto ReteCREE',
+       amount: '0.001044',
+       subtypeKey: 'Retention name not found'
+     },
+     {
+       id: '3906044',
+       tranid: 'JOU00033568',
+       trandate: '2023-08-02T07:00:00.000Z',
+       memo: 'Latam - CO WHT (Lines) - Auto ReteIVA',
+       amount: '0.002088',
+       subtypeKey: 'Retention name not found'
+     },
+     {
+       id: '3906045',
+       tranid: 'JOU00033569',
+       trandate: '2023-08-02T07:00:00.000Z',
+       memo: 'Latam - CO WHT (Lines) - Auto ReteFTE',
+       amount: '0.000522',
+       subtypeKey: 'Retention name not found'
+     }
+   ]
+ }
