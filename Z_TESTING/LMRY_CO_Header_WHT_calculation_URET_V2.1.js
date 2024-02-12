@@ -7,7 +7,7 @@
  * @Date 29/01/2024
  */
 
-define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/url'], (runtime, serverWidget, search,url) => {
+define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/url'], (runtime, serverWidget, search, url) => {
 
 
     const beforeLoad = (scriptContext) => {
@@ -19,9 +19,9 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/url'], (runtime, server
                 mainUIManager.loadTable();
             }
         } catch (error) {
-           log.error('Error beforeLoad ', error)
+            log.error('Error beforeLoad ', error)
         }
-        
+
     };
 
 
@@ -41,7 +41,7 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/url'], (runtime, server
             this.form.clientScriptModulePath = './LMRY_CO_Header_WHT_calculation_CLNT_V2.1.js';
             this.form.addButton({
                 id: "custpage_btn_reload",
-                label: "Refresh",
+                label: this.translations.LMRY_REFRESH,
                 functionName: "reload()"
             });
             this.tab = this.form.addTab({ id: 'custpage_tab_transactions', label: this.translations.LMRY_TRANSACTIONS });
@@ -89,13 +89,32 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/url'], (runtime, server
                 const tranUrlEntity = url.resolveRecord({ recordType: entityType, recordId: entityValue, isEditMode: false });
                 sublist.setSublistValue({ id: "custpage_col_entity", line: i, value: `<a class="dottedlink" href="${tranUrlEntity}" target="_blank">${entityName}</a>` });
 
-                
+
                 const setSublistValue = (colId, value) => sublist.setSublistValue({ id: colId, line: i, value });
                 setSublistValue("custpage_col_type_transaction", type);
                 setSublistValue("custpage_col_legal_document_type", legalDocument);
                 setSublistValue("custpage_col_currency", currency);
                 setSublistValue("custpage_col_total_amt", Number(amount).toFixed(2));
-                setSublistValue("custpage_col_state", state);
+
+                let stateResult;
+                log.error("state",state)
+                switch (state) {
+                    case "Procesando":
+                        stateResult = this.translations.LMRY_PROCESING;
+                        break;
+                    case "Error":
+                        stateResult = this.translations.LMRY_ERROR;
+                        break;
+                    case "No procesada":
+                        stateResult = this.translations.LMRY_NOT_PROCESING;
+                        break;
+                    case "Procesada con exito":
+                        stateResult = this.translations.LMRY_PROCESING_CHECK;
+                        break;
+                    default:
+                        stateResult = "No procesada";
+                }
+                setSublistValue("custpage_col_state", stateResult);
             });
 
             if (ids.length) {
@@ -140,18 +159,18 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/url'], (runtime, server
                 transactions[internalid] = {
                     internalid,
                     legalDocument: result.getValue(columns[4]) || " ",
-                    entityName: result.getValue(columns[2])|| " ",
-                    entityValue: result.getValue(columns[8])|| " ",
-                    tranid: result.getValue(columns[5])|| " - ",
-                    type: result.getValue(columns[1])|| " ",
-                    recordType: result.getValue(columns[3])|| " ",
-                    amount: Math.abs(result.getValue(columns[6]))|| 0,
-                    currency: result.getValue(columns[7])|| " ",
+                    entityName: result.getValue(columns[2]) || " ",
+                    entityValue: result.getValue(columns[8]) || " ",
+                    tranid: result.getValue(columns[5]) || " - ",
+                    type: result.getValue(columns[1]) || " ",
+                    recordType: result.getValue(columns[3]) || " ",
+                    amount: Math.abs(result.getValue(columns[6])) || 0,
+                    currency: result.getValue(columns[7]) || " ",
                     state: "Procesando"
                 };
                 return true;
             });
-            log.error("state",state)
+            log.error("state", state)
             if (!state) {
                 transactionsState.forEach(({ id, state }) => {
                     Object.assign(transactions[id], { state: state });
@@ -165,9 +184,9 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/url'], (runtime, server
             return transactions;
         }
 
-        hiddenFields(){
+        hiddenFields() {
             let jsonTransactions = this.form.getField('custrecord_lmry_co_hwht_log_transactions');
-            jsonTransactions.updateDisplayType({displayType: 'hidden'});
+            jsonTransactions.updateDisplayType({ displayType: 'hidden' });
         }
 
 
@@ -189,6 +208,11 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/url'], (runtime, server
                     "LMRY_CURRENCY": "Moneda",
                     "LMRY_STATE": "Estado",
                     "LMRY_RESTART": "Reiniciar",
+                    "LMRY_PROCESING": "Procesando",
+                    "LMRY_ERROR": "Error",
+                    "LMRY_NOT_PROCESING": "No procesada",
+                    "LMRY_PROCESING_CHECK": "Procesada con éxito",
+                    "LMRY_REFRESH": "Actualizar Pagina",
                 },
                 "en": {
                     "LMRY_TRANSACTIONS": "Transactions",
@@ -202,6 +226,11 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/url'], (runtime, server
                     "LMRY_CURRENCY": "Currency",
                     "LMRY_STATE": "State",
                     "LMRY_RESTART": "Restart",
+                    "LMRY_PROCESING": "Processing",
+                    "LMRY_ERROR": "Error",
+                    "LMRY_NOT_PROCESING": "Not Processed",
+                    "LMRY_PROCESING_CHECK": "Successfully Processed",
+                    "LMRY_REFRESH": "Refresh",
                 }
             }
             return translatedFields[country];

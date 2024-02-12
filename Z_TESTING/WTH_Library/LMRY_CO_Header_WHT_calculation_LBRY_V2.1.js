@@ -224,14 +224,18 @@ define([
 
         for (let item in transaction.items) {
             for (let retention in transaction.wht) {
-                createAndSaveRecord(transaction.items[item].amount, 'Item', retention, item);
+                const typeBase=transaction.recordtype == "vendorbill" ||transaction.recordtype == "vendorcredit" ? "puchasebase":"salesbase";
+                const whtBase = transaction.wht[retention][typeBase];
+                createAndSaveRecord(transaction.items[item][whtBase], 'Item', retention, item);
             }
         }
 
         if (transaction.expense) {
             for (let expense in transaction.expense) {
                 for (let retention in transaction.wht) {
-                    createAndSaveRecord(transaction.expense[expense].amount, 'Expense', retention, expense);
+                    const typeBase=transaction.recordtype == "vendorbill" ||transaction.recordtype == "vendorcredit" ? "puchasebase":"salesbase";
+                    const whtBase = transaction.wht[retention][typeBase];
+                    createAndSaveRecord(transaction.expense[expense][whtBase], 'Expense', retention, expense);
                 }
             }
         }
@@ -269,21 +273,7 @@ define([
         });
     }
 
-    const getExpense = (recordObj) => {
-        let expense = {};
-        const itemsLines = recordObj.getLineCount({ sublistId: 'expense' });
-        for (let i = 0; i < itemsLines; i++) {
-            const lineuniquekey = recordObj.getSublistValue({ sublistId: 'expense', fieldId: 'lineuniquekey', line: i });
-
-            expense[lineuniquekey] = {
-                amount: recordObj.getSublistValue({ sublistId: 'expense', fieldId: 'amount', line: i }),
-                lineuniquekey: lineuniquekey,
-                account: recordObj.getSublistValue({ sublistId: 'expense', fieldId: 'account', line: i })
-            }
-
-        }
-        return expense;
-    }
+    
 
     const getRetentionName = text => {
         const match = text.match(/Latam - WHT(?: Reclasification)?\s?(\S.*)/);
@@ -519,19 +509,46 @@ define([
         for (let i = 0; i < itemsLines; i++) {
             const id = recordObj.getSublistValue({ sublistId: 'item', fieldId: 'item', line: i });
             const lineuniquekey = recordObj.getSublistValue({ sublistId: 'item', fieldId: 'lineuniquekey', line: i });
-
+            const total = Math.abs(recordObj.getSublistValue({ sublistId: 'item', fieldId: 'grossamt', line: i })) || 0;
+            const subtotal = Math.abs(recordObj.getSublistValue({ sublistId: 'item', fieldId: 'amount', line: i })) || 0;
+            const taxtotal = parseFloat(total) - parseFloat(subtotal);
             items[lineuniquekey] = {
                 id: id,
-                amount: Math.abs(recordObj.getSublistValue({ sublistId: 'item', fieldId: 'amount', line: i })),
+                subtotal: subtotal,
+                total: total,
+                taxtotal: taxtotal,
                 lineuniquekey: lineuniquekey,
                 account: getItemAccount(id),
                 itemType: recordObj.getSublistValue({ sublistId: 'item', fieldId: "itemtype", line: i })
             }
             if (items[lineuniquekey].itemType == "Discount" || items[lineuniquekey].itemType == "Descuento") {
-                items[lineuniquekey].amount *= -1;
+                items[lineuniquekey].subtotal *= -1;
+                items[lineuniquekey].taxtotal *= -1;
+                items[lineuniquekey].total *= -1;
             }
         }
         return items;
+    }
+
+    const getExpense = (recordObj) => {
+        let expense = {};
+        const itemsLines = recordObj.getLineCount({ sublistId: 'expense' });
+        for (let i = 0; i < itemsLines; i++) {
+            const lineuniquekey = recordObj.getSublistValue({ sublistId: 'expense', fieldId: 'lineuniquekey', line: i });
+            const total = Math.abs(recordObj.getSublistValue({ sublistId: 'expense', fieldId: 'grossamt', line: i })) || 0;
+            const subtotal = Math.abs(recordObj.getSublistValue({ sublistId: 'expense', fieldId: 'amount', line: i })) || 0;
+            const taxtotal = parseFloat(total) - parseFloat(subtotal);
+            expense[lineuniquekey] = {
+                subtotal: subtotal,
+                total: total,
+                taxtotal: taxtotal,
+                amount: recordObj.getSublistValue({ sublistId: 'expense', fieldId: 'amount', line: i }),
+                lineuniquekey: lineuniquekey,
+                account: recordObj.getSublistValue({ sublistId: 'expense', fieldId: 'account', line: i })
+            }
+
+        }
+        return expense;
     }
 
     /**

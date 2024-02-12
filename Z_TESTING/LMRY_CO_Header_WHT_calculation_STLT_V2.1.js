@@ -39,7 +39,7 @@ define([
         const processGETRequest = (handler, { params, response }) => {
             try {
 
-                let tiempoInicio = new Date();
+                
                 const status = Number(params.status);
                 const form = handler.createForm();
 
@@ -50,10 +50,6 @@ define([
                 form.clientScriptModulePath = CLIENT_SCRIPT_PATH;
                 response.writePage(form);
 
-                let tiempoFin = new Date();
-
-                let duracionEnSegundos = (tiempoFin - tiempoInicio) / 1000;
-                log.error("duracionEnSegundos",duracionEnSegundos)
             } catch (err) {
                 log.error("[ onRequest - GET ]", err);
             }
@@ -167,7 +163,7 @@ define([
                 this.addSelectField('custpage_wht_type', this.translations.LMRY_WTH_TYPE, 'mainGroup').isMandatory();
 
                 this.addGroup('dateRangeGroup', this.translations.LMRY_PERIOD_INTERVAL);
-                this.addSelectField('custpage_period_type', this.translations.LMRY_PERIOD, 'dateRangeGroup').isMandatory();
+                this.addSelectField('custpage_period_type', this.translations.LMRY_PERIOD_TYPE, 'dateRangeGroup').isMandatory();
                 this.addDateField('custpage_start_date', this.translations.LMRY_START_DATE, 'dateRangeGroup');
                 this.addDateField('custpage_end_date', this.translations.LMRY_END_DATE, 'dateRangeGroup');
                 this.addSelectField('custpage_period', this.translations.LMRY_PERIOD, 'dateRangeGroup');
@@ -254,28 +250,36 @@ define([
 
 
             areThereSubsidiaries() {
-                let subsidiaries = [];
-                let allLicenses = {};  // Inicializar para el caso de que FEAT_SUBS no esté activo
+                let anySubsidiaryActive = false;
+                
+               
                 if (this.FEAT_SUBS) {
-                    allLicenses = LibraryMail.getAllLicenses();
-                    subsidiaries = this.getSubsidiaries();
+                    const allLicenses = LibraryMail.getAllLicenses();
+                    this.subsidiaries = this.getSubsidiaries();
+            
+                    
+                    this.subsidiaries.forEach(subsidiary => {
+                        const licenses = allLicenses[subsidiary.value] || [];
+                        subsidiary.active = LibraryMail.getAuthorization(26, licenses);
+                        if (subsidiary.active) {
+                            anySubsidiaryActive = true;
+                        }
+                    });
                 } else {
-                    subsidiaries.push({ value: 1, text: 'Company', active: false });
+                
+                    const licenses = LibraryMail.getLicenses(1);
+                    const isAuthorized = LibraryMail.getAuthorization(26, licenses);
+                    this.subsidiaries = [{
+                        value: 1,
+                        text: 'Company',
+                        active: isAuthorized
+                    }];
+                    anySubsidiaryActive = isAuthorized;
                 }
-
-                for (let i = 0; i < subsidiaries.length; i++) {
-
-                    let licenses = this.FEAT_SUBS ? allLicenses[subsidiaries[i].value] : LibraryMail.getLicenses(subsidiaries[i].value);
-                    if (LibraryMail.getAuthorization(26, licenses)) {
-                        subsidiaries[i].active = true;
-                        this.subsidiaries = subsidiaries;
-                        return true;
-                    }
-                }
-
-                this.subsidiaries = subsidiaries;
-                return false;
+            
+                return anySubsidiaryActive;
             }
+            
 
 
             getSubsidiaries() {
