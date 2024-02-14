@@ -882,5 +882,5 @@ define([
 
         }
 
-        return { onRequest };
+        return { onRequest, SuiteletFormManager };
     });

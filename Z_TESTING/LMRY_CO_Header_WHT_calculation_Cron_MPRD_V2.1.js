@@ -2,7 +2,7 @@
  * @NApiVersion 2.1
  * @NScriptType MapReduceScript
  * @NModuleScope Public
- * @Name LMRY_CO_Header_WHT_calculation_MPRD_V2.1.js
+ * @Name LMRY_CO_Header_WHT_calculation_Cron_MPRD_V2.1.js
  * @Author LatamReady - Giussepe Delgado
  * @Date 02/01/2024
  */
@@ -12,16 +12,26 @@ define([
     "N/search",
     "N/log",
     "./WTH_Library/LMRY_CO_Header_WHT_calculation_LBRY_V2.1",
+    "./LMRY_CO_Header_WHT_calculation_STLT_V2.1",
+    "./LMRY_CO_Header_WHT_calculation_CLNT_V2.1"
 ],
 
-    (record, runtime, search, log, lbryWHTHeader) => {
+    (record, runtime, search, log, lbryWHTHeader, SuiteletForm, ClntForm) => {
 
-
+        let formProcess = {};
+        let parameters = {};
         const getInputData = (inputContext) => {
             try {
-                const parameters = getParameters();
+
+                const formInstance = new SuiteletForm.SuiteletFormManager({});
+                const recordInstance = new ClntForm.ClientUIManager({});
+
+                formProcess.authorise = formInstance.areThereSubsidiaries();
+
+
+                //const parameters = getParameters();
                 log.error("getInputData parameters",parameters)
-                const transactions = getTransactions(parameters);
+                const transactions = getTransactionsFromRecord(parameters);
                 updateState(parameters, 'Procesando', 'Se ha comenzado a procesar las transacciones...');
                 log.error("transactions",transactions)
                 return transactions;
@@ -75,7 +85,7 @@ define([
                 });
                 const errors = results.filter(([key]) => key === 'isError' || key === 'isErrorInput');
         
-                const transactionsData = getTransactions(parameters);
+                const transactionsData = getTransactionsFromRecord(parameters);
                 const transactionIds = transactionsData.map(({id}) => id);
                 const idsSuccess = results.filter(([key, value]) => value === 'T').map(([id]) => id);
                 const idsError = transactionIds.filter(id => !idsSuccess.includes(id));
@@ -103,45 +113,27 @@ define([
         };
 
 
-        let getParameters = () => {
+        const getParameters = () => {
 
-            /*
-            return {
-                idUser: "9358",
-                idLog: "11"
-            }
-            
-            
-            
-            */
             return {
                 idUser: runtime.getCurrentScript().getParameter({ name: 'custscript_lmry_co_head_wht_calc_user' }),
                 idLog: runtime.getCurrentScript().getParameter({ name: 'custscript_lmry_co_head_wht_calc_state' }),
             }
         }
 
-        let getPreference = () => {
+        const getConfiguration = () => {
 
-            return {
-                department: runtime.getCurrentUser().getPreference({ name: 'DEPTMANDATORY' }),
-                "class": runtime.getCurrentUser().getPreference({ name: 'CLASSMANDATORY' }),
-                location: runtime.getCurrentUser().getPreference({ name: 'LOCMANDATORY' }),
-                journal: runtime.getCurrentScript().getParameter({ name: 'CUSTOMAPPROVALJOURNAL' })
-            }
         }
 
-        let getFeatures = () => {
+        const processHeader = () => {
 
-            return {
-                department: runtime.isFeatureInEffect({ feature: "DEPARTMENTS" }),
-                "class": runtime.isFeatureInEffect({ feature: "CLASS" }),
-                location: runtime.isFeatureInEffect({ feature: "LOCATIONS" }),
-                multibook: runtime.isFeatureInEffect({ feature: "MULTIBOOK" }),
-                subsidiary: runtime.isFeatureInEffect({ feature: 'SUBSIDIARIES' })
-            }
         }
 
-        let getTransactions = (parameters) => {
+        const processLines = () => {
+
+        }
+
+        const getTransactionsFromRecord = (parameters) => {
             let recordLog = {};
             let searchRecordLog = search.create({
                 type: 'customrecord_lmry_co_head_wht_cal_log',
@@ -165,7 +157,7 @@ define([
         /* ------------------------------------------------------------------------------------------------------
         * Esta funcion permite actualiazr el estado del proceso segun la etapa del flujo del modulo.
         * --------------------------------------------------------------------------------------------------- */
-        let updateState = (parameters, msgState, msgDetails) => {
+        const updateState = (parameters, msgState, msgDetails) => {
             record.submitFields({
                 type: 'customrecord_lmry_co_head_wht_cal_log',
                 id: parameters.idLog,
@@ -177,7 +169,7 @@ define([
             });
         }
 
-        let updateTransactionState = (parameters, transactions) => {
+        const updateTransactionState = (parameters, transactions) => {
             record.submitFields({
                 type: 'customrecord_lmry_co_head_wht_cal_log',
                 id: parameters.idLog,

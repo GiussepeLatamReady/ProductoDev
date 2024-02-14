@@ -342,34 +342,38 @@ define(['N/runtime',
             }
 
 
-            createRecordLog() {
+            createRecordLog(interface, dataProcess) {
                 let currentRecord = this.currentRecord;
                 let form = {
                     ids: []
                 };
+                
+                if (!interface) {
 
+                    form.subsidiary = Number(currentRecord.getValue({ fieldId: 'custpage_subsidiary' })) || '';
+                    form.typeProcess = currentRecord.getValue({ fieldId: 'custpage_wht_process' });
+                    form.startDate = currentRecord.getValue({ fieldId: 'custpage_start_date' });
+                    form.endDate = currentRecord.getValue({ fieldId: 'custpage_end_date' });
+                    form.whtType = currentRecord.getValue({ fieldId: 'custpage_wht_type' });
+                    form.periodType = currentRecord.getValue({ fieldId: 'custpage_period_type' });
+                    form.accoutingPeriod = currentRecord.getValue({ fieldId: 'custpage_period' });
+                    form.executionType = "UI";
 
-                form.subsidiary = Number(currentRecord.getValue({ fieldId: 'custpage_subsidiary' })) || '';
-                form.typeProcess = currentRecord.getValue({ fieldId: 'custpage_wht_process' });
-                form.startDate = currentRecord.getValue({ fieldId: 'custpage_start_date' });
-                form.endDate = currentRecord.getValue({ fieldId: 'custpage_end_date' });
-                form.whtType = currentRecord.getValue({ fieldId: 'custpage_wht_type' });
-                form.periodType = currentRecord.getValue({ fieldId: 'custpage_period_type' });
-                form.accoutingPeriod = currentRecord.getValue({ fieldId: 'custpage_period' });
-                form.executionType = "UI";
+                    let numberLines = currentRecord.getLineCount({ sublistId: 'custpage_results_list' });
+                    for (let i = 0; i < numberLines; i++) {
 
-                let numberLines = currentRecord.getLineCount({ sublistId: 'custpage_results_list' });
-                for (let i = 0; i < numberLines; i++) {
-
-                    let isApplied = currentRecord.getSublistValue({
-                        sublistId: 'custpage_results_list',
-                        fieldId: 'apply',
-                        line: i
-                    });
-
-                    if (isApplied) {
-                        form.ids.push(currentRecord.getSublistValue({ sublistId: 'custpage_results_list', fieldId: 'internalidtext', line: i }));
+                        let isApplied = currentRecord.getSublistValue({
+                            sublistId: 'custpage_results_list',
+                            fieldId: 'apply',
+                            line: i
+                        });
+    
+                        if (isApplied) {
+                            form.ids.push(currentRecord.getSublistValue({ sublistId: 'custpage_results_list', fieldId: 'internalidtext', line: i }));
+                        }
                     }
+                }else{
+                    form = dataProcess;
                 }
 
 
@@ -423,5 +427,5 @@ define(['N/runtime',
 
         }
 
-        return { pageInit, validateField, saveRecord, back, backLog, toggleCheckBoxes,reload };
+        return { pageInit, validateField, saveRecord, back, backLog, toggleCheckBoxes, reload, ClientUIManager };
     });
