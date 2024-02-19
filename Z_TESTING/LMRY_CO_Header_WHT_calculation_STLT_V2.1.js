@@ -879,6 +879,9 @@ define([
             isValid(bool) {
                 return (bool === "T" || bool === true);
             }
+            setParams(parameters){
+                this.params = parameters;
+            }
 
         }
 

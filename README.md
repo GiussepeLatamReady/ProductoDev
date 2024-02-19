@@ -35,6 +35,21 @@
     + LMRY_CO_Header_WHT_calculation_STLT_LOG_V2.1.js
         + Name: LatamReady - CO Header WHT calc STLT Log
         + Id: _lmry_co_head_calc_stlt_log
+
+    Librerias
+    LMRY_CO_Header_WHT_calculation_LBRY_V2.1.js
+
+    Scrits
+    LMRY_CO_Header_WHT_calculation_CLNT_V2.1.js
+    LMRY_CO_Header_WHT_calculation_MPRD_V2.1.js
+        Name:
+        Parametros:
+        User: custscript_lmry_co_head_wht_calc_user
+        State: custscript_lmry_co_head_wht_calc_state
+    LMRY_CO_Header_WHT_calculation_STLT_LOG_V2.1.js
+    LMRY_CO_Header_WHT_calculation_STLT_V2.1.js
+    LMRY_CO_Header_WHT_calculation_URET_V2.1.js
+
     
 + Update
 
