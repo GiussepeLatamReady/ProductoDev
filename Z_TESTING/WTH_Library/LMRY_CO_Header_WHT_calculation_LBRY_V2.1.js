@@ -11,7 +11,7 @@ define([
     'N/search',
     'N/record',
     'N/runtime',
-    'N/format'
+    'N/format',
 ], (log, search, record, runtime, format) => {
 
     let features = {};
@@ -507,6 +507,10 @@ define([
         let items = {};
         const itemsLines = recordObj.getLineCount({ sublistId: 'item' });
         for (let i = 0; i < itemsLines; i++) {
+            const itemType = recordObj.getSublistValue({ sublistId: 'item', fieldId: "itemtype", line: i });
+
+            if(itemType=="Group" || itemType=="EndGroup") continue;
+
             const id = recordObj.getSublistValue({ sublistId: 'item', fieldId: 'item', line: i });
             const lineuniquekey = recordObj.getSublistValue({ sublistId: 'item', fieldId: 'lineuniquekey', line: i });
             const total = Math.abs(recordObj.getSublistValue({ sublistId: 'item', fieldId: 'grossamt', line: i })) || 0;
@@ -519,7 +523,7 @@ define([
                 taxtotal: taxtotal,
                 lineuniquekey: lineuniquekey,
                 account: getItemAccount(id),
-                itemType: recordObj.getSublistValue({ sublistId: 'item', fieldId: "itemtype", line: i })
+                itemType: itemType
             }
             if (items[lineuniquekey].itemType == "Discount" || items[lineuniquekey].itemType == "Descuento") {
                 items[lineuniquekey].subtotal *= -1;
