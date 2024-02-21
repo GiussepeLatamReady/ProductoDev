@@ -188,6 +188,13 @@ define(["N/search", "N/record", "N/runtime", "N/translation", "N/redirect", "N/u
                     container: "mainGroup"
                 }).setHelpText({ help: "custpage_date" });
 
+                let exchangeRate = form.addField({
+                    id: "custpage_exchange_rate",
+                    type: serverWidget.FieldType.FLOAT,
+                    label: this.getText("EXCHANGERATE"),
+                    container: "mainGroup"
+                }).setHelpText({ help: "custpage_exchange_rate" });
+
                 let batchField = form.addField({
                     id: "custpage_batch",
                     type: serverWidget.FieldType.TEXT,
@@ -949,7 +956,7 @@ define(["N/search", "N/record", "N/runtime", "N/translation", "N/redirect", "N/u
                             "classification", "department", "class", "location", "filter",
                             "additional_information", "apply_rule", "save", "back",
                             "transactions", "results", "apply", "internal_id", "tranid", "transaction", "date", "document_type",
-                            "total_amt", "wht_percent", "wht_amount", "mark_all", "desmark_all"
+                            "total_amt", "wht_percent", "wht_amount", "mark_all", "desmark_all","EXCHANGERATE"
                         ]
                     }]
                 });
