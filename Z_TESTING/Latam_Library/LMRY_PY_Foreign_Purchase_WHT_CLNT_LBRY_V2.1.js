@@ -4,8 +4,8 @@
  * @Name LMRY_PY_Foreign_Purchase_WHT_CLNT_LBRY_V2.1.js
  * @Author gerson@latamready.com
  */
-define(["N/runtime", "N/search", "N/record", "N/format", "N/translation", "N/ui/message", "./LMRY_CustomFieldData_LBRY_V2.1", "./LMRY_Log_LBRY_V2.0"],
-    function (runtime, search, record, format, translation, message, lbryCustomField, lbryLog) {
+define(["N/runtime","N/currency", "N/search", "N/record", "N/format", "N/translation", "N/ui/message", "./LMRY_CustomFieldData_LBRY_V2.1", "./LMRY_Log_LBRY_V2.0"],
+    function (runtime, currency, search, record, format, translation, message, lbryCustomField, lbryLog) {
         const ScriptName = "LMRY_PY_Foreign_Purchase_WHT_CLNT_LBRY_V2.1.js";
 
         class ClntHandler {
@@ -100,6 +100,10 @@ define(["N/runtime", "N/search", "N/record", "N/format", "N/translation", "N/ui/
                                 }
                             }
                         }
+                    }
+
+                    if (fieldId === "custpage_currency") {
+                        this.setExchangeRate();
                     }
 
                     if (sublistId === "custpage_results_list") {
@@ -757,6 +761,52 @@ define(["N/runtime", "N/search", "N/record", "N/format", "N/translation", "N/ui/
                     }]
                 });
             }
+
+            setExchangeRate(){
+                const recordObj = this.currentRecord;
+                const subsidiaryValue =  recordObj.getValue("custpage_subsidiary");
+                const currencyValue =  recordObj.getValue("custpage_currency");
+                const dateValue =  recordObj.getValue("custpage_date");
+
+                const rateField =  recordObj.getField("custpage_exchange_rate");
+                let companyCurrency;
+                let rate;
+                console.log("subsidiaryValue :",subsidiaryValue)
+                console.log("currencyValue :",currencyValue)
+                console.log("currencyValue typeof:",typeof currencyValue)
+                console.log("dateValue :",dateValue)
+
+                if (this.FEAT_SUBS) {
+                    if (subsidiaryValue) {
+                        companyCurrency = search.lookupFields({
+                            type: search.Type.SUBSIDIARY,
+                            id: subsidiaryValue,
+                            columns: ["currency"]
+                        }).currency[0].value;
+                    }
+                }else{
+                    companyCurrency = "11";
+                }
+                console.log("companyCurrency :",companyCurrency)
+                if (companyCurrency && (currencyValue && currencyValue!="0") && dateValue) {
+                    rate = currency.exchangeRate({
+                        source: currencyValue,
+                        target: companyCurrency,
+                        date: dateValue
+                    });
+
+                    recordObj.setValue({ fieldId: "custpage_exchange_rate", value: rate });
+
+                    if (rate==1) {
+                        rateField.isDisabled = true;
+                    }else{
+                        rateField.isDisabled = false;
+                    }
+                }
+                console.log("rate :",rate)
+            }
+
+           
         }
 
         function handleError(functionName, err) {

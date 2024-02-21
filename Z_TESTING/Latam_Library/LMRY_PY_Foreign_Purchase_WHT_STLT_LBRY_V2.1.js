@@ -194,6 +194,7 @@ define(["N/search", "N/record", "N/runtime", "N/translation", "N/redirect", "N/u
                     label: this.getText("EXCHANGERATE"),
                     container: "mainGroup"
                 }).setHelpText({ help: "custpage_exchange_rate" });
+                exchangeRate.isMandatory = true;
 
                 let batchField = form.addField({
                     id: "custpage_batch",
@@ -243,6 +244,7 @@ define(["N/search", "N/record", "N/runtime", "N/translation", "N/redirect", "N/u
                     container: "filtersGroup"
                 }).setHelpText({ help: "custpage_currency" });
 
+                currencyField.isMandatory = true;
                 //Classification
                 form.addFieldGroup({
                     id: "classGroup",
@@ -349,6 +351,7 @@ define(["N/search", "N/record", "N/runtime", "N/translation", "N/redirect", "N/u
                     dateToField.updateDisplayType({ displayType: serverWidget.FieldDisplayType.DISABLED });
                     vendorField.updateDisplayType({ displayType: serverWidget.FieldDisplayType.DISABLED });
                     currencyField.updateDisplayType({ displayType: serverWidget.FieldDisplayType.DISABLED });
+                    exchangeRate.updateDisplayType({ displayType: serverWidget.FieldDisplayType.DISABLED });
                     if (depField) {
                         depField.updateDisplayType({ displayType: serverWidget.FieldDisplayType.DISABLED });
                     }
