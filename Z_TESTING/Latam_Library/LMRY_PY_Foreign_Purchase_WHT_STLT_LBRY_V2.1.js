@@ -833,6 +833,10 @@ define(["N/search","N/config","N/format","N/currency", "N/record", "N/runtime", 
 
                 const {currency} = this.params;
 
+                if (currency == currencySource) {
+                    
+                }
+
                 const rate = Ncurrency.exchangeRate({
                     source: currencySource,
                     target: this.companyCurrency,
