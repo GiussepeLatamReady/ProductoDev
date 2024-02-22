@@ -4,8 +4,8 @@
  * @Name LMRY_PY_Foreign_Purchase_WHT_STLT_LBRY_V2.1.js
  * @Author gerson@latamready.com
  */
-define(["N/search", "N/record", "N/runtime", "N/translation", "N/redirect", "N/ui/serverWidget", "N/url", "N/task", "./LMRY_libSendingEmailsLBRY_V2.0"],
-    (search, record, runtime, translation, redirect, serverWidget, url, task, lbryMail) => {
+define(["N/search","N/config","N/format","N/currency", "N/record", "N/runtime", "N/translation", "N/redirect", "N/ui/serverWidget", "N/url", "N/task", "./LMRY_libSendingEmailsLBRY_V2.0"],
+    (search,config,format,Ncurrency, record, runtime, translation, redirect, serverWidget, url, task, lbryMail) => {
 
         const MPRD_SCRIPT_ID = "customscript_lmry_py_wht_purchase_mprd";
         const MPRD_DEPLOY_ID = "customdeploy_lmry_py_wht_purchase_mprd";
@@ -188,13 +188,7 @@ define(["N/search", "N/record", "N/runtime", "N/translation", "N/redirect", "N/u
                     container: "mainGroup"
                 }).setHelpText({ help: "custpage_date" });
 
-                let exchangeRate = form.addField({
-                    id: "custpage_exchange_rate",
-                    type: serverWidget.FieldType.FLOAT,
-                    label: this.getText("EXCHANGERATE"),
-                    container: "mainGroup"
-                }).setHelpText({ help: "custpage_exchange_rate" });
-                exchangeRate.isMandatory = true;
+                
 
                 let batchField = form.addField({
                     id: "custpage_batch",
@@ -329,6 +323,14 @@ define(["N/search", "N/record", "N/runtime", "N/translation", "N/redirect", "N/u
                         container: "additionalGroup"
                     }).setHelpText({ help: "custpage_apply_rule" });
 
+                    let exchangeRate = form.addField({
+                        id: "custpage_exchange_rate",
+                        type: serverWidget.FieldType.FLOAT,
+                        label: this.getText("EXCHANGERATE"),
+                        container: "mainGroup"
+                    }).setHelpText({ help: "custpage_exchange_rate" });
+                    exchangeRate.isMandatory = true;
+
                     this.fillRulesPY(applyRulefield);
 
                     //Buttons
@@ -351,7 +353,6 @@ define(["N/search", "N/record", "N/runtime", "N/translation", "N/redirect", "N/u
                     dateToField.updateDisplayType({ displayType: serverWidget.FieldDisplayType.DISABLED });
                     vendorField.updateDisplayType({ displayType: serverWidget.FieldDisplayType.DISABLED });
                     currencyField.updateDisplayType({ displayType: serverWidget.FieldDisplayType.DISABLED });
-                    exchangeRate.updateDisplayType({ displayType: serverWidget.FieldDisplayType.DISABLED });
                     if (depField) {
                         depField.updateDisplayType({ displayType: serverWidget.FieldDisplayType.DISABLED });
                     }
@@ -498,7 +499,94 @@ define(["N/search", "N/record", "N/runtime", "N/translation", "N/redirect", "N/u
                     functionName: "toggleCheckBoxes(false)"
                 });
 
+                // Sublista accounting books
+                this.form.addTab({
+                    id: "accounting_books_tab",
+                    label: "Accounting Books"//this.getText("accounting_books")
+                });
+
+                this.sublist = this.form.addSublist({
+                    id: "custpage_results_list_books",
+                    label:"Accounting Books",//this.getText("results"),
+                    tab: "accounting_books_tab",
+                    type: serverWidget.SublistType.LIST
+                });
+
+                
+
+                let sublistBooks = this.sublist;
+
+                sublistBooks.addField({
+                    id: "name_book",
+                    label: "Name",
+                    type: serverWidget.FieldType.TEXT
+                });
+                sublistBooks.addField({
+                    id: "currency_book",
+                    label: "Currency",
+                    type: serverWidget.FieldType.TEXT
+                });
+
+                sublistBooks.addField({
+                    id: "exchange_rate_sblt",
+                    label: this.getText("EXCHANGERATE"),
+                    type: serverWidget.FieldType.FLOAT
+                });
+
+
                 return sublist;
+            }
+
+            setExchangeRate(){
+                const form = this.form
+                const {subsidiary,currency,date}=this.params;
+                log.error("date",date)
+                log.error("date typeof",typeof date)
+                
+                log.error("currency",currency)
+                const dateFormat = format.parse({ value: date, type: format.Type.DATE });
+                log.error("dateFormat",dateFormat)
+                
+                 
+                
+                
+                
+                let companyCurrency;
+                if (this.FEAT_SUBS) {
+                    if (subsidiary && subsidiary!=0) {
+                        companyCurrency = search.lookupFields({
+                            type: search.Type.SUBSIDIARY,
+                            id: subsidiary,
+                            columns: ["currency"]
+                        }).currency[0].value;
+                    }
+                }else{
+                    const configpage = config.load({
+                        type: config.Type.COMPANY_INFORMATION
+                    });
+
+                    companyCurrency = configpage.getValue('basecurrency')
+                }
+                log.error("companyCurrency",companyCurrency)
+                this.dateFormat = dateFormat;
+                this.companyCurrency = companyCurrency;
+                if (companyCurrency && (currency && currency!="0") && date) {
+                    const rate = Ncurrency.exchangeRate({
+                        source: currency,
+                        target: companyCurrency,
+                        date: dateFormat
+                    });
+                    log.error("rate",rate);
+                    let rateField = form.getField({ id: "custpage_exchange_rate" });
+                    rateField.defaultValue = rate;
+
+                    if (rate == 1) {
+                        rateField.updateDisplayType({ displayType: serverWidget.FieldDisplayType.DISABLED });
+                    }
+                }
+
+
+
             }
 
             loadSublist() {
@@ -671,6 +759,88 @@ define(["N/search", "N/record", "N/runtime", "N/translation", "N/redirect", "N/u
 
                 return data;
             }
+
+            loadSublistAccoutingBooks(){
+                const books = this.getAccountingBooks();
+
+                let sublist = this.form.getSublist({ id: "custpage_results_list_books" });
+
+                books.forEach(({bookName,currency},i)=>{
+                    sublist.setSublistValue({ id: "name_book", line: i, value: bookName });
+                    sublist.setSublistValue({ id: "currency_book", line: i, value: currency });
+                    sublist.setSublistValue({ id: "exchange_rate_sblt", line: i, value: 1 });
+                });
+
+                log.error("books",books);
+            }
+
+
+            getAccountingBooks() {
+                const { subsidiary } = this.params;
+                const subsidiaryRecord = record.load({ type: "subsidiary", id: subsidiary });
+                const books = [];
+                const accountingBookCount = subsidiaryRecord.getLineCount({ sublistId: "accountingbookdetail" });
+                let bookNames = {};
+                let currencyNames = {};
+
+
+                search.create({
+                    type: search.Type.ACCOUNTING_BOOK,
+                    columns: ["internalid", "name"],
+                    filters: [{
+                        name: 'subsidiary',
+                        operator: 'anyof',
+                        values: [subsidiary]
+                    }]
+                }).run().each(result => {
+                    let bookId = result.getValue(result.columns[0]);
+                    bookNames[bookId] = result.getValue(result.columns[1]);
+                    return true;
+                });
+
+                search.create({
+                    type: "currency",
+                    filters: [
+                        ['isinactive', 'is', 'F']
+                    ],
+                    columns: ["name", "internalid"]
+                }).run().each(result => {
+                    let currencyId = result.getValue(result.columns[1]);
+                    currencyNames[currencyId] = result.getValue(result.columns[0]);
+                    return true;
+                });
+
+                for (let i = 0; i < accountingBookCount; i++) {
+
+                    const bookId = subsidiaryRecord.getSublistValue("accountingbookdetail", "bookid", i);
+                    const currencyId = subsidiaryRecord.getSublistValue("accountingbookdetail", "currency", i);
+                    const bookStatus = subsidiaryRecord.getSublistValue("accountingbookdetail", "bookstatus", i);
+
+                    if (bookStatus == "ACTIVE") {
+                        books.push({
+                            currency: currencyNames[currencyId],
+                            bookName: bookNames[bookId],
+                            bookId,
+                            currencyId
+                        })
+                    }
+
+                }
+                return books;
+            }
+
+            getExchangeRate(currencySource){
+
+                const {currency} = this.params;
+
+                const rate = Ncurrency.exchangeRate({
+                    source: currencySource,
+                    target: this.companyCurrency,
+                    date: this.dateFormat
+                });
+            }
+
+
 
             fillRulesPY(applyRuleField) {
                 let search_rule = search.create({
@@ -936,6 +1106,7 @@ define(["N/search", "N/record", "N/runtime", "N/translation", "N/redirect", "N/u
                     locationField.addSelectOption({ value: location, text: name });
                     locationField.defaultValue = location;
                 }
+                this.setExchangeRate();
 
                 form.updateDefaultValues({
                     "custpage_date": date || "",

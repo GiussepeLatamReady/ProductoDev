@@ -36,6 +36,7 @@ define(["./Latam_Library/LMRY_PY_Foreign_Purchase_WHT_STLT_LBRY_V2.1", "./Latam_
                     } else {
                         handler.setFormValues();
                         handler.loadSublist();
+                        handler.loadSublistAccoutingBooks();
                     }
 
                     form.clientScriptModulePath = CLIENT_SCRIPT;

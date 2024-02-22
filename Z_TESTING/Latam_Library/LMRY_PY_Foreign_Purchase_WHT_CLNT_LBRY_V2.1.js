@@ -101,11 +101,15 @@ define(["N/runtime","N/currency", "N/search", "N/record", "N/format", "N/transla
                             }
                         }
                     }
-
+                    /*
                     if (fieldId === "custpage_currency") {
                         this.setExchangeRate();
                     }
 
+                    if (fieldId === "custpage_date") {
+                        this.setExchangeRate();
+                    }
+                    */
                     if (sublistId === "custpage_results_list") {
                         if (fieldId === "apply") {
                             let sublistrule = recordObj.getSublistField({ sublistId: "custpage_results_list", fieldId: "apply_rule", line: context.line });
@@ -318,7 +322,7 @@ define(["N/runtime","N/currency", "N/search", "N/record", "N/format", "N/transla
                     });
                 }
                 this.whtByRule = data;
-                console.log("whtByRule: "+JSON.stringify(this.whtByRule));
+                
             }
 
             getRulesbyEntity(recordObj) {
@@ -363,7 +367,7 @@ define(["N/runtime","N/currency", "N/search", "N/record", "N/format", "N/transla
                     });
                 }
                 this.ruleByEntity = data;
-                console.log("ruleByEntity: "+JSON.stringify(this.ruleByEntity));
+                
             }
 
             validateMandatoryFields() {
@@ -700,7 +704,7 @@ define(["N/runtime","N/currency", "N/search", "N/record", "N/format", "N/transla
                     "batch": batch
                 }
 
-                console.log(jsonRecord);
+                
 
                 // Creacion de Logs
                 let recordlog = record.create({
@@ -726,7 +730,7 @@ define(["N/runtime","N/currency", "N/search", "N/record", "N/format", "N/transla
 
                 currentRecord.setValue({ fieldId: "custpage_log_id", value: idlog, ignoreFieldChange: true });
 
-                console.log("idlog: " + idlog);
+                
                 return true;
             }
 
@@ -777,7 +781,7 @@ define(["N/runtime","N/currency", "N/search", "N/record", "N/format", "N/transla
                 console.log("dateValue :",dateValue)
 
                 if (this.FEAT_SUBS) {
-                    if (subsidiaryValue) {
+                    if (subsidiaryValue && subsidiaryValue!=0) {
                         companyCurrency = search.lookupFields({
                             type: search.Type.SUBSIDIARY,
                             id: subsidiaryValue,
@@ -796,12 +800,7 @@ define(["N/runtime","N/currency", "N/search", "N/record", "N/format", "N/transla
                     });
 
                     recordObj.setValue({ fieldId: "custpage_exchange_rate", value: rate });
-
-                    if (rate==1) {
-                        rateField.isDisabled = true;
-                    }else{
-                        rateField.isDisabled = false;
-                    }
+                    rate == 1 ? rateField.isDisabled = true : rateField.isDisabled = false;
                 }
                 console.log("rate :",rate)
             }
