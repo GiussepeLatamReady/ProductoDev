@@ -215,6 +215,7 @@ define(["N/search", "N/runtime", "N/record", "N/log", "N/url", "N/format"],
 
             if (applyExchangeRate) {
                 journalObj.setValue("exchangerate", exchangeRate);
+                setAccountingBookDetails(journalObj,accountingBooks)
             }
             
 
@@ -323,9 +324,35 @@ define(["N/search", "N/runtime", "N/record", "N/log", "N/url", "N/format"],
                 }
             }
 
+            setAccountingBookDetails(billpaymentObj,accountingBooks)
+            
+            
+
             billpaymentObj.save({ ignoreMandatoryFields: true, disableTriggers: true });
 
             return idJournal;
+        }
+
+        function setAccountingBookDetails(newTransaction,accountingBooks){
+            const numApplyBook = newTransaction.getLineCount({ sublistId: "accountingbookdetail" });
+            if (numApplyBook > 0) {
+                for (let i = 0; i < numApplyBook; i++) {
+                    newTransaction.selectLine({ sublistId: "accountingbookdetail", line: i });
+
+                    const bookId = newTransaction.getCurrentSublistValue({
+                        sublistId: "accountingbookdetail",
+                        fieldId: "bookid"
+                    });
+                    if (accountingBooks[bookId]) {
+                        newTransaction.setCurrentSublistValue({
+                            sublistId: "accountingbookdetail",
+                            fieldId: "exchangerate",
+                            value: accountingBooks[bookId].exchangeRate
+                        });
+                    }
+                    
+                }
+            }
         }
 
         function setupTaxSubsidiary(subsidiary) {

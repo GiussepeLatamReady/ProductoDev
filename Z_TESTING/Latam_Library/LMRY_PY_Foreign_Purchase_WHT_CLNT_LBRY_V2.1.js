@@ -792,12 +792,12 @@ define(["N/runtime","N/currency", "N/search", "N/record", "N/format", "N/transla
             getAccountingBooks(){
                 const recordObj = this.currentRecord;
                 const numberLines = recordObj.getLineCount({ sublistId: "custpage_results_list_books" });
-                let accountingBooks = new Array()
+                let accountingBooks = {}
                 for (let i = 0; i < numberLines; i++) {
                     const currencyId = recordObj.getSublistValue({ sublistId: "custpage_results_list_books", fieldId: "currency_book_id", line: i }) || "11";
                     const bookId = recordObj.getSublistValue({ sublistId: "custpage_results_list_books", fieldId: "book_id", line: i })
                     const exchangeRate = recordObj.getSublistValue({ sublistId: "custpage_results_list_books", fieldId: "exchange_rate_sblt", line: i })
-                    accountingBooks.push({bookId,currencyId,exchangeRate})
+                    accountingBooks[bookId] = {bookId,currencyId,exchangeRate};
                 }
                 return JSON.stringify(accountingBooks);
             }
