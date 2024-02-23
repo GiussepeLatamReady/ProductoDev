@@ -323,13 +323,30 @@ define(["N/search","N/config","N/format","N/currency", "N/record", "N/runtime", 
                         container: "additionalGroup"
                     }).setHelpText({ help: "custpage_apply_rule" });
 
+                    //Additional Information
+                    form.addFieldGroup({
+                        id: "journalGroup",
+                        label: "Journal Entry"
+                    });
+
+
+                    let applyExchangeRate = form.addField({
+                        id: "custpage_apply_exchange_rate",
+                        type: serverWidget.FieldType.FLOAT,
+                        label: "Apply "+this.getText("EXCHANGERATE"),
+                        container: "journalGroup"
+                    }).setHelpText({ help: "custpage_apply_exchange_rate" });
+                    
                     let exchangeRate = form.addField({
                         id: "custpage_exchange_rate",
                         type: serverWidget.FieldType.FLOAT,
                         label: this.getText("EXCHANGERATE"),
-                        container: "mainGroup"
+                        container: "journalGroup"
                     }).setHelpText({ help: "custpage_exchange_rate" });
                     exchangeRate.isMandatory = true;
+                    this.fillRulesPY(applyRulefield);
+
+                    
 
                     this.fillRulesPY(applyRulefield);
 
@@ -528,9 +545,27 @@ define(["N/search","N/config","N/format","N/currency", "N/record", "N/runtime", 
                 });
 
                 sublistBooks.addField({
+                    id: "currency_book_id",
+                    label: "Currency",
+                    type: serverWidget.FieldType.TEXT
+                }).updateDisplayType({
+                    displayType: serverWidget.FieldDisplayType.HIDDEN
+                });
+
+                sublistBooks.addField({
+                    id: "book_id",
+                    label: "Currency",
+                    type: serverWidget.FieldType.TEXT
+                }).updateDisplayType({
+                    displayType: serverWidget.FieldDisplayType.HIDDEN
+                });
+
+                sublistBooks.addField({
                     id: "exchange_rate_sblt",
                     label: this.getText("EXCHANGERATE"),
                     type: serverWidget.FieldType.FLOAT
+                }).updateDisplayType({
+                    displayType: serverWidget.FieldDisplayType.ENTRY
                 });
 
 
@@ -765,10 +800,12 @@ define(["N/search","N/config","N/format","N/currency", "N/record", "N/runtime", 
 
                 let sublist = this.form.getSublist({ id: "custpage_results_list_books" });
 
-                books.forEach(({bookName,currency},i)=>{
+                books.forEach(({bookName,currency,exchangeRate,currencyId,bookId},i)=>{
                     sublist.setSublistValue({ id: "name_book", line: i, value: bookName });
                     sublist.setSublistValue({ id: "currency_book", line: i, value: currency });
-                    sublist.setSublistValue({ id: "exchange_rate_sblt", line: i, value: 1 });
+                    sublist.setSublistValue({ id: "currency_book_id", line: i, value: currencyId });
+                    sublist.setSublistValue({ id: "exchange_rate_sblt", line: i, value: exchangeRate });
+                    sublist.setSublistValue({ id: "book_id", line: i, value: bookId });
                 });
 
                 log.error("books",books);
@@ -821,8 +858,10 @@ define(["N/search","N/config","N/format","N/currency", "N/record", "N/runtime", 
                             currency: currencyNames[currencyId],
                             bookName: bookNames[bookId],
                             bookId,
-                            currencyId
+                            currencyId,
+                            exchangeRate:this.getExchangeRate(currencyId)
                         })
+                        
                     }
 
                 }
@@ -830,18 +869,13 @@ define(["N/search","N/config","N/format","N/currency", "N/record", "N/runtime", 
             }
 
             getExchangeRate(currencySource){
-
-                const {currency} = this.params;
-
-                if (currency == currencySource) {
-                    
-                }
-
                 const rate = Ncurrency.exchangeRate({
                     source: currencySource,
                     target: this.companyCurrency,
                     date: this.dateFormat
                 });
+                log.error("rate {getExchangeRate}",rate)
+                return rate;
             }
 
 

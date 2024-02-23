@@ -101,11 +101,13 @@ define(["N/runtime","N/currency", "N/search", "N/record", "N/format", "N/transla
                             }
                         }
                     }
-                    /*
-                    if (fieldId === "custpage_currency") {
-                        this.setExchangeRate();
+                    
+                    if (fieldId === "custpage_exchange_rate") {
+                        this.setExchangeRateAccountingBooks();
+                        console.log("cambio en exchangerate")
                     }
-
+                    
+                    /*
                     if (fieldId === "custpage_date") {
                         this.setExchangeRate();
                     }
@@ -689,7 +691,11 @@ define(["N/runtime","N/currency", "N/search", "N/record", "N/format", "N/transla
                 let department = Number(currentRecord.getValue({ fieldId: "custpage_department" })) || "";
                 let class_ = Number(currentRecord.getValue({ fieldId: "custpage_class" })) || "";
                 let location = Number(currentRecord.getValue({ fieldId: "custpage_location" })) || "";
+                let exchangeRate = Number(currentRecord.getValue({ fieldId: "custpage_exchange_rate" }));
+                let applyExchangeRate = currentRecord.getValue({ fieldId: "custpage_apply_exchange_rate" }) || false;
 
+                applyExchangeRate = exchangeRate ? false: applyExchangeRate;
+                
                 let jsonRecord = {
                     "subsidiary": subsidiary,
                     "entity": entity,
@@ -725,7 +731,9 @@ define(["N/runtime","N/currency", "N/search", "N/record", "N/format", "N/transla
                 recordlog.setValue({ fieldId: "custrecord_lmry_py_wht_location", value: location });
                 recordlog.setValue({ fieldId: "custrecord_lmry_py_wht_status", value: "4" });
                 recordlog.setValue({ fieldId: "custrecord_lmry_py_wht_data", value: JSON.stringify(billsData) });
-
+                recordlog.setValue({ fieldId: "custrecord_lmry_py_wht_books", value: this.getAccountingBooks() });
+                recordlog.setValue({ fieldId: "custrecord_lmry_py_wht_exchange_rate", value: exchangeRate});
+                recordlog.setValue({ fieldId: "custrecord_lmry_py_wht_apply_rate", value: applyExchangeRate});
                 let idlog = recordlog.save({ enableSourcing: true, ignoreMandatoryFields: true, disableTriggers: true });
 
                 currentRecord.setValue({ fieldId: "custpage_log_id", value: idlog, ignoreFieldChange: true });
@@ -766,46 +774,33 @@ define(["N/runtime","N/currency", "N/search", "N/record", "N/format", "N/transla
                 });
             }
 
-            setExchangeRate(){
+            setExchangeRateAccountingBooks() {
                 const recordObj = this.currentRecord;
-                const subsidiaryValue =  recordObj.getValue("custpage_subsidiary");
-                const currencyValue =  recordObj.getValue("custpage_currency");
-                const dateValue =  recordObj.getValue("custpage_date");
+                const primaryCurrency = recordObj.getValue("custpage_currency");
+                const primaryExchangeRate = recordObj.getValue("custpage_exchange_rate");
+                const numberLines = recordObj.getLineCount({ sublistId: "custpage_results_list_books" });
 
-                const rateField =  recordObj.getField("custpage_exchange_rate");
-                let companyCurrency;
-                let rate;
-                console.log("subsidiaryValue :",subsidiaryValue)
-                console.log("currencyValue :",currencyValue)
-                console.log("currencyValue typeof:",typeof currencyValue)
-                console.log("dateValue :",dateValue)
-
-                if (this.FEAT_SUBS) {
-                    if (subsidiaryValue && subsidiaryValue!=0) {
-                        companyCurrency = search.lookupFields({
-                            type: search.Type.SUBSIDIARY,
-                            id: subsidiaryValue,
-                            columns: ["currency"]
-                        }).currency[0].value;
+                for (let i = 0; i < numberLines; i++) {
+                    const currencyId = recordObj.getSublistValue({ sublistId: "custpage_results_list_books", fieldId: "currency_book_id", line: i }) || "11";
+                    if (primaryCurrency==currencyId) {
+                        recordObj.selectLine({ sublistId: 'custpage_results_list_books', line: i });
+                        recordObj.setCurrentSublistValue({ sublistId: 'custpage_results_list_books', fieldId: 'exchange_rate_sblt', value: primaryExchangeRate });
                     }
-                }else{
-                    companyCurrency = "11";
                 }
-                console.log("companyCurrency :",companyCurrency)
-                if (companyCurrency && (currencyValue && currencyValue!="0") && dateValue) {
-                    rate = currency.exchangeRate({
-                        source: currencyValue,
-                        target: companyCurrency,
-                        date: dateValue
-                    });
-
-                    recordObj.setValue({ fieldId: "custpage_exchange_rate", value: rate });
-                    rate == 1 ? rateField.isDisabled = true : rateField.isDisabled = false;
-                }
-                console.log("rate :",rate)
             }
 
-           
+            getAccountingBooks(){
+                const recordObj = this.currentRecord;
+                const numberLines = recordObj.getLineCount({ sublistId: "custpage_results_list_books" });
+                let accountingBooks = new Array()
+                for (let i = 0; i < numberLines; i++) {
+                    const currencyId = recordObj.getSublistValue({ sublistId: "custpage_results_list_books", fieldId: "currency_book_id", line: i }) || "11";
+                    const bookId = recordObj.getSublistValue({ sublistId: "custpage_results_list_books", fieldId: "book_id", line: i })
+                    const exchangeRate = recordObj.getSublistValue({ sublistId: "custpage_results_list_books", fieldId: "exchange_rate_sblt", line: i })
+                    accountingBooks.push({bookId,currencyId,exchangeRate})
+                }
+                return JSON.stringify(accountingBooks);
+            }
         }
 
         function handleError(functionName, err) {

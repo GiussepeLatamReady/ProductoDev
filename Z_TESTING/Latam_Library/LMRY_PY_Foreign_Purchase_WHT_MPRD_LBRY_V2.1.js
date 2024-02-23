@@ -17,7 +17,8 @@ define(["N/search", "N/runtime", "N/record", "N/log", "N/url", "N/format"],
                     "custrecord_lmry_py_wht_subsidiary", "custrecord_lmry_py_wht_entity", "custrecord_lmry_py_wht_currency",
                     "custrecord_lmry_py_wht_datefrom", "custrecord_lmry_py_wht_dateto", "custrecord_lmry_py_wht_dateissue",
                     "custrecord_lmry_py_wht_department", "custrecord_lmry_py_wht_class", "custrecord_lmry_py_wht_location",
-                    "custrecord_lmry_py_wht_batch", "custrecord_lmry_py_wht_memo", "custrecord_lmry_py_wht_data"
+                    "custrecord_lmry_py_wht_batch", "custrecord_lmry_py_wht_memo", "custrecord_lmry_py_wht_data",
+                    "custrecord_lmry_py_wht_books", "custrecord_lmry_py_wht_exchange_rate"
                 ]
             });
             log.debug("dataLog", JSON.stringify(dataLog));
@@ -33,6 +34,9 @@ define(["N/search", "N/runtime", "N/record", "N/log", "N/url", "N/format"],
             let batch = dataLog.custrecord_lmry_py_wht_batch;
             let memo = dataLog.custrecord_lmry_py_wht_memo;
             let data = JSON.parse(dataLog.custrecord_lmry_py_wht_data);
+            let exchangeRate = dataLog.custrecord_lmry_py_wht_exchange_rate;
+            let applyExchangeRate = dataLog.custrecord_lmry_py_wht_apply_rate;
+            let accountingBooks = JSON.parse(dataLog.custrecord_lmry_py_wht_books);
             log.debug("data", JSON.stringify(data));
 
             let setupJson = setupTaxSubsidiary(subsidiary);
@@ -52,6 +56,9 @@ define(["N/search", "N/runtime", "N/record", "N/log", "N/url", "N/format"],
                     location: location,
                     batch: batch,
                     memo: memo,
+                    exchangeRate,
+                    accountingBooks,
+                    applyExchangeRate,
                     total_amt: data[bill].total_amt,
                     wht_percent: data[bill].wht_percent,
                     apply_rule: data[bill].apply_rule,
@@ -168,6 +175,9 @@ define(["N/search", "N/runtime", "N/record", "N/log", "N/url", "N/format"],
             let currency = dataLog.currency;
             let precision = dataLog.precision;
             let memo = dataLog.memo;
+            let exchangeRate = dataLog.exchangeRate;
+            let applyExchangeRate = dataLog.exchangeRate == "T" || dataLog.exchangeRate == true
+            let accountingBooks = dataLog.accountingBooks;
             let department = dataLog.department;
             let class_ = dataLog.class_;
             let location = dataLog.location;
@@ -202,6 +212,11 @@ define(["N/search", "N/runtime", "N/record", "N/log", "N/url", "N/format"],
             journalObj.setValue("currency", currency);
             journalObj.setValue("trandate", dateissue);
             journalObj.setValue("memo", memo);
+
+            if (applyExchangeRate) {
+                journalObj.setValue("exchangerate", exchangeRate);
+            }
+            
 
             let FEAT_JOURNAL = runtime.getCurrentScript().getParameter({ name: "CUSTOMAPPROVALJOURNAL" });
             if (FEAT_JOURNAL === true || FEAT_JOURNAL === "T") {
@@ -307,6 +322,7 @@ define(["N/search", "N/runtime", "N/record", "N/log", "N/url", "N/format"],
                     });
                 }
             }
+
             billpaymentObj.save({ ignoreMandatoryFields: true, disableTriggers: true });
 
             return idJournal;
