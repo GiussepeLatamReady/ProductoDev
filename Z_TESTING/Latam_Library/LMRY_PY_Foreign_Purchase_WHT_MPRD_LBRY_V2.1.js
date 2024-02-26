@@ -21,7 +21,7 @@ define(["N/search", "N/runtime", "N/record", "N/log", "N/url", "N/format"],
                     "custrecord_lmry_py_wht_books", "custrecord_lmry_py_wht_exchange_rate"
                 ]
             });
-            log.debug("dataLog", JSON.stringify(dataLog));
+            log.error("dataLog", dataLog);
             let subsidiary = dataLog.custrecord_lmry_py_wht_subsidiary ? dataLog.custrecord_lmry_py_wht_subsidiary[0].value : 1;
             let vendor = dataLog.custrecord_lmry_py_wht_entity.length ? dataLog.custrecord_lmry_py_wht_entity[0].value : "";
             let currency = dataLog.custrecord_lmry_py_wht_currency.length ? dataLog.custrecord_lmry_py_wht_currency[0].value : "";
@@ -37,10 +37,10 @@ define(["N/search", "N/runtime", "N/record", "N/log", "N/url", "N/format"],
             let exchangeRate = dataLog.custrecord_lmry_py_wht_exchange_rate;
             let applyExchangeRate = dataLog.custrecord_lmry_py_wht_apply_rate;
             let accountingBooks = JSON.parse(dataLog.custrecord_lmry_py_wht_books);
-            log.debug("data", JSON.stringify(data));
+            log.error("data", data);
 
             let setupJson = setupTaxSubsidiary(subsidiary);
-            log.debug("setupJson", JSON.stringify(setupJson));
+            log.error("setupJson", setupJson);
 
             for (const bill in data) {
                 dataMap[bill] = {
@@ -167,6 +167,7 @@ define(["N/search", "N/runtime", "N/record", "N/log", "N/url", "N/format"],
         }
 
         function createJournal(billId, dataLog, nationalTaxes) {
+
             let FEAT_MULTIBOOK = runtime.isFeatureInEffect({ feature: "MULTIBOOK" });
             let subsidiary = dataLog.subsidiary;
             let vendor = dataLog.vendor;
@@ -185,6 +186,7 @@ define(["N/search", "N/runtime", "N/record", "N/log", "N/url", "N/format"],
             let bankaccount = dataLog.bankaccount;
 
             if (!bankaccount) {
+                log.error("bankaccount feat", "entro bankaccount")
                 return 0;
             }
 
@@ -195,8 +197,11 @@ define(["N/search", "N/runtime", "N/record", "N/log", "N/url", "N/format"],
                 subtypes.push(nationalTaxes[index].subtypetext);
                 account = nationalTaxes[index].account;
             }
-
+            log.error("nationalTaxes", nationalTaxes)
+            log.error("nretention", retention)
+            log.error("account", account)
             if (!retention || !account) {
+                log.error("retention account feat", "entro retention account")
                 return 0;
             }
 
@@ -215,12 +220,12 @@ define(["N/search", "N/runtime", "N/record", "N/log", "N/url", "N/format"],
 
             if (applyExchangeRate) {
                 journalObj.setValue("exchangerate", exchangeRate);
-                if (FEAT_MULTIBOOK== "T"|| FEAT_MULTIBOOK == true) {
-                    setAccountingBookDetails(journalObj,accountingBooks)
+                if (FEAT_MULTIBOOK == "T" || FEAT_MULTIBOOK == true) {
+                    setAccountingBookDetails(journalObj, accountingBooks)
                 }
-                
+
             }
-            
+
 
             let FEAT_JOURNAL = runtime.getCurrentScript().getParameter({ name: "CUSTOMAPPROVALJOURNAL" });
             if (FEAT_JOURNAL === true || FEAT_JOURNAL === "T") {
@@ -326,16 +331,19 @@ define(["N/search", "N/runtime", "N/record", "N/log", "N/url", "N/format"],
                     });
                 }
             }
-            if (FEAT_MULTIBOOK== "T"|| FEAT_MULTIBOOK == true) {
-                setAccountingBookDetails(billpaymentObj,accountingBooks)
+            if (FEAT_MULTIBOOK == "T" || FEAT_MULTIBOOK == true) {
+                setAccountingBookDetails(billpaymentObj, accountingBooks)
             }
-            
-            
-            
+
+
+
 
             billpaymentObj.save({ ignoreMandatoryFields: true, disableTriggers: true });
-
             return idJournal;
+
+
+
+
         }
 
         function setAccountingBookDetails(newTransaction,accountingBooks){
@@ -398,7 +406,6 @@ define(["N/search", "N/runtime", "N/record", "N/log", "N/url", "N/format"],
                 }
                 jsonSetupTax["bankAccounts"] = accountByCurrency;
             }
-
             return jsonSetupTax;
         }
 

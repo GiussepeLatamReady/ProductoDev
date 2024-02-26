@@ -12,7 +12,7 @@
  * @NScriptType ScheduledScript
  * @NModuleScope Public
  */
-define(["N/search","N/record", "N/log","N/query", "N/runtime"],
+define(["N/search", "N/record", "N/log", "N/query", "N/runtime"],
     function (search, record, log, query, runtime) {
 
         function execute(Context) {
@@ -21,25 +21,50 @@ define(["N/search","N/record", "N/log","N/query", "N/runtime"],
                 //var invoiceId = "1041271"
                 //var result = record.create({ type:"customtransaction_lmry_ei_voided_transac"});
                 //log.error("type",result.getValue("type"));
-                 /*
-                for (var i = 0; i < 25; i++) {
-                    copyCreditMemo("3939035");
-                }
-                */
-                //voidCreditMemo("3939157",true);
 
-                searchTransaction("3914166");
+                for (var i = 0; i < 25; i++) {
+                    copyCreditMemo("3957662");
+                }
+
+                //voidCreditMemo("3939157",true);s
+
+                //searchTransaction("3914166");
                 //log.error("account",creditMemoSearch.accountmain[0].value);
 
 
-                
+
             } catch (error) {
-                log.error("error",error)
+                log.error("error", error)
             }
 
         }
 
+        function copyCreditMemo(transactionId) {
+            // Duplicar la transacción
+            var duplicatedTransaction = record.copy({
+                type: record.Type.VENDOR_BILL, // Reemplaza con el tipo de transacción adecuado
+                id: transactionId,
+            });
 
+            // Puedes realizar modificaciones en la transacción duplicada si es necesario
+
+            duplicatedTransaction.setValue({
+                fieldId: 'memo',
+                value: 'Copias generadas gadp',
+            });
+
+            duplicatedTransaction.setValue({
+                fieldId: 'approvalstatus',
+                value: '2',
+            });
+
+            // Guardar la transacción duplicada
+            var newTransactionId = duplicatedTransaction.save();
+
+            log.error('Transacción duplicada', 'Nueva transacción ID: ' + newTransactionId);
+        }
+
+        /*
         function searchTransaction(id) {
             var transaction = {};
             var searchFilters = [
@@ -67,8 +92,8 @@ define(["N/search","N/record", "N/log","N/query", "N/runtime"],
             });
             log.error("transaction",transaction)
         }
+        */
 
-       
 
         return {
             execute: execute
