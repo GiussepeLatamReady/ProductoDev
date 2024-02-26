@@ -21,7 +21,7 @@ define(["N/search","N/config","N/format","N/currency", "N/record", "N/runtime", 
                 this.FEAT_DEPT = runtime.isFeatureInEffect({ feature: "DEPARTMENTS" });
                 this.FEAT_LOC = runtime.isFeatureInEffect({ feature: "LOCATIONS" });
                 this.FEAT_CLASS = runtime.isFeatureInEffect({ feature: "CLASSES" });
-
+                this.FEAT_MULTIBOOK = runtime.isFeatureInEffect({ feature: "MULTIBOOK" });
                 this.DEPTMANDATORY = runtime.getCurrentUser().getPreference({ name: "DEPTMANDATORY" });
                 this.LOCMANDATORY = runtime.getCurrentUser().getPreference({ name: "LOCMANDATORY" });
                 this.CLASSMANDATORY = runtime.getCurrentUser().getPreference({ name: "CLASSMANDATORY" });
@@ -332,7 +332,7 @@ define(["N/search","N/config","N/format","N/currency", "N/record", "N/runtime", 
 
                     let applyExchangeRate = form.addField({
                         id: "custpage_apply_exchange_rate",
-                        type: serverWidget.FieldType.FLOAT,
+                        type: serverWidget.FieldType.CHECKBOX,
                         label: "Apply "+this.getText("EXCHANGERATE"),
                         container: "journalGroup"
                     }).setHelpText({ help: "custpage_apply_exchange_rate" });
@@ -516,57 +516,60 @@ define(["N/search","N/config","N/format","N/currency", "N/record", "N/runtime", 
                     functionName: "toggleCheckBoxes(false)"
                 });
 
-                // Sublista accounting books
-                this.form.addTab({
-                    id: "accounting_books_tab",
-                    label: "Accounting Books"//this.getText("accounting_books")
-                });
+                if (this.FEAT_MULTIBOOK === "T" || this.FEAT_MULTIBOOK === true) {
+                    // Sublista accounting books
+                    this.form.addTab({
+                        id: "accounting_books_tab",
+                        label: "Accounting Books"//this.getText("accounting_books")
+                    });
 
-                this.sublist = this.form.addSublist({
-                    id: "custpage_results_list_books",
-                    label:"Accounting Books",//this.getText("results"),
-                    tab: "accounting_books_tab",
-                    type: serverWidget.SublistType.LIST
-                });
+                    this.sublist = this.form.addSublist({
+                        id: "custpage_results_list_books",
+                        label: "Accounting Books",//this.getText("results"),
+                        tab: "accounting_books_tab",
+                        type: serverWidget.SublistType.LIST
+                    });
 
-                
 
-                let sublistBooks = this.sublist;
 
-                sublistBooks.addField({
-                    id: "name_book",
-                    label: "Name",
-                    type: serverWidget.FieldType.TEXT
-                });
-                sublistBooks.addField({
-                    id: "currency_book",
-                    label: "Currency",
-                    type: serverWidget.FieldType.TEXT
-                });
+                    let sublistBooks = this.sublist;
 
-                sublistBooks.addField({
-                    id: "currency_book_id",
-                    label: "Currency",
-                    type: serverWidget.FieldType.TEXT
-                }).updateDisplayType({
-                    displayType: serverWidget.FieldDisplayType.HIDDEN
-                });
+                    sublistBooks.addField({
+                        id: "name_book",
+                        label: "Name",
+                        type: serverWidget.FieldType.TEXT
+                    });
+                    sublistBooks.addField({
+                        id: "currency_book",
+                        label: "Currency",
+                        type: serverWidget.FieldType.TEXT
+                    });
 
-                sublistBooks.addField({
-                    id: "book_id",
-                    label: "Currency",
-                    type: serverWidget.FieldType.TEXT
-                }).updateDisplayType({
-                    displayType: serverWidget.FieldDisplayType.HIDDEN
-                });
+                    sublistBooks.addField({
+                        id: "currency_book_id",
+                        label: "Currency",
+                        type: serverWidget.FieldType.TEXT
+                    }).updateDisplayType({
+                        displayType: serverWidget.FieldDisplayType.HIDDEN
+                    });
 
-                sublistBooks.addField({
-                    id: "exchange_rate_sblt",
-                    label: this.getText("EXCHANGERATE"),
-                    type: serverWidget.FieldType.FLOAT
-                }).updateDisplayType({
-                    displayType: serverWidget.FieldDisplayType.ENTRY
-                });
+                    sublistBooks.addField({
+                        id: "book_id",
+                        label: "Currency",
+                        type: serverWidget.FieldType.TEXT
+                    }).updateDisplayType({
+                        displayType: serverWidget.FieldDisplayType.HIDDEN
+                    });
+
+                    sublistBooks.addField({
+                        id: "exchange_rate_sblt",
+                        label: this.getText("EXCHANGERATE"),
+                        type: serverWidget.FieldType.FLOAT
+                    }).updateDisplayType({
+                        displayType: serverWidget.FieldDisplayType.ENTRY
+                    });
+                }
+               
 
 
                 return sublist;
@@ -796,19 +799,21 @@ define(["N/search","N/config","N/format","N/currency", "N/record", "N/runtime", 
             }
 
             loadSublistAccoutingBooks(){
-                const books = this.getAccountingBooks();
+                if (this.FEAT_MULTIBOOK === "T" || this.FEAT_MULTIBOOK === true) {
+                    const books = this.getAccountingBooks();
 
-                let sublist = this.form.getSublist({ id: "custpage_results_list_books" });
+                    let sublist = this.form.getSublist({ id: "custpage_results_list_books" });
 
-                books.forEach(({bookName,currency,exchangeRate,currencyId,bookId},i)=>{
-                    sublist.setSublistValue({ id: "name_book", line: i, value: bookName });
-                    sublist.setSublistValue({ id: "currency_book", line: i, value: currency });
-                    sublist.setSublistValue({ id: "currency_book_id", line: i, value: currencyId });
-                    sublist.setSublistValue({ id: "exchange_rate_sblt", line: i, value: exchangeRate });
-                    sublist.setSublistValue({ id: "book_id", line: i, value: bookId });
-                });
+                    books.forEach(({ bookName, currency, exchangeRate, currencyId, bookId }, i) => {
+                        sublist.setSublistValue({ id: "name_book", line: i, value: bookName });
+                        sublist.setSublistValue({ id: "currency_book", line: i, value: currency });
+                        sublist.setSublistValue({ id: "currency_book_id", line: i, value: currencyId });
+                        sublist.setSublistValue({ id: "exchange_rate_sblt", line: i, value: exchangeRate });
+                        sublist.setSublistValue({ id: "book_id", line: i, value: bookId });
+                    });
 
-                log.error("books",books);
+                    log.error("books", books);
+                }               
             }
 
 

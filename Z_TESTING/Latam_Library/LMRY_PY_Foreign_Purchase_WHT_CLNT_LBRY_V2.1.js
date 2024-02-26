@@ -103,8 +103,9 @@ define(["N/runtime","N/currency", "N/search", "N/record", "N/format", "N/transla
                     }
                     
                     if (fieldId === "custpage_exchange_rate") {
-                        this.setExchangeRateAccountingBooks();
-                        console.log("cambio en exchangerate")
+                        if (this.FEAT_MULTIBOOK === "T" || this.FEAT_MULTIBOOK === true) {
+                            this.setExchangeRateAccountingBooks();
+                        }
                     }
                     
                     /*
@@ -694,7 +695,7 @@ define(["N/runtime","N/currency", "N/search", "N/record", "N/format", "N/transla
                 let exchangeRate = Number(currentRecord.getValue({ fieldId: "custpage_exchange_rate" }));
                 let applyExchangeRate = currentRecord.getValue({ fieldId: "custpage_apply_exchange_rate" }) || false;
 
-                applyExchangeRate = exchangeRate ? false: applyExchangeRate;
+                applyExchangeRate = exchangeRate ? applyExchangeRate : false;
                 
                 let jsonRecord = {
                     "subsidiary": subsidiary,
@@ -731,7 +732,9 @@ define(["N/runtime","N/currency", "N/search", "N/record", "N/format", "N/transla
                 recordlog.setValue({ fieldId: "custrecord_lmry_py_wht_location", value: location });
                 recordlog.setValue({ fieldId: "custrecord_lmry_py_wht_status", value: "4" });
                 recordlog.setValue({ fieldId: "custrecord_lmry_py_wht_data", value: JSON.stringify(billsData) });
-                recordlog.setValue({ fieldId: "custrecord_lmry_py_wht_books", value: this.getAccountingBooks() });
+                if (this.FEAT_MULTIBOOK === "T" || this.FEAT_MULTIBOOK === true) {
+                    recordlog.setValue({ fieldId: "custrecord_lmry_py_wht_books", value: this.getAccountingBooks() });
+                }
                 recordlog.setValue({ fieldId: "custrecord_lmry_py_wht_exchange_rate", value: exchangeRate});
                 recordlog.setValue({ fieldId: "custrecord_lmry_py_wht_apply_rate", value: applyExchangeRate});
                 let idlog = recordlog.save({ enableSourcing: true, ignoreMandatoryFields: true, disableTriggers: true });

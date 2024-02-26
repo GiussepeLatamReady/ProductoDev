@@ -167,7 +167,7 @@ define(["N/search", "N/runtime", "N/record", "N/log", "N/url", "N/format"],
         }
 
         function createJournal(billId, dataLog, nationalTaxes) {
-
+            let FEAT_MULTIBOOK = runtime.isFeatureInEffect({ feature: "MULTIBOOK" });
             let subsidiary = dataLog.subsidiary;
             let vendor = dataLog.vendor;
             let dateissue = dataLog.dateissue;
@@ -176,7 +176,7 @@ define(["N/search", "N/runtime", "N/record", "N/log", "N/url", "N/format"],
             let precision = dataLog.precision;
             let memo = dataLog.memo;
             let exchangeRate = dataLog.exchangeRate;
-            let applyExchangeRate = dataLog.exchangeRate == "T" || dataLog.exchangeRate == true
+            let applyExchangeRate = dataLog.applyExchangeRate === "T" || dataLog.applyExchangeRate === true
             let accountingBooks = dataLog.accountingBooks;
             let department = dataLog.department;
             let class_ = dataLog.class_;
@@ -215,7 +215,10 @@ define(["N/search", "N/runtime", "N/record", "N/log", "N/url", "N/format"],
 
             if (applyExchangeRate) {
                 journalObj.setValue("exchangerate", exchangeRate);
-                setAccountingBookDetails(journalObj,accountingBooks)
+                if (FEAT_MULTIBOOK== "T"|| FEAT_MULTIBOOK == true) {
+                    setAccountingBookDetails(journalObj,accountingBooks)
+                }
+                
             }
             
 
@@ -323,8 +326,10 @@ define(["N/search", "N/runtime", "N/record", "N/log", "N/url", "N/format"],
                     });
                 }
             }
-
-            setAccountingBookDetails(billpaymentObj,accountingBooks)
+            if (FEAT_MULTIBOOK== "T"|| FEAT_MULTIBOOK == true) {
+                setAccountingBookDetails(billpaymentObj,accountingBooks)
+            }
+            
             
             
 
