@@ -557,13 +557,8 @@ define([
 
 
                 if (startDate != null && startDate != '' && endDate != null && endDate != '') {
-                    filters.push('AND');
-                    const periodFourmulaids = this.getPeriods(subsidiary, startDate, endDate);
-                    filters.push([
-                        "formulatext:" + periodFourmulaids,
-                        search.Operator.IS,
-                        "1"
-                    ]);
+                    filters.push('AND',['trandate', 'onorafter', startDate]);
+                    filters.push('AND',['trandate', 'onorbefore', endDate]);
                 }
 
                 if (accoutingPeriod != null && accoutingPeriod != '') {

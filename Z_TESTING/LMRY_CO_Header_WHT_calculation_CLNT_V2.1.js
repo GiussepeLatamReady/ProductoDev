@@ -342,13 +342,13 @@ define(['N/runtime',
             }
 
 
-            createRecordLog(interface, dataProcess) {
+            createRecordLog(isCron, dataProcess) {
                 let currentRecord = this.currentRecord;
                 let form = {
                     ids: []
                 };
                 
-                if (!interface) {
+                if (!isCron) {
 
                     form.subsidiary = Number(currentRecord.getValue({ fieldId: 'custpage_subsidiary' })) || '';
                     form.typeProcess = currentRecord.getValue({ fieldId: 'custpage_wht_process' });
@@ -399,6 +399,7 @@ define(['N/runtime',
 
                 currentRecord.setValue({ fieldId: 'custpage_log_id', value: idlog, ignoreFieldChange: true });
 
+                this.parameters = { idlog,idUser: runtime.getCurrentUser().id }
                 console.log('idlog: ' + idlog);
                 return true;
             }

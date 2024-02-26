@@ -27,14 +27,15 @@ define([
             })
         };
         let parameters = {};
-
+        let recordInstance;
+        let formInstance;
 
         const getInputData = (inputContext) => {
             try {
 
-                const formInstance = new SuiteletForm.SuiteletFormManager({});
-                const recordInstance = new ClntForm.ClientUIManager({});
-                let transactions = getTransactions(formInstance);
+                formInstance = new SuiteletForm.SuiteletFormManager({});
+                recordInstance = new ClntForm.ClientUIManager({});
+                let transactions = setTransactions(formInstance);
 
 
 
@@ -133,26 +134,32 @@ define([
             }
         }
 
-        const getTransactions = (processExecution) => {
+        const setTransactions = () => {
             let transactions = [];
-            processExecution.authorise = formInstance.areThereSubsidiaries();
+            const authorise = formInstance.areThereSubsidiaries();
 
-            if (processExecution.authorise) {
+            if (authorise) {
 
-                const currentDate = processExecution.date;
+                const currentDate = new Date();
 
                 formInstance.subsidiaries?.filter(sub => sub.active).forEach(activeSub => {
                     ['header', 'line'].forEach(whtType => {
                         ['purchases', 'sales'].forEach(typeProcess => {
-                            const params = { subsidiary: activeSub, startDate: currentDate, endDate: currentDate, whtType, typeProcess };
-                            formInstance.setParams(params);
-                            transactions = transactions.concat(formInstance.getTransactions().map(transaction => transaction.whtType = whtType));
+                            const form = { subsidiary: activeSub, startDate: currentDate, endDate: currentDate, whtType, typeProcess,periodType:"Day",executionType:"Programmed script" };
+                            formInstance.setParams(form);
+                            
+                            
+                            transactions = formInstance.getTransactions();
+
+                            if (transactions.length) {
+                                form.ids = transactions.map(transaction => transaction.id);
+                                recordInstance.createRecordLog(true,form);
+                                parameters = recordInstance.parameters;
+                                updateState(parameters, 'Procesando', 'Se ha comenzado a procesar las transacciones...');
+                            }
                         });
                     });
                 });
-                return transactions;
-            } else {
-                return [];
             }
         }
 
