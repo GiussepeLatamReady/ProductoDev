@@ -344,7 +344,6 @@ define(["N/search","N/config","N/format","N/currency", "N/record", "N/runtime", 
                         container: "journalGroup"
                     }).setHelpText({ help: "custpage_exchange_rate" });
                     exchangeRate.isMandatory = true;
-                    this.fillRulesPY(applyRulefield);
 
                     
 
@@ -874,9 +873,10 @@ define(["N/search","N/config","N/format","N/currency", "N/record", "N/runtime", 
             }
 
             getExchangeRate(currencySource){
+                const {currency}=this.params;
                 const rate = Ncurrency.exchangeRate({
-                    source: currencySource,
-                    target: this.companyCurrency,
+                    source: currency,
+                    target: currencySource,
                     date: this.dateFormat
                 });
                 log.error("rate {getExchangeRate}",rate)
@@ -886,6 +886,7 @@ define(["N/search","N/config","N/format","N/currency", "N/record", "N/runtime", 
 
 
             fillRulesPY(applyRuleField) {
+                let rules = {};
                 let search_rule = search.create({
                     type: "customrecord_lmry_wht_rules",
                     filters: [
@@ -903,7 +904,9 @@ define(["N/search","N/config","N/format","N/currency", "N/record", "N/runtime", 
                         let ruleID = lengt_rule[i].getValue("internalid");
                         let ruleNM = lengt_rule[i].getValue("name");
                         applyRuleField.addSelectOption({ value: ruleID, text: ruleNM });
+                        rules[ruleID] = {ruleID, ruleNM}
                     }
+                    log.error("rules",rules)
                 }
             }
 

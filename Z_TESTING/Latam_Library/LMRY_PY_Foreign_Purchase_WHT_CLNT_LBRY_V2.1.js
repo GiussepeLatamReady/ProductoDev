@@ -86,6 +86,7 @@ define(["N/runtime","N/currency", "N/search", "N/record", "N/format", "N/transla
 
                     if (fieldId === "custpage_apply_rule") {
                         let rule = recordObj.getValue({ fieldId: "custpage_apply_rule" });
+                        console.log("rule",rule)
                         if (Number(rule)) {
                             for (var i = 0; i < recordObj.getLineCount("custpage_results_list"); i++) {
                                 if (recordObj.getSublistValue({ sublistId: "custpage_results_list", fieldId: "apply", line: i })) {
@@ -108,11 +109,7 @@ define(["N/runtime","N/currency", "N/search", "N/record", "N/format", "N/transla
                         }
                     }
                     
-                    /*
-                    if (fieldId === "custpage_date") {
-                        this.setExchangeRate();
-                    }
-                    */
+                    
                     if (sublistId === "custpage_results_list") {
                         if (fieldId === "apply") {
                             let sublistrule = recordObj.getSublistField({ sublistId: "custpage_results_list", fieldId: "apply_rule", line: context.line });
@@ -779,18 +776,28 @@ define(["N/runtime","N/currency", "N/search", "N/record", "N/format", "N/transla
 
             setExchangeRateAccountingBooks() {
                 const recordObj = this.currentRecord;
-                const primaryCurrency = recordObj.getValue("custpage_currency");
+                const subsidiary = recordObj.getValue("custpage_subsidiary");
+                let companyCurrency = "11";
+                if (this.FEAT_SUBS) {
+                    if (subsidiary && subsidiary!=0) {
+                        companyCurrency = search.lookupFields({
+                            type: search.Type.SUBSIDIARY,
+                            id: subsidiary,
+                            columns: ["currency"]
+                        }).currency[0].value;
+                    }
+                }
                 const primaryExchangeRate = recordObj.getValue("custpage_exchange_rate");
                 const numberLines = recordObj.getLineCount({ sublistId: "custpage_results_list_books" });
 
                 for (let i = 0; i < numberLines; i++) {
                     const currencyId = recordObj.getSublistValue({ sublistId: "custpage_results_list_books", fieldId: "currency_book_id", line: i }) || "11";
-                    if (primaryCurrency==currencyId) {
+                    if (companyCurrency==currencyId) {
                         recordObj.selectLine({ sublistId: 'custpage_results_list_books', line: i });
                         recordObj.setCurrentSublistValue({ sublistId: 'custpage_results_list_books', fieldId: 'exchange_rate_sblt', value: primaryExchangeRate });
                     }
                 }
-            }
+            }  
 
             getAccountingBooks(){
                 const recordObj = this.currentRecord;

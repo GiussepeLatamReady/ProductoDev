@@ -18,7 +18,7 @@ define(["N/search", "N/runtime", "N/record", "N/log", "N/url", "N/format"],
                     "custrecord_lmry_py_wht_datefrom", "custrecord_lmry_py_wht_dateto", "custrecord_lmry_py_wht_dateissue",
                     "custrecord_lmry_py_wht_department", "custrecord_lmry_py_wht_class", "custrecord_lmry_py_wht_location",
                     "custrecord_lmry_py_wht_batch", "custrecord_lmry_py_wht_memo", "custrecord_lmry_py_wht_data",
-                    "custrecord_lmry_py_wht_books", "custrecord_lmry_py_wht_exchange_rate"
+                    "custrecord_lmry_py_wht_books", "custrecord_lmry_py_wht_exchange_rate","custrecord_lmry_py_wht_apply_rate"
                 ]
             });
             log.error("dataLog", dataLog);
@@ -162,7 +162,7 @@ define(["N/search", "N/runtime", "N/record", "N/log", "N/url", "N/format"],
                     }
                 });
             }
-            log.debug("data", JSON.stringify(data));
+            log.debug("data", data);
             return data;
         }
 
@@ -206,7 +206,7 @@ define(["N/search", "N/runtime", "N/record", "N/log", "N/url", "N/format"],
             }
 
             let apaccount = search.lookupFields({ type: "vendorbill", id: billId, columns: ["account"] }).account[0].value;
-
+            log.error("apaccount",apaccount)
             let journalObj = record.create({ type: "journalentry", isDynamic: true });
 
             if (formJournal != "") {
@@ -338,7 +338,8 @@ define(["N/search", "N/runtime", "N/record", "N/log", "N/url", "N/format"],
 
 
 
-            billpaymentObj.save({ ignoreMandatoryFields: true, disableTriggers: true });
+            let newBill = billpaymentObj.save({ ignoreMandatoryFields: true, disableTriggers: true });
+            log.error("newBill",newBill)
             return idJournal;
 
 
@@ -347,6 +348,7 @@ define(["N/search", "N/runtime", "N/record", "N/log", "N/url", "N/format"],
         }
 
         function setAccountingBookDetails(newTransaction,accountingBooks){
+            log.error(" accountingBooks [setAccountingBookDetails]",accountingBooks)
             const numApplyBook = newTransaction.getLineCount({ sublistId: "accountingbookdetail" });
             if (numApplyBook > 0) {
                 for (let i = 0; i < numApplyBook; i++) {
@@ -356,6 +358,7 @@ define(["N/search", "N/runtime", "N/record", "N/log", "N/url", "N/format"],
                         sublistId: "accountingbookdetail",
                         fieldId: "bookid"
                     });
+                    log.error(" bookId [setAccountingBookDetails]",bookId)
                     if (accountingBooks[bookId]) {
                         newTransaction.setCurrentSublistValue({
                             sublistId: "accountingbookdetail",
