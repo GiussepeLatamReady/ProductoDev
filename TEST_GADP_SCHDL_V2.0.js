@@ -27,8 +27,8 @@ define(["N/search","N/record", "N/log","N/query", "N/runtime"],
                 }
                 */
                 //voidCreditMemo("3939157",true);
-
-                searchTransaction("3914166");
+                deleteTaxResults("3959312");
+                //searchTransaction("3914166");
                 //log.error("account",creditMemoSearch.accountmain[0].value);
 
 
@@ -38,7 +38,27 @@ define(["N/search","N/record", "N/log","N/query", "N/runtime"],
             }
 
         }
-
+        function deleteTaxResults(id) {
+            var searchRecordLog = search.create({
+                type: 'customrecord_lmry_br_transaction',
+                filters: [
+                    ['custrecord_lmry_br_transaction', 'is', id]
+                ],
+                columns: [
+                    'internalid'
+                ]
+            })
+            searchRecordLog.run().each(function (result) {
+                var idTax = result.getValue(result.columns[0]);
+    
+                var idTaxLog = record.delete({
+                    type: 'customrecord_lmry_br_transaction',
+                    id: idTax,
+                    isDynamic: true
+                });
+                return true;
+            });
+        }
 
         function searchTransaction(id) {
             var transaction = {};

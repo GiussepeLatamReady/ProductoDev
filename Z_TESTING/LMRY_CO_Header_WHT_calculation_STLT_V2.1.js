@@ -548,7 +548,11 @@ define([
                     filters.push('AND');
                     filters.push(
                         [
-                            ["formulatext: {memomain}", "startswith", "Latam - CO WHT (Lines)"]
+                            [
+                                ["formulatext: {memomain}", "startswith", "Latam - Country WHT (Lines)"],
+                                "OR",
+                                ["formulatext: {memomain}", "startswith", "Latam - CO WHT (Lines)"]
+                            ]
                         ]
                     );
                 }
