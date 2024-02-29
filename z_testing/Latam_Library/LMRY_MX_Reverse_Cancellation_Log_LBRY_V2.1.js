@@ -213,12 +213,12 @@ define(["N/log","N/search", "N/runtime", "N/redirect", "N/ui/serverWidget","N/ur
                     let {internalid,tranid,account,entity,state,type, transVoid, transReverse} = data[id];
                     let transactionType = {
                         void: "creditmemo",
-                        reverse: "journal"
+                        reverse: "journalentry"
                     };
-                    if (type == "creditmemp") {
+                    if (type == "creditmemo") {
                         transactionType = {
-                            void: "customtransaction",
-                            reverse: "customtransaction"
+                            void: "customtransaction_lmry_ei_voided_transac",
+                            reverse: "customtransaction_lmry_ei_voided_transac"
                         }
                     } else if (type == "customerpayment"){
                         transactionType = {
@@ -226,6 +226,7 @@ define(["N/log","N/search", "N/runtime", "N/redirect", "N/ui/serverWidget","N/ur
                             reverse: "customtransaction_lmry_ei_voided_transac"
                         }
                     }
+                    log.error("transactionType",transactionType)
                     let tranUrl = url.resolveRecord({ recordType: type , recordId: internalid, isEditMode: false });
                     let urlID = `<a class="dottedlink" href=${tranUrl} target="_blank">${tranid}</a>`;
                     sublist.setSublistValue({ id: "tranid", line: i, value: urlID });

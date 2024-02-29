@@ -161,6 +161,12 @@ define(['N/record', 'N/runtime', 'N/log', 'N/search', 'N/format', 'N/transaction
                         response['standardvoid'] = true;
                     } else {
                         // 2022.06.23 ONE WORLD/MID MARKET
+                        // Evalua si existe anulacion de invoice para Mexico
+                        var country = invoice.custbody_lmry_subsidiary_country[0].value;
+                        if (isThereCancellation(id_invoice)) {
+                            response.error = "La transaccion ya esta anulada. El proceso se ha cancelado";
+                            return response;
+                        }
                         var idSubsidiary = 1;
                         if (F_SUBSIDIAR == true || F_SUBSIDIAR == 'T') {
                             idSubsidiary = invoice.subsidiary[0].value;
@@ -171,7 +177,9 @@ define(['N/record', 'N/runtime', 'N/log', 'N/search', 'N/format', 'N/transaction
 
                         //Si tiene retenciones se crea un invoice para cancelar el credit memo de retencion
                         var idWHTInvoice = createVoidWHTInvoice(id_invoice, whtObject, customSegments, forms);
+                        
 
+                       
                         //Se crea el credit memo de anulacion
                         var idVoidCreditMemo = createVoidCreditMemo(id_invoice, invoice, idWHTInvoice, forms);
                         response['idcreditmemo'] = idVoidCreditMemo;
@@ -1127,7 +1135,7 @@ define(['N/record', 'N/runtime', 'N/log', 'N/search', 'N/format', 'N/transaction
                 F_CLASSMANDATORY = runtime.getCurrentUser().getPreference({ name: 'CLASSMANDATORY' });
 
 
-                var paymentValues = getTransactionValues(recordId,"customerpayment");
+                var paymentValues = getPaymentValues(recordId);
 
                 //-------------- validate dept, class, loct
                 lineFields['department'] = paymentValues.department;
@@ -1289,6 +1297,7 @@ define(['N/record', 'N/runtime', 'N/log', 'N/search', 'N/format', 'N/transaction
             }
         }
 
+        
 
         function voidCreditMemo(recordId,void_feature) {
 
@@ -1621,7 +1630,7 @@ define(['N/record', 'N/runtime', 'N/log', 'N/search', 'N/format', 'N/transaction
 
         }
 
-        function getTransactionValues(transactionId,recordType) {
+        function getPaymentValues(paymentId) {
             var F_DEPARTMENTS = runtime.isFeatureInEffect({
                 feature: "DEPARTMENTS"
             });
@@ -1647,10 +1656,10 @@ define(['N/record', 'N/runtime', 'N/log', 'N/search', 'N/format', 'N/transaction
             }
 
             var paymentSearch = search.create({
-                type: recordType,
+                type: "customerpayment",
                 filters: [
                     ["mainline", "is", "T"], "AND",
-                    ["internalid", "anyof", transactionId]
+                    ["internalid", "anyof", paymentId]
                 ],
                 columns: columns
             });
@@ -1753,6 +1762,38 @@ define(['N/record', 'N/runtime', 'N/log', 'N/search', 'N/format', 'N/transaction
                     }
                 }
             }
+        }
+
+        function isThereCancellation(invoiceId){
+
+            var idCreditmemo = [];
+            var creditmemoSearchObj = search.create({
+                type: "creditmemo",
+                filters:
+                [
+                   ["type","anyof","CustCred"], 
+                   "AND", 
+                   ["createdfrom.internalid","anyof",invoiceId], 
+                   "AND", 
+                   ["mainline","is","T"],
+                   "AND",
+                   ["memo","startswith","Reference VOID"]
+                ],
+                columns:
+                [
+                   search.createColumn({
+                      name: "internalid",
+                      sort: search.Sort.DESC,
+                      label: "Internal ID"
+                   })
+                ]
+             });
+
+             creditmemoSearchObj.run().each(function(result){              
+                idCreditmemo.push(result.getValue("internalid"));
+             });
+
+             return idCreditmemo.length != 0;
         }
 
         return {

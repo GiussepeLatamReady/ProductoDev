@@ -322,7 +322,7 @@ define([
 
 
     function handleError(functionName, err) {
-        console.error(functionName, err);
+        console.log(functionName, err);
         lbryLog.doLog({ title: functionName, message: err, relatedScript: ScriptName });
         alert(functionName + '\n' + JSON.stringify({ name: err.name, message: err.message }));
     }

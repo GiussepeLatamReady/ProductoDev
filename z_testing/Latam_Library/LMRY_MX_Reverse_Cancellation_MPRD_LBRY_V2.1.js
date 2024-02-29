@@ -300,12 +300,11 @@ define([
 
     let getAccountingBook = (idCreditMemo, features) => {
         let books = {};
-
         if (features.multibook == true || features.multibook == "T") {
             var searchAccoutingBook = search.create({
                 type: "accountingtransaction",
                 filters: [
-                    ["internalid", "is", idCreditMemo]
+                    ["internalid", "anyof", idCreditMemo]
                 ],
                 columns: [
                     search.createColumn({

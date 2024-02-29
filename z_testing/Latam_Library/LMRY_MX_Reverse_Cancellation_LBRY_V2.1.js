@@ -299,8 +299,12 @@ define([
                 }
                 startDateField.updateDisplayType({ displayType: serverWidget.FieldDisplayType.DISABLED });
                 endDateField.updateDisplayType({ displayType: serverWidget.FieldDisplayType.DISABLED });
-
-                account.updateDisplayType({ displayType: serverWidget.FieldDisplayType.DISABLED });
+                if (this.params.typeTransaction == "invoice") {
+                    account.updateDisplayType({ displayType: serverWidget.FieldDisplayType.DISABLED });
+                }else{
+                    account.updateDisplayType({ displayType: serverWidget.FieldDisplayType.HIDDEN });
+                }
+                
                 typeTransaction.updateDisplayType({ displayType: serverWidget.FieldDisplayType.DISABLED });
 
             }
@@ -414,17 +418,18 @@ define([
                 id: account,
                 columns: ['name']
             }).name;
-
-            let accountField = form.getField({ id: 'custpage_account' });
-            accountField.addSelectOption({ value: account, text: nameAccount });
-            accountField.defaultValue = account;
+            if (typeTransaction=="invoice") {
+                let accountField = form.getField({ id: 'custpage_account' });
+                accountField.addSelectOption({ value: account, text: nameAccount });
+                accountField.defaultValue = account;
+            }
+            
 
             form.updateDefaultValues({
                 custpage_start_date: startDate || '',
                 custpage_end_date: endDate || '',
                 custpage_status: '1',
-                custpage_type_transaction: typeTransaction || "",
-                custpage_account: account || ""
+                custpage_type_transaction: typeTransaction || ""
             });
         }
 

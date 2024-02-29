@@ -21,12 +21,19 @@ define(["N/search", "N/record", "N/log", "N/query", "N/runtime",'/SuiteBundles/B
                 //var invoiceId = "1041271"
                 //var result = record.create({ type:"customtransaction_lmry_ei_voided_transac"});
                 //log.error("type",result.getValue("type"));
-                /*
+                voidCreditMemo("3959849",true);
+               voidCreditMemo("3959850",true);
+               voidCreditMemo("3959851",true);
+               voidCreditMemo("3959852",true);
+               voidCreditMemo("3959853",true);
+               voidCreditMemo("3959854",true);
+               /*
                for (var i = 0; i < 25; i++) {
                    copyCreditMemo("3939035");
                }
                
-                //voidCreditMemo("3939157",true);
+               
+                
 
                 var CreditMemoAccount = search.lookupFields({
                     type: "creditmemo",
@@ -46,7 +53,7 @@ define(["N/search", "N/record", "N/log", "N/query", "N/runtime",'/SuiteBundles/B
                 }
                 log.error("TEst","Process end");   
                 //Remove_Trans(nInternalid, nTypeRec, void_feature);
-                */
+                
                 var payments = ["1054526",
                 "1054528",
                 "1054530",
@@ -60,7 +67,7 @@ define(["N/search", "N/record", "N/log", "N/query", "N/runtime",'/SuiteBundles/B
                 payments.forEach(function(id) {
                     changeStatus(id);
                 });
-                
+                */
 
             } catch (error) {
                 log.error("error", error)
@@ -301,6 +308,11 @@ define(["N/search", "N/record", "N/log", "N/query", "N/runtime",'/SuiteBundles/B
 
                 voidCreditMemo.setValue({
                     fieldId: 'custbody_lmry_reference_transaction',
+                    value: recordId
+                });
+
+                voidCreditMemo.setValue({
+                    fieldId: 'custbody_lmry_reference_transaction_id',
                     value: recordId
                 });
 
