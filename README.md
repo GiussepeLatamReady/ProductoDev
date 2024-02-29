@@ -12,7 +12,10 @@ Configuración de tipo de cambio para el Journal Entry en el módulo de retencio
 + Create
     
 + Update
-
+    LMRY_PY_Foreign_Purchase_WHT_CLNT_LBRY_V2.1.js
+    LMRY_PY_Foreign_Purchase_WHT_MPRD_LBRY_V2.1.js
+    LMRY_PY_Foreign_Purchase_WHT_STLT_LBRY_V2.1.js
+    LMRY_PY_Foreign_Purchase_WHT_STLT_V2.1.js
 + Delete
 
 ## Records
