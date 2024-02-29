@@ -21,135 +21,6 @@ define([
         createTaxResults(transaction);
     }
 
-    const updateWthInformationByLine = (id) => {
-        log.error(updateWthInformationByLine.name, id)
-        const transaction = getTransactionLine(id);
-        updateTaxResults(transaction);
-    }
-
-    const getTransactionLine = (id) => {
-        //deleteTaxResults(id);
-        let transaction = {
-            id: id,
-            wht: {
-                ica: {},
-                iva: {},
-                fte: {},
-                cree: {}
-            }
-        };
-        let searchFilters = [
-            ["internalid", "anyof", id],
-            "AND",
-            ["mainline", "is", "T"]
-        ];
-
-        let searchColumns = new Array();
-        searchColumns.push(search.createColumn({ name: 'formulatext', formula: '{internalid}' }));
-        searchColumns.push(search.createColumn({ name: 'formulatext', formula: '{recordType}' }));
-
-        search.create({
-            type: 'transaction',
-            filters: searchFilters,
-            columns: searchColumns
-        }).run().each(result => {
-            transaction.recordtype = result.getValue(result.columns[1]);
-        });
-
-
-
-        let recordObj = record.load({ type: transaction.recordtype, id: id });
-        transaction.items = getItemsData(recordObj);
-        if (transaction.recordtype == "vendorbill" || transaction.recordtype == "vendorcredit") {
-            transaction.expense = getExpense(recordObj);
-        }
-        transaction.taxResults = getTaxResult(id);
-        transaction.relatedRecords = getRelatedRecord(id);
-
-
-        assignRetentionToTaxResults(transaction);
-        log.error("transaction", transaction);
-
-        return transaction;
-    }
-
-    const getTaxResult = id => {
-
-        let taxResults = {}
-        let searchRecordLog = search.create({
-            type: 'customrecord_lmry_br_transaction',
-            filters: [
-                ['custrecord_lmry_br_transaction', 'anyof', id]
-            ],
-            columns: [
-                'internalid',
-                'custrecord_lmry_br_type',
-                'custrecord_lmry_lineuniquekey',
-
-                'custrecord_lmry_ccl',
-                'custrecord_lmry_ccl.custrecord_lmry_ccl_gen_transaction',
-                'custrecord_lmry_ccl.custrecord_lmry_ccl_subtype',
-                'custrecord_lmry_ccl.custrecord_lmry_ar_ccl_taxitem',
-                'custrecord_lmry_ccl.custrecord_lmry_br_ccl_account2',
-                'custrecord_lmry_ccl.custrecord_lmry_br_ccl_account1',
-
-                'custrecord_lmry_ntax.custrecord_lmry_ntax_gen_transaction',  
-                'custrecord_lmry_ntax.custrecord_lmry_ntax_subtype',
-                'custrecord_lmry_ntax.custrecord_lmry_ntax_taxitem',
-                'custrecord_lmry_ntax.custrecord_lmry_ntax_credit_account',
-                'custrecord_lmry_ntax.custrecord_lmry_ntax_debit_account',
-
-
-            ]
-        })
-        searchRecordLog.run().each(function (result) {
-            const id = result.getValue(result.columns[0]);
-            let generetedTransaction
-            let subtype;
-            let accountDebit;
-            let accountCrebit;
-            let itemTax;
-            const isContributoryClass = result.getValue(result.columns[3]);
-            log.error("isContributoryClass",isContributoryClass);
-            if (isContributoryClass) {
-                generetedTransaction = result.getValue(result.columns[4]);
-                subtype = result.getValue(result.columns[5]);
-                accountDebit = result.getValue(result.columns[6])
-                accountCrebit = result.getValue(result.columns[7])
-                itemTax = result.getValue(result.columns[8])
-            } else{
-                generetedTransaction = result.getValue(result.columns[9]);
-                subtype = result.getValue(result.columns[10]);
-                accountDebit = result.getValue(result.columns[11])
-                accountCrebit = result.getValue(result.columns[12])
-                itemTax = result.getValue(result.columns[13])
-            }
-
-            if (generetedTransaction == "1") {
-                generetedTransaction = "journalentry";
-            } else{
-                if (subtype == "7") {
-                    generetedTransaction = "journalentry";
-                }
-                
-            }
-
-
-            taxResults[id] = {
-                id: id,
-                subtype: result.getValue(result.columns[1]),
-                lineuniquekey: result.getValue(result.columns[2]),
-                generetedTransaction,
-                itemTax,
-                accountDebit,
-                accountCrebit
-            };
-            return true;
-        });
-
-        return taxResults;
-
-    }
 
     const getTransaction = (id) => {
         //deleteTaxResults(id);
@@ -212,28 +83,6 @@ define([
     }
 
 
-    const deleteTaxResults = id => {
-        let searchRecordLog = search.create({
-            type: 'customrecord_lmry_br_transaction',
-            filters: [
-                ['custrecord_lmry_br_transaction', 'is', id]
-            ],
-            columns: [
-                'internalid'
-            ]
-        })
-        searchRecordLog.run().each(function (result) {
-            const idTax = result.getValue(result.columns[0]);
-
-            const idTaxLog = record.delete({
-                type: 'customrecord_lmry_br_transaction',
-                id: idTax,
-                isDynamic: true
-            });
-            return true;
-        });
-    }
-
     const createTaxResults = transaction => {
         const createAndSaveRecord = (amount, itemType, retentionKey, itemKey) => {
             if (Object.keys(transaction.wht[retentionKey]).length === 0) return;
@@ -292,25 +141,6 @@ define([
     };
 
 
-    const updateTaxResults = transaction => {
-        const {taxResults, items, expense } = transaction;
-        log.error("taxResults",taxResults)
-        log.error("items",items)
-        log.error("expense",expense)
-        for (let retention in taxResults) {
-            let recordUpdate = record.load({ type: "customrecord_lmry_br_transaction", id: retention });
-            recordUpdate.setValue("custrecord_lmry_co_wht_applied",taxResults[retention].retentionApplied );
-            recordUpdate.setValue("custrecord_lmry_co_date_wht_applied", taxResults[retention].retentionDate );
-            const elementAccount = items[taxResults[retention].lineuniquekey]?items[taxResults[retention].lineuniquekey].account:expense[taxResults[retention].lineuniquekey].account;
-            recordUpdate.setValue("custrecord_lmry_co_acc_exo_concept", elementAccount );
-            const idRecordSummary = recordUpdate.save({ disableTriggers: true, ignoreMandatoryFields: true });     
-
-            log.debug(`idRecordSummary - ${retention.id} - ${retention.subtype}`, idRecordSummary);
-        }
-
-    };
-
-
     const setTransactionWht = transaction => {
         transaction.relatedRecords.forEach(record => {
             let subtypeKey = record.subtypeKey;
@@ -322,8 +152,7 @@ define([
             }
         });
     }
-
-    
+  
 
     const getRetentionName = text => {
         const match = text.match(/Latam - WHT(?: Reclasification)?\s?(\S.*)/);
@@ -479,10 +308,6 @@ define([
         return filtered.length ? filtered : transactions.filter(t => t.memo.startsWith("Latam - WHT"));
     };
 
-    const isReclasification = transactions => {
-        let filtered = transactions.filter(t => t.memo.startsWith("Latam - CO WHT (Lines) Reclasification"));
-        return filtered.length!=0;
-    }
     /**
      * Filtra las líneas de transacciones basadas en el memo específico relacionado con la reclasificación de WHT (Withholding Tax) en Latam - Colombia.
      * La función primero intenta filtrar las transacciones que contienen el memo que comienza con "Latam - CO WHT (Lines) Reclasification".
@@ -575,25 +400,6 @@ define([
         return (bool === "T" || bool === true);
     }
 
-    const roundNumber = (num) => {
-        if (num >= 0) {
-            return parseFloat(Math.round(parseFloat(num) * 1e2 + 1e-3) / 1e2);
-        } else {
-            return parseFloat(Math.round(parseFloat(num) * 1e2 - 1e-3) / 1e2);
-        }
-    }
-
-
-    const getBase = (id) => {
-        const bases = {
-            "Net Amount": "subtotal",
-            "Gross Amount": "total"
-        };
-
-        return bases[id] || null;
-    };
-
-
     const getItemsData = (recordObj,isLine) => {
         let items = {};
         const itemsLines = recordObj.getLineCount({ sublistId: 'item' });
@@ -667,32 +473,8 @@ define([
         }).run().each(result => {
             accountItem = result.getValue(result.columns[0]);
         });
-
         return accountItem;
     }
 
-    /**
-    * Asigna una retención a cada resultado de impuesto en un objeto de transacción, basándose en registros relacionados.
-    * 
-    * @param {Object} transaction - Contiene 'taxResults' (resultados de impuestos) y 'relatedRecords' (registros relacionados).
-    * Para cada 'taxResult', busca un 'relatedRecord' cuyo 'memo' incluya el 'subtype' de 'taxResult'.
-    * Si encuentra coincidencia, asigna el 'id' de 'relatedRecord' a 'retentionApplied' en 'taxResult'.
-    */
-    const assignRetentionToTaxResults = transaction => {
-        const { taxResults, relatedRecords } = transaction;
-
-        Object.values(taxResults).forEach(taxResult => {
-            const matchingRecord = relatedRecords.filter(relatedRecord => relatedRecord.memo.includes(taxResult.subtype));//["1212","121212"]
-            //log.error("matchingRecord",matchingRecord)
-            if (matchingRecord.length) {
-                taxResult.retentionApplied = matchingRecord[0].id;
-                taxResult.retentionDate = matchingRecord[0].trandate;
-            }
-        });
-    };
-
-
-
-
-    return { calculateHeaderWHT, updateWthInformationByLine };
+    return { calculateHeaderWHT};
 });

@@ -30,7 +30,6 @@ define([
                 return [["isErrorInput", error.message]];
             }
         }
- 
 
         const map = (mapContext) => {
             try {
@@ -46,8 +45,6 @@ define([
 
                     if (transaction.whtType == "header") {
                         lbryWHTHeader.calculateHeaderWHT(transaction.id);
-                    } else {
-                        lbryWHTHeader.updateWthInformationByLine(transaction.id);
                     }
                     mapContext.write({
                         key: mapContext.key,
@@ -104,29 +101,9 @@ define([
 
 
         let getParameters = () => {
-
-            /*
-            return {
-                idUser: "9358",
-                idLog: "11"
-            }
-            
-            
-            
-            */
             return {
                 idUser: runtime.getCurrentScript().getParameter({ name: 'custscript_lmry_co_head_wht_calc_user' }),
                 idLog: runtime.getCurrentScript().getParameter({ name: 'custscript_lmry_co_head_wht_calc_state' }),
-            }
-        }
-
-        let getPreference = () => {
-
-            return {
-                department: runtime.getCurrentUser().getPreference({ name: 'DEPTMANDATORY' }),
-                "class": runtime.getCurrentUser().getPreference({ name: 'CLASSMANDATORY' }),
-                location: runtime.getCurrentUser().getPreference({ name: 'LOCMANDATORY' }),
-                journal: runtime.getCurrentScript().getParameter({ name: 'CUSTOMAPPROVALJOURNAL' })
             }
         }
 

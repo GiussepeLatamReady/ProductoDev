@@ -83,6 +83,7 @@ define([
                 this.params = options.params || {};
                 this.method = options.method;
                 this.FEAT_SUBS = this.isValid(runtime.isFeatureInEffect({ feature: 'SUBSIDIARIES' }));
+                this.FEAT_CALENDAR = this.isValid(runtime.isFeatureInEffect({ feature: 'MULTIPLECALENDARS' }));
                 let language = runtime.getCurrentScript().getParameter({ name: "LANGUAGE" }).substring(0, 2);
                 language = language === "es" ? language : "en";
                 this.translations = this.getTranslations(language);
@@ -349,7 +350,9 @@ define([
                 if (this.FEAT_SUBS) {
                     this.fillSubsidiaries();
                 }
-                this.fillWhtType();
+                const fieldWhtType = this.fillWhtType();
+                fieldWhtType.defaultValue = "header";
+                fieldWhtType.updateDisplayType({ displayType: serverWidget.FieldDisplayType.DISABLED });
                 this.fillPeriodType();
                 this.fillProcess();
             }
@@ -369,6 +372,7 @@ define([
                 whtTypeField.addSelectOption({ value: 0, text: '&nbsp;' });
                 whtTypeField.addSelectOption({ value: "header", text: this.translations.LMRY_WHT_HEADER });
                 whtTypeField.addSelectOption({ value: "line", text: this.translations.LMRY_WHT_LINE });
+                return whtTypeField;
             }
             fillPeriodType() {
                 let periodTypeField = this.form.getField({ id: 'custpage_period_type' });
@@ -413,6 +417,7 @@ define([
                 this.fillWhtType();
                 this.fillPeriodType();
                 this.fillProcess();
+
                 form.updateDefaultValues({
                     custpage_start_date: startDate || '',
                     custpage_end_date: endDate || '',
@@ -612,7 +617,7 @@ define([
             }
 
             getTransactionsMain(ids, whtType) {
-                
+
                 if (whtType != "header") {
                     ids = this.getIdsFilterTaxResult(ids);
                 }
@@ -719,7 +724,7 @@ define([
                 searchFilters.push({ name: 'isyear', operator: 'is', values: false });
                 searchFilters.push({ name: 'isquarter', operator: 'is', values: false });
 
-                if (this.FEAT_SUBS) {
+                if (this.FEAT_SUBS && this.FEAT_CALENDAR) {
 
                     searchFilters.push({ name: 'fiscalCalendar', operator: 'is', values: this.getFiscalCalendar(subsidiaryValue) });
                 }

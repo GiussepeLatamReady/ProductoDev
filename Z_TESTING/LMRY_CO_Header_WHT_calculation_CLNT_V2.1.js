@@ -11,8 +11,8 @@ define(['N/runtime',
     'N/record',
     'N/format',
     'N/ui/message',
-    'SuiteBundles/Bundle 37714/Latam_Library/LMRY_Log_LBRY_V2.0'
-    , 'N/url',
+    'SuiteBundles/Bundle 37714/Latam_Library/LMRY_Log_LBRY_V2.0',
+    'N/url',
     'N/currentRecord'],
     (runtime, search, record, format, message, lbryLog, urlApi, currentRecord) => {
         const STLT_ID = 'customscript_lmry_co_head_wht_calc_stlt';
@@ -74,6 +74,7 @@ define(['N/runtime',
         class ClientUIManager {
             constructor(options) {
                 this.FEAT_SUBS = this.isValid(runtime.isFeatureInEffect({ feature: 'SUBSIDIARIES' }));
+                this.FEAT_CALENDAR = this.isValid(runtime.isFeatureInEffect({ feature: 'MULTIPLECALENDARS' }));
                 let language = runtime.getCurrentScript().getParameter({ name: "LANGUAGE" }).substring(0, 2);
                 language = language === "es" ? language : "en";
                 this.deploy = options.deployid;
@@ -95,7 +96,7 @@ define(['N/runtime',
 
             pageInit(scriptContext) {
                 this.currentRecord = scriptContext.currentRecord;
-                this.hiddenFields();
+                this.hiddenFields(true);
             }
             validateField(scriptContext) {
                 this.currentRecord = scriptContext.currentRecord;
@@ -153,7 +154,7 @@ define(['N/runtime',
                 return true;
             }
 
-            setPeriod() {
+            setPeriod(isInit) {
                 let filters = [
                     ['isadjust', 'is', 'F'],
                     'AND',
@@ -161,7 +162,14 @@ define(['N/runtime',
                     'AND',
                     ["isyear", "is", "F"]
                 ];
-                if (this.FEAT_SUBS) {
+
+                if(isInit){
+                    const urlObject = new URL(window.location.href);
+                    const accoutingPeriodValue = urlObject.searchParams.get('accoutingPeriod');
+                    filters.push('AND',['internalid', 'anyof',accoutingPeriodValue]);
+                }
+
+                if (this.FEAT_SUBS && this.FEAT_CALENDAR) {
 
                     const subsidiary = this.currentRecord.getValue({ fieldId: 'custpage_subsidiary' });
                     const { fiscalcalendar } = search.lookupFields({
@@ -171,9 +179,10 @@ define(['N/runtime',
                     });
 
                     if (fiscalcalendar && fiscalcalendar.length > 0) {
-                        filters.push('AND');
-                        filters.push(['fiscalcalendar', 'anyof', fiscalcalendar[0].value]);
+                        filters.push('AND',['fiscalcalendar', 'anyof', fiscalcalendar[0].value]);
                     }
+
+                    
                 }
                 const periodSearch = search.create({
                     type: "accountingperiod",
@@ -284,7 +293,7 @@ define(['N/runtime',
 
 
 
-            hiddenFields() {
+            hiddenFields(isInit) {
                 const fields = ['custpage_start_date', 'custpage_end_date', 'custpage_period'];
                 fields.forEach(id => this.currentRecord.getField({ fieldId: id }).isDisplay = false);
                 const status = this.currentRecord.getValue('custpage_status');
@@ -294,7 +303,7 @@ define(['N/runtime',
                         this.currentRecord.getField({ fieldId: 'custpage_start_date' }).isDisplay = true;
                         this.currentRecord.getField({ fieldId: 'custpage_end_date' }).isDisplay = true;
                     } else {
-                        this.setPeriod();
+                        this.setPeriod(isInit);
                         this.currentRecord.getField({ fieldId: 'custpage_period' }).isDisplay = true;
                     }
                 }
