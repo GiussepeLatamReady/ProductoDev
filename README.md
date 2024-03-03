@@ -71,6 +71,7 @@
             State	            custrecord_lmry_co_hwht_log_state	    Free-Form Text	 	 	            Yes
             Execution Type   custrecord_lmry_co_hwht_log_exect       text
             Process details 	custrecord_lmry_co_hwht_log_details	    Long Text	 	 	                No
+            Transactions	custrecord_lmry_co_hwht_log_transactions	Long Text	 	 	                No
         
 + Update
     + Name: LatamReady - TAX Results
