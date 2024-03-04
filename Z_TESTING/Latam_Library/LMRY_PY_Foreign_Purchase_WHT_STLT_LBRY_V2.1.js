@@ -546,7 +546,7 @@ define(["N/search","N/config","N/format","N/currency", "N/record", "N/runtime", 
 
                     sublistBooks.addField({
                         id: "currency_book_id",
-                        label: "Currency",
+                        label: "currency_book_id",
                         type: serverWidget.FieldType.TEXT
                     }).updateDisplayType({
                         displayType: serverWidget.FieldDisplayType.HIDDEN
@@ -554,7 +554,7 @@ define(["N/search","N/config","N/format","N/currency", "N/record", "N/runtime", 
 
                     sublistBooks.addField({
                         id: "book_id",
-                        label: "Currency",
+                        label: "currency_book_id",
                         type: serverWidget.FieldType.TEXT
                     }).updateDisplayType({
                         displayType: serverWidget.FieldDisplayType.HIDDEN

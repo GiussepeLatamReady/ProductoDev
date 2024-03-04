@@ -223,7 +223,6 @@ define(["N/search", "N/runtime", "N/record", "N/log", "N/url", "N/format"],
                 if (FEAT_MULTIBOOK == "T" || FEAT_MULTIBOOK == true) {
                     setAccountingBookDetails(journalObj, accountingBooks)
                 }
-
             }
 
 
@@ -331,11 +330,6 @@ define(["N/search", "N/runtime", "N/record", "N/log", "N/url", "N/format"],
                     });
                 }
             }
-            if (FEAT_MULTIBOOK == "T" || FEAT_MULTIBOOK == true) {
-                setAccountingBookDetails(billpaymentObj, accountingBooks)
-            }
-
-
 
 
             let newBill = billpaymentObj.save({ ignoreMandatoryFields: true, disableTriggers: true });
