@@ -35,6 +35,8 @@ Se realizara la reversa contable para la anulacion del credit memo y custoemr pa
     + LMRY_MX_Reverse_Cancellation_CLNT_V2.1.js
 
 + Update
+    LMRY_VoidedCreditMemo_LBRY_V2.0.js
+    LMRY_MX_EI_VOID_STLT.js
 
 + Delete
 

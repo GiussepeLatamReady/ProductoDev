@@ -64,8 +64,8 @@
  var REC_PRINT_PDF = 'customrecord_lmry_printing_pdf_xml';
  var REC_ENABLE_FEAT = 'customrecord_lmry_mx_fel_enable_feature';
  
- define(['N/ui/serverWidget', 'N/search', 'N/redirect', "N/email", "N/encode", 'N/runtime', 'N/record', 'N/render', 'N/file', "N/config", "N/url", "N/http", "N/https", "N/transaction", '/SuiteBundles/Bundle 245636/EI_Library/LMRY_AnulacionInvoice_LBRY_V2.0', 'SuiteBundles/Bundle 245636/EI_Send_Email_Module/LMRY_Transaction_Message_LBRY_V2.0.js', 'SuiteBundles/Bundle 245636/EI_Library/LMRY_EI_libSendingEmailsLBRY_V2.0'],
-     function(serverWidget, search, redirect, email, encode, runtime, record, render, file, config, url, http, https, transaction, library_AnulacionInvoice, message_lbry, ei_library) {
+ define(['N/ui/serverWidget', 'N/search', 'N/redirect', "N/email", "N/encode", 'N/runtime', 'N/record', 'N/render', 'N/file', "N/config", "N/url", "N/http", "N/https", "N/transaction", '/SuiteBundles/Bundle 245636/EI_Library/LMRY_AnulacionInvoice_LBRY_V2.0', 'SuiteBundles/Bundle 245636/EI_Send_Email_Module/LMRY_Transaction_Message_LBRY_V2.0.js', 'SuiteBundles/Bundle 245636/EI_Library/LMRY_EI_libSendingEmailsLBRY_V2.0', 'SuiteBundles/Bundle 245636/EI_Library/LMRY_VoidedCreditMemo_LBRY_V2.0'],
+     function(serverWidget, search, redirect, email, encode, runtime, record, render, file, config, url, http, https, transaction, library_AnulacionInvoice, message_lbry, ei_library,libraryVoidedCreditMemo) {
  
          function onRequest(context) {
  
@@ -263,7 +263,7 @@
                                      });
                                  } else if(nTypeRec == 'creditmemo'){
                                     
-                                    library_AnulacionInvoice.voidCreditMemo(nInternalid,void_feature);                        
+                                    libraryVoidedCreditMemo.voidCreditMemo(nInternalid,void_feature);                        
                                     
                                  } else {
                                      if (nTypeRec == 'customerpayment' || nTypeRec == 'customtransaction_lmry_payment_complemnt') {
