@@ -1,4 +1,4 @@
-# [C1040  - L - Uriarte - FDD precio unitario Remitos](https://docs.google.com/document/d/19TXmcvsnjFcuLVNYa3IKwmVoM69Rzsyc/edit)
+# [C1032- Uriarte - FDD precio unitario Remitos](https://docs.google.com/document/d/19TXmcvsnjFcuLVNYa3IKwmVoM69Rzsyc/edit)
 
 
 ## Description of the Requirement
@@ -43,7 +43,7 @@ Así mismo se requiere que este campo “LATAM COL - PRECIO UNITARIO SO” se en
 
 ## Observations
 
-
+i sale el card C1040 compatibilizar con este card
 
 
 
