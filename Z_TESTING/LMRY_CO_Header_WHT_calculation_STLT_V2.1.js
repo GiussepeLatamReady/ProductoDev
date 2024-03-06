@@ -164,9 +164,9 @@ define([
                 this.addSelectField('custpage_wht_type', this.translations.LMRY_WTH_TYPE, 'mainGroup').isMandatory();
 
                 this.addGroup('dateRangeGroup', this.translations.LMRY_PERIOD_INTERVAL);
-                this.addSelectField('custpage_period_type', this.translations.LMRY_PERIOD_TYPE, 'dateRangeGroup').isMandatory();
-                this.addDateField('custpage_start_date', this.translations.LMRY_START_DATE, 'dateRangeGroup');
-                this.addDateField('custpage_end_date', this.translations.LMRY_END_DATE, 'dateRangeGroup');
+                //this.addSelectField('custpage_period_type', this.translations.LMRY_PERIOD_TYPE, 'dateRangeGroup').isMandatory();
+                //this.addDateField('custpage_start_date', this.translations.LMRY_START_DATE, 'dateRangeGroup');
+                //this.addDateField('custpage_end_date', this.translations.LMRY_END_DATE, 'dateRangeGroup');
                 this.addSelectField('custpage_period', this.translations.LMRY_PERIOD, 'dateRangeGroup');
 
 
@@ -240,7 +240,7 @@ define([
 
 
             disableFields() {
-                const fieldsToDisable = ['custpage_subsidiary', 'custpage_start_date', 'custpage_end_date', 'custpage_period', 'custpage_wht_type', 'custpage_period_type','custpage_wht_process'];
+                const fieldsToDisable = ['custpage_subsidiary', 'custpage_period', 'custpage_wht_type','custpage_wht_process'];
                 fieldsToDisable.forEach(fieldId => {
                     let field = this.form.getField({ id: fieldId });
                     if (field) {
@@ -353,7 +353,7 @@ define([
                 const fieldWhtType = this.fillWhtType();
                 fieldWhtType.defaultValue = "header";
                 fieldWhtType.updateDisplayType({ displayType: serverWidget.FieldDisplayType.DISABLED });
-                this.fillPeriodType();
+                //this.fillPeriodType();
                 this.fillProcess();
             }
 
@@ -374,12 +374,13 @@ define([
                 whtTypeField.addSelectOption({ value: "line", text: this.translations.LMRY_WHT_LINE });
                 return whtTypeField;
             }
+            /*
             fillPeriodType() {
                 let periodTypeField = this.form.getField({ id: 'custpage_period_type' });
                 periodTypeField.addSelectOption({ value: 0, text: '&nbsp;' });
                 periodTypeField.addSelectOption({ value: "range", text: this.translations.LMRY_DATE_RANGE });
                 periodTypeField.addSelectOption({ value: "month", text: this.translations.LMRY_PERIOD });
-            }
+            }*/
             fillProcess() {
                 let typeProcessField = this.form.getField({ id: 'custpage_wht_process' });
                 typeProcessField.addSelectOption({ value: 0, text: '&nbsp;' });
@@ -415,16 +416,13 @@ define([
                 }
 
                 this.fillWhtType();
-                this.fillPeriodType();
+                //this.fillPeriodType();
                 this.fillProcess();
 
                 form.updateDefaultValues({
-                    custpage_start_date: startDate || '',
-                    custpage_end_date: endDate || '',
                     custpage_status: '1',
                     custpage_wht_type: whtType || '',
                     custpage_period: accoutingPeriod || '',
-                    custpage_period_type: typePeriod || '',
                     custpage_wht_process: typeProcess || ''
                 });
             }
@@ -763,11 +761,8 @@ define([
                 let params = this.params;
                 return {
                     subsidiary: params.custpage_subsidiary || '',
-                    startDate: params.custpage_start_date || '',
-                    endDate: params.custpage_end_date || '',
                     whtType: params.custpage_wht_type || '',
                     accoutingPeriod: params.custpage_period || '',
-                    typePeriod: params.custpage_period_type || '',
                     typeProcess: params.custpage_wht_process || '',
                     status: '1'
                 };

@@ -100,7 +100,7 @@ define(['N/runtime',
             }
             validateField(scriptContext) {
                 this.currentRecord = scriptContext.currentRecord;
-
+                /*
                 if (scriptContext.fieldId == 'custpage_period_type') {
                     const periodTypeValue = this.currentRecord.getValue({ fieldId: 'custpage_period_type' });
                     const startDateField = this.currentRecord.getField({ fieldId: 'custpage_start_date' });
@@ -116,6 +116,7 @@ define(['N/runtime',
                         endDateField.isDisplay = true;
                     }
                 }
+                */
                 return true
             }
 
@@ -129,10 +130,11 @@ define(['N/runtime',
                         if (!this.validateMandatoryFields()) {
                             return false;
                         }
-
+                        /*
                         if (!this.validateDates()) {
                             return false;
                         }
+                        */
                     } else {
                         if (!this.validateSublist()) {
                             return false;
@@ -212,12 +214,12 @@ define(['N/runtime',
 
             validateMandatoryFields() {
                 const recordObj = this.currentRecord;
-                const periodTypeValue = this.currentRecord.getValue({ fieldId: 'custpage_period_type' });
+                //const periodTypeValue = this.currentRecord.getValue({ fieldId: 'custpage_period_type' });
                 let mandatoryFields = [
                     'custpage_wht_process',
                     'custpage_wht_type'
                 ];
-
+                /*
                 if (this.FEAT_SUBS) {
                     mandatoryFields.unshift('custpage_subsidiary');
                 }
@@ -227,7 +229,8 @@ define(['N/runtime',
                     mandatoryFields.push('custpage_start_date');
                     mandatoryFields.push('custpage_end_date');
                 }
-
+                */
+                mandatoryFields.push('custpage_period');
                 const isFieldInvalid = (fieldId) => {
                     const value = recordObj.getValue({ fieldId });
                     console.log(fieldId, value)
@@ -252,7 +255,7 @@ define(['N/runtime',
                 return fields.filter(element => element !== id);
             }
 
-
+            /*
             validateDates() {
                 const { getValue, getField } = this.currentRecord;
                 const periodType = getValue('custpage_period_type');
@@ -270,7 +273,7 @@ define(['N/runtime',
 
                 return true;
             }
-
+            */
             validateSublist() {
                 const recordObj = this.currentRecord;
                 const numberLines = recordObj.getLineCount({ sublistId: 'custpage_results_list' });
@@ -294,11 +297,13 @@ define(['N/runtime',
 
 
             hiddenFields(isInit) {
-                const fields = ['custpage_start_date', 'custpage_end_date', 'custpage_period'];
-                fields.forEach(id => this.currentRecord.getField({ fieldId: id }).isDisplay = false);
+                //const fields = ['custpage_start_date', 'custpage_end_date', 'custpage_period'];
+                //fields.forEach(id => this.currentRecord.getField({ fieldId: id }).isDisplay = false);
                 const status = this.currentRecord.getValue('custpage_status');
-                const periodType = this.currentRecord.getValue('custpage_period_type');
+                //const periodType = this.currentRecord.getValue('custpage_period_type');
+                /*
                 if (status == 1 || status == "1") {
+                    /*
                     if (periodType == "range") {
                         this.currentRecord.getField({ fieldId: 'custpage_start_date' }).isDisplay = true;
                         this.currentRecord.getField({ fieldId: 'custpage_end_date' }).isDisplay = true;
@@ -306,7 +311,13 @@ define(['N/runtime',
                         this.setPeriod(isInit);
                         this.currentRecord.getField({ fieldId: 'custpage_period' }).isDisplay = true;
                     }
+                    
+                    this.setPeriod(isInit);
+                    this.currentRecord.getField({ fieldId: 'custpage_period' }).isDisplay = true;
                 }
+                */
+                this.setPeriod(isInit);
+                this.currentRecord.getField({ fieldId: 'custpage_period' }).isDisplay = true;
 
             }
 
@@ -361,10 +372,10 @@ define(['N/runtime',
 
                     form.subsidiary = Number(currentRecord.getValue({ fieldId: 'custpage_subsidiary' })) || '';
                     form.typeProcess = currentRecord.getValue({ fieldId: 'custpage_wht_process' });
-                    form.startDate = currentRecord.getValue({ fieldId: 'custpage_start_date' });
-                    form.endDate = currentRecord.getValue({ fieldId: 'custpage_end_date' });
+                    //form.startDate = currentRecord.getValue({ fieldId: 'custpage_start_date' });
+                    //form.endDate = currentRecord.getValue({ fieldId: 'custpage_end_date' });
                     form.whtType = currentRecord.getValue({ fieldId: 'custpage_wht_type' });
-                    form.periodType = currentRecord.getValue({ fieldId: 'custpage_period_type' });
+                    //form.periodType = currentRecord.getValue({ fieldId: 'custpage_period_type' });
                     form.accoutingPeriod = currentRecord.getValue({ fieldId: 'custpage_period' });
                     form.executionType = "UI";
 
@@ -401,7 +412,7 @@ define(['N/runtime',
                 recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_transactions', value: JSON.stringify(form.ids) });
                 recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_process', value: form.typeProcess });
                 recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_whttype', value: form.whtType });
-                recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_period_type', value: form.periodType });
+                //recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_period_type', value: form.periodType });
                 recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_period', value: form.accoutingPeriod });
                 recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_exect', value: form.executionType });
                 idlog = recordlog.save({ enableSourcing: true, ignoreMandatoryFields: true, disableTriggers: true });
