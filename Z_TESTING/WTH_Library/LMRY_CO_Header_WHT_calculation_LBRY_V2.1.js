@@ -18,7 +18,7 @@ define([
     const calculateHeaderWHT = (id) => {
         getFeatures();
         const transaction = getTransaction(id);
-        createTaxResults(transaction);
+        //createTaxResults(transaction);
     }
 
 
@@ -57,6 +57,7 @@ define([
         transaction.total = parseFloat(recordObj.getValue({ fieldId: 'total' }));
         transaction.taxtotal = parseFloat(recordObj.getValue({ fieldId: 'taxtotal' }));
         transaction.subtotal = transaction.total - transaction.taxtotal;
+        transaction.discountTotal = parseFloat(recordObj.getValue("discounttotal"));
         transaction.exchangeRate = parseFloat(getExchangeRate(recordObj));
         transaction.items = getItemsData(recordObj);
         const relatedRecords = getRelatedRecord(id);
@@ -64,6 +65,14 @@ define([
         if (transaction.recordtype == "vendorbill" || transaction.recordtype == "vendorcredit") {
             transaction.expense = getExpense(recordObj);
         }
+
+        transaction.sumSubtotal = transaction.items.sumSubtotal
+
+        if(transaction.expense) {
+            transaction.sumSubtotal += transaction.expense.sumSubtotal;
+        }
+
+        
         relatedRecords.forEach(retention => {
 
             let nameWht = getRetentionName(retention.memo);
@@ -400,8 +409,13 @@ define([
         return (bool === "T" || bool === true);
     }
 
-    const getItemsData = (recordObj,isLine) => {
-        let items = {};
+    const getItemsData = (recordObj) => {
+        let items = {
+            sumSubtotal:0,
+            sumTaxtotal:0,
+            sumTotal:0
+        };
+        
         const itemsLines = recordObj.getLineCount({ sublistId: 'item' });
         for (let i = 0; i < itemsLines; i++) {
             const itemType = recordObj.getSublistValue({ sublistId: 'item', fieldId: "itemtype", line: i });
@@ -413,6 +427,7 @@ define([
             const total = Math.abs(recordObj.getSublistValue({ sublistId: 'item', fieldId: 'grossamt', line: i })) || 0;
             const subtotal = Math.abs(recordObj.getSublistValue({ sublistId: 'item', fieldId: 'amount', line: i })) || 0;
             const taxtotal = parseFloat(total) - parseFloat(subtotal);
+
             items[lineuniquekey] = {
                 id: id,
                 subtotal: subtotal,
@@ -426,8 +441,15 @@ define([
                 items[lineuniquekey].subtotal *= -1;
                 items[lineuniquekey].taxtotal *= -1;
                 items[lineuniquekey].total *= -1;
+                
             }
+
+            items.sumSubtotal += items[lineuniquekey].subtotal;
+            items.sumTaxtotal += items[lineuniquekey].taxtotal;
+            items.sumTotal += items[lineuniquekey].total;
+
         }
+
         return items;
     }
 
@@ -447,6 +469,10 @@ define([
                 lineuniquekey: lineuniquekey,
                 account: recordObj.getSublistValue({ sublistId: 'expense', fieldId: 'account', line: i })
             }
+
+            expense.sumSubtotal += expense[lineuniquekey].subtotal;
+            expense.sumTaxtotal += expense[lineuniquekey].taxtotal;
+            expense.sumTotal += expense[lineuniquekey].total;
 
         }
         return expense;
