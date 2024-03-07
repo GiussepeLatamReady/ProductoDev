@@ -72,7 +72,10 @@ define([
             transaction.sumSubtotal += transaction.expense.sumSubtotal;
         }
 
+        transaction.discountRate = transaction.subtotal/transaction.sumSubtotal;
         
+        applyGlobalDiscount(transaction);
+
         relatedRecords.forEach(retention => {
 
             let nameWht = getRetentionName(retention.memo);
@@ -97,22 +100,22 @@ define([
             if (Object.keys(transaction.wht[retentionKey]).length === 0) return;
 
             const recordSummary = record.create({ type: 'customrecord_lmry_br_transaction', isDynamic: false });
-            const retentionAmount = parseFloat(amount * transaction.wht[retentionKey].rate).toFixed(2);
-            const baseAmount = parseFloat(amount).toFixed(2);
+            const retentionAmount = parseFloat(amount * transaction.wht[retentionKey].rate);
+            const baseAmount = parseFloat(amount);
             const commonValues = {
                 custrecord_lmry_br_related_id: String(transaction.id),
                 custrecord_lmry_br_transaction: transaction.id,
                 custrecord_lmry_br_type: transaction.wht[retentionKey].subtype,
                 custrecord_lmry_br_type_id: transaction.wht[retentionKey].subtypeId,
-                custrecord_lmry_base_amount: baseAmount,
-                custrecord_lmry_br_total: retentionAmount,
+                custrecord_lmry_base_amount: round(baseAmount),
+                custrecord_lmry_br_total: round(retentionAmount),
                 custrecord_lmry_br_percent: parseFloat(transaction.wht[retentionKey].rate),
                 custrecord_lmry_total_item: `Line - ${itemType}`,
                 custrecord_lmry_item: itemType === 'Item' ? transaction.items[itemKey].id : undefined,
                 custrecord_lmry_account: itemType === 'Expense' ? transaction.expense[itemKey].account : undefined,
-                custrecord_lmry_total_base_currency: (baseAmount * transaction.exchangeRate).toFixed(2),
-                custrecord_lmry_base_amount_local_currc: (baseAmount * transaction.exchangeRate).toFixed(2),
-                custrecord_lmry_amount_local_currency: (retentionAmount * transaction.exchangeRate).toFixed(2),
+                custrecord_lmry_total_base_currency: round(baseAmount * transaction.exchangeRate),
+                custrecord_lmry_base_amount_local_currc: round(baseAmount * transaction.exchangeRate),
+                custrecord_lmry_amount_local_currency: round(retentionAmount * transaction.exchangeRate),
                 custrecord_lmry_tax_type: '1',
                 custrecord_lmry_lineuniquekey: itemKey,
                 custrecord_lmry_co_wht_applied: transaction.wht[retentionKey].relatedTransaction.id,
@@ -175,6 +178,24 @@ define([
     const subtypeToKey = (subtype) => {
         return subtype.replace(/.*(?:cree|fte|ica|iva).*/i, (match) => match.toLowerCase().match(/cree|fte|ica|iva/)[0]);
     };
+
+    const round = amount => {
+        amount = amount.toFixed(8);
+        return parseFloat(amount.toString().replace(/\.?0+$/, ''));
+    };
+
+    const applyGlobalDiscount = (transaction) => {
+        Object.values(transaction.items).forEach(item => {
+            ['subtotal', 'taxtotal', 'total'].forEach(prop => item[prop] = round(item[prop] * transaction.discountRate));
+        });
+        if (transaction.expense) {
+            Object.values(transaction.expense).forEach(item => {
+                ['subtotal', 'taxtotal', 'total'].forEach(prop => item[prop] = round(item[prop] * transaction.discountRate));
+            });
+        }
+        
+    };
+      
 
     const getFeatures = () => {
         features.multibook = isValid(runtime.isFeatureInEffect({ feature: "MULTIBOOK" }));

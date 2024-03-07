@@ -96,7 +96,7 @@ define(['N/runtime',
 
             pageInit(scriptContext) {
                 this.currentRecord = scriptContext.currentRecord;
-                this.hiddenFields(true);
+                this.setFieldPeriod();
             }
             validateField(scriptContext) {
                 this.currentRecord = scriptContext.currentRecord;
@@ -162,13 +162,16 @@ define(['N/runtime',
                     'AND',
                     ["isquarter", "is", "F"],
                     'AND',
-                    ["isyear", "is", "F"]
+                    ["isyear", "is", "T"]
                 ];
 
                 if(isInit){
                     const urlObject = new URL(window.location.href);
                     const accoutingPeriodValue = urlObject.searchParams.get('accoutingPeriod');
                     filters.push('AND',['internalid', 'anyof',accoutingPeriodValue]);
+
+                    console.log('urlObject :', 'urlObject')
+                    console.log('accoutingPeriodValue :', 'accoutingPeriodValue')
                 }
 
                 if (this.FEAT_SUBS && this.FEAT_CALENDAR) {
@@ -296,7 +299,7 @@ define(['N/runtime',
 
 
 
-            hiddenFields(isInit) {
+            setFieldPeriod() {
                 //const fields = ['custpage_start_date', 'custpage_end_date', 'custpage_period'];
                 //fields.forEach(id => this.currentRecord.getField({ fieldId: id }).isDisplay = false);
                 const status = this.currentRecord.getValue('custpage_status');
@@ -316,6 +319,7 @@ define(['N/runtime',
                     this.currentRecord.getField({ fieldId: 'custpage_period' }).isDisplay = true;
                 }
                 */
+                const isInit = status == 1 || status == "1";
                 this.setPeriod(isInit);
                 this.currentRecord.getField({ fieldId: 'custpage_period' }).isDisplay = true;
 
@@ -396,6 +400,13 @@ define(['N/runtime',
                     form = dataProcess;
                 }
 
+                const periodlookup = search.lookupFields({
+                    type: 'accountingperiod',
+                    id: form.accoutingPeriod,
+                    columns: ['periodname']
+                });
+
+                form.accoutingPeriod = periodlookup.periodname;
 
                 // Creacion de Logs
                 let idlog = '';
@@ -405,14 +416,14 @@ define(['N/runtime',
                 });
                 console.log("form :", form)
                 recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_subsi', value: form.subsidiary });
-                recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_start_date', value: form.startDate });
-                recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_end_date', value: form.endDate });
+                //recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_start_date', value: new Date() });
+                //recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_end_date', value: new Date() });
                 recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_state', value: "Cargando datos" });
                 recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_employee', value: runtime.getCurrentUser().id });
                 recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_transactions', value: JSON.stringify(form.ids) });
                 recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_process', value: form.typeProcess });
                 recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_whttype', value: form.whtType });
-                //recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_period_type', value: form.periodType });
+                //recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_period_type', value: "" });
                 recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_period', value: form.accoutingPeriod });
                 recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_exect', value: form.executionType });
                 idlog = recordlog.save({ enableSourcing: true, ignoreMandatoryFields: true, disableTriggers: true });

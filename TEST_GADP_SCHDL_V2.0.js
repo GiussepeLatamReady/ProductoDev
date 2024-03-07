@@ -12,7 +12,7 @@
  * @NScriptType ScheduledScript
  * @NModuleScope Public
  */
-define(["N/search","N/record", "N/log","N/query", "N/runtime"],
+define(["N/search", "N/record", "N/log", "N/query", "N/runtime"],
     function (search, record, log, query, runtime) {
 
         function execute(Context) {
@@ -21,20 +21,36 @@ define(["N/search","N/record", "N/log","N/query", "N/runtime"],
                 //var invoiceId = "1041271"
                 //var result = record.create({ type:"customtransaction_lmry_ei_voided_transac"});
                 //log.error("type",result.getValue("type"));
-                 /*
-                for (var i = 0; i < 25; i++) {
-                    copyCreditMemo("3939035");
+                /*
+               for (var i = 0; i < 25; i++) {
+                   copyCreditMemo("3939035");
+               }
+               */
+
+                var transactions = [
+                    3960157,
+                    3957770,
+                    3957765,
+                    3956151,
+                    3956043,
+                    3955924,
+                    3955903,
+                    3955899,
+                    3955917,
+                    3955910
+                ]
+                for (var i = 0; i < transactions.length; i++) {
+                    deleteTaxResults(transactions[i]);
                 }
-                */
                 //voidCreditMemo("3939157",true);
-                deleteTaxResults("3959312");
+                //deleteTaxResults("3959312");
                 //searchTransaction("3914166");
                 //log.error("account",creditMemoSearch.accountmain[0].value);
 
 
-                
+
             } catch (error) {
-                log.error("error",error)
+                log.error("error", error)
             }
 
         }
@@ -50,7 +66,7 @@ define(["N/search","N/record", "N/log","N/query", "N/runtime"],
             })
             searchRecordLog.run().each(function (result) {
                 var idTax = result.getValue(result.columns[0]);
-    
+
                 var idTaxLog = record.delete({
                     type: 'customrecord_lmry_br_transaction',
                     id: idTax,
@@ -67,28 +83,28 @@ define(["N/search","N/record", "N/log","N/query", "N/runtime"],
                 "AND",
                 ["mainline", "is", "T"]
             ];
-    
+
             var searchColumns = [];
-            searchColumns.push(search.createColumn({ name: 'formulatext', formula: '{internalid}'}));
-            searchColumns.push(search.createColumn({name: 'amount', join: 'item'}))
+            searchColumns.push(search.createColumn({ name: 'formulatext', formula: '{internalid}' }));
+            searchColumns.push(search.createColumn({ name: 'amount', join: 'item' }))
             let settings = [];
-            
+
             settings = [search.createSetting({ name: 'consolidationtype', value: 'NONE' })];
-            
-    
+
+
             search.create({
                 type: 'transaction',
                 filters: searchFilters,
                 columns: searchColumns,
-                settings:settings
-            }).run().each( function (result){
+                settings: settings
+            }).run().each(function (result) {
                 var columns = result.columns;
                 transaction.id = result.getValue(columns[0])
             });
-            log.error("transaction",transaction)
+            log.error("transaction", transaction)
         }
 
-       
+
 
         return {
             execute: execute

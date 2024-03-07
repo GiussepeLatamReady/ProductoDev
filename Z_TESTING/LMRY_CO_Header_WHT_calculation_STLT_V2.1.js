@@ -463,8 +463,6 @@ define([
                 
                 let {
                     subsidiary,
-                    startDate,
-                    endDate,
                     whtType,
                     accoutingPeriod,
                     typeProcess
@@ -562,15 +560,15 @@ define([
 
 
 
-
+                /*
                 if (startDate != null && startDate != '' && endDate != null && endDate != '') {
                     filters.push('AND',['trandate', 'onorafter', startDate]);
                     filters.push('AND',['trandate', 'onorbefore', endDate]);
                 }
-
+                */
                 if (accoutingPeriod != null && accoutingPeriod != '') {
                     filters.push('AND');
-                    const periodFourmulaids = this.generatePeriodFormula([accoutingPeriod]);
+                    const periodFourmulaids = this.getPeriods(subsidiary,accoutingPeriod);
                     filters.push([
                         "formulatext:" + periodFourmulaids,
                         search.Operator.IS,
@@ -713,8 +711,15 @@ define([
                 
             }
 
+            
 
-            getPeriods(subsidiaryValue, startDate, endDate) {
+            getPeriods(subsidiaryValue,anualPeriod) {
+
+                const periodlookup = search.lookupFields({
+                    type: 'accountingperiod',
+                    id: anualPeriod,
+                    columns: ['startdate', 'enddate']
+                });
 
                 let periodIds = new Array();
 
@@ -726,8 +731,8 @@ define([
 
                     searchFilters.push({ name: 'fiscalCalendar', operator: 'is', values: this.getFiscalCalendar(subsidiaryValue) });
                 }
-                searchFilters.push({ name: 'startdate', operator: 'onorafter', values: startDate });
-                searchFilters.push({ name: 'enddate', operator: 'onorbefore', values: endDate });
+                searchFilters.push({ name: 'startdate', operator: 'onorafter', values: periodlookup.startdate });
+                searchFilters.push({ name: 'enddate', operator: 'onorbefore', values: periodlookup.enddate });
 
                 let searchColumns = new Array();
                 searchColumns.push({ name: 'internalid', sort: search.Sort.ASC, summary: 'GROUP' });
@@ -743,11 +748,12 @@ define([
 
                 return this.generatePeriodFormula(periodIds);
             }
+            
             generatePeriodFormula(idsPeriod) {
                 const periodsString = idsPeriod.map(id => `'${id}'`).join(', ');
                 return `CASE WHEN {custbody_lmry_reference_transaction.postingperiod.id} IN (${periodsString}) THEN 1 ELSE 0 END`;
             }
-
+            
             getFiscalCalendar(subsidiaryValue) {
                 let subsidiary = search.lookupFields({
                     type: search.Type.SUBSIDIARY,

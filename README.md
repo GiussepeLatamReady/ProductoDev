@@ -60,18 +60,15 @@
     Name: LatamReady - WHT Calc CO Header Log
     id: customrecord_lmry_co_head_wht_cal_log
         Fields
-            Subsidiary	        custrecord_lmry_co_hwht_log_subsi	    List/Record	Subsidiary	 	        Yes
-            Process          	custrecord_lmry_co_hwht_log_process	    text	 	                        Yes
-            Wht Calculation type custrecord_lmry_co_hwht_log_whttype	text	 	                        Yes
-            Period Type         custrecord_lmry_co_hwht_log_period_type	    text	 	                        Yes
-            Period          	custrecord_lmry_co_hwht_log_period	    List/Record	Accouting period	 	Yes
-            Start Date	        custrecord_lmry_co_hwht_log_start_date	Date	 	 	                    No
-            End Date	        custrecord_lmry_co_hwht_log_end_date	    Date	 	 	                    No
-            Employee	        custrecord_lmry_co_hwht_log_employee	    List/Record	Employee	 	        No
-            State	            custrecord_lmry_co_hwht_log_state	    Free-Form Text	 	 	            Yes
-            Execution Type   custrecord_lmry_co_hwht_log_exect       text
-            Process details 	custrecord_lmry_co_hwht_log_details	    Long Text	 	 	                No
-            Transactions	custrecord_lmry_co_hwht_log_transactions	Long Text	 	 	                No
+            Subsidiary	                    custrecord_lmry_co_hwht_log_subsi	        List/Record	Subsidiary	 	No
+ 	        Process	                        custrecord_lmry_co_hwht_log_process	        Free-Form Text	 	 	    No
+            withholding calculation type	custrecord_lmry_co_hwht_log_whttype	        Free-Form Text	 	 	    Yes
+            Period	                        custrecord_lmry_co_hwht_log_period	        Free-Form Text	 	 	    Yes
+            User Responsible	            custrecord_lmry_co_hwht_log_employee	    List/Record	Employee	 	Yes
+            State	                        custrecord_lmry_co_hwht_log_state	        Free-Form Text	 	 	    Yes
+            Execution Type	                custrecord_lmry_co_hwht_log_exect	        Free-Form Text	 	 	    Yes
+            Process details	                custrecord_lmry_co_hwht_log_details	        Long Text	 	 	        No
+            Transactions	                custrecord_lmry_co_hwht_log_transactions	Long Text	 	 	        No
         
 + Update
     + Name: LatamReady - TAX Results
