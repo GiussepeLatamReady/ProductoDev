@@ -12,7 +12,8 @@ define([
     'N/record',
     'N/runtime',
     'N/format',
-], (log, search, record, runtime, format) => {
+    'N/currency'
+], (log, search, record, runtime, format, Ncurrency) => {
 
     let features = {};
     const calculateHeaderWHT = (id) => {
@@ -31,8 +32,10 @@ define([
                 iva: {},
                 fte: {},
                 cree: {}
-            }
+            },
+            sumSubtotal: 0
         };
+        
         let searchFilters = [
             ["internalid", "anyof", id],
             "AND",
@@ -42,7 +45,7 @@ define([
         let searchColumns = new Array();
         searchColumns.push(search.createColumn({ name: 'formulatext', formula: '{internalid}' }));
         searchColumns.push(search.createColumn({ name: 'formulatext', formula: '{recordType}' }));
-
+        
         search.create({
             type: 'transaction',
             filters: searchFilters,
@@ -50,32 +53,35 @@ define([
         }).run().each(result => {
             transaction.recordtype = result.getValue(result.columns[1]);
         });
-
+        
 
         let recordObj = record.load({ type: transaction.recordtype, id: id });
         
+        transaction.variable = recordObj.getValue({ fieldId: 'custbody_lmry_features_active' })
         transaction.total = parseFloat(recordObj.getValue({ fieldId: 'total' }));
         transaction.taxtotal = parseFloat(recordObj.getValue({ fieldId: 'taxtotal' }));
         transaction.subtotal = transaction.total - transaction.taxtotal;
         transaction.discountTotal = parseFloat(recordObj.getValue("discounttotal"));
-        transaction.exchangeRate = parseFloat(getExchangeRate(recordObj));
+        transaction.exchangeRate = parseFloat(getExchangeRate(recordObj,"9"));
         transaction.items = getItemsData(recordObj);
-        const relatedRecords = getRelatedRecord(id);
 
         if (transaction.recordtype == "vendorbill" || transaction.recordtype == "vendorcredit") {
             transaction.expense = getExpense(recordObj);
         }
 
-        transaction.sumSubtotal = transaction.items.sumSubtotal
-
+        if (transaction.items) {
+            transaction.sumSubtotal = transaction.items.sumSubtotal
+        }
+        
         if(transaction.expense) {
             transaction.sumSubtotal += transaction.expense.sumSubtotal;
         }
-
         transaction.discountRate = transaction.subtotal/transaction.sumSubtotal;
         
+        setLineFactor(transaction);
         applyGlobalDiscount(transaction);
 
+        const relatedRecords = getRelatedRecord(id);
         relatedRecords.forEach(retention => {
 
             let nameWht = getRetentionName(retention.memo);
@@ -94,33 +100,50 @@ define([
         return transaction;
     }
 
+    const setLineFactor = transaction => {
+        if (transaction.items) {
+            for (let itemKey in transaction.items) {
+                transaction.items[itemKey].factor = transaction.items[itemKey].subtotal/transaction.sumSubtotal;
+            }
+        }
+        if (transaction.expense) {
+            for (let expenseKey in transaction.expense) {
+                transaction.expense[expenseKey].factor = transaction.expense[expenseKey].subtotal/transaction.sumSubtotal;
+            }
+        }
+    };
 
     const createTaxResults = transaction => {
-        const createAndSaveRecord = (amount, itemType, retentionKey, itemKey) => {
-            if (Object.keys(transaction.wht[retentionKey]).length === 0) return;
+        const createAndSaveRecord = (amount, itemType, retention, item) => {
+            if (Object.keys(retention).length === 0) return;
 
             const recordSummary = record.create({ type: 'customrecord_lmry_br_transaction', isDynamic: false });
-            const retentionAmount = parseFloat(amount * transaction.wht[retentionKey].rate);
+
             const baseAmount = parseFloat(amount);
+            const retentionAmount = parseFloat(amount * retention.rate);
+            
             const commonValues = {
                 custrecord_lmry_br_related_id: String(transaction.id),
                 custrecord_lmry_br_transaction: transaction.id,
-                custrecord_lmry_br_type: transaction.wht[retentionKey].subtype,
-                custrecord_lmry_br_type_id: transaction.wht[retentionKey].subtypeId,
+                custrecord_lmry_br_type: retention.subtype,
+                custrecord_lmry_br_type_id: retention.subtypeId,
+                custrecord_lmry_total_item: `Line - ${itemType}`,
+                custrecord_lmry_item: itemType === 'Item' ? item.id : undefined,
+                custrecord_lmry_account: itemType === 'Expense' ? item.account : undefined,
+
                 custrecord_lmry_base_amount: round(baseAmount),
                 custrecord_lmry_br_total: round(retentionAmount),
-                custrecord_lmry_br_percent: parseFloat(transaction.wht[retentionKey].rate),
-                custrecord_lmry_total_item: `Line - ${itemType}`,
-                custrecord_lmry_item: itemType === 'Item' ? transaction.items[itemKey].id : undefined,
-                custrecord_lmry_account: itemType === 'Expense' ? transaction.expense[itemKey].account : undefined,
+                custrecord_lmry_br_percent: parseFloat(retention.rate), 
+
                 custrecord_lmry_total_base_currency: round(baseAmount * transaction.exchangeRate),
                 custrecord_lmry_base_amount_local_currc: round(baseAmount * transaction.exchangeRate),
                 custrecord_lmry_amount_local_currency: round(retentionAmount * transaction.exchangeRate),
+
                 custrecord_lmry_tax_type: '1',
-                custrecord_lmry_lineuniquekey: itemKey,
-                custrecord_lmry_co_wht_applied: transaction.wht[retentionKey].relatedTransaction.id,
-                custrecord_lmry_co_date_wht_applied: transaction.wht[retentionKey].relatedTransaction.trandate,
-                custrecord_lmry_co_acc_exo_concept: itemType === 'Expense' ? transaction.expense[itemKey].account : transaction.items[itemKey].account,
+                custrecord_lmry_lineuniquekey: item.lineuniquekey,
+                custrecord_lmry_co_wht_applied: retention.relatedTransaction.id,
+                custrecord_lmry_co_date_wht_applied: retention.relatedTransaction.trandate,
+                custrecord_lmry_co_acc_exo_concept: item.account,
             };
 
             for (const fieldId in commonValues) {
@@ -133,20 +156,23 @@ define([
             log.debug(`idRecordSummary - ${itemType}`, idRecordSummary);
         };
 
-        for (let item in transaction.items) {
-            for (let retention in transaction.wht) {
-                const typeBase=transaction.recordtype == "vendorbill" ||transaction.recordtype == "vendorcredit" ? "puchasebase":"salesbase";
-                const whtBase = transaction.wht[retention][typeBase];
-                createAndSaveRecord(transaction.items[item][whtBase], 'Item', retention, item);
+        if (transaction.items) {
+            for (let item of transaction.items) {
+                for (let retention of transaction.wht) {
+                    const typeBase=transaction.recordtype == "vendorbill" ||transaction.recordtype == "vendorcredit" ? "puchasebase":"salesbase";
+                    const whtBase = retention[typeBase];
+                    createAndSaveRecord(item[whtBase], 'Item', retention, item);
+                }
             }
         }
+        
 
         if (transaction.expense) {
-            for (let expense in transaction.expense) {
-                for (let retention in transaction.wht) {
+            for (let expense of transaction.expense) {
+                for (let retention of transaction.wht) {
                     const typeBase=transaction.recordtype == "vendorbill" ||transaction.recordtype == "vendorcredit" ? "puchasebase":"salesbase";
-                    const whtBase = transaction.wht[retention][typeBase];
-                    createAndSaveRecord(transaction.expense[expense][whtBase], 'Expense', retention, expense);
+                    const whtBase = retention[typeBase];
+                    createAndSaveRecord(expense[whtBase], 'Expense', retention, expense);
                 }
             }
         }
@@ -178,6 +204,8 @@ define([
     const subtypeToKey = (subtype) => {
         return subtype.replace(/.*(?:cree|fte|ica|iva).*/i, (match) => match.toLowerCase().match(/cree|fte|ica|iva/)[0]);
     };
+
+   
 
     const round = amount => {
         amount = amount.toFixed(8);
@@ -227,6 +255,7 @@ define([
             searchColumns.push(search.createColumn({ name: 'formulatext', formula: '{custrecord_lmry_wht_purcbase.custrecord_lmry_wht_internalid}' }));
             searchColumns.push(search.createColumn({ name: 'formulatext', formula: '{custrecord_lmry_wht_types.custrecord_lmry_wht_subtype}' }));
             searchColumns.push(search.createColumn({ name: 'formulatext', formula: '{custrecord_lmry_wht_types.custrecord_lmry_wht_subtype.id}' }));
+            searchColumns.push(search.createColumn({ name: 'formulatext', formula: '{custrecord_lmry_wht_variable_rate}' }));
 
             search.create({
                 type: 'customrecord_lmry_wht_code',
@@ -241,6 +270,8 @@ define([
                 whtCode.puchasebase = result.getValue(result.columns[4]) || " ";
                 whtCode.subtype = result.getValue(result.columns[5]) || " ";
                 whtCode.subtypeId = result.getValue(result.columns[6]) || " ";
+                whtCode.variable = result.getValue(result.columns[7]);
+                whtCode.variable = whtCode.variable == "T" || whtCode.variable == true
             });
             whtCode.rate = parseFloat(whtCode.rate) / 100;
 
@@ -365,8 +396,10 @@ define([
     };
 
 
-    const getExchangeRate = (recordObj) => {
+    const getExchangeRate = (recordObj, currencyLocal) => {
         const exchangerateTran = recordObj.getValue({ fieldId: 'exchangerate' });
+        const transactionCurrency = recordObj.getValue({ fieldId: 'currency' });
+        const transactionDate = recordObj.getValue({ fieldId: 'trandate' });
         const subsidiary = recordObj.getValue({ fieldId: 'subsidiary' });
 
         if (!features.subsidiary) return exchangerateTran;
@@ -391,37 +424,57 @@ define([
             start: 0,
             end: 1000
         });
-        const currencySetup = searchSetupSubsidiary.length ? searchSetupSubsidiary[0].getValue('custrecord_lmry_setuptax_currency') : 0;
 
-        if (!features.multibook || currencySetup === 0) return exchangerateTran;
+        let currencySetup = 0;
 
-        const { currency: [{ value: currencySubs }] } = search.lookupFields({
-            type: 'subsidiary',
-            id: subsidiary,
-            columns: ['currency']
-        });
-
-        if (currencySubs === currencySetup) return exchangerateTran;
-
-        const lineasBook = recordObj.getLineCount({ sublistId: 'accountingbookdetail' });
-
-        for (let i = 0; i < lineasBook; i++) {
-            const lineaCurrencyMB = recordObj.getSublistValue({
-                sublistId: 'accountingbookdetail',
-                fieldId: 'currency',
-                line: i
-            });
-
-            if (lineaCurrencyMB === currencySetup) {
-                return recordObj.getSublistValue({
-                    sublistId: 'accountingbookdetail',
-                    fieldId: 'exchangerate',
-                    line: i
-                });
-            }
+        if (searchSetupSubsidiary.length) {
+            currencySetup = searchSetupSubsidiary.length ? searchSetupSubsidiary[0].getValue('custrecord_lmry_setuptax_currency') : 0;
         }
 
-        return exchangerateTran;
+        currencySetup = currencySetup === 0 ? currencyLocal : currencySetup;
+
+        //if (!features.multibook || currencySetup === 0) return exchangerateTran;
+
+
+        if (features.multibook) {
+            const lineasBook = recordObj.getLineCount({ sublistId: 'accountingbookdetail' });
+
+            for (let i = 0; i < lineasBook; i++) {
+                const lineaCurrencyMB = recordObj.getSublistValue({
+                    sublistId: 'accountingbookdetail',
+                    fieldId: 'currency',
+                    line: i
+                });
+
+                if (lineaCurrencyMB === currencySetup) {
+                    return recordObj.getSublistValue({
+                        sublistId: 'accountingbookdetail',
+                        fieldId: 'exchangerate',
+                        line: i
+                    });
+                }
+            }
+        } else {
+
+            const { currency: [{ value: currencySubs }] } = search.lookupFields({
+                type: 'subsidiary',
+                id: subsidiary,
+                columns: ['currency']
+            });
+
+
+            if (transactionCurrency === currencySetup) return 1;
+            if (currencySubs === currencySetup) {
+                return exchangerateTran
+            } else {
+                return Ncurrency.exchangeRate({
+                    source: transactionCurrency,
+                    target: currencySetup,
+                    date: transactionDate
+                });
+            };
+
+        }
     };
 
 

@@ -1,4 +1,199 @@
 {
+    id: "3907739",
+    wht: {
+       ica: {
+          id: "123",
+          name: "AutoReteICA10%",
+          rate: 0.1,
+          salesbase: "subtotal",
+          puchasebase: "subtotal",
+          subtype: "ReteICA",
+          subtypeId: "19",
+          relatedTransactionId: "3952026"
+       },
+       iva: {
+          id: "120",
+          name: "AutoReteIVA 5%",
+          rate: 0.05,
+          salesbase: "subtotal",
+          puchasebase: "subtotal",
+          subtype: "ReteIVA",
+          subtypeId: "18",
+          relatedTransactionId: "3952027"
+       },
+       fte: {
+          id: "121",
+          name: "AutoReteFTE25%",
+          rate: 0.25,
+          salesbase: "subtotal",
+          puchasebase: "subtotal",
+          subtype: "ReteFTE",
+          subtypeId: "21",
+          relatedTransactionId: "3952028"
+       },
+       "cree": {}
+    },
+    recordtype: "vendorcredit",
+    total: 2010,
+    taxtotal: 0,
+    subtotal: 2010,
+    exchangeRate: 1,
+    items: {
+       13995365: {
+          id: "387",
+          amount: 1000,
+          lineuniquekey: "13995365",
+          account:205,
+          itemType: "InvtPart"
+       },
+       13995368: {
+          id: "387",
+          amount: 1000,
+          lineuniquekey: "13995368",
+          account:205,
+          itemType: "InvtPart"
+       }
+    },
+    expense: {
+       14168827: {
+          amount: 10,
+          lineuniquekey: "14168827",
+          account:1979
+       }
+    },
+    relatedRecords: [
+       {
+          id: "3952026",
+          tranid: "JOU04402309",
+          trandate: "07/08/2023",
+          memo: "Latam - WHT AutoReteICA10%",
+          amount: "-201",
+          subtypeKey: "ica"
+       },
+       {
+          id: "3952027",
+          tranid: "JOU04402310",
+          trandate: "07/08/2023",
+          memo: "Latam - WHT AutoReteIVA 5%",
+          amount: "-100.5",
+          subtypeKey: "iva"
+       },
+       {
+          id: "3952028",
+          tranid: "JOU04402311",
+          trandate: "07/08/2023",
+          memo: "Latam - WHT AutoReteFTE25%",
+          amount: "-502.5",
+          subtypeKey: "fte"
+       }
+    ]
+ }
+
+
+ {
+    id: "3906039",
+    wht: {
+       "ica": {},
+       "iva": {},
+       "fte": {},
+       "cree": {}
+    },
+    recordtype: "vendorbill",
+    items: {
+       13989955: {
+          id: "387",
+          amount: 36,
+          lineuniquekey: "13989955",
+          account:205,
+          itemType: "InvtPart"
+       },
+       13989956: {
+          id: "387",
+          amount: 36,
+          lineuniquekey: "13989956",
+          account:205,
+          itemType: "InvtPart"
+       }
+    },
+    taxResults: {
+       401163: {
+          id: "401163",
+          subtype: "Auto ReteICA",
+          lineunikey: "13989955"
+       },
+       401164: {
+          id: "401164",
+          subtype: "Auto ReteCREE",
+          lineunikey: "13989955"
+       },
+       401165: {
+          id: "401165",
+          subtype: "Auto ReteIVA",
+          lineunikey: "13989955"
+       },
+       401166: {
+          id: "401166",
+          subtype: "Auto ReteFTE",
+          lineunikey: "13989955"
+       },
+       401167: {
+          id: "401167",
+          subtype: "Auto ReteICA",
+          lineunikey: "13989956"
+       },
+       401168: {
+          id: "401168",
+          subtype: "Auto ReteCREE",
+          lineunikey: "13989956"
+       },
+       401169: {
+          id: "401169",
+          subtype: "Auto ReteIVA",
+          lineunikey: "13989956"
+       },
+       401170: {
+          id: "401170",
+          subtype: "Auto ReteFTE",
+          lineunikey: "13989956"
+       }
+    },
+    relatedRecords: [
+       {
+          id: "3906042",
+          tranid: "JOU00033566",
+          trandate: "2023-08-02T07:00:00.000Z",
+          memo: "Latam - CO WHT (Lines) - Auto ReteICA",
+          amount: "0.001044",
+          subtypeKey: "Retention name not found"
+       },
+       {
+          id: "3906043",
+          tranid: "JOU00033567",
+          trandate: "2023-08-02T07:00:00.000Z",
+          memo: "Latam - CO WHT (Lines) - Auto ReteCREE",
+          amount: "0.001044",
+          subtypeKey: "Retention name not found"
+       },
+       {
+          id: "3906044",
+          tranid: "JOU00033568",
+          trandate: "2023-08-02T07:00:00.000Z",
+          memo: "Latam - CO WHT (Lines) - Auto ReteIVA",
+          amount: "0.002088",
+          subtypeKey: "Retention name not found"
+       },
+       {
+          id: "3906045",
+          tranid: "JOU00033569",
+          trandate: "2023-08-02T07:00:00.000Z",
+          memo: "Latam - CO WHT (Lines) - Auto ReteFTE",
+          amount: "0.000522",
+          subtypeKey: "Retention name not found"
+       }
+    ]
+ }
+
+ {
    id: "3944963",
    wht: {
       ica: {
@@ -9,6 +204,7 @@
          puchasebase: "subtotal",
          subtype: "ReteICA",
          subtypeId: "19",
+         variable: "F",
          relatedTransaction: {
             id: "3944964",
             trandate: "2023-12-22T08:00:00.000Z"
@@ -22,6 +218,7 @@
          puchasebase: "subtotal",
          subtype: "ReteIVA",
          subtypeId: "18",
+         variable: "F",
          relatedTransaction: {
             id: "3944965",
             trandate: "2023-12-22T08:00:00.000Z"
@@ -35,6 +232,7 @@
          puchasebase: "total",
          subtype: "ReteFTE",
          subtypeId: "21",
+         variable: "T",
          relatedTransaction: {
             id: "3944966",
             trandate: "2023-12-22T08:00:00.000Z"
@@ -43,6 +241,7 @@
       "cree": {}
    },
    recordtype: "invoice",
+   variable: "",
    total: 2156.99,
    taxtotal: 344.39,
    subtotal: 1812.6,
@@ -51,36 +250,36 @@
    items: {
       14122555: {
          id: "502",
-         subtotal: 1700,
-         total: 2023,
-         taxtotal: 323,
+         subtotal: 1615,
+         total: 1921.85,
+         taxtotal: 306.85,
          lineuniquekey: "14122555",
          account:23,
          itemType: "InvtPart"
       },
       14122558: {
          id: "3054",
-         subtotal: -170,
-         total: -202.3,
-         taxtotal: -32.30000000000001,
+         subtotal: -161.5,
+         total: -192.185,
+         taxtotal: -30.685,
          lineuniquekey: "14122558",
          account:1978,
          itemType: "Discount"
       },
       14122559: {
          id: "387",
-         subtotal: 420,
-         total: 499.8,
-         taxtotal: 79.80000000000001,
+         subtotal: 399,
+         total: 474.81,
+         taxtotal: 75.81,
          lineuniquekey: "14122559",
          account:205,
          itemType: "InvtPart"
       },
       14122562: {
          id: "3054",
-         subtotal: -42,
-         total: -49.98,
-         taxtotal: -7.979999999999997,
+         subtotal: -39.9,
+         total: -47.481,
+         taxtotal: -7.581,
          lineuniquekey: "14122562",
          account:1978,
          itemType: "Discount"
@@ -90,6 +289,7 @@
       sumTotal: 2270.52
    },
    sumSubtotal: 1908,
+   discountRate: 0.95,
    relatedRecords: [
       {
          id: "3944964",
