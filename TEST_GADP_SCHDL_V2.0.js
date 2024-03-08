@@ -25,7 +25,7 @@ define(["N/search", "N/record", "N/log", "N/query", "N/runtime"],
                for (var i = 0; i < 25; i++) {
                    copyCreditMemo("3939035");
                }
-               */
+               
 
                 var transactions = [
                     3960157,
@@ -42,12 +42,13 @@ define(["N/search", "N/record", "N/log", "N/query", "N/runtime"],
                 for (var i = 0; i < transactions.length; i++) {
                     deleteTaxResults(transactions[i]);
                 }
+                */
                 //voidCreditMemo("3939157",true);
                 //deleteTaxResults("3959312");
                 //searchTransaction("3914166");
                 //log.error("account",creditMemoSearch.accountmain[0].value);
 
-
+                deleteTaxResults("3961506");
 
             } catch (error) {
                 log.error("error", error)
@@ -72,6 +73,8 @@ define(["N/search", "N/record", "N/log", "N/query", "N/runtime"],
                     id: idTax,
                     isDynamic: true
                 });
+
+                log.error("delete",idTaxLog)
                 return true;
             });
         }
@@ -87,7 +90,7 @@ define(["N/search", "N/record", "N/log", "N/query", "N/runtime"],
             var searchColumns = [];
             searchColumns.push(search.createColumn({ name: 'formulatext', formula: '{internalid}' }));
             searchColumns.push(search.createColumn({ name: 'amount', join: 'item' }))
-            let settings = [];
+            var settings = [];
 
             settings = [search.createSetting({ name: 'consolidationtype', value: 'NONE' })];
 
