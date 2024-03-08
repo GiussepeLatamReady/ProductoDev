@@ -19,7 +19,7 @@ define([
     const calculateHeaderWHT = (id) => {
         getFeatures();
         const transaction = getTransaction(id);
-        //createTaxResults(transaction);
+        createTaxResults(transaction);
     }
 
 
@@ -58,6 +58,7 @@ define([
         let recordObj = record.load({ type: transaction.recordtype, id: id });
         
         transaction.variable = recordObj.getValue({ fieldId: 'custbody_lmry_features_active' })
+
         transaction.total = parseFloat(recordObj.getValue({ fieldId: 'total' }));
         transaction.taxtotal = parseFloat(recordObj.getValue({ fieldId: 'taxtotal' }));
         transaction.subtotal = transaction.total - transaction.taxtotal;
@@ -93,22 +94,66 @@ define([
             }
 
         });
+
+        setAmountsVariable(transaction,recordObj);
+
         transaction.relatedRecords = [...relatedRecords];
         setTransactionWht(transaction);
+        deleteProperty(transaction);
         log.error("transaction", transaction);
 
         return transaction;
     }
 
+    const deleteProperty = transaction => {
+       if (transaction.items) {
+        delete transaction.items.sumSubtotal;
+        delete transaction.items.sumTaxtotal;
+        delete transaction.items.sumTotal;
+       }
+       if (transaction.expense) {
+        delete transaction.expense.sumSubtotal;
+        delete transaction.expense.sumTaxtotal;
+        delete transaction.expense.sumTotal;
+       }
+    };
+
+    const setAmountsVariable = (transaction,recordObj) => {
+        if (transaction.variable && (transaction.recordtype == "vendorbill" ||transaction.recordtype == "vendorcredit" )) {
+            transaction.variable = JSON.parse(transaction.variable);
+            if (transaction.wht.ica.variable) {
+                transaction.wht.ica.amount = recordObj.getValue("custbody_lmry_co_reteica") ;
+                transaction.wht.ica.baseamount = transaction.variable.custpage_lmry_reteica_base;
+                transaction.wht.ica.rate = parseFloat(transaction.variable.custpage_lmry_reteica_rate)/100;
+            }
+            if (transaction.wht.iva.variable) {
+                transaction.wht.iva.amount = recordObj.getValue("custbody_lmry_co_reteiva");
+                transaction.wht.iva.baseamount = transaction.variable.custpage_lmry_reteiva_base;
+                transaction.wht.iva.rate = parseFloat(transaction.variable.custpage_lmry_reteiva_rate)/100;
+            }
+            if (transaction.wht.fte.variable) {
+                transaction.wht.fte.amount = recordObj.getValue("custbody_lmry_co_retefte");
+                transaction.wht.fte.baseamount = transaction.variable.custpage_lmry_retefte_base;
+                transaction.wht.fte.rate = parseFloat(transaction.variable.custpage_lmry_retefte_rate)/100;
+            }
+            if (transaction.wht.cree.variable) {
+                transaction.wht.cree.amount = recordObj.getValue("custbody_lmry_co_autoretecree");
+                transaction.wht.cree.baseamount = transaction.variable.custpage_lmry_retecree_base;
+                transaction.wht.cree.rate = parseFloat(transaction.variable.custpage_lmry_retecree_rate)/100;
+            }
+        }
+         
+    };
+
     const setLineFactor = transaction => {
         if (transaction.items) {
             for (let itemKey in transaction.items) {
-                transaction.items[itemKey].factor = transaction.items[itemKey].subtotal/transaction.sumSubtotal;
+                transaction.items[itemKey].factor = Math.abs(transaction.items[itemKey].subtotal/transaction.sumSubtotal);
             }
         }
         if (transaction.expense) {
             for (let expenseKey in transaction.expense) {
-                transaction.expense[expenseKey].factor = transaction.expense[expenseKey].subtotal/transaction.sumSubtotal;
+                transaction.expense[expenseKey].factor = Math.abs(transaction.expense[expenseKey].subtotal/transaction.sumSubtotal);
             }
         }
     };
@@ -119,8 +164,8 @@ define([
 
             const recordSummary = record.create({ type: 'customrecord_lmry_br_transaction', isDynamic: false });
 
-            const baseAmount = parseFloat(amount);
-            const retentionAmount = parseFloat(amount * retention.rate);
+            let baseAmount = parseFloat(amount);
+            let retentionAmount = parseFloat(amount * retention.rate);
             
             const commonValues = {
                 custrecord_lmry_br_related_id: String(transaction.id),
@@ -146,6 +191,19 @@ define([
                 custrecord_lmry_co_acc_exo_concept: item.account,
             };
 
+            if (retention.variable && retention.amount) {
+                baseAmount = round(parseFloat(retention.amount) * item.factor);
+                retentionAmount = round(parseFloat(retention.baseamount) * item.factor);
+
+
+                commonValues.custrecord_lmry_base_amount = baseAmount / transaction.exchangeRate;
+                commonValues.custrecord_lmry_br_total = retentionAmount / transaction.exchangeRate;
+
+                commonValues.custrecord_lmry_total_base_currency = baseAmount;
+                commonValues.custrecord_lmry_base_amount_local_currc = baseAmount;
+                commonValues.custrecord_lmry_amount_local_currency = retentionAmount;
+            }
+
             for (const fieldId in commonValues) {
                 if (commonValues[fieldId] !== undefined) {
                     recordSummary.setValue({ fieldId, value: commonValues[fieldId] });
@@ -157,8 +215,8 @@ define([
         };
 
         if (transaction.items) {
-            for (let item of transaction.items) {
-                for (let retention of transaction.wht) {
+            for (let item of Object.values(transaction.items)) {
+                for (let retention of Object.values(transaction.wht)) {
                     const typeBase=transaction.recordtype == "vendorbill" ||transaction.recordtype == "vendorcredit" ? "puchasebase":"salesbase";
                     const whtBase = retention[typeBase];
                     createAndSaveRecord(item[whtBase], 'Item', retention, item);
@@ -168,8 +226,8 @@ define([
         
 
         if (transaction.expense) {
-            for (let expense of transaction.expense) {
-                for (let retention of transaction.wht) {
+            for (let expense of Object.values(transaction.expense)) {
+                for (let retention of Object.values(transaction.wht)) {
                     const typeBase=transaction.recordtype == "vendorbill" ||transaction.recordtype == "vendorcredit" ? "puchasebase":"salesbase";
                     const whtBase = retention[typeBase];
                     createAndSaveRecord(expense[whtBase], 'Expense', retention, expense);
@@ -213,15 +271,16 @@ define([
     };
 
     const applyGlobalDiscount = (transaction) => {
-        Object.values(transaction.items).forEach(item => {
-            ['subtotal', 'taxtotal', 'total'].forEach(prop => item[prop] = round(item[prop] * transaction.discountRate));
-        });
-        if (transaction.expense) {
-            Object.values(transaction.expense).forEach(item => {
+        if (transaction.discountTotal !=0) {
+            Object.values(transaction.items).forEach(item => {
                 ['subtotal', 'taxtotal', 'total'].forEach(prop => item[prop] = round(item[prop] * transaction.discountRate));
             });
+            if (transaction.expense) {
+                Object.values(transaction.expense).forEach(item => {
+                    ['subtotal', 'taxtotal', 'total'].forEach(prop => item[prop] = round(item[prop] * transaction.discountRate));
+                });
+            }
         }
-        
     };
       
 
