@@ -13,7 +13,7 @@
  */
 define(['N/runtime', 'N/log', 'N/search', 'N/record', 'N/ui/serverWidget', './Latam_Library/LMRY_libSendingEmailsLBRY_V2.0',
   './Latam_Library/LMRY_HideViewLBRY_V2.0', './Latam_Library/LMRY_GLImpact_LBRY_V2.0', './Latam_Library/LMRY_UniversalSetting_Fulfillment_Receipt_LBRY',
-  './Latam_Library/LMRY_BR_LatamTax_Purchase_LBRY_V2.0', './Latam_Library/LMRY_BR_ValidateDuplicate_LBRY_V2.0', './Latam_Library/LMRY_ValidateClosePeriod_LBRY_V2.0', './Latam_Library/LMRY_libToolsFunctionsLBRY_V2.0','./Latam_Library/LMRY_second_Entity_LBRY_V2.0','./Latam_Library/LMRY_Unit_Price_LBRY_V2.0'],
+  './Latam_Library/LMRY_BR_LatamTax_Purchase_LBRY_V2.0', './Latam_Library/LMRY_BR_ValidateDuplicate_LBRY_V2.0', './Latam_Library/LMRY_ValidateClosePeriod_LBRY_V2.0', './Latam_Library/LMRY_libToolsFunctionsLBRY_V2.0','./Latam_Library/LMRY_second_Entity_LBRY_V2.0','./Latam_Library/LMRY_AR_Unit_Price_LBRY_V2.0'],
   function (runtime, log, search, record, serverWidget, library_mail, library_HideView, libraryGLImpact, library_Uni_Setting, library_taxPurchase, Library_BRDup, LibraryValidatePeriod, libtools,librarySecondClient,libraryUnitPrice) {
     var LMRY_script = 'LatamReady - Item Fulfillment URET V2.0';
     var licenses = [];
@@ -160,7 +160,12 @@ define(['N/runtime', 'N/log', 'N/search', 'N/record', 'N/ui/serverWidget', './La
 
         }//FIN PRINT & EMAIL
 
-
+        if (LMRY_Result[0] == 'AR') {
+          var feaUnitPrice = library_mail.getAuthorization(1089, licenses);
+          if (feaUnitPrice) {
+            libraryUnitPrice.disabledField(OBJ_FORM);
+          }
+        }
       }
       catch (err) {
         log.error('BeforeLoad', err);

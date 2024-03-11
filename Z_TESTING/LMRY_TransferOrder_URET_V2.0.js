@@ -14,9 +14,10 @@
 define(['N/runtime', 'N/log', 'N/search', 'N/record', 'N/ui/serverWidget',
 	'./Latam_Library/LMRY_libSendingEmailsLBRY_V2.0',
 	'./Latam_Library/LMRY_HideViewLBRY_V2.0',
-	'./Latam_Library/LMRY_BR_ValidateDuplicate_LBRY_V2.0'],
+	'./Latam_Library/LMRY_BR_ValidateDuplicate_LBRY_V2.0',
+	'./Latam_Library/LMRY_AR_Unit_Price_LBRY_V2.0.js'],
 
-	function (runtime, log, search, record, serverWidget, library_mail, library_HideView, Library_BRDup) {
+	function (runtime, log, search, record, serverWidget, library_mail, library_HideView, Library_BRDup, libraryUnitPrice) {
 		var LMRY_script = 'LatamReady - Transfer Order URET V2.0';
 		var licenses = [];
 
@@ -86,6 +87,13 @@ define(['N/runtime', 'N/log', 'N/search', 'N/record', 'N/ui/serverWidget',
 							log.debug('library_HideView', 'HideColumn');
 							library_HideView.HideColumn(scriptContext.form, LMRY_Result[1], recordObj.type, licenses);
 						} // Hide and View en formulario
+					}
+				}
+
+				if (LMRY_Result[0] == 'AR') {
+					var feaUnitPrice = library_mail.getAuthorization(1089, licenses);
+					if (feaUnitPrice) {
+						libraryUnitPrice.disabledField(OBJ_FORM);
 					}
 				}
 

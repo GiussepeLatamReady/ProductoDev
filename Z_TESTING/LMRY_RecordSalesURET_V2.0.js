@@ -21,7 +21,7 @@ define(['N/config', 'N/currency', 'N/record', 'N/runtime', 'N/search', 'N/ui/ser
   './Latam_Library/LMRY_MX_STE_Sales_Tax_Transaction_LBRY_V2.0',
   './Latam_Library/LMRY_Custom_ExchangeRate_Field_LBRY_V2.0.js', './WTH_Library/LMRY_AutoPercepcionDesc_LBRY_V2.0',
   './Latam_Library/LMRY_second_Entity_LBRY_V2.0', './Latam_Library/LMRY_Custom_ExchangeRate_LBRY_V2.0.js',
-  './Latam_Library/LMRY_Unit_Price_LBRY_V2.0'
+  './Latam_Library/LMRY_AR_Unit_Price_LBRY_V2.0'
 ],
 
   function (config, currencyModule, record, runtime, search, serverWidget, log,
@@ -596,6 +596,11 @@ define(['N/config', 'N/currency', 'N/record', 'N/runtime', 'N/search', 'N/ui/ser
 
         if (LMRY_countr[0] == 'AR') {
           Library_AutoPercepcionDesc.removePerceptionLines(RCD_OBJ);
+
+          var feaUnitPrice = Library_Mail.getAuthorization(1089, licenses);
+          if (feaUnitPrice) {
+            libraryUnitPrice.disabledField(OBJ_FORM);
+          }
         }
 
         if (LMRY_countr[0] == 'BR' && (scriptContext.type == "create" || scriptContext.type == "edit" || scriptContext.type == "view" || scriptContext.type == "copy")) {
