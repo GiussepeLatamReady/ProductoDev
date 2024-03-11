@@ -43,7 +43,7 @@ Así mismo se requiere que este campo “LATAM COL - PRECIO UNITARIO SO” se en
 
 ## Observations
 
-i sale el card C1040 compatibilizar con este card
+si sale el card C1040 revisar con este card
 
 
 

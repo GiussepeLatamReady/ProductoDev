@@ -24,6 +24,11 @@ define([
         if (numberItems) {
             for (var i = 0; i < numberItems; i++) {
                 var unitPrice = 0;
+
+                var fieldId = currentRecord.type == 'itemfulfillment' ? "itemunitprice" : "rate";
+                fieldId = currentRecord.type == 'tranfesrorder'? "transferprice" : fieldId;
+
+                
                 if (currentRecord.type == 'itemfulfillment') {
                     unitPrice = currentRecord.getSublistValue({
                         sublistId: "item",
