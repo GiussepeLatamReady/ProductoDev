@@ -96,7 +96,11 @@ define(['N/runtime',
 
             pageInit(scriptContext) {
                 this.currentRecord = scriptContext.currentRecord;
-                this.setFieldPeriod();
+                const status = this.currentRecord.getValue('custpage_status');
+                const isInit = status == 1 || status == "1";
+
+                if (isInit) this.setFieldPeriod(isInit);
+                
             }
             validateField(scriptContext) {
                 this.currentRecord = scriptContext.currentRecord;
@@ -117,6 +121,10 @@ define(['N/runtime',
                     }
                 }
                 */
+                if (scriptContext.fieldId == 'custpage_subsidiary') {
+                    this.setFieldPeriod();
+                }
+               
                 return true
             }
 
@@ -182,6 +190,8 @@ define(['N/runtime',
                         id: subsidiary,
                         columns: ['fiscalcalendar']
                     });
+
+                    console.log("fiscalcalendar:",fiscalcalendar)
 
                     if (fiscalcalendar && fiscalcalendar.length > 0) {
                         filters.push('AND',['fiscalcalendar', 'anyof', fiscalcalendar[0].value]);
@@ -299,10 +309,10 @@ define(['N/runtime',
 
 
 
-            setFieldPeriod() {
+            setFieldPeriod(isInit) {
                 //const fields = ['custpage_start_date', 'custpage_end_date', 'custpage_period'];
                 //fields.forEach(id => this.currentRecord.getField({ fieldId: id }).isDisplay = false);
-                const status = this.currentRecord.getValue('custpage_status');
+                
                 //const periodType = this.currentRecord.getValue('custpage_period_type');
                 /*
                 if (status == 1 || status == "1") {
@@ -319,7 +329,7 @@ define(['N/runtime',
                     this.currentRecord.getField({ fieldId: 'custpage_period' }).isDisplay = true;
                 }
                 */
-                const isInit = status == 1 || status == "1";
+                
                 this.setPeriod(isInit);
                 this.currentRecord.getField({ fieldId: 'custpage_period' }).isDisplay = true;
 
