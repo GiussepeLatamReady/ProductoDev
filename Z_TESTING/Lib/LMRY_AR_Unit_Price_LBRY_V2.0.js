@@ -17,7 +17,6 @@ define([
         var numberItems = currentRecord.getLineCount({
             sublistId: "item"
         });
-        var form = currentRecord.form;
         if (numberItems) {
             for (var i = 0; i < numberItems; i++) {
                 var unitPrice = 0;
@@ -50,15 +49,17 @@ define([
 
     function disabledField() {
         var objRecord = currentRecord.get();
+        
         var numberItems = objRecord.getLineCount({ sublistId: 'item' });;
         console.log("numberItems: ", numberItems);
         if (numberItems) {
             for (var i = 0; i < numberItems; i++) {
                 //var currentLine = objRecord.getSublistField({ sublistId: 'item', fieldId: 'custcol_lmry_prec_unit_so', line: i });
-                var objLine = objRecord.selectLine({ sublistId: 'item', line: i });
+                objRecord.selectLine({ sublistId: 'item', line: i });
+                var objLine =objRecord.getCurrentSublistField({ sublistId: 'item', fieldId: 'custcol_lmry_prec_unit_so' })
                 console.log("objLine :",objLine);
-                objLine.isDisplay = false;
-                objRecord.isDisplay = false;
+                //objLine.isDisplay = false;
+                objLine.isDisabled = true;
             }
         }
     }

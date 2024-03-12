@@ -90,12 +90,6 @@ define(['N/runtime', 'N/log', 'N/search', 'N/record', 'N/ui/serverWidget',
 					}
 				}
 
-				if (LMRY_Result[0] == 'AR') {
-					var feaUnitPrice = library_mail.getAuthorization(1089, licenses);
-					if (feaUnitPrice) {
-						libraryUnitPrice.disabledField(OBJ_FORM);
-					}
-				}
 
 			} catch (err) {
 				log.error(' [ beforeLoad ] ', err);

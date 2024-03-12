@@ -596,11 +596,6 @@ define(['N/config', 'N/currency', 'N/record', 'N/runtime', 'N/search', 'N/ui/ser
 
         if (LMRY_countr[0] == 'AR') {
           Library_AutoPercepcionDesc.removePerceptionLines(RCD_OBJ);
-
-          var feaUnitPrice = Library_Mail.getAuthorization(1089, licenses);
-          if (feaUnitPrice) {
-            libraryUnitPrice.disabledField(OBJ_FORM);
-          }
         }
 
         if (LMRY_countr[0] == 'BR' && (scriptContext.type == "create" || scriptContext.type == "edit" || scriptContext.type == "view" || scriptContext.type == "copy")) {
