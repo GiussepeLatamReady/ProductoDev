@@ -81,6 +81,10 @@
             + Latam - Account Exogenous Concept
                 id:custrecord_lmry_co_acc_exo_concept
 
+    + Name: LatamReady - WHT Type
+    + Id: customrecord_lmry_wht_type
+    
+
 ## Fields
 + Create
 + Update 
