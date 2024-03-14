@@ -10,7 +10,7 @@
 define([
     'N/log',
     'N/currentRecord'
-], function (log,currentRecord) {
+], function (log, currentRecord) {
 
     function saveUnitPrice(currentRecord) {
         log.error("saveUnitPrice", "START")
@@ -20,15 +20,31 @@ define([
         if (numberItems) {
             for (var i = 0; i < numberItems; i++) {
                 var unitPrice = 0;
+                var amount = 0;
+                var quantity = 0;
+                var unitPriceAux = 0;
+                var fieldIdUnitPrice = currentRecord.type == 'itemfulfillment' ? "itemunitprice" : "rate";
+                var fieldIdAmount = currentRecord.type == 'itemfulfillment' ? "itemfxamount" : "amount";
 
-                var fieldId = currentRecord.type == 'itemfulfillment' ? "itemunitprice" : "rate";
+                quantity = currentRecord.getSublistValue({
+                    sublistId: "item",
+                    fieldId: "quantity",
+                    line: i
+                }) || 1;
+                amount = currentRecord.getSublistValue({
+                    sublistId: "item",
+                    fieldId: fieldIdAmount,
+                    line: i
+                }) || 0;
+
+
+                unitPriceAux = amount == 0 ? 0.01 : (amount / quantity).toFixed(2);
 
                 unitPrice = currentRecord.getSublistValue({
                     sublistId: "item",
-                    fieldId: fieldId,
+                    fieldId: fieldIdUnitPrice,
                     line: i
-                }) || 0.01;
-
+                }) || unitPriceAux;
 
                 unitPrice = unitPrice == 0 ? 0.01 : unitPrice;
                 currentRecord.setSublistValue({
@@ -44,20 +60,20 @@ define([
 
 
 
-        
+
     }
 
     function disabledField() {
         var objRecord = currentRecord.get();
-        
+
         var numberItems = objRecord.getLineCount({ sublistId: 'item' });;
         console.log("numberItems: ", numberItems);
         if (numberItems) {
             for (var i = 0; i < numberItems; i++) {
                 //var currentLine = objRecord.getSublistField({ sublistId: 'item', fieldId: 'custcol_lmry_prec_unit_so', line: i });
                 objRecord.selectLine({ sublistId: 'item', line: i });
-                var objLine =objRecord.getCurrentSublistField({ sublistId: 'item', fieldId: 'custcol_lmry_prec_unit_so' })
-                console.log("objLine :",objLine);
+                var objLine = objRecord.getCurrentSublistField({ sublistId: 'item', fieldId: 'custcol_lmry_prec_unit_so' })
+                console.log("objLine :", objLine);
                 //objLine.isDisplay = false;
                 objLine.isDisabled = true;
             }
@@ -65,5 +81,5 @@ define([
     }
 
 
-    return { disabledField:disabledField,saveUnitPrice: saveUnitPrice };
+    return { disabledField: disabledField, saveUnitPrice: saveUnitPrice };
 });
