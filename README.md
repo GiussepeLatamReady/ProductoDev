@@ -18,6 +18,11 @@ Así mismo se requiere que este campo “LATAM COL - PRECIO UNITARIO SO” se en
     LMRY_ItemFulfillmentURET_V2.0.js
     LMRY_RecordSalesURET_V2.0.js
     LMRY_TransferOrder_URET_V2.0.js
+
+    LMRY_ItemFulfillmentCLNT_V2.0.js
+    LMRY_RecordSalesCLNT_V2.0.js
+    LMRY_TransferOrder_CLNT_V2.0.js
+    
 + Delete
 
 ## Records
