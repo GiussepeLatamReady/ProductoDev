@@ -1,27 +1,25 @@
-# [C1032- Uriarte - FDD precio unitario Remitos](https://docs.google.com/document/d/19TXmcvsnjFcuLVNYa3IKwmVoM69Rzsyc/edit)
+# [C1063 - ARG Mejora facturas desde ov con Percepciones](https://docs.google.com/document/d/1Png59TUJYHZK8h_obwWwtvpcEv8ywkrI/edit)
 
 
 ## Description of the Requirement
 
-Se requiere automatizar el valor del campo de columna “LATAM COL - PRECIO UNITARIO SO” (id: custcol_lmry_prec_unit_so) de tal forma que traiga en automático la información referente al precio unitario del campo RATE (estándar de NS) 
+Se solicita considerar como mejora al proceso de percepciones en facturas de venta asociadas a órdenes de venta, el objetivo de la mejora es que al facturar la sales order herede la línea o item de percepción desde la sales order a la factura, pues actualmente no se hereda y se agrega la línea al guardar la factura y esto hace que la sales order quede pendiente de facturar ya que ambas transacciones quedan con líneas de percepción diferentes.
 
-Así mismo se requiere que este campo “LATAM COL - PRECIO UNITARIO SO” se encuentre bloqueado (no edición), con el fin de que solo dependa del campo estándar de NetSuite mencionado.
+
+Lo anterior hace que el botón “Facturar” siga apareciendo en la sales order aun cuando la sales order está facturada por completo. Esto también ocasiona que reportes de órdenes de venta por facturar sean alterados
+
 
 
 ## Description of the solution
 
 
 ## Scripts
-+ Create
-    LMRY_Unit_Price_LBRY_V2.1.js
 + Update
-    LMRY_ItemFulfillmentURET_V2.0.js
-    LMRY_RecordSalesURET_V2.0.js
-    LMRY_TransferOrder_URET_V2.0.js
+    + LMRY_RecordSalesURET_V2.0.js
+    + LMRY_InvoiceURET_V2.0.js
+    + WHT_library/ 
+        + LMRY_AutoPercepcionDesc_LBRY_V2.0.js
 
-    LMRY_ItemFulfillmentCLNT_V2.0.js
-    LMRY_RecordSalesCLNT_V2.0.js
-    LMRY_TransferOrder_CLNT_V2.0.js
     
 + Delete
 

@@ -20,14 +20,13 @@ define(['N/config', 'N/currency', 'N/record', 'N/runtime', 'N/search', 'N/ui/ser
   './WTH_Library/LMRY_MX_TAX_Withholding_LBRY_V2.0', './Latam_Library/LMRY_BR_UPDATE_Flete_Transaction_Field_LBRY_2.0',
   './Latam_Library/LMRY_MX_STE_Sales_Tax_Transaction_LBRY_V2.0',
   './Latam_Library/LMRY_Custom_ExchangeRate_Field_LBRY_V2.0.js', './WTH_Library/LMRY_AutoPercepcionDesc_LBRY_V2.0',
-  './Latam_Library/LMRY_second_Entity_LBRY_V2.0', './Latam_Library/LMRY_Custom_ExchangeRate_LBRY_V2.0.js',
-  './Latam_Library/LMRY_AR_Unit_Price_LBRY_V2.0'
+  './Latam_Library/LMRY_second_Entity_LBRY_V2.0', './Latam_Library/LMRY_Custom_ExchangeRate_LBRY_V2.0.js'
 ],
 
   function (config, currencyModule, record, runtime, search, serverWidget, log,
     Library_Mail, Library_HideView, Library_WHT_Transaction, library_hideview3,
     library_SalesOrder, libraryGLImpact, PE_libMapTransactions, libraryTaxWithholding, libraryFleteGlobales,
-    MX_STE_TaxLibrary, Library_ExchangeRate_Field, Library_AutoPercepcionDesc, librarySecondClient, Library_ExchangeRate,libraryUnitPrice) {
+    MX_STE_TaxLibrary, Library_ExchangeRate_Field, Library_AutoPercepcionDesc, librarySecondClient, Library_ExchangeRate) {
 
     var LMRY_script = 'LMRY Record Sales URET V2.0';
     var OBJ_FORM = '';
@@ -726,13 +725,6 @@ define(['N/config', 'N/currency', 'N/record', 'N/runtime', 'N/search', 'N/ui/ser
               }
             }
 
-          }
-          
-          if (LMRY_Result[0] == 'AR') {
-            var feaUnitPrice = Library_Mail.getAuthorization(1089, licenses);
-            if (feaUnitPrice) {
-              libraryUnitPrice.saveUnitPrice(RCD_OBJ);
-            }
           }
         }
 
