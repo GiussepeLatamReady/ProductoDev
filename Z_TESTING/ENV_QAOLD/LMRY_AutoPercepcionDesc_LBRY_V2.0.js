@@ -48,7 +48,7 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
         function autoperc_beforeSubmit(paramContext, CodeCountry, evento) {
 
             try {
-
+                log.debug("autoperc_beforeSubmit","Start")
                 if (evento == "create" || evento == "edit") {
                     // Registro actual
                     var invoiceRecord = paramContext.newRecord;
@@ -91,7 +91,7 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
          *********************************************************** */
         function logicaAutoPercepciones(invoiceRecord, numLines, CodeCountry) {
             try {
-
+                log.error("logicaAutoPercepciones","start")
                 var auto_wht = invoiceRecord.getValue('custbody_lmry_apply_wht_code');
                 var tipo_Docum = invoiceRecord.getValue("custbody_lmry_document_type");
                 var fieldStatus = invoiceRecord.getField({ fieldId: 'custbody_psg_ei_status' });
@@ -115,6 +115,7 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
                 if (auto_wht && validarTipoDoc(tipo_Docum, invoiceRecord.type) && (eDocStatus != "Sent" && eDocStatus != "Enviado")) {
                     seteoSuma = true;
                     var hayTributo = contieneTributo(invoiceRecord, numLines, cantidad);
+                    log.error("hayTributo",hayTributo)
                     if (!hayTributo) {
                         var tradate = invoiceRecord.getValue("trandate");
                         tradate = format.format({ value: tradate, type: format.Type.DATE });
@@ -142,8 +143,10 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
                              ********************************************/
                             var responsableType = search.lookupFields({ type: search.Type.CUSTOMER, id: entity, columns: ['custentity_lmry_ar_tiporespons'] });
 
+                            log.error("responsableType",responsableType)
                             // Se valida que el campo no este vacio
                             if (responsableType.custentity_lmry_ar_tiporespons.length == 0 || responsableType == '' || responsableType == null) {
+                                log.error("stop","por responsableType")
                                 return true;
                             }
                             RespType = responsableType.custentity_lmry_ar_tiporespons[0].value;
@@ -204,6 +207,7 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
                             }
 
                         } else {
+                            log.debug("autoperc_beforeSubmit","tax subsidiary")
                             return true;
                         }
 
@@ -251,7 +255,7 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
                         });
 
                         result_nt = search_nt.run().getRange({ start: 0, end: 1000 });
-                        log.debug('result_nt', result_nt);
+                        log.error('result_nt', result_nt);
                         //Busqueda de las Clases Contributiva
                         var i = 8;
                         var filtros_ccl = new Array();
@@ -300,7 +304,7 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
                         });
 
                         var resultContClass = busqContClass.run().getRange(0, 1000);
-                        log.debug('resultContClass', resultContClass);
+                        log.error('resultContClass', resultContClass);
                         logicaLlenado("1", result_nt, invoiceRecord, CodeCountry, tipoRedondeo, arregloSegmentacion, "", "0");
                         logicaLlenado("1", resultContClass, invoiceRecord, CodeCountry, tipoRedondeo, arregloSegmentacion, "", "1");
 
@@ -340,15 +344,11 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
         function logicaLlenado(appliesTo, result, invoiceRecord, CodeCountry, tipoRedondeo, segmentacion, infoItem, bySubsidiary) {
 
             // var subtotal_invoice = parseFloat(invoiceRecord.getValue("subtotal")) * parseFloat(exchange_global);
-            log.debug('parseFloat(invoiceRecord.getValue("subtotal")', parseFloat(invoiceRecord.getValue("subtotal")))
-            log.debug('invoiceRecord.getValue("discounttotal")', invoiceRecord.getValue("discounttotal"))
-            log.debug('parseFloat(exchange_global)', parseFloat(exchange_global))
+            
             var subtotal_invoice = parseFloat(invoiceRecord.getValue("subtotal") + (invoiceRecord.getValue("discounttotal") || 0)) * parseFloat(exchange_global);
             var total_invoice = parseFloat(invoiceRecord.getValue("total")) * parseFloat(exchange_global);
             var taxtotal_invoice = parseFloat(invoiceRecord.getValue("taxtotal")) * parseFloat(exchange_global);
-            log.debug('subtotal_invoice', subtotal_invoice);
-            log.debug('total_invoice', total_invoice);
-            log.debug('taxtotal_invoice', taxtotal_invoice);
+            
             var department_setup = segmentacion[0];
             var class_setup = segmentacion[1];
             var lcoation_setup = segmentacion[2];
@@ -460,9 +460,9 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
                         }
                         if (amount_to == 3) { amount_base = parseFloat(aux_itemg[3]) * parseFloat(exchange_global); } //NET
                     }
-                    log.debug('amount_base 1', amount_base)
+                    
                     amount_base = parseFloat(amount_base) - parseFloat(minimonoimponible);
-                    log.debug('amount_base 2', amount_base)
+                    
                     if (amount_base <= 0) {
                         continue;
                     }
@@ -502,16 +502,16 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
 
                     //RETENCION
                     var retencion = parseFloat(setbaseretention) + parseFloat(amount_base) * parseFloat(ratio) * parseFloat(tax_rate);
-                    log.debug('retencion 1', retencion)
+                    
                     retencion = parseFloat(Math.round(parseFloat(retencion) * 1000000) / 1000000);
-                    log.debug('retencion 2', retencion)
+                    
                     retencion = parseFloat(Math.round(parseFloat(retencion) * 10000) / 10000);
-                    log.debug('retencion 3', retencion)
+                    
                     var retencion_peso = retencion;
 
                     var aux_cadena = retencion + ";";
                     retencion = parseFloat(retencion) / parseFloat(exchange_global);
-                    log.debug('retencion 4', retencion);
+                    
                     amount_base = parseFloat(amount_base) / parseFloat(exchange_global);
 
                     if (tipoRedondeo == '1') {
@@ -737,6 +737,7 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
          *********************************************************** */
 
         function removePerceptionLines(recordObj) {
+            log.error("removePerceptionLines","start")
             var currentNumberLine = recordObj.getLineCount({
                 sublistId: 'item'
             });
@@ -752,8 +753,9 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
                     deletedTransactions.push(i);
                 }
             }
+            log.error("deletedTransactions",deletedTransactions)
             deletedTransactions.forEach(function (id) {
-                var a = recordObj.removeLine({
+                recordObj.removeLine({
                     sublistId: 'item',
                     line: id
                 });
@@ -804,10 +806,10 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
                 var recordObj = scriptContext.newRecord;
                 var subsidiary = recordObj.getValue('subsidiary');
                 var setupTaxValues = getSetupTaxSubsidiary(subsidiary);
-                log.debug('setupTaxValues', setupTaxValues);
+                
                 if (Object.keys(setupTaxValues).length > 0) {
                     if (setupTaxValues['salesDiscount'] == true || setupTaxValues['salesDiscount'] == 'T') {
-                        log.debug('inicia discount', 'disc');
+                        
                         var objRecord = record.load({
                             type: recordObj.type,
                             id: recordObj.id
@@ -830,9 +832,9 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
         }
 
         function setGlobalDiscount(objRecord) {
-            log.debug('objRecord', objRecord);
+            
             var discountRate = objRecord.getValue('discountrate');
-            log.debug('discountRate', discountRate);
+            
             var discountRateText = objRecord.getText('discountrate');
             if (!discountRate) {
                 return true;
@@ -842,32 +844,32 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
             var sumAmount = 0, sumWithout = 0; sumConDescLinea = 0;
             for (var i = 0; i < objRecord.getLineCount({ sublistId: 'item' }); i++) {
                 var amount = objRecord.getSublistValue({ sublistId: 'item', fieldId: 'amount', line: i });
-                log.debug('amount', amount);
+                
                 var tributo = objRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_lmry_ar_item_tributo', line: i });
-                log.debug('tributo', tributo);
+                
                 var itemType = objRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_lmry_item_type', line: i });
-                log.debug('itemType', itemType);
+                
 
                 sumAmount += parseFloat(amount);
-                log.debug('sumAmount', sumAmount);
+                
                 if (tributo != 'T' && !tributo) {
                     sumConDescLinea += parseFloat(amount);
-                    log.debug('sumConDescLinea', sumConDescLinea);
+                    
                 }
 
                 if (tributo == 'T' || tributo == true || itemType == 'Descuento' || itemType == 'Discount') {
-                    log.debug('continua', 'continua');
+                    
                     continue;
                 }
-                log.debug('322', '322')
+                
                 sumWithout += parseFloat(amount);
-                log.debug('sumWithout', sumWithout);
+                
             }
             //Porcentaje
             if (isPercent) {
                 var totalDiscountGlobal = (parseFloat(sumConDescLinea) * parseFloat(discountRate) / 100);
                 totalDiscountGlobal = Math.round(parseFloat(totalDiscountGlobal) * 100) / 100;
-                log.debug('totalDiscountGlobal', totalDiscountGlobal);
+                
                 for (var i = 0; i < objRecord.getLineCount({ sublistId: 'item' }); i++) {
                     var itemType = objRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_lmry_item_type', line: i });
                     var tributo = objRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_lmry_ar_item_tributo', line: i });
@@ -876,11 +878,11 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
                         continue;
                     }
                     var prorrateo = (parseFloat(amount) * parseFloat(totalDiscountGlobal)) / parseFloat(sumWithout);
-                    log.debug('prorrateo 1', prorrateo);
+                    
                     prorrateo = Math.round(parseFloat(prorrateo) * 100) / 100;
-                    log.debug('prorrateo 2', prorrateo);
+                    
                     prorrateo = Math.abs(prorrateo);
-                    log.debug('prorrateo 3', prorrateo);
+                    
                     objRecord.setSublistValue({ sublistId: 'item', fieldId: 'custcol_lmry_col_sales_discount', line: i, value: prorrateo });
                 }
                 objRecord.setValue('discountrate', totalDiscountGlobal);
@@ -909,12 +911,11 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
         function createARTransactionField(objRecord, discountRate, isPercent) {
             try {
                 var idTransaction = objRecord.id;
-                log.debug('idTransaction', idTransaction);
+                
                 var typeTransaction = objRecord.type;
-                log.debug('typeTransaction', typeTransaction);
+                
                 var createdFrom = objRecord.getValue('createdfrom');
-                log.debug('createdFrom', createdFrom);
-                log.debug('test', discountRate + '%');
+                
                 var typeFrom = '';
                 if (createdFrom && createdFrom != '' && createdFrom != null) {
                     var resultFrom = search.lookupFields({ type: search.Type.TRANSACTION, id: createdFrom, columns: ['type'] });
@@ -944,10 +945,10 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
                             ]
                     });
                     var resultFrom = searchArTransactionFrom.run().getRange(0, 1);
-                    log.debug('result 1', result);
+                    
                     if (resultFrom.length > 0) {
                         var discRate = resultFrom[0].getValue('custrecord_lmry_ar_glob_disc_rate')
-                        log.debug('discRate', discRate);
+                        
                         var searchArTransaction = search.create({
                             type: "customrecord_lmry_ar_transaction_fields",
                             filters:
@@ -966,7 +967,7 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
                                 ]
                         });
                         var result = searchArTransaction.run().getRange(0, 1);
-                        log.debug('result', result);
+                        
                         if (result.length > 0) {
                             var arTransaction = record.load({
                                 type: 'customrecord_lmry_ar_transaction_fields',
@@ -1104,18 +1105,18 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
 
         function setLineDiscount(objRecord) {
             for (var i = 0; i < objRecord.getLineCount({ sublistId: 'item' }); i++) {
-                log.debug('i', i);
+                
                 var itemType = objRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_lmry_item_type', line: i });
                 var amount = objRecord.getSublistValue({ sublistId: 'item', fieldId: 'amount', line: i });
-                log.debug('amount', amount)
+                
                 if (itemType != 'Descuento' && itemType != 'Discount') {
                     continue;
                 }
                 if (i - 1 >= 0) {
                     var salesDiscount = objRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_lmry_col_sales_discount', line: i - 1 }) || 0;
-                    log.debug('salesDiscount 1', salesDiscount);
+                    
                     salesDiscount += parseFloat(Math.abs(amount));
-                    log.debug('salesDiscount 2', salesDiscount);
+                    
                     objRecord.setSublistValue({ sublistId: 'item', fieldId: 'custcol_lmry_col_sales_discount', line: i - 1, value: salesDiscount });
                 }
             }
