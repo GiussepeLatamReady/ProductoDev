@@ -25,6 +25,8 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
         var soloItems = 1;
         var apply_line = false;
         var filtroTransactionType = "";
+
+        
         var cantidad = 0;
 
         // Department, Class and Location
@@ -48,7 +50,7 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
         function autoperc_beforeSubmit(paramContext, CodeCountry, evento) {
 
             try {
-                log.debug("autoperc_beforeSubmit","Start")
+
                 if (evento == "create" || evento == "edit") {
                     // Registro actual
                     var invoiceRecord = paramContext.newRecord;
@@ -64,14 +66,14 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
                     soloItems = numLines;
 
                     // Logica de Auto Percepciones por Linea
-                    logicaAutoPercepciones(invoiceRecord, numLines, CodeCountry);
+                    calculatePerception(invoiceRecord, numLines, CodeCountry);
 
                     /*************************************
                      * Logica de Descuentos por Linea solo
                      * para Argentina
                      *************************************/
                     if (CodeCountry == "AR" && (invoiceRecord.type == 'invoice' || invoiceRecord.type == 'creditmemo' || invoiceRecord.type == 'cashsale')) {
-                        logicaDescuentos(invoiceRecord, numLines);
+                        calculateDiscount(invoiceRecord, numLines);
                     }
                 }
             } catch (msg) {
@@ -83,80 +85,81 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
         }
 
         /**************************************************************
-         * Funcion logicaAutoPercepciones si el cliente tiene
+         * Funcion calculatePerception si el cliente tiene
          * el campo personalizado 'Latam - AR Responsible Type Code'
          * configurado, adicionalmente tiene que estar marcado el
          * campo personalizado 'Latam - Applied WHT Code' se realizara
          * la Auto Percepcion en la transaccion.
          *********************************************************** */
-        function logicaAutoPercepciones(invoiceRecord, numLines, CodeCountry) {
+        function calculatePerception(invoiceRecord, numLines, CodeCountry) {
             try {
-                log.error("logicaAutoPercepciones","start")
-                var auto_wht = invoiceRecord.getValue('custbody_lmry_apply_wht_code');
-                var tipo_Docum = invoiceRecord.getValue("custbody_lmry_document_type");
-                var fieldStatus = invoiceRecord.getField({ fieldId: 'custbody_psg_ei_status' });
-                var eDocStatus = '';
-                if (fieldStatus != '' && fieldStatus != null) {
-                    eDocStatus = invoiceRecord.getValue("custbody_psg_ei_status");
-                    if (eDocStatus != null && eDocStatus != '') {
-                        eDocStatus = search.lookupFields({ type: 'customlist_psg_ei_status', id: eDocStatus, columns: ['name'] });
-                        eDocStatus = eDocStatus.name;
-                    }
+                const featjobs = runtime.isFeatureInEffect({ feature: "JOBS" });
+
+                const transactionType = {
+                    'invoice': 1,
+                    'creditmemo': 8,
+                    'cashsale': 3,
+                    'salesorder': 2,
+                    'estimate': 10
                 }
 
-                switch (invoiceRecord.type) {
-                    case 'invoice': filtroTransactionType = 1; break;
-                    case 'creditmemo': filtroTransactionType = 8; break;
-                    case 'cashsale': filtroTransactionType = 3; break;
-                    case 'salesorder': filtroTransactionType = 2; break;
-                    case 'estimate': filtroTransactionType = 10; break;
+                var transaction = {
+                    applyWhtCode: invoiceRecord.getValue('custbody_lmry_apply_wht_code'),
+                    documentType: invoiceRecord.getValue("custbody_lmry_document_type"),
+                    eiStatus: {
+                        field: invoiceRecord.getField({ fieldId: 'custbody_psg_ei_status' }),
+                        value: invoiceRecord.getValue("custbody_psg_ei_status") || ""
+                    },
+                    type:{
+                        text: invoiceRecord.type,
+                        value: transactionType[invoiceRecord.type]
+                    },
+                    trandate: invoiceRecord.getValue("trandate"),
+                    entity: invoiceRecord.getValue("entity"),
+                    subsidiary: invoiceRecord.getValue("subsidiary")
                 }
 
-                if (auto_wht && validarTipoDoc(tipo_Docum, invoiceRecord.type) && (eDocStatus != "Sent" && eDocStatus != "Enviado")) {
+                transaction.trandate = format.format({ value: transaction.trandate, type: format.Type.DATE });
+
+                if (featjobs == "T" || featjobs) {
+                    const jobs = search.lookupFields({ type: search.Type.JOB, id: transaction.entity, columns: ['customer'] });
+                    transaction.entity = jobs && jobs.customer ? jobs.customer[0].value : transaction.entity;
+                }
+                if(transaction.eiStatus.field && !transaction.eiStatus.value) {
+                    transaction.eiStatus.value = search.lookupFields({ type: 'customlist_psg_ei_status', id: transaction.eiStatus.value, columns: ['name'] }).name;  
+                }
+                transaction.notSend = (transaction.eiStatus.value != "Sent" && transaction.eiStatus.value != "Enviado")
+
+                if (transaction.applyWhtCode && validateDocumentType(transaction) && transaction.notSend) {
                     seteoSuma = true;
-                    var hayTributo = contieneTributo(invoiceRecord, numLines, cantidad);
-                    log.error("hayTributo",hayTributo)
-                    if (!hayTributo) {
-                        var tradate = invoiceRecord.getValue("trandate");
-                        tradate = format.format({ value: tradate, type: format.Type.DATE });
-                        var entity = invoiceRecord.getValue("entity");
-                        // Verifica si esta activo el Feature Poryectos
-                        var featjobs = runtime.isFeatureInEffect({ feature: "JOBS" });
-                        if (featjobs == true) {
-                            var ajobs = search.lookupFields({ type: search.Type.JOB, id: entity, columns: ['customer'] });
-                            if (ajobs.customer) {
-                                entity = ajobs.customer[0].value;
-                            }
-                        }
-                        var subtotal = invoiceRecord.getValue("subtotal");
-                        var subsidiary = invoiceRecord.getValue("subsidiary");
-
+                    var isTribute = containsTribute(invoiceRecord, numLines, cantidad);
+                    if (!isTribute) {
+                        
                         /********************************************
                          * Solo para Argentina se aplica
                          * el siguiente codigo
                          *******************************************/
-                        var RespType;
                         if (CodeCountry == "AR") {
                             /********************************************
                              * Campo personalizdo: Latam - AR Responsible
                              * Type Code para el cliente
                              ********************************************/
-                            var responsableType = search.lookupFields({ type: search.Type.CUSTOMER, id: entity, columns: ['custentity_lmry_ar_tiporespons'] });
-
-                            log.error("responsableType",responsableType)
+                            var responsableType = search.lookupFields({ type: search.Type.CUSTOMER, id: transaction.entity, columns: ['custentity_lmry_ar_tiporespons'] });
+                            
                             // Se valida que el campo no este vacio
                             if (responsableType.custentity_lmry_ar_tiporespons.length == 0 || responsableType == '' || responsableType == null) {
-                                log.error("stop","por responsableType")
                                 return true;
                             }
-                            RespType = responsableType.custentity_lmry_ar_tiporespons[0].value;
+                            transaction.responsableType = responsableType.custentity_lmry_ar_tiporespons[0].value;
                         }
+
+                        const setupTaxSubsidiary = getSetupTaxSubsidiary(transaction.subsidiary);
 
                         //Busqueda SetupTaxSubsidiary
                         var filtros_setuptax = new Array();
                         filtros_setuptax[0] = search.createFilter({ name: 'isinactive', operator: 'is', values: ['F'] });
                         if (subsi_OW) {
-                            filtros_setuptax[1] = search.createFilter({ name: 'custrecord_lmry_setuptax_subsidiary', operator: 'is', values: subsidiary });
+                            filtros_setuptax[1] = search.createFilter({ name: 'custrecord_lmry_setuptax_subsidiary', operator: 'is', values: transaction.subsidiary });
                         }
 
                         var search_setuptax = search.create({
@@ -166,14 +169,11 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
                         });
                         var result_setuptax = search_setuptax.run().getRange({ start: 0, end: 1 });
 
-                        var tipoRedondeo = '', apply_line = '';
+                        
                         var arregloSegmentacion = [];
 
                         if (result_setuptax != null && result_setuptax.length > 0) {
-
-                            tipoRedondeo = result_setuptax[0].getValue({ name: "custrecord_lmry_setuptax_type_rounding" });
-                            apply_line = result_setuptax[0].getValue({ name: "custrecord_lmry_setuptax_apply_line" });
-
+                            // te quedaste aqui 17:32
                             var setup_department = result_setuptax[0].getValue({ name: "custrecord_lmry_setuptax_department" });
                             var setup_class = result_setuptax[0].getValue({ name: "custrecord_lmry_setuptax_class" });
                             var setup_location = result_setuptax[0].getValue({ name: "custrecord_lmry_setuptax_location" });
@@ -183,7 +183,7 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
                             var currency_invoice = invoiceRecord.getValue("currency");
                             var currency_subsidiary = "";
                             if (subsi_OW) {
-                                currency_subsidiary = search.lookupFields({ type: search.Type.SUBSIDIARY, id: subsidiary, columns: ['currency'] });
+                                currency_subsidiary = search.lookupFields({ type: search.Type.SUBSIDIARY, id: transaction.subsidiary, columns: ['currency'] });
                                 currency_subsidiary = currency_subsidiary.currency[0].value;
                             }
 
@@ -207,7 +207,6 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
                             }
 
                         } else {
-                            log.debug("autoperc_beforeSubmit","tax subsidiary")
                             return true;
                         }
 
@@ -215,14 +214,14 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
                         //Busqueda de National Taxes
 
                         var filtros_nt = new Array();
-                        filtros_nt[0] = search.createFilter({ name: 'custrecord_lmry_ntax_subsidiary', operator: 'is', values: [subsidiary] });
+                        filtros_nt[0] = search.createFilter({ name: 'custrecord_lmry_ntax_subsidiary', operator: 'is', values: [transaction.subsidiary] });
                         filtros_nt[1] = search.createFilter({ name: 'custrecord_lmry_ntax_isexempt', operator: 'is', values: ['F'] });
                         filtros_nt[2] = search.createFilter({ name: 'isinactive', operator: 'is', values: ['F'] });
                         filtros_nt[3] = search.createFilter({ name: 'custrecord_lmry_ntax_taxtype', operator: 'anyof', values: [2] });
                         filtros_nt[4] = search.createFilter({ name: 'custrecord_lmry_ntax_gen_transaction', operator: 'anyof', values: [4] });
-                        filtros_nt[5] = search.createFilter({ name: 'custrecord_lmry_ntax_datefrom', operator: 'onorbefore', values: tradate });
-                        filtros_nt[6] = search.createFilter({ name: 'custrecord_lmry_ntax_dateto', operator: 'onorafter', values: tradate });
-                        filtros_nt[7] = search.createFilter({ name: 'custrecord_lmry_ntax_transactiontypes', operator: 'anyof', values: [filtroTransactionType] });
+                        filtros_nt[5] = search.createFilter({ name: 'custrecord_lmry_ntax_datefrom', operator: 'onorbefore', values: transaction.trandate });
+                        filtros_nt[6] = search.createFilter({ name: 'custrecord_lmry_ntax_dateto', operator: 'onorafter', values: transaction.trandate });
+                        filtros_nt[7] = search.createFilter({ name: 'custrecord_lmry_ntax_transactiontypes', operator: 'anyof', values: [transaction.type.value] });
 
                         var search_nt = search.create({
                             type: "customrecord_lmry_national_taxes",
@@ -259,19 +258,19 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
                         //Busqueda de las Clases Contributiva
                         var i = 8;
                         var filtros_ccl = new Array();
-                        filtros_ccl[0] = search.createFilter({ name: 'custrecord_lmry_ar_ccl_entity', operator: 'is', values: [entity] });
+                        filtros_ccl[0] = search.createFilter({ name: 'custrecord_lmry_ar_ccl_entity', operator: 'is', values: [transaction.entity] });
                         filtros_ccl[1] = search.createFilter({ name: 'custrecord_lmry_ar_ccl_isexempt', operator: 'is', values: ['F'] });
                         filtros_ccl[2] = search.createFilter({ name: 'isinactive', operator: 'is', values: ['F'] });
                         filtros_ccl[3] = search.createFilter({ name: 'custrecord_lmry_ccl_taxtype', operator: 'anyof', values: [2] });
                         filtros_ccl[4] = search.createFilter({ name: 'custrecord_lmry_ccl_gen_transaction', operator: 'anyof', values: [4] });
-                        filtros_ccl[5] = search.createFilter({ name: 'custrecord_lmry_ar_ccl_fechdesd', operator: 'onorbefore', values: tradate });
-                        filtros_ccl[6] = search.createFilter({ name: 'custrecord_lmry_ar_ccl_fechhast', operator: 'onorafter', values: tradate });
-                        filtros_ccl[7] = search.createFilter({ name: 'custrecord_lmry_ccl_transactiontypes', operator: 'anyof', values: [filtroTransactionType] });
+                        filtros_ccl[5] = search.createFilter({ name: 'custrecord_lmry_ar_ccl_fechdesd', operator: 'onorbefore', values: transaction.trandate });
+                        filtros_ccl[6] = search.createFilter({ name: 'custrecord_lmry_ar_ccl_fechhast', operator: 'onorafter', values: transaction.trandate });
+                        filtros_ccl[7] = search.createFilter({ name: 'custrecord_lmry_ccl_transactiontypes', operator: 'anyof', values: [transaction.type.value] });
                         if (CodeCountry == "AR") {
-                            filtros_ccl[8] = search.createFilter({ name: 'custrecord_lmry_ar_ccl_resptype', operator: 'anyof', values: [RespType] });
+                            filtros_ccl[8] = search.createFilter({ name: 'custrecord_lmry_ar_ccl_resptype', operator: 'anyof', values: [transaction.responsableType] });
                             i++;
                         }
-                        filtros_ccl[i] = search.createFilter({ name: 'custrecord_lmry_ar_ccl_subsidiary', operator: 'is', values: subsidiary });
+                        filtros_ccl[i] = search.createFilter({ name: 'custrecord_lmry_ar_ccl_subsidiary', operator: 'is', values: transaction.subsidiary });
 
                         var busqContClass = search.create({
                             type: "customrecord_lmry_ar_contrib_class",
@@ -305,10 +304,10 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
 
                         var resultContClass = busqContClass.run().getRange(0, 1000);
                         log.error('resultContClass', resultContClass);
-                        logicaLlenado("1", result_nt, invoiceRecord, CodeCountry, tipoRedondeo, arregloSegmentacion, "", "0");
-                        logicaLlenado("1", resultContClass, invoiceRecord, CodeCountry, tipoRedondeo, arregloSegmentacion, "", "1");
+                        logicaLlenado("1", result_nt, invoiceRecord, CodeCountry, setupTaxSubsidiary.typeRounding, arregloSegmentacion, "", "0");
+                        logicaLlenado("1", resultContClass, invoiceRecord, CodeCountry, setupTaxSubsidiary.typeRounding, arregloSegmentacion, "", "1");
 
-                        if (apply_line == true) {
+                        if (setupTaxSubsidiary.applyLine == true) {
                             for (var j = 0; j < soloItems; j++) {
                                 var gross_item = invoiceRecord.getSublistValue({ sublistId: 'item', fieldId: 'grossamt', line: j });
                                 var tax_item = invoiceRecord.getSublistValue({ sublistId: 'item', fieldId: 'tax1amt', line: j });
@@ -322,8 +321,8 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
 
                                 var info_item = id_item + "|" + gross_item + "|" + tax_item + "|" + net_item + "|" + catalog_item;
 
-                                logicaLlenado("2", result_nt, invoiceRecord, CodeCountry, tipoRedondeo, arregloSegmentacion, info_item, "0");
-                                logicaLlenado("2", resultContClass, invoiceRecord, CodeCountry, tipoRedondeo, arregloSegmentacion, info_item, "1");
+                                logicaLlenado("2", result_nt, invoiceRecord, CodeCountry, setupTaxSubsidiary.typeRounding, arregloSegmentacion, info_item, "0");
+                                logicaLlenado("2", resultContClass, invoiceRecord, CodeCountry, setupTaxSubsidiary.typeRounding, arregloSegmentacion, info_item, "1");
                             }
 
                         }
@@ -331,20 +330,18 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
                     }
 
                     cantidad++;
-                    contieneTributo(invoiceRecord, invoiceRecord.getLineCount('item'), cantidad);
+                    containsTribute(invoiceRecord, invoiceRecord.getLineCount('item'), cantidad);
 
                 }
 
             } catch (errmsg) {
                 // Envio de mail con errores
-                LibraryMail.sendemail('[ logicaAutoPercepciones ] ' + errmsg, Name_script);
+                LibraryMail.sendemail('[ calculatePerception ] ' + errmsg, Name_script);
             }
         }
 
         function logicaLlenado(appliesTo, result, invoiceRecord, CodeCountry, tipoRedondeo, segmentacion, infoItem, bySubsidiary) {
 
-            // var subtotal_invoice = parseFloat(invoiceRecord.getValue("subtotal")) * parseFloat(exchange_global);
-            
             var subtotal_invoice = parseFloat(invoiceRecord.getValue("subtotal") + (invoiceRecord.getValue("discounttotal") || 0)) * parseFloat(exchange_global);
             var total_invoice = parseFloat(invoiceRecord.getValue("total")) * parseFloat(exchange_global);
             var taxtotal_invoice = parseFloat(invoiceRecord.getValue("taxtotal")) * parseFloat(exchange_global);
@@ -501,17 +498,13 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
                     }
 
                     //RETENCION
-                    var retencion = parseFloat(setbaseretention) + parseFloat(amount_base) * parseFloat(ratio) * parseFloat(tax_rate);
-                    
-                    retencion = parseFloat(Math.round(parseFloat(retencion) * 1000000) / 1000000);
-                    
-                    retencion = parseFloat(Math.round(parseFloat(retencion) * 10000) / 10000);
-                    
+                    var retencion = parseFloat(setbaseretention) + parseFloat(amount_base) * parseFloat(ratio) * parseFloat(tax_rate);                    
+                    retencion = parseFloat(Math.round(parseFloat(retencion) * 1000000) / 1000000);                   
+                    retencion = parseFloat(Math.round(parseFloat(retencion) * 10000) / 10000);                   
                     var retencion_peso = retencion;
 
                     var aux_cadena = retencion + ";";
-                    retencion = parseFloat(retencion) / parseFloat(exchange_global);
-                    
+                    retencion = parseFloat(retencion) / parseFloat(exchange_global);                 
                     amount_base = parseFloat(amount_base) / parseFloat(exchange_global);
 
                     if (tipoRedondeo == '1') {
@@ -620,7 +613,7 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
          * ISSUE : Nose considerba la linea de descuentos
          *         por total
          * ************************************************ */
-        function logicaDescuentos(invoiceRecord, numLines) {
+        function calculateDiscount(invoiceRecord, numLines) {
             try {
                 var pos = 0;
                 var trantype = '';
@@ -642,7 +635,7 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
                         var disc_amount = invoiceRecord.getSublistValue('item', 'amount', i);
 
                         // 2023-07-18 : Solo actualiza si la linea anterior no es un EndGroup
-                        // log.debug("Line : " + i + " - logicaDescuentos : ", 'SaleDisc : ' + disc_amount);
+                        // log.debug("Line : " + i + " - calculateDiscount : ", 'SaleDisc : ' + disc_amount);
                         if (type_anterior != "EndGroup") {
                             // Valida que el campo Latam Col - Sales Discount este vacio
                             var SaleDisc = invoiceRecord.getSublistValue('item', 'custcol_lmry_col_sales_discount', i - 1);
@@ -665,7 +658,7 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
                 } // End for
             } catch (errmsg) {
                 // Envio de mail con errores
-                LibraryMail.sendemail('[ logicaDescuentos ] ' + errmsg, Name_script);
+                LibraryMail.sendemail('[ calculateDiscount ] ' + errmsg, Name_script);
             }
         }
 
@@ -675,7 +668,7 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
          * Name. : Latam Col - Item Tributo
          * ID ...: custcol_lmry_ar_item_tributo
          *********************************************************** */
-        function contieneTributo(invoiceRecord, numLines, cantidad) {
+        function containsTribute(invoiceRecord, numLines, cantidad) {
             var tributo = false;
 
             for (var i = 0; i < numLines; i++) {
@@ -694,39 +687,39 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
         }
 
         /**************************************************************
-         * Funcion validarTipoDoc para validar si el tipo de documento
+         * Funcion validateDocumentType para validar si el tipo de documento
          * de la transaccion se encuentra en el registro personalizado
          * Name... : LatamReady - Doc Type Perceptions
          * ID..... : customrecord_lmry_ar_doctype_percep
          * Bundle. : 37714 - LamtamReady
          *********************************************************** */
-        function validarTipoDoc(tipoDoc, typeTransaction) {
+        function validateDocumentType(transaction) {
             try {
-                var tipoDocEncontrado = false;
-                if (typeTransaction == "salesorder" || typeTransaction == "estimate") {
+                var documentFound = false;
+                if (transaction.type.text == "salesorder" || transaction.type.text  == "estimate") {
                     return true;
                 }
-                if (tipoDoc == '' || tipoDoc == null) {
-                    return tipoDocEncontrado;
+                if (transaction.documentType == '' || transaction.documentType  == null) {
+                    return documentFound;
                 }
 
                 var busqDocTypePerc = search.create({
                     type: 'customrecord_lmry_ar_doctype_percep', columns: ['custrecord_lmry_ar_doctype_percep'],
-                    filters: [['custrecord_lmry_ar_doctype_percep', 'anyof', tipoDoc]]
+                    filters: [['custrecord_lmry_ar_doctype_percep', 'anyof', transaction.documentType ]]
                 });
 
                 var resultDocTypePerc = busqDocTypePerc.run().getRange(0, 100);
-                if (resultDocTypePerc != null && resultDocTypePerc.length != 0) {
-                    tipoDocEncontrado = true;
+                if (resultDocTypePerc && resultDocTypePerc.length) {
+                    documentFound = true;
                 }
             } catch (errmsg) {
                 // Envio de mail con errores
-                LibraryMail.sendemail('[ validarTipoDoc ] ' + errmsg, Name_script);
+                LibraryMail.sendemail('[ validateDocumentType ] ' + errmsg, Name_script);
             }
 
-            //log.error("Step [04] validarTipoDoc:", tipoDocEncontrado);
+            //log.error("Step [04] validateDocumentType:", tipoDocEncontrado);
 
-            return tipoDocEncontrado;
+            return documentFound;
         }
 
 
@@ -737,7 +730,6 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
          *********************************************************** */
 
         function removePerceptionLines(recordObj) {
-            log.error("removePerceptionLines","start")
             var currentNumberLine = recordObj.getLineCount({
                 sublistId: 'item'
             });
@@ -753,7 +745,6 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
                     deletedTransactions.push(i);
                 }
             }
-            log.error("deletedTransactions",deletedTransactions)
             deletedTransactions.forEach(function (id) {
                 recordObj.removeLine({
                     sublistId: 'item',
@@ -790,12 +781,26 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
 
             var search_setuptax = search.create({
                 type: 'customrecord_lmry_setup_tax_subsidiary', filters: filtros_setuptax,
-                columns: ['custrecord_lmry_setuptax_sales_discount']
+                columns: [
+                    'custrecord_lmry_setuptax_sales_discount',
+                    'custrecord_lmry_setuptax_currency', 
+                    'custrecord_lmry_setuptax_type_rounding', 
+                    'custrecord_lmry_setuptax_apply_line',
+                    'custrecord_lmry_setuptax_department', 
+                    'custrecord_lmry_setuptax_class', 
+                    'custrecord_lmry_setuptax_location'
+                ]
             });
             var result_setuptax = search_setuptax.run().getRange({ start: 0, end: 1 });
             if (result_setuptax != null && result_setuptax.length > 0) {
                 jsonSetup = {
-                    'salesDiscount': result_setuptax[0].getValue('custrecord_lmry_setuptax_sales_discount')
+                    'salesDiscount': result_setuptax[0].getValue('custrecord_lmry_setuptax_sales_discount'),
+                    'currency': result_setuptax[0].getValue('custrecord_lmry_setuptax_currency'),
+                    'typeRounding': result_setuptax[0].getValue('custrecord_lmry_setuptax_type_rounding'),
+                    'applyLine': result_setuptax[0].getValue('custrecord_lmry_setuptax_apply_line'),
+                    'department': result_setuptax[0].getValue('custrecord_lmry_setuptax_department'),
+                    'class': result_setuptax[0].getValue('custrecord_lmry_setuptax_class'),
+                    'location': result_setuptax[0].getValue('custrecord_lmry_setuptax_location'),
                 }
             }
             return jsonSetup;
