@@ -70,7 +70,7 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
                      * para Argentina
                      *************************************/
                     if (CodeCountry == "AR" && (invoiceRecord.type == 'invoice' || invoiceRecord.type == 'creditmemo' || invoiceRecord.type == 'cashsale')) {
-                        calculateDiscount(invoiceRecord, numLines);
+                        //calculateDiscount(invoiceRecord, numLines);
                     }
                 }
             } catch (msg) {
@@ -182,12 +182,12 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
                             var net_item = invoiceRecord.getSublistValue({ sublistId: 'item', fieldId: 'amount', line: j });
                             var id_item = invoiceRecord.getSublistValue({ sublistId: 'item', fieldId: 'item', line: j });
                             var catalog_item = invoiceRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_lmry_br_service_catalog', line: j });
-
+                            var lineuniquekey = invoiceRecord.getSublistValue({ sublistId: 'item', fieldId: 'lineuniquekey', line: j });
                             if (catalog_item == null || catalog_item == '') {
                                 catalog_item = "no catalogo";
                             }
 
-                            var info_item = id_item + "|" + gross_item + "|" + tax_item + "|" + net_item + "|" + catalog_item;
+                            var info_item = id_item + "|" + gross_item + "|" + tax_item + "|" + net_item + "|" + catalog_item+ "|" + lineuniquekey;
 
                             setLinePerception("2", nationalTaxs, transaction, setupTaxSubsidiary, info_item, isTribute);
                             setLinePerception("2", contributoryClass, transaction, setupTaxSubsidiary, info_item, isTribute);
@@ -288,7 +288,14 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
                     notTaxableMinimum: result.getValue(columns[19]),
                     internalid: result.getValue(columns[20]),
                     catalog: result.getValue(columns[21]),
-                    appliesToAccount: result.getValue(columns[22])
+                    appliesToAccount: result.getValue(columns[22]),
+                    key: "NT"
+                }
+        
+                if (nationalTax.taxMemo) {
+                    nationalTax.taxMemo += " - " + "NT" + nationalTax.internalid
+                }else{
+                    nationalTax.taxMemo = "NT" + nationalTax.internalid
                 }
                 nationalTaxList.push(nationalTax);
                 return true;
@@ -379,8 +386,15 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
                     notTaxableMinimum: result.getValue(columns[19]),
                     internalid: result.getValue(columns[20]),
                     catalog: result.getValue(columns[21]),
-                    appliesToAccount: result.getValue(columns[22])
+                    appliesToAccount: result.getValue(columns[22]),
+                    key:"CC"
                 }
+                if (contributoryClass.taxMemo) {
+                    contributoryClass.taxMemo += " - " + "CC" + contributoryClass.internalid
+                }else{
+                    contributoryClass.taxMemo = "CC" + contributoryClass.internalid
+                }
+                
                 contributoryClassList.push(contributoryClass);
                 return true;
             });
@@ -390,7 +404,6 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
         function setLinePerception(appliesTo, recordTaxs, transaction, setupTaxSubsidiary, infoItem, updatePercetion) {
 
             if (recordTaxs.length) {
-
                 for (var i = 0; i < recordTaxs.length; i++) {
                     var recordTax = recordTaxs[i];
 
@@ -434,9 +447,9 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
                         }
                         if (recordTax.amount == 3) { baseAmount = transaction.subtotal; } //NET
                     }
-
+                    var aux_itemg;
                     if (recordTax.appliesTo == '2') {
-                        var aux_itemg = infoItem.split("|");
+                        aux_itemg = infoItem.split("|");
                         if (recordTax.amount == 1) { baseAmount = parseFloat(aux_itemg[1]) * parseFloat(transaction.exchangerate); }
                         //TAX
                         if (recordTax.amount == 2) {
@@ -448,7 +461,7 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
                         }
                         if (recordTax.amount == 3) { baseAmount = parseFloat(aux_itemg[3]) * parseFloat(transaction.exchangerate); } //NET
                     }
-                    
+                    log.error("aux_itemg",aux_itemg)
                     baseAmount = parseFloat(baseAmount) - parseFloat(recordTax.notTaxableMinimum);
                     
                     if (baseAmount <= 0) continue;
@@ -524,109 +537,126 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
 
                     var index;
                     log.error("updatePercetion",updatePercetion)
-                    if (updatePercetion) {
+                    index = findLinePerception(transaction.currentRecord, recordTax, aux_itemg);
+                    if (index != -1) {
                         // Busca la linea de percepcion a actualizar
                         log.error("updatePercetion","Busca la linea de percepcion a actualizar")
-                        index = findLinePerception(transaction.currentRecord, recordTax);
-                        log.error("index",index)
-                        if (index == -1) continue;
-                    }else{
-                        log.error("updatePercetion","Agrega una linea en blanco")
+                        try {
+                            transaction.currentRecord.setSublistValue('item', 'rate', index, parseFloat(retention));
+                        } catch (error) {
+                            log.error("error Controlado",error)
+                        }
+                    } else {
+                        log.error("updatePercetion", "Agrega una linea en blanco")
                         // Agrega una linea en blanco
                         transaction.currentRecord.insertLine('item', numLines);
                         index = numLines
-                    }
-                    
-                    transaction.currentRecord.setSublistValue('item', 'item', index, recordTax.taxItem);
 
-                    
-                    if (recordTax.taxMemo) {
-                        transaction.currentRecord.setSublistValue('item', 'description', index, recordTax.taxMemo);
-                    }
+                        transaction.currentRecord.setSublistValue('item', 'item', index, recordTax.taxItem);
 
-                    transaction.currentRecord.setSublistValue('item', 'quantity', index, 1);
-                    transaction.currentRecord.setSublistValue('item', 'rate', index, parseFloat(retention));
-                    transaction.currentRecord.setSublistValue('item', 'taxcode', index, recordTax.taxCode);
-                    transaction.currentRecord.setSublistValue('item', 'custcol_lmry_ar_perception_percentage', index, parseFloat(recordTax.taxRate));
-                    transaction.currentRecord.setSublistValue('item', 'custcol_lmry_ar_item_tributo', index, true);
-                    transaction.currentRecord.setSublistValue('item', 'custcol_lmry_base_amount', index, baseAmount);
-                    transaction.currentRecord.setSublistValue('item', 'custcol_lmry_ar_perception_account', index, aux_cadena);
-                    transaction.currentRecord.setSublistValue('item', 'custcol_lmry_ar_perception_adjustment', index, adjustment);
 
-                    if (transaction.countryCode == "AR") {
-                        // Name: Latam Col - AR Norma IIBB - ARCIBA
-                        if (recordTax.iibbNorma) {
-                            transaction.currentRecord.setSublistValue('item', 'custcol_lmry_ar_norma_iibb_arciba', index, recordTax.iibbNorma);
+                        if (recordTax.taxMemo) {
+                            var memo = recordTax.taxMemo;
+                            if (appliesTo == "2") {
+                                memo +=" - " + aux_itemg[5];
+                            } else {
+                                memo +=" - Total";
+                            }
+                            transaction.currentRecord.setSublistValue('item', 'description', index, memo);
                         }
-                        // Name: Latam Col - AR Jurisdiccion IIBB
-                        if (recordTax.jurisDib) {
-                            transaction.currentRecord.setSublistValue('item', 'custcol_lmry_ar_col_jurisd_iibb', index, recordTax.jurisDib);
-                        }
-                        // Name: Latam Col - AR Regimen
-                        if (recordTax.taxRegimen) {
-                            transaction.currentRecord.setSublistValue('item', 'custcol_lmry_ar_col_regimen', index, recordTax.taxRegimen);
-                        }
-                    }
 
-                    // Department
-                    if (FeaDepa || FeaDepa == 'T') {
-                        if (recordTax.department) {
-                            transaction.currentRecord.setSublistValue('item', 'department', index, recordTax.department);
-                        } else {
-                            if (pref_dep || pref_dep == 'T') {
-                                transaction.currentRecord.setSublistValue('item', 'department', index, setupTaxSubsidiary.department);
+                        transaction.currentRecord.setSublistValue('item', 'quantity', index, 1);
+                        transaction.currentRecord.setSublistValue('item', 'rate', index, parseFloat(retention));
+                        transaction.currentRecord.setSublistValue('item', 'taxcode', index, recordTax.taxCode);
+                        transaction.currentRecord.setSublistValue('item', 'custcol_lmry_ar_perception_percentage', index, parseFloat(recordTax.taxRate));
+                        transaction.currentRecord.setSublistValue('item', 'custcol_lmry_ar_item_tributo', index, true);
+                        transaction.currentRecord.setSublistValue('item', 'custcol_lmry_base_amount', index, baseAmount);
+                        transaction.currentRecord.setSublistValue('item', 'custcol_lmry_ar_perception_account', index, aux_cadena);
+                        transaction.currentRecord.setSublistValue('item', 'custcol_lmry_ar_perception_adjustment', index, adjustment);
+
+                        if (transaction.countryCode == "AR") {
+                            // Name: Latam Col - AR Norma IIBB - ARCIBA
+                            if (recordTax.iibbNorma) {
+                                transaction.currentRecord.setSublistValue('item', 'custcol_lmry_ar_norma_iibb_arciba', index, recordTax.iibbNorma);
+                            }
+                            // Name: Latam Col - AR Jurisdiccion IIBB
+                            if (recordTax.jurisDib) {
+                                transaction.currentRecord.setSublistValue('item', 'custcol_lmry_ar_col_jurisd_iibb', index, recordTax.jurisDib);
+                            }
+                            // Name: Latam Col - AR Regimen
+                            if (recordTax.taxRegimen) {
+                                transaction.currentRecord.setSublistValue('item', 'custcol_lmry_ar_col_regimen', index, recordTax.taxRegimen);
                             }
                         }
-                    }
 
-                    // Class
-                    if (FeaClas || FeaClas == 'T') {
-                        if (recordTax.class) {
-                            transaction.currentRecord.setSublistValue('item', 'class', index, recordTax.class);
-                        } else {
-                            if (pref_clas || pref_clas == 'T') {
-                                transaction.currentRecord.setSublistValue('item', 'class', index, setupTaxSubsidiary.class);
+                        // Department
+                        if (FeaDepa || FeaDepa == 'T') {
+                            if (recordTax.department) {
+                                transaction.currentRecord.setSublistValue('item', 'department', index, recordTax.department);
+                            } else {
+                                if (pref_dep || pref_dep == 'T') {
+                                    transaction.currentRecord.setSublistValue('item', 'department', index, setupTaxSubsidiary.department);
+                                }
                             }
                         }
-                    }
 
-                    var fieldLocation = transaction.currentRecord.getSublistField({ sublistId: 'item', fieldId: 'location', line: index });
-                    // Location
-                    if (fieldLocation && (FeaLoca || FeaLoca == 'T')) {
-                        if (recordTax.location) {
-
-                            transaction.currentRecord.setSublistValue('item', 'location', index, recordTax.location);
-                        } else {
-                            if (pref_loc || pref_loc == 'T') {
-                                transaction.currentRecord.setSublistValue('item', 'location', index, setupTaxSubsidiary.location);
-
+                        // Class
+                        if (FeaClas || FeaClas == 'T') {
+                            if (recordTax.class) {
+                                transaction.currentRecord.setSublistValue('item', 'class', index, recordTax.class);
+                            } else {
+                                if (pref_clas || pref_clas == 'T') {
+                                    transaction.currentRecord.setSublistValue('item', 'class', index, setupTaxSubsidiary.class);
+                                }
                             }
                         }
-                    }
 
-                    if (!updatePercetion) {
+                        var fieldLocation = transaction.currentRecord.getSublistField({ sublistId: 'item', fieldId: 'location', line: index });
+                        // Location
+                        if (fieldLocation && (FeaLoca || FeaLoca == 'T')) {
+                            if (recordTax.location) {
+
+                                transaction.currentRecord.setSublistValue('item', 'location', index, recordTax.location);
+                            } else {
+                                if (pref_loc || pref_loc == 'T') {
+                                    transaction.currentRecord.setSublistValue('item', 'location', index, setupTaxSubsidiary.location);
+
+                                }
+                            }
+                        }
+
+                        
                         numLines++;
+                        
                     }
+                    
+                    
                     
                 };
                 
             }
         }
 
-        function findLinePerception(currentRecord, recordTax) {
+        function findLinePerception(currentRecord, recordTax,item) {
+
             var lines = currentRecord.getLineCount('item');
+            var index = -1
             for (var i = 0; i < lines; i++) {
-                var itemId = currentRecord.getSublistValue('item', 'item', i);
-                var perceptionPercentage = currentRecord.getSublistValue('item', 'custcol_lmry_ar_perception_percentage', i);
-                log.error("itemId",itemId)
-                log.error("perceptionPercentage",perceptionPercentage)
-                log.error("recordTax.taxRate",recordTax.taxRate)
-                log.error("parseFloat(recordTax.taxRate)",parseFloat(recordTax.taxRate))
-                if (recordTax.taxItem == itemId && parseFloat(recordTax.taxRate) == perceptionPercentage) {
-                    return i;
+                var memoCode = recordTax.key + recordTax.internalid
+                var description = currentRecord.getSublistValue('item', 'description', i);
+                if (recordTax.appliesTo=="2") {
+                    var lineuniquekey = item[5];
+                    memoCode += " - " + lineuniquekey;
                 }
+                log.error("description",description)
+                log.error("memoCode",memoCode)
+                log.error("comparacion",description.indexOf(memoCode) !== -1)
+                if (description.indexOf(memoCode) !==-1) {
+                    index = i;
+                    break;
+                };
             }
-            return -1;
+            return index;
         }
         
 

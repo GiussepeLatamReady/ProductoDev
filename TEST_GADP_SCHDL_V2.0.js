@@ -50,8 +50,8 @@ define(["N/search", "N/record", "N/log", "N/query", "N/runtime"],
             for (var i = 0; i < lines; i++) {
                 var tiene_tributo = currentRecord.getSublistValue('item', 'custcol_lmry_ar_item_tributo', i);
                 if (tiene_tributo) {
-                    currentRecord.setSublistValue('item', 'quantity', i, 1);
-                    currentRecord.setSublistValue('item', 'rate', i, parseFloat(300));
+                    //currentRecord.setSublistValue('item', 'quantity', i, 1);
+                    currentRecord.setSublistValue('item', 'rate', i, parseFloat(500));
                 }
             }
             
