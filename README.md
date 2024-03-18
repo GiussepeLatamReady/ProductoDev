@@ -46,7 +46,8 @@ Lo anterior hace que el botón “Facturar” siga apareciendo en la sales order
 
 ## Observations
 
-si sale el card C1040 revisar con este card
+## Error
+No puede cambiar el artículo en esta línea porque tiene un elemento de ingreso existente. Elimine la línea e ingrese una nueva línea para corregir el elemento.
 
 
 

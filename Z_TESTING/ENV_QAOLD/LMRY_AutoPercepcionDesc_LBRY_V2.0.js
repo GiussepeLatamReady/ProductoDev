@@ -20,11 +20,9 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
         // Nombre del Script
         var Name_script = "LatamReady - Auto Percepcion Desc LBRY";
         // Exchange global
-        var exchange_global = 1;
         var numLines = 1;
         var soloItems = 1;
-        var apply_line = false;
-        var filtroTransactionType = "";
+
 
         
         var cantidad = 0;
@@ -109,7 +107,7 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
                         field: invoiceRecord.getField({ fieldId: 'custbody_psg_ei_status' }),
                         value: invoiceRecord.getValue("custbody_psg_ei_status") || ""
                     },
-                    type:{
+                    type: {
                         text: invoiceRecord.type,
                         value: transactionType[invoiceRecord.type]
                     },
@@ -126,73 +124,73 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
                     const jobs = search.lookupFields({ type: search.Type.JOB, id: transaction.entity, columns: ['customer'] });
                     transaction.entity = jobs && jobs.customer ? jobs.customer[0].value : transaction.entity;
                 }
-                if(transaction.eiStatus.field && !transaction.eiStatus.value) {
-                    transaction.eiStatus.value = search.lookupFields({ type: 'customlist_psg_ei_status', id: transaction.eiStatus.value, columns: ['name'] }).name;  
+                if (transaction.eiStatus.field && transaction.eiStatus.value) {
+                    transaction.eiStatus.value = search.lookupFields({ type: 'customlist_psg_ei_status', id: transaction.eiStatus.value, columns: ['name'] }).name;
                 }
                 transaction.notSend = (transaction.eiStatus.value != "Sent" && transaction.eiStatus.value != "Enviado")
 
+
+                /********************************************
+                * Solo para Argentina se aplica
+                * el siguiente codigo
+                *******************************************/
+                if (CodeCountry == "AR") {
+                    /********************************************
+                     * Campo personalizdo: Latam - AR Responsible
+                     * Type Code para el cliente
+                     ********************************************/
+                    var responsableType = search.lookupFields({ type: search.Type.CUSTOMER, id: transaction.entity, columns: ['custentity_lmry_ar_tiporespons'] });
+
+                    // Se valida que el campo no este vacio
+                    if (responsableType.custentity_lmry_ar_tiporespons.length == 0 || responsableType == '' || responsableType == null) {
+                        return true;
+                    }
+                    transaction.responsableType = responsableType.custentity_lmry_ar_tiporespons[0].value;
+                }
+
+                const setupTaxSubsidiary = getSetupTaxSubsidiary(transaction.subsidiary);
+
+                if (!Object.keys(setupTaxSubsidiary).length) return true;
+
+                // El tipo de cambio sera establecida para convertir los montos a moneda del pais
+                transaction.exchangerate = getExchangeRate(setupTaxSubsidiary, transaction, invoiceRecord);
+
+                transaction.subtotal = parseFloat(invoiceRecord.getValue("subtotal") + (invoiceRecord.getValue("discounttotal") || 0)) * parseFloat(transaction.exchangerate);
+                transaction.total = parseFloat(invoiceRecord.getValue("total")) * parseFloat(transaction.exchangerate);
+                transaction.taxtotal = parseFloat(invoiceRecord.getValue("taxtotal")) * parseFloat(transaction.exchangerate);
+
+                //Busqueda de National Taxes
+                const nationalTaxs = getNationaltaxs(transaction);
+                log.error('nationalTaxs', nationalTaxs);
+
+                //Busqueda de las Clases Contributiva
+                const contributoryClass = getContributoryClass(transaction);
+                log.error('contributoryClass', contributoryClass);
+                log.error("transaction", transaction)
+                transaction.currentRecord =  invoiceRecord;
                 if (transaction.applyWhtCode && validateDocumentType(transaction) && transaction.notSend) {
                     var isTribute = containsTribute(invoiceRecord, numLines, cantidad);
-                    if (!isTribute) {
-                        
-                        /********************************************
-                         * Solo para Argentina se aplica
-                         * el siguiente codigo
-                         *******************************************/
-                        if (CodeCountry == "AR") {
-                            /********************************************
-                             * Campo personalizdo: Latam - AR Responsible
-                             * Type Code para el cliente
-                             ********************************************/
-                            var responsableType = search.lookupFields({ type: search.Type.CUSTOMER, id: transaction.entity, columns: ['custentity_lmry_ar_tiporespons'] });
-                            
-                            // Se valida que el campo no este vacio
-                            if (responsableType.custentity_lmry_ar_tiporespons.length == 0 || responsableType == '' || responsableType == null) {
-                                return true;
-                            }
-                            transaction.responsableType = responsableType.custentity_lmry_ar_tiporespons[0].value;
-                        }
 
-                        const setupTaxSubsidiary = getSetupTaxSubsidiary(transaction.subsidiary);
+                    log.error("isTribute",isTribute)
+                    setLinePerception("1", nationalTaxs, transaction, setupTaxSubsidiary, "", isTribute);
+                    setLinePerception("1", contributoryClass, transaction, setupTaxSubsidiary, "", isTribute);
 
-                        if (!Object.keys(setupTaxSubsidiary).length) return true;
+                    if (setupTaxSubsidiary.applyLine == true) {
+                        for (var j = 0; j < soloItems; j++) {
+                            var gross_item = invoiceRecord.getSublistValue({ sublistId: 'item', fieldId: 'grossamt', line: j });
+                            var tax_item = invoiceRecord.getSublistValue({ sublistId: 'item', fieldId: 'tax1amt', line: j });
+                            var net_item = invoiceRecord.getSublistValue({ sublistId: 'item', fieldId: 'amount', line: j });
+                            var id_item = invoiceRecord.getSublistValue({ sublistId: 'item', fieldId: 'item', line: j });
+                            var catalog_item = invoiceRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_lmry_br_service_catalog', line: j });
 
-                        // El tipo de cambio sera establecida para convertir los montos a moneda del pais
-                        transaction.exchangerate = getExchangeRate(setupTaxSubsidiary, transaction, invoiceRecord);
-                        
-                        transaction.subtotal = parseFloat(invoiceRecord.getValue("subtotal") + (invoiceRecord.getValue("discounttotal") || 0)) * parseFloat(transaction.exchangerate);
-                        transaction.total = parseFloat(invoiceRecord.getValue("total")) * parseFloat(transaction.exchangerate);
-                        transaction.taxtotal = parseFloat(invoiceRecord.getValue("taxtotal")) * parseFloat(transaction.exchangerate);
-
-                        //Busqueda de National Taxes
-                        const nationalTaxs = getNationaltaxs(transaction);
-                        log.error('nationalTaxs', nationalTaxs);
-
-                        //Busqueda de las Clases Contributiva
-                        const contributoryClass = getContributoryClass(transaction);
-                        log.error('contributoryClass', contributoryClass);
-
-                        createLinePerception("1", nationalTaxs, transaction, setupTaxSubsidiary, "", "0");
-                        createLinePerception("1", contributoryClass, transaction, setupTaxSubsidiary, "", "1");
-
-                        if (setupTaxSubsidiary.applyLine == true) {
-                            for (var j = 0; j < soloItems; j++) {
-                                var gross_item = invoiceRecord.getSublistValue({ sublistId: 'item', fieldId: 'grossamt', line: j });
-                                var tax_item = invoiceRecord.getSublistValue({ sublistId: 'item', fieldId: 'tax1amt', line: j });
-                                var net_item = invoiceRecord.getSublistValue({ sublistId: 'item', fieldId: 'amount', line: j });
-                                var id_item = invoiceRecord.getSublistValue({ sublistId: 'item', fieldId: 'item', line: j });
-                                var catalog_item = invoiceRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_lmry_br_service_catalog', line: j });
-
-                                if (catalog_item == null || catalog_item == '') {
-                                    catalog_item = "no catalogo";
-                                }
-
-                                var info_item = id_item + "|" + gross_item + "|" + tax_item + "|" + net_item + "|" + catalog_item;
-
-                                createLinePerception("2", nationalTaxs, transaction, setupTaxSubsidiary, info_item, "0");
-                                createLinePerception("2", contributoryClass, transaction, setupTaxSubsidiary, info_item, "1");
+                            if (catalog_item == null || catalog_item == '') {
+                                catalog_item = "no catalogo";
                             }
 
+                            var info_item = id_item + "|" + gross_item + "|" + tax_item + "|" + net_item + "|" + catalog_item;
+
+                            setLinePerception("2", nationalTaxs, transaction, setupTaxSubsidiary, info_item, isTribute);
+                            setLinePerception("2", contributoryClass, transaction, setupTaxSubsidiary, info_item, isTribute);
                         }
 
                     }
@@ -203,6 +201,7 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
                 }
 
             } catch (errmsg) {
+                log.error("Error [calculatePerception]", errmsg)
                 // Envio de mail con errores
                 LibraryMail.sendemail('[ calculatePerception ] ' + errmsg, Name_script);
             }
@@ -388,7 +387,7 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
             return contributoryClassList;
         }
 
-        function createLinePerception(appliesTo, recordTaxs, transaction, setupTaxSubsidiary, infoItem, bySubsidiary) {
+        function setLinePerception(appliesTo, recordTaxs, transaction, setupTaxSubsidiary, infoItem, updatePercetion) {
 
             if (recordTaxs.length) {
 
@@ -438,16 +437,16 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
 
                     if (recordTax.appliesTo == '2') {
                         var aux_itemg = infoItem.split("|");
-                        if (recordTax.amount == 1) { baseAmount = parseFloat(aux_itemg[1]) * parseFloat(exchange_global); }
+                        if (recordTax.amount == 1) { baseAmount = parseFloat(aux_itemg[1]) * parseFloat(transaction.exchangerate); }
                         //TAX
                         if (recordTax.amount == 2) {
                             if (aux_itemg[2] > 0) {
-                                baseAmount = parseFloat(aux_itemg[2]) * parseFloat(exchange_global);
+                                baseAmount = parseFloat(aux_itemg[2]) * parseFloat(transaction.exchangerate);
                             } else {
                                 continue;
                             }
                         }
-                        if (recordTax.amount == 3) { baseAmount = parseFloat(aux_itemg[3]) * parseFloat(exchange_global); } //NET
+                        if (recordTax.amount == 3) { baseAmount = parseFloat(aux_itemg[3]) * parseFloat(transaction.exchangerate); } //NET
                     }
                     
                     baseAmount = parseFloat(baseAmount) - parseFloat(recordTax.notTaxableMinimum);
@@ -495,8 +494,8 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
                     var retencion_peso = retention;
 
                     var aux_cadena = retention + ";";
-                    retention = parseFloat(retention) / parseFloat(exchange_global);                 
-                    baseAmount = parseFloat(baseAmount) / parseFloat(exchange_global);
+                    retention = parseFloat(retention) / parseFloat(transaction.exchangerate);                 
+                    baseAmount = parseFloat(baseAmount) / parseFloat(transaction.exchangerate);
 
                     if (setupTaxSubsidiary.typeRounding == '1') {
                         if (parseFloat(retention) - parseInt(retention) < 0.5) {
@@ -516,88 +515,120 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
 
                     retention = parseFloat(Math.round(parseFloat(retention) * 100) / 100);
 
-                    var retencion_transaccion = parseFloat(retention) * parseFloat(exchange_global);
+                    var retencion_transaccion = parseFloat(retention) * parseFloat(transaction.exchangerate);
                     retencion_transaccion = Math.round(parseFloat(retencion_transaccion) * 10000) / 10000;
 
                     var adjustment = parseFloat(retencion_peso) - parseFloat(retencion_transaccion);
 
                     adjustment = adjustment.toFixed(4);
 
-                    // Agrega una linea en blanco
-                    transaction.currentRecord.insertLine('item', numLines);
-                    transaction.currentRecord.setSublistValue('item', 'item', numLines, recordTax.taxItem);
+                    var index;
+                    log.error("updatePercetion",updatePercetion)
+                    if (updatePercetion) {
+                        // Busca la linea de percepcion a actualizar
+                        log.error("updatePercetion","Busca la linea de percepcion a actualizar")
+                        index = findLinePerception(transaction.currentRecord, recordTax);
+                        log.error("index",index)
+                        if (index == -1) continue;
+                    }else{
+                        log.error("updatePercetion","Agrega una linea en blanco")
+                        // Agrega una linea en blanco
+                        transaction.currentRecord.insertLine('item', numLines);
+                        index = numLines
+                    }
+                    
+                    transaction.currentRecord.setSublistValue('item', 'item', index, recordTax.taxItem);
 
-
-                    if (recordTax.taxMemo != null && recordTax.taxMemo != '') {
-                        transaction.currentRecord.setSublistValue('item', 'description', numLines, recordTax.taxMemo);
+                    
+                    if (recordTax.taxMemo) {
+                        transaction.currentRecord.setSublistValue('item', 'description', index, recordTax.taxMemo);
                     }
 
-                    transaction.currentRecord.setSublistValue('item', 'quantity', numLines, 1);
-                    transaction.currentRecord.setSublistValue('item', 'rate', numLines, parseFloat(retention));
-                    transaction.currentRecord.setSublistValue('item', 'taxcode', numLines, recordTax.taxCode);
-                    transaction.currentRecord.setSublistValue('item', 'custcol_lmry_ar_perception_percentage', numLines, parseFloat(recordTax.taxRate));
-                    transaction.currentRecord.setSublistValue('item', 'custcol_lmry_ar_item_tributo', numLines, true);
-                    transaction.currentRecord.setSublistValue('item', 'custcol_lmry_base_amount', numLines, baseAmount);
-                    transaction.currentRecord.setSublistValue('item', 'custcol_lmry_ar_perception_account', numLines, aux_cadena);
-                    transaction.currentRecord.setSublistValue('item', 'custcol_lmry_ar_perception_adjustment', numLines, adjustment);
+                    transaction.currentRecord.setSublistValue('item', 'quantity', index, 1);
+                    transaction.currentRecord.setSublistValue('item', 'rate', index, parseFloat(retention));
+                    transaction.currentRecord.setSublistValue('item', 'taxcode', index, recordTax.taxCode);
+                    transaction.currentRecord.setSublistValue('item', 'custcol_lmry_ar_perception_percentage', index, parseFloat(recordTax.taxRate));
+                    transaction.currentRecord.setSublistValue('item', 'custcol_lmry_ar_item_tributo', index, true);
+                    transaction.currentRecord.setSublistValue('item', 'custcol_lmry_base_amount', index, baseAmount);
+                    transaction.currentRecord.setSublistValue('item', 'custcol_lmry_ar_perception_account', index, aux_cadena);
+                    transaction.currentRecord.setSublistValue('item', 'custcol_lmry_ar_perception_adjustment', index, adjustment);
 
                     if (transaction.countryCode == "AR") {
                         // Name: Latam Col - AR Norma IIBB - ARCIBA
-                        if (recordTax.iibbNorma != '' && recordTax.iibbNorma != null) {
-                            transaction.currentRecord.setSublistValue('item', 'custcol_lmry_ar_norma_iibb_arciba', numLines, recordTax.iibbNorma);
+                        if (recordTax.iibbNorma) {
+                            transaction.currentRecord.setSublistValue('item', 'custcol_lmry_ar_norma_iibb_arciba', index, recordTax.iibbNorma);
                         }
                         // Name: Latam Col - AR Jurisdiccion IIBB
-                        if (recordTax.jurisDib != '' && recordTax.jurisDib != null) {
-                            transaction.currentRecord.setSublistValue('item', 'custcol_lmry_ar_col_jurisd_iibb', numLines, recordTax.jurisDib);
+                        if (recordTax.jurisDib) {
+                            transaction.currentRecord.setSublistValue('item', 'custcol_lmry_ar_col_jurisd_iibb', index, recordTax.jurisDib);
                         }
                         // Name: Latam Col - AR Regimen
-                        if (recordTax.taxRegimen != '' && recordTax.taxRegimen != null) {
-                            transaction.currentRecord.setSublistValue('item', 'custcol_lmry_ar_col_regimen', numLines, recordTax.taxRegimen);
+                        if (recordTax.taxRegimen) {
+                            transaction.currentRecord.setSublistValue('item', 'custcol_lmry_ar_col_regimen', index, recordTax.taxRegimen);
                         }
                     }
 
                     // Department
                     if (FeaDepa || FeaDepa == 'T') {
-                        if (recordTax.department != '' && recordTax.department != null) {
-                            transaction.currentRecord.setSublistValue('item', 'department', numLines, recordTax.department);
+                        if (recordTax.department) {
+                            transaction.currentRecord.setSublistValue('item', 'department', index, recordTax.department);
                         } else {
                             if (pref_dep || pref_dep == 'T') {
-                                transaction.currentRecord.setSublistValue('item', 'department', numLines, setupTaxSubsidiary.department);
+                                transaction.currentRecord.setSublistValue('item', 'department', index, setupTaxSubsidiary.department);
                             }
                         }
                     }
 
                     // Class
                     if (FeaClas || FeaClas == 'T') {
-                        if (recordTax.class != '' && recordTax.class != null) {
-                            transaction.currentRecord.setSublistValue('item', 'class', numLines, recordTax.class);
+                        if (recordTax.class) {
+                            transaction.currentRecord.setSublistValue('item', 'class', index, recordTax.class);
                         } else {
                             if (pref_clas || pref_clas == 'T') {
-                                transaction.currentRecord.setSublistValue('item', 'class', numLines, setupTaxSubsidiary.class);
+                                transaction.currentRecord.setSublistValue('item', 'class', index, setupTaxSubsidiary.class);
                             }
                         }
                     }
 
-                    var fieldLocation = transaction.currentRecord.getSublistField({ sublistId: 'item', fieldId: 'location', line: numLines });
+                    var fieldLocation = transaction.currentRecord.getSublistField({ sublistId: 'item', fieldId: 'location', line: index });
                     // Location
-                    if (fieldLocation != '' && fieldLocation != null && (FeaLoca || FeaLoca == 'T')) {
-                        if (recordTax.location != '' && recordTax.location != null) {
+                    if (fieldLocation && (FeaLoca || FeaLoca == 'T')) {
+                        if (recordTax.location) {
 
-                            transaction.currentRecord.setSublistValue('item', 'location', numLines, recordTax.location);
+                            transaction.currentRecord.setSublistValue('item', 'location', index, recordTax.location);
                         } else {
                             if (pref_loc || pref_loc == 'T') {
-                                transaction.currentRecord.setSublistValue('item', 'location', numLines, setupTaxSubsidiary.location);
+                                transaction.currentRecord.setSublistValue('item', 'location', index, setupTaxSubsidiary.location);
 
                             }
                         }
                     }
 
-                    // Incrementa las lineas
-                    numLines++;
+                    if (!updatePercetion) {
+                        numLines++;
+                    }
+                    
                 };
                 
             }
         }
+
+        function findLinePerception(currentRecord, recordTax) {
+            var lines = currentRecord.getLineCount('item');
+            for (var i = 0; i < lines; i++) {
+                var itemId = currentRecord.getSublistValue('item', 'item', i);
+                var perceptionPercentage = currentRecord.getSublistValue('item', 'custcol_lmry_ar_perception_percentage', i);
+                log.error("itemId",itemId)
+                log.error("perceptionPercentage",perceptionPercentage)
+                log.error("recordTax.taxRate",recordTax.taxRate)
+                log.error("parseFloat(recordTax.taxRate)",parseFloat(recordTax.taxRate))
+                if (recordTax.taxItem == itemId && parseFloat(recordTax.taxRate) == perceptionPercentage) {
+                    return i;
+                }
+            }
+            return -1;
+        }
+        
 
         function getExchangeRate(setupTaxSubsidiary, transaction, invoiceRecord) {
             var exchangerate = 1;

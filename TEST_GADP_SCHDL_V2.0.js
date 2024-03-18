@@ -21,22 +21,41 @@ define(["N/search", "N/record", "N/log", "N/query", "N/runtime"],
                 //var invoiceId = "1041271"
                 //var result = record.create({ type:"customtransaction_lmry_ei_voided_transac"});
                 //log.error("type",result.getValue("type"));
-
+                /*
                 for (var i = 0; i < 25; i++) {
                     copyCreditMemo("3957662");
                 }
-
+                */
                 //voidCreditMemo("3939157",true);s
 
                 //searchTransaction("3914166");
                 //log.error("account",creditMemoSearch.accountmain[0].value);
 
+                updatePercetion();
 
 
             } catch (error) {
                 log.error("error", error)
             }
 
+        }
+
+        function updatePercetion(){
+
+            var currentRecord = record.load({
+                type: 'salesorder',
+                id: "3967092"
+            });
+            var lines = currentRecord.getLineCount('item');
+            for (var i = 0; i < lines; i++) {
+                var tiene_tributo = currentRecord.getSublistValue('item', 'custcol_lmry_ar_item_tributo', i);
+                if (tiene_tributo) {
+                    currentRecord.setSublistValue('item', 'quantity', i, 1);
+                    currentRecord.setSublistValue('item', 'rate', i, parseFloat(300));
+                }
+            }
+            
+            currentRecord.save();
         }
 
         function copyCreditMemo(transactionId) {
