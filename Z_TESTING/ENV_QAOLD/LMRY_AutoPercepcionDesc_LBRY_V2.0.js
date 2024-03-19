@@ -154,8 +154,7 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
 
                 // El tipo de cambio sera establecida para convertir los montos a moneda del pais
                 transaction.exchangerate = getExchangeRate(setupTaxSubsidiary, transaction, invoiceRecord);
-
-                transaction.subtotal = parseFloat(invoiceRecord.getValue("subtotal") + (invoiceRecord.getValue("discounttotal") || 0)) * parseFloat(transaction.exchangerate);
+                transaction.subtotal = parseFloat(getSubtotal(invoiceRecord) + (invoiceRecord.getValue("discounttotal") || 0)) * parseFloat(transaction.exchangerate);
                 transaction.total = parseFloat(invoiceRecord.getValue("total")) * parseFloat(transaction.exchangerate);
                 transaction.taxtotal = parseFloat(invoiceRecord.getValue("taxtotal")) * parseFloat(transaction.exchangerate);
 
@@ -402,15 +401,16 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
         }
 
         function setLinePerception(appliesTo, recordTaxs, transaction, setupTaxSubsidiary, infoItem, updatePercetion) {
-
             if (recordTaxs.length) {
                 for (var i = 0; i < recordTaxs.length; i++) {
                     var recordTax = recordTaxs[i];
 
                     // Valida si es articulo para las ventas
-                    
+                    log.error("stop ","stop 1")
                     if (['Para la venta', 'For Sale', 'Para reventa', 'For Resale'].indexOf(recordTax.taxItemSubtype) == -1) continue;
+                    log.error("stop ","stop 2")
                     if (!recordTax.taxCode) continue;
+                    log.error("stop ","stop 3")
                     if (appliesTo != recordTax.appliesTo) continue;
                     
                     if (recordTax.appliesTo == '2') {
@@ -456,6 +456,7 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
                             if (aux_itemg[2] > 0) {
                                 baseAmount = parseFloat(aux_itemg[2]) * parseFloat(transaction.exchangerate);
                             } else {
+                                log.error("stop ","stop 4")
                                 continue;
                             }
                         }
@@ -542,7 +543,11 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
                         // Busca la linea de percepcion a actualizar
                         log.error("updatePercetion","Busca la linea de percepcion a actualizar")
                         try {
+                            log.error("retention 1",retention)
+                            log.error("baseAmount 1",baseAmount)
                             transaction.currentRecord.setSublistValue('item', 'rate', index, parseFloat(retention));
+                            log.error("retention",retention)
+                            log.error("baseAmount",baseAmount)
                         } catch (error) {
                             log.error("error Controlado",error)
                         }
@@ -640,7 +645,6 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
         function findLinePerception(currentRecord, recordTax,item) {
 
             var lines = currentRecord.getLineCount('item');
-            var index = -1
             for (var i = 0; i < lines; i++) {
                 var memoCode = recordTax.key + recordTax.internalid
                 var description = currentRecord.getSublistValue('item', 'description', i);
@@ -648,15 +652,23 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
                     var lineuniquekey = item[5];
                     memoCode += " - " + lineuniquekey;
                 }
-                log.error("description",description)
-                log.error("memoCode",memoCode)
-                log.error("comparacion",description.indexOf(memoCode) !== -1)
-                if (description.indexOf(memoCode) !==-1) {
-                    index = i;
-                    break;
-                };
+                if (description.indexOf(memoCode) !==-1) return i;
             }
-            return index;
+            return -1;
+        }
+
+        function getSubtotal(currentRecord){
+            var subtotal = 0.00;
+            var lines = currentRecord.getLineCount('item');
+            for (var i = 0; i < lines; i++) {
+                var isTribute = currentRecord.getSublistValue('item', 'custcol_lmry_ar_item_tributo', i);
+                var perceptionPercentage = currentRecord.getSublistValue('item', 'custcol_lmry_ar_perception_percentage', i);
+
+                if (!isTribute || !perceptionPercentage) {
+                    subtotal += parseFloat(currentRecord.getSublistValue('item', 'amount', i));
+                }
+            }
+            return subtotal;
         }
         
 
