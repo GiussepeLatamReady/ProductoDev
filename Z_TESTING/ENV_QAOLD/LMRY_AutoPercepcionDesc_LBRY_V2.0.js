@@ -50,8 +50,17 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
 
                 if (evento == "create" || evento == "edit") {
                     // Registro actual
-                    var invoiceRecord = paramContext.newRecord;
 
+                    
+                    var invoiceRecord = paramContext.newRecord;
+                    log.error("invoiceRecord",invoiceRecord)
+                    log.error("invoiceRecord",invoiceRecord.id)
+                    invoiceRecord = record.load(
+                        {
+                            id:invoiceRecord.id,
+                            type:invoiceRecord.type
+                        }
+                    );
                     /********************************************
                      * Valida si tiene activo el feature para
                      * realizar la autopercepcion y descuento
@@ -151,13 +160,15 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
                 const setupTaxSubsidiary = getSetupTaxSubsidiary(transaction.subsidiary);
 
                 if (!Object.keys(setupTaxSubsidiary).length) return true;
-
+                log.error('op', 'op 1');
+                transaction.items = getItems(invoiceRecord);
+                log.error('op', 'op 2');
                 // El tipo de cambio sera establecida para convertir los montos a moneda del pais
                 transaction.exchangerate = getExchangeRate(setupTaxSubsidiary, transaction, invoiceRecord);
-                transaction.subtotal = parseFloat(getSubtotal(invoiceRecord) + (invoiceRecord.getValue("discounttotal") || 0)) * parseFloat(transaction.exchangerate);
+                transaction.subtotal = parseFloat(getSubtotal(transaction) + (invoiceRecord.getValue("discounttotal") || 0)) * parseFloat(transaction.exchangerate);
                 transaction.total = parseFloat(invoiceRecord.getValue("total")) * parseFloat(transaction.exchangerate);
                 transaction.taxtotal = parseFloat(invoiceRecord.getValue("taxtotal")) * parseFloat(transaction.exchangerate);
-
+                log.error('op', 'op 3');
                 //Busqueda de National Taxes
                 const nationalTaxs = getNationaltaxs(transaction);
                 log.error('nationalTaxs', nationalTaxs);
@@ -168,36 +179,20 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
                 log.error("transaction", transaction)
                 transaction.currentRecord =  invoiceRecord;
                 if (transaction.applyWhtCode && validateDocumentType(transaction) && transaction.notSend) {
-                    var isTribute = containsTribute(invoiceRecord, numLines, cantidad);
 
-                    log.error("isTribute",isTribute)
-                    setLinePerception("1", nationalTaxs, transaction, setupTaxSubsidiary, "", isTribute);
-                    setLinePerception("1", contributoryClass, transaction, setupTaxSubsidiary, "", isTribute);
+                    setLinePerception("1", nationalTaxs, transaction, setupTaxSubsidiary,{});
+                    setLinePerception("1", contributoryClass, transaction, setupTaxSubsidiary,{});
 
                     if (setupTaxSubsidiary.applyLine == true) {
-                        for (var j = 0; j < soloItems; j++) {
-                            var gross_item = invoiceRecord.getSublistValue({ sublistId: 'item', fieldId: 'grossamt', line: j });
-                            var tax_item = invoiceRecord.getSublistValue({ sublistId: 'item', fieldId: 'tax1amt', line: j });
-                            var net_item = invoiceRecord.getSublistValue({ sublistId: 'item', fieldId: 'amount', line: j });
-                            var id_item = invoiceRecord.getSublistValue({ sublistId: 'item', fieldId: 'item', line: j });
-                            var catalog_item = invoiceRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_lmry_br_service_catalog', line: j });
-                            var lineuniquekey = invoiceRecord.getSublistValue({ sublistId: 'item', fieldId: 'lineuniquekey', line: j });
-                            if (catalog_item == null || catalog_item == '') {
-                                catalog_item = "no catalogo";
-                            }
-
-                            var info_item = id_item + "|" + gross_item + "|" + tax_item + "|" + net_item + "|" + catalog_item+ "|" + lineuniquekey;
-
-                            setLinePerception("2", nationalTaxs, transaction, setupTaxSubsidiary, info_item, isTribute);
-                            setLinePerception("2", contributoryClass, transaction, setupTaxSubsidiary, info_item, isTribute);
-                        }
-
+                        Object.keys(transaction.items).forEach(function(lineuniquekey){
+                            var item = transaction.items[lineuniquekey];
+                            setLinePerception("2", nationalTaxs, transaction, setupTaxSubsidiary, item);
+                            setLinePerception("2", contributoryClass, transaction, setupTaxSubsidiary, item);
+                        })
                     }
-
-                    cantidad++;
-                    containsTribute(invoiceRecord, invoiceRecord.getLineCount('item'), cantidad);
-
+                    removePerceptionLines(transaction);
                 }
+                transaction.currentRecord.save();
 
             } catch (errmsg) {
                 log.error("Error [calculatePerception]", errmsg)
@@ -400,7 +395,7 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
             return contributoryClassList;
         }
 
-        function setLinePerception(appliesTo, recordTaxs, transaction, setupTaxSubsidiary, infoItem, updatePercetion) {
+        function setLinePerception(appliesTo, recordTaxs, transaction, setupTaxSubsidiary, item) {
             if (recordTaxs.length) {
                 for (var i = 0; i < recordTaxs.length; i++) {
                     var recordTax = recordTaxs[i];
@@ -414,11 +409,11 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
                     if (appliesTo != recordTax.appliesTo) continue;
                     
                     if (recordTax.appliesTo == '2') {
-                        var aux_item = infoItem.split("|");
                         if (transaction.countryCode == 'BR') {
-                            if (recordTax.catalog != aux_item[4]) continue;
+                            if (recordTax.catalog != item.catalog) continue;
                         } else {
-                            if (recordTax.appliesToItem != aux_item[0]) continue;
+                            log.error("stop ","stop 4")
+                            if (recordTax.appliesToItem != item.id) continue;
                         }
                     }
 
@@ -442,29 +437,29 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
                             if (transaction.taxtotal > 0) {
                                 baseAmount = transaction.taxtotal;
                             } else {
+                                log.error("stop ","stop 4")
                                 continue;
                             }
                         }
                         if (recordTax.amount == 3) { baseAmount = transaction.subtotal; } //NET
                     }
-                    var aux_itemg;
+
                     if (recordTax.appliesTo == '2') {
-                        aux_itemg = infoItem.split("|");
-                        if (recordTax.amount == 1) { baseAmount = parseFloat(aux_itemg[1]) * parseFloat(transaction.exchangerate); }
+                        
+                        if (recordTax.amount == 1) { baseAmount = parseFloat(item.grossAmount) * parseFloat(transaction.exchangerate); }
                         //TAX
                         if (recordTax.amount == 2) {
-                            if (aux_itemg[2] > 0) {
-                                baseAmount = parseFloat(aux_itemg[2]) * parseFloat(transaction.exchangerate);
+                            if (item.taxAmount > 0) {
+                                baseAmount = parseFloat(item.taxAmount) * parseFloat(transaction.exchangerate);
                             } else {
-                                log.error("stop ","stop 4")
+                                log.error("stop ","stop 5")
                                 continue;
                             }
                         }
-                        if (recordTax.amount == 3) { baseAmount = parseFloat(aux_itemg[3]) * parseFloat(transaction.exchangerate); } //NET
+                        if (recordTax.amount == 3) { baseAmount = parseFloat(item.amount) * parseFloat(transaction.exchangerate); } //NET
                     }
-                    log.error("aux_itemg",aux_itemg)
                     baseAmount = parseFloat(baseAmount) - parseFloat(recordTax.notTaxableMinimum);
-                    
+                    log.error("stop ","stop 6")
                     if (baseAmount <= 0) continue;
                     
 
@@ -477,9 +472,11 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
                                         if (recordTax.baseAmount == 3) { baseAmount = recordTax.minAmount; }
                                         if (recordTax.baseAmount == 4) { baseAmount = recordTax.maxAmount; }
                                     } else {
+                                        log.error("stop ","stop 7")
                                         continue;
                                     }
                                 } else {
+                                    log.error("stop ","stop 8")
                                     continue;
                                 }
                             } else {
@@ -487,6 +484,7 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
                                 if (recordTax.baseAmount == 3) { baseAmount = recordTax.minAmount; }
                             }
                         } else {
+                            log.error("stop ","stop 9")
                             continue;
                         }
                     } else {
@@ -496,6 +494,7 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
                                 if (recordTax.baseAmount == 3) { baseAmount = recordTax.minAmount; }
                                 if (recordTax.baseAmount == 4) { baseAmount = recordTax.maxAmount; }
                             } else {
+                                log.error("stop ","stop 10")
                                 continue;
                             }
                         }
@@ -537,17 +536,13 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
                     adjustment = adjustment.toFixed(4);
 
                     var index;
-                    log.error("updatePercetion",updatePercetion)
-                    index = findLinePerception(transaction.currentRecord, recordTax, aux_itemg);
+                    //log.error("updatePercetion",updatePercetion)
+                    index = findLinePerception(transaction,transaction.currentRecord, recordTax, item);
                     if (index != -1) {
                         // Busca la linea de percepcion a actualizar
                         log.error("updatePercetion","Busca la linea de percepcion a actualizar")
                         try {
-                            log.error("retention 1",retention)
-                            log.error("baseAmount 1",baseAmount)
                             transaction.currentRecord.setSublistValue('item', 'rate', index, parseFloat(retention));
-                            log.error("retention",retention)
-                            log.error("baseAmount",baseAmount)
                         } catch (error) {
                             log.error("error Controlado",error)
                         }
@@ -563,7 +558,7 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
                         if (recordTax.taxMemo) {
                             var memo = recordTax.taxMemo;
                             if (appliesTo == "2") {
-                                memo +=" - " + aux_itemg[5];
+                                memo +=" - " + item.lineuniquekey;
                             } else {
                                 memo +=" - Total";
                             }
@@ -628,46 +623,66 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
 
                                 }
                             }
-                        }
-
-                        
-                        numLines++;
-                        
-                    }
-                    
-                    
-                    
+                        }               
+                        numLines++;              
+                    }                    
                 };
                 
             }
         }
 
-        function findLinePerception(currentRecord, recordTax,item) {
+        function findLinePerception(transaction,currentRecord, recordTax, item) {
 
             var lines = currentRecord.getLineCount('item');
             for (var i = 0; i < lines; i++) {
                 var memoCode = recordTax.key + recordTax.internalid
                 var description = currentRecord.getSublistValue('item', 'description', i);
-                if (recordTax.appliesTo=="2") {
-                    var lineuniquekey = item[5];
-                    memoCode += " - " + lineuniquekey;
+                
+                if (recordTax.appliesTo == "2") {
+                    memoCode += " - " + item.lineuniquekey;  
                 }
-                if (description.indexOf(memoCode) !==-1) return i;
+                if (description.indexOf(memoCode) !==-1) {
+                    var unikey = currentRecord.getSublistValue('item', 'lineuniquekey', i);
+                    transaction.items[unikey].revised = true;
+                    return i;
+                };
             }
             return -1;
         }
 
-        function getSubtotal(currentRecord){
-            var subtotal = 0.00;
+        function getItems(currentRecord){
+            var items = {};
             var lines = currentRecord.getLineCount('item');
             for (var i = 0; i < lines; i++) {
-                var isTribute = currentRecord.getSublistValue('item', 'custcol_lmry_ar_item_tributo', i);
-                var perceptionPercentage = currentRecord.getSublistValue('item', 'custcol_lmry_ar_perception_percentage', i);
 
-                if (!isTribute || !perceptionPercentage) {
-                    subtotal += parseFloat(currentRecord.getSublistValue('item', 'amount', i));
+                var key = currentRecord.getSublistValue('item','lineuniquekey', i);
+                items[key]={
+                    lineuniquekey: key,
+                    isTribute: currentRecord.getSublistValue('item', 'custcol_lmry_ar_item_tributo', i),
+                    amount: parseFloat(currentRecord.getSublistValue('item', 'amount', i)),
+                    revised: false,
+                    perceptionPercentage: currentRecord.getSublistValue('item', 'custcol_lmry_ar_perception_percentage', i),
+                    grossAmount : currentRecord.getSublistValue({ sublistId: 'item', fieldId: 'grossamt', line: i }),
+                    taxAmount : currentRecord.getSublistValue({ sublistId: 'item', fieldId: 'tax1amt', line: i }),
+                    id : currentRecord.getSublistValue({ sublistId: 'item', fieldId: 'item', line: i }),
+                    catalog: currentRecord.getSublistValue({ sublistId: 'item', fieldId: 'custcol_lmry_br_service_catalog', line: i }) || "no catalogo",
+                    line:i
                 }
             }
+            return items;
+        }
+
+        function getSubtotal(transaction){
+            var subtotal = 0.00;
+            var items = transaction.items
+
+            Object.keys(items).forEach(function(lineuniquekey){
+                var item = items[lineuniquekey]
+                if (!item.isTribute || !item.perceptionPercentage) {
+                    subtotal += item.amount;
+                }
+            })
+            
             return subtotal;
         }
         
@@ -829,24 +844,19 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
          * ID ...: custcol_lmry_ar_item_tributo
          *********************************************************** */
 
-        function removePerceptionLines(recordObj) {
-            var currentNumberLine = recordObj.getLineCount({
-                sublistId: 'item'
-            });
-            var deletedTransactions = [];
-            for (var i = currentNumberLine - 1; i >= 0; i--) {
+        function removePerceptionLines(transaction) {
 
-                var isItemTax = recordObj.getSublistValue({
-                    sublistId: 'item',
-                    fieldId: 'custcol_lmry_ar_item_tributo',
-                    line: i
-                });
-                if (isItemTax || isItemTax == 'T') {
-                    deletedTransactions.push(i);
+            var items = transaction.items;
+            log.error("items remove",items);
+            var deletedTransactions = [];
+            Object.keys(items).forEach(function(lineuniquekey){
+                if (!items[lineuniquekey].revised && items[lineuniquekey].isTribute) {
+                    deletedTransactions.push(items[lineuniquekey].line);
                 }
-            }
+            })
+            log.error("deletedTransactions",deletedTransactions);
             deletedTransactions.forEach(function (id) {
-                recordObj.removeLine({
+                transaction.currentRecord.removeLine({
                     sublistId: 'item',
                     line: id
                 });
@@ -1229,7 +1239,6 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
         // Regresa la funcion para el User Event
         return {
             autoperc_beforeSubmit: autoperc_beforeSubmit,
-            removePerceptionLines: removePerceptionLines,
             disabledSalesDiscount: disabledSalesDiscount,
             processDiscount: processDiscount,
             setDiscountRate: setDiscountRate

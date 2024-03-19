@@ -725,7 +725,7 @@ define(['N/config', 'N/currency', 'N/record', 'N/runtime', 'N/search', 'N/ui/ser
                         if (ST_FEATURE == false || ST_FEATURE == "F") {
                             if (swAutoPe) {
                                 // Realiza el seteo de percepciones
-                                Library_AutoPercepcionDesc.autoperc_beforeSubmit(scriptContext, LMRY_Result[0], scriptContext.type);
+                                //Library_AutoPercepcionDesc.autoperc_beforeSubmit(scriptContext, LMRY_Result[0], scriptContext.type);
                             }
                         }
 
@@ -838,7 +838,19 @@ define(['N/config', 'N/currency', 'N/record', 'N/runtime', 'N/search', 'N/ui/ser
                 }
 
                 if (LMRY_countr[0] == 'AR' && (type_event == 'create' || type_event == 'edit' || type_event == 'copy')) {
+
                     Library_AutoPercepcionDesc.processDiscount(scriptContext);
+                    var swAutoPe = false;
+                    if (LMRY_countr[0] == 'AR') {
+                        swAutoPe = Library_Mail.getAuthorization(142, licenses);
+                    }
+                    // Si hay acceso Procesa
+                    if (ST_FEATURE == false || ST_FEATURE == "F") {
+                        if (swAutoPe) {
+                            // Realiza el seteo de percepciones
+                            Library_AutoPercepcionDesc.autoperc_beforeSubmit(scriptContext, LMRY_countr[0], scriptContext.type);
+                        }
+                    }
                 }
 
             } catch (err) {

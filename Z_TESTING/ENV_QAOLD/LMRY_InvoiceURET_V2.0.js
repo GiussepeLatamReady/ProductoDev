@@ -860,7 +860,7 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
                     if (RCD_OBJ.getValue('createdfrom') && scriptContext.type == 'create') {
                         Library_AutoPercepcionDesc.setDiscountRate(RCD_OBJ);
                     }
-                    //Library_AutoPercepcionDesc.removePerceptionLines(RCD_OBJ);
+                    Library_AutoPercepcionDesc.removePerceptionLines(RCD_OBJ);
                 }
                 if (LMRY_Result[0] == 'BR' && (scriptContext.type == "create" || scriptContext.type == "edit" || scriptContext.type == "view" || scriptContext.type == "copy")) {
                     librarySecondClient.setSecondClient(RCD_OBJ, OBJ_FORM, scriptContext.type);
@@ -1126,7 +1126,6 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
                          * Auto Percepcions para Argentina,
                          * Brasil y Paraguay antes // Ahora los 14 paises
                          *************************************/
-                        /*
                         var swAutoPe = false;
                         if (LMRY_Result[0] == 'AR') {
                             swAutoPe = Library_Mail.getAuthorization(142, licenses);
@@ -1178,7 +1177,7 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
                                 Library_AutoPercepcionDesc.autoperc_beforeSubmit(scriptContext, LMRY_Result[0], scriptContext.type);
                             }
                         }
-                        */
+
                     }
                 }
 
@@ -1871,61 +1870,6 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
 
                 if (LMRY_Result[0] == 'AR' && (type_event == 'create' || type_event == 'edit' || type_event == 'copy')) {
                     Library_AutoPercepcionDesc.processDiscount(scriptContext);
-
-                    if (ST_FEATURE == false || ST_FEATURE == "F") {
-
-                        /*************************************
-                         * Auto Percepcions para Argentina,
-                         * Brasil y Paraguay antes // Ahora los 14 paises
-                         *************************************/
-                        var swAutoPe = false;
-                        if (LMRY_Result[0] == 'AR') {
-                            swAutoPe = Library_Mail.getAuthorization(142, licenses);
-                        }
-                        if (LMRY_Result[0] == 'BR') {
-                            swAutoPe = Library_Mail.getAuthorization(143, licenses);
-                        }
-                        if (LMRY_Result[0] == 'BO') {
-                            swAutoPe = Library_Mail.getAuthorization(230, licenses);
-                        }
-                        if (LMRY_Result[0] == 'PE') {
-                            swAutoPe = Library_Mail.getAuthorization(231, licenses);
-                        }
-                        if (LMRY_Result[0] == 'CL') {
-                            swAutoPe = Library_Mail.getAuthorization(232, licenses);
-                        }
-                        if (LMRY_Result[0] == 'CO') {
-                            swAutoPe = Library_Mail.getAuthorization(233, licenses);
-                        }
-                        if (LMRY_Result[0] == 'CR') {
-                            swAutoPe = Library_Mail.getAuthorization(234, licenses);
-                        }
-                        if (LMRY_Result[0] == 'EC') {
-                            swAutoPe = Library_Mail.getAuthorization(235, licenses);
-                        }
-                        if (LMRY_Result[0] == 'SV') {
-                            swAutoPe = Library_Mail.getAuthorization(236, licenses);
-                        }
-                        if (LMRY_Result[0] == 'GT') {
-                            swAutoPe = Library_Mail.getAuthorization(237, licenses);
-                        }
-                        if (LMRY_Result[0] == 'MX') {
-                            swAutoPe = Library_Mail.getAuthorization(238, licenses);
-                        }
-                        if (LMRY_Result[0] == 'PA') {
-                            swAutoPe = Library_Mail.getAuthorization(239, licenses);
-                        }
-                        if (LMRY_Result[0] == 'PY') {
-                            swAutoPe = Library_Mail.getAuthorization(240, licenses);
-                        }
-                        if (LMRY_Result[0] == 'UY') {
-                            swAutoPe = Library_Mail.getAuthorization(241, licenses);
-                        }
-                        if (swAutoPe) {
-                            // Realiza el seteo de percepciones
-                            Library_AutoPercepcionDesc.autoperc_beforeSubmit(scriptContext, LMRY_Result[0], scriptContext.type);
-                        }
-                    }
                 }
                 /*****************************************************/
             } catch (err) {
