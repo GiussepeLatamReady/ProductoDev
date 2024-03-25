@@ -49,10 +49,9 @@ define(['N/record', 'N/runtime', 'N/log', 'N/search', 'N/transaction', './LMRY_I
                 var detailsCreditMemo = query.runSuiteQL({
                     query: "SELECT top 2 BUILTIN.DF( TransactionAccountingLine.Account ) AS Account,TransactionAccountingLine.Account,TransactionAccountingLine.Debit,TransactionAccountingLine.Credit,TransactionAccountingLine.Posting,TransactionLine.Memo,TransactionLine.id,TransactionLine.Transaction FROM accountingbook, TransactionLine,TransactionAccountingLine where TransactionLine.Transaction = TransactionAccountingLine.Transaction and TransactionAccountingLine.accountingbook=accountingbook.id  and   accountingbook.isprimary= 'T'   and TransactionAccountingLine.Transaction = '" + recordId + "' and (TransactionAccountingLine.Debit IS NOT NULL or TransactionAccountingLine.Credit IS NOT NULL ) ORDER BY TransactionLine.ID"
                 }).results;
-                // log.error("data custPymtAccountDetail", [custPymtAccountDetail[0], custPymtAccountDetail[1]]);
+                
                 var accountDebit = detailsCreditMemo.filter(function (account) { return account.values[2] == null })[0].values[1];
                 var accountCredit = detailsCreditMemo.filter(function (account) { return account.values[3] == null })[0].values[1];
-                log.debug("detailsCreditMemo", [accountDebit, accountCredit]);
 
                 F_SUBSIDIAR = runtime.isFeatureInEffect({ feature: "SUBSIDIARIES" });
                 F_LOCMANDATORY = runtime.getCurrentUser().getPreference({ name: 'LOCMANDATORY' });
@@ -88,7 +87,7 @@ define(['N/record', 'N/runtime', 'N/log', 'N/search', 'N/transaction', './LMRY_I
                 configFilters.forEach(function (fieldId) {
                     var configField = configuration[0].getValue(fieldId);
                     fieldId.replace('custrecord_lmry_setuptax_', '');
-                    if (configField != null && configField != undefined && configField != '') {
+                    if (configField) {
                         lineFields[fieldId] = configField;
                     }
                 });
@@ -122,7 +121,7 @@ define(['N/record', 'N/runtime', 'N/log', 'N/search', 'N/transaction', './LMRY_I
                 });
 
                 voidCreditMemo.setValue({
-                    fieldId: 'custbody_lmry_refernce_transaction',
+                    fieldId: 'custbody_lmry_reference_transaction',
                     value: recordId
                 });
 
@@ -159,7 +158,7 @@ define(['N/record', 'N/runtime', 'N/log', 'N/search', 'N/transaction', './LMRY_I
                 });
 
                 for (var property in lineFields) {
-                    if (lineFields[property] != '' && lineFields[property] != null && lineFields[property] != null) {
+                    if (lineFields[property]) {
                         voidCreditMemo.setCurrentSublistValue({
                             sublistId: 'line',
                             fieldId: property,
@@ -211,12 +210,12 @@ define(['N/record', 'N/runtime', 'N/log', 'N/search', 'N/transaction', './LMRY_I
                 });
 
                 var trasactionVoid = voidCreditMemo.save({ enableSourcing: true, ignoreMandatoryFields: true, disableTriggers: true });
-                //log.debug("End Void Credit Memo", result);
+                log.debug("End Void Credit Memo", trasactionVoid);
                 unapplyAndApplyTransaction (recordId,"creditmemo",trasactionVoid);
                 
             } catch (error) {
-                log.error('LMRY_AnulacionInvoice_LBRY_V2 - [voidCreditMemoNonStandar]', error);
-                libraryEmail.sendemail(' [ reversalJournal ] ' + error, LMRY_script);
+                log.error('LMRY_VoidedCreditMemo_LBRY_V2.0.js - [voidCreditMemoNonStandar]', error);
+                libraryEmail.sendemail('LMRY_VoidedCreditMemo_LBRY_V2.0.js - [voidCreditMemoNonStandar]' + error, LMRY_script);
             }
         }
  
@@ -240,17 +239,23 @@ define(['N/record', 'N/runtime', 'N/log', 'N/search', 'N/transaction', './LMRY_I
                         id: recordId
                     });
                 } else{
-                    log.error("Anulacion detenida","La elimacion se ha detenido debido a que el peirodo de la transaccion esta cerrado.")
+                    log.error("Anulacion detenida","La elimacion se ha detenido debido a que el periodo de la transaccion esta cerrado.")
+                    libraryEmail.sendemail(' [ voidCreditMemoStandar ] La elimacion se ha detenido debido a que el periodo de la transaccion esta cerrado.', LMRY_script);
                 }
                 
             } catch (error) {
                 log.error('LMRY_AnulacionInvoice_LBRY_V2 - [voidCreditMemoStandar]', error);
-                libraryEmail.sendemail(' [ reversalJournal ] ' + error, LMRY_script);
+                libraryEmail.sendemail(' [ voidCreditMemoStandar ] ' + error, LMRY_script);
             }
             
         }
         function unapplyAndApplyTransaction(transactionId, transactionType, relatedTransactionId) {
             var creditmemoRecord = record.load({ type: transactionType, id: transactionId });
+
+            creditmemoRecord.setValue({
+                fieldId: 'custbody_lmry_pe_estado_sf',
+                value: 'Cancelado',
+            });
 
             var count_invoice = creditmemoRecord.getLineCount({
                 sublistId: 'apply'

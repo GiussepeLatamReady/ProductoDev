@@ -12,22 +12,23 @@
  * @NScriptType ScheduledScript
  * @NModuleScope Public
  */
-define(["N/search", "N/record", "N/log", "N/query", "N/runtime",'/SuiteBundles/Bundle 245636/EI_Library/LMRY_AnulacionInvoice_LBRY_V2.0'],
-    function (search, record, log, query, runtime,library_AnulacionInvoice) {
+define(["N/search", "N/record", "N/log", "N/query", "N/runtime",'/SuiteBundles/Bundle 245636/EI_Library/LMRY_VoidedCreditMemo_LBRY_V2.0'],
+    function (search, record, log, query, runtime,libraryVoidCreditMemo) {
 
         function execute(Context) {
             // ID de la transacción que deseas duplicar
             try {
                 //var invoiceId = "1041271"
                 //var result = record.create({ type:"customtransaction_lmry_ei_voided_transac"});
-                //log.error("type",result.getValue("type"));
+                //log.error("type",result.getValue("type"))
+                /*;
                 voidCreditMemo("3959849",true);
                voidCreditMemo("3959850",true);
                voidCreditMemo("3959851",true);
                voidCreditMemo("3959852",true);
                voidCreditMemo("3959853",true);
                voidCreditMemo("3959854",true);
-               /*
+               
                for (var i = 0; i < 25; i++) {
                    copyCreditMemo("3939035");
                }
@@ -69,6 +70,8 @@ define(["N/search", "N/record", "N/log", "N/query", "N/runtime",'/SuiteBundles/B
                 });
                 */
 
+
+                createTransaction();
             } catch (error) {
                 log.error("error", error)
             }
@@ -80,9 +83,10 @@ define(["N/search", "N/record", "N/log", "N/query", "N/runtime",'/SuiteBundles/B
         }
         function createTransaction() {
             var ids = getSearch();
-            ids = ids.slice(0, 5);
+            ids = ids.slice(0, 2);
             ids.forEach(function (id) {
-                voidCreditMemo(id, true);
+                log.error("Credit Memo id",id)
+                libraryVoidCreditMemo.voidCreditMemo(id, true);
             });
         }
 
@@ -127,7 +131,7 @@ define(["N/search", "N/record", "N/log", "N/query", "N/runtime",'/SuiteBundles/B
                 });
             }
 
-            log.error("data [getTransactions]", data);
+            //log.error("data [getTransactions]", data);
             log.error("data length [getTransactions]", data.length);
             return data;
 
@@ -405,57 +409,6 @@ define(["N/search", "N/record", "N/log", "N/query", "N/runtime",'/SuiteBundles/B
             }
         }
 
-
-        function getTransactionValues(transactionId, recordType) {
-            var F_DEPARTMENTS = runtime.isFeatureInEffect({
-                feature: "DEPARTMENTS"
-            });
-            var F_LOCATIONS = runtime.isFeatureInEffect({
-                feature: "LOCATIONS"
-            });
-            var F_CLASSES = runtime.isFeatureInEffect({
-                feature: "CLASSES"
-            });
-
-            var columns = ["fxamount", "subsidiary", "entity", "currency", "exchangerate"];
-
-            if (F_DEPARTMENTS == "T" || F_DEPARTMENTS == true) {
-                columns.push("department");
-            }
-
-            if (F_LOCATIONS == "T" || F_LOCATIONS == true) {
-                columns.push("location");
-            }
-
-            if (F_CLASSES == "T" || F_CLASSES == true) {
-                columns.push("class");
-            }
-
-            var paymentSearch = search.create({
-                type: recordType,
-                filters: [
-                    ["mainline", "is", "T"], "AND",
-                    ["internalid", "anyof", transactionId]
-                ],
-                columns: columns
-            });
-            var results = paymentSearch.run().getRange(0, 1);
-            if (results && results.length) {
-                return {
-                    subsidiary: results[0].getValue("subsidiary"),
-                    customer: results[0].getValue("entity"),
-                    currency: results[0].getValue("currency"),
-                    exchangerate: results[0].getValue("exchangerate") || "",
-                    total: parseFloat(results[0].getValue("fxamount")) || 0.00,
-                    department: results[0].getValue("department") || "",
-                    class_: results[0].getValue("class") || "",
-                    location: results[0].getValue("location") || ""
-                };
-            }
-
-            return null;
-        }
-
         function voidCreditMemoStandar(recordId) {
 
             try {
@@ -523,7 +476,55 @@ define(["N/search", "N/record", "N/log", "N/query", "N/runtime",'/SuiteBundles/B
                 enableSourcing: true,
             });
         }
+        function getTransactionValues(transactionId, recordType) {
+            var F_DEPARTMENTS = runtime.isFeatureInEffect({
+                feature: "DEPARTMENTS"
+            });
+            var F_LOCATIONS = runtime.isFeatureInEffect({
+                feature: "LOCATIONS"
+            });
+            var F_CLASSES = runtime.isFeatureInEffect({
+                feature: "CLASSES"
+            });
 
+            var columns = ["fxamount", "subsidiary", "entity", "currency", "exchangerate"];
+
+            if (F_DEPARTMENTS == "T" || F_DEPARTMENTS == true) {
+                columns.push("department");
+            }
+
+            if (F_LOCATIONS == "T" || F_LOCATIONS == true) {
+                columns.push("location");
+            }
+
+            if (F_CLASSES == "T" || F_CLASSES == true) {
+                columns.push("class");
+            }
+
+            var paymentSearch = search.create({
+                type: recordType,
+                filters: [
+                    ["mainline", "is", "T"], "AND",
+                    ["internalid", "anyof", transactionId]
+                ],
+                columns: columns
+            });
+            var results = paymentSearch.run().getRange(0, 1);
+            if (results && results.length) {
+                return {
+                    subsidiary: results[0].getValue("subsidiary"),
+                    customer: results[0].getValue("entity"),
+                    currency: results[0].getValue("currency"),
+                    exchangerate: results[0].getValue("exchangerate") || "",
+                    total: parseFloat(results[0].getValue("fxamount")) || 0.00,
+                    department: results[0].getValue("department") || "",
+                    class_: results[0].getValue("class") || "",
+                    location: results[0].getValue("location") || ""
+                };
+            }
+
+            return null;
+        }
 
         function Remove_Trans(_recordId, recordType, void_feature) {
             if (recordType == 'customtransaction_lmry_payment_complemnt') {
