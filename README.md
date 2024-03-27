@@ -3,11 +3,6 @@
 
 ## Description of the Requirement
 
-Se solicita considerar como mejora al proceso de percepciones en facturas de venta asociadas a órdenes de venta, el objetivo de la mejora es que al facturar la sales order herede la línea o item de percepción desde la sales order a la factura, pues actualmente no se hereda y se agrega la línea al guardar la factura y esto hace que la sales order quede pendiente de facturar ya que ambas transacciones quedan con líneas de percepción diferentes.
-
-
-Lo anterior hace que el botón “Facturar” siga apareciendo en la sales order aun cuando la sales order está facturada por completo. Esto también ocasiona que reportes de órdenes de venta por facturar sean alterados
-
 
 
 ## Description of the solution
@@ -15,11 +10,6 @@ Lo anterior hace que el botón “Facturar” siga apareciendo en la sales order
 
 ## Scripts
 + Update
-    + LMRY_RecordSalesURET_V2.0.js
-    + LMRY_InvoiceURET_V2.0.js
-    + WHT_library/ 
-        + LMRY_AutoPercepcionDesc_LBRY_V2.0.js
-
     
 + Delete
 
