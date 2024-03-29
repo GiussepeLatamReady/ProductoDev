@@ -9,13 +9,42 @@
 
 
 ## Scripts
++ Create
+    + Title: LatamReady - AR Massive generation AGIP STLT | LatamReady - AR Generación Masiva AGIP STLT
+        + Name: LatamReady - Massive generation AGIP STLT
+        + id: _lmry_ar_mass_gene_agip_stlt
+        + File: LMRY_AR_Massive_Gene_Agip_STLT_V2.1.js
+
+    + File: LMRY_AR_Massive_Gene_Agip_CLNT_V2.1.js
+
+    + Title: LatamReady - AR Massive generation AGIP MPRD | LatamReady - AR Generación Masiva AGIP STLT
+        + Name: LatamReady - Massive generation AGIP MPRD
+        + id: _lmry_ar_mass_gene_agip_mprd
+        + File: LMRY_AR_Massive_Gene_Agip_MPRD_V2.1.js
+
+        + Parametros:
+            + custscript_lmry_co_head_wht_calc_user
+            + custscript_lmry_co_head_wht_calc_state
+
+
 + Update
     
 + Delete
 
 ## Records
 + Create
-  
+    Name: LatamReady - Massive generation AGIP  | LatamReady - Generación masiva AGIP
+    id: customrecord_lmry_ar_massive_gener_agip 
+
+        Fields:
+            Subsidiary          custrecord_lmry_ar_gen_agip_subsidiary
+            Entity Type         custrecord_lmry_ar_gen_agip_entity_type
+            Period              custrecord_lmry_ar_gen_agip_period
+            User Responsible    custrecord_lmry_ar_gen_agip_user
+            Process details     custrecord_lmry_ar_gen_agip_details
+            Transactions        custrecord_lmry_ar_gen_agip_transactions
+
+
         
 + Update
     
