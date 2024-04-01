@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tabla con Iconos para Detalles y CSV</title>
+<style>
+  table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+
+  th, td {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+  }
+
+  th {
+    background-color: #f2f2f2;
+  }
+
+  .action-icons {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .details-button,
+  .csv-button {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+  }
+
+  .icon {
+    width: 24px;
+    height: 24px;
+    fill: #007bff;
+    transition: fill 0.3s;
+  }
+
+  .icon:hover {
+    fill: #0056b3;
+  }
+</style>
+</head>
+<body>
+
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Nombre</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>Juan Pérez</td>
+      <td class="action-icons">
+        <button class="details-button" onclick="mostrarDetalles(this)">
+          <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M12 15.5l-6-6 1.41-1.41L12 12.67l4.59-4.58L18 9.5l-6 6z"/><path d="M0 0h24v24H0z" fill="none"/>
+          </svg>
+        </button>
+        <button class="csv-button" onclick="exportarCSV()">
+          <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M6 18h12v-2H6v2zM18 8V4H6v2h8v2H6v2h8v2H6v4h12v-3h2v4c0 1.1-.9 2-2 2H6c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2h8c1.1 0 2 .9 2 2z"/>
+            <path d="M0 0h24v24H0z" fill="none"/>
+          </svg>
+        </button>
+      </td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>María González</td>
+      <td class="action-icons">
+        <button class="details-button" onclick="mostrarDetalles(this)">
+          <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M12 15.5l-6-6 1.41-1.41L12 12.67l4.59-4.58L18 9.5l-6 6z"/><path d="M0 0h24v24H0z" fill="none"/>
+          </svg>
+        </button>
+        <button class="csv-button" onclick="exportarCSV()">
+          <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M6 18h12v-2H6v2zM18 8V4H6v2h8v2H6v2h8v2H6v4h12v-3h2v4c0 1.1-.9 2-2 2H6c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2h8c1.1 0 2 .9 2 2z"/>
+            <path d="M0 0h24v24H0z" fill="none"/>
+          </svg>
+        </button>
+      </td>
+    </tr>
+    <!-- Agregar más filas según sea necesario -->
+  </tbody>
+</table>
+
+<script>
+  function mostrarDetalles(button) {
+    // Implementa aquí la lógica para mostrar los detalles
+    alert("Detalles mostrados para ID: " + button.parentNode.parentNode.firstChild.innerText);
+  }
+
+  function exportarCSV() {
+    // Implementa aquí la lógica para exportar a CSV
+    alert("Exportar datos a CSV");
+  }
+</script>
+
+</body>
+</html>

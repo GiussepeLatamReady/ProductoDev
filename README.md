@@ -23,8 +23,8 @@
         + File: LMRY_AR_Massive_Gene_Agip_MPRD_V2.1.js
 
         + Parametros:
-            + custscript_lmry_co_head_wht_calc_user
-            + custscript_lmry_co_head_wht_calc_state
+            + custscript_lmry_ar_mass_gen_agip_user
+            + custscript_lmry_ar_mass_gen_agip_state
 
 
 + Update
@@ -43,6 +43,7 @@
             User Responsible    custrecord_lmry_ar_gen_agip_user
             Process details     custrecord_lmry_ar_gen_agip_details
             Transactions        custrecord_lmry_ar_gen_agip_transactions
+            status              custrecord_lmry_ar_gen_agip_status
 
 
         

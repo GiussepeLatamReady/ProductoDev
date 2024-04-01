@@ -46,7 +46,7 @@ define([
                 if (active) {
                     handler.loadFormValues();
                     handler.createTransactionSublist();
-                    handler.loadTransactionSublist();
+                    handler.loadProcessRecord();
 
                     form.clientScriptModulePath = CLIENT_SCRIPT_PATH;
                 }
@@ -60,22 +60,14 @@ define([
 
         const processPOSTRequest = (handler, { params, scriptId, deploymentId }) => {
             try {
-                const status = Number(params.custpage_status);
-                if (!status) {
-                    redirect.toSuitelet({
-                        scriptId,
-                        deploymentId,
-                        parameters: handler.getRedirectParams()
-                    });
-                } else {
-                    const parameters = {
-                        state: params.custpage_log_id,
-                        user: runtime.getCurrentUser().id
-                    };
+                const parameters = {
+                    state: params.custpage_log_id,
+                    user: runtime.getCurrentUser().id
+                };
 
-                    handler.runMapReduce(parameters);
-                    handler.toLogSuitelet();
-                }
+                handler.runMapReduce(parameters);
+                handler.toLogSuitelet();
+
             } catch (err) {
                 log.error("[ onRequest - POST ]", err);
             }
@@ -92,23 +84,8 @@ define([
                 language = language === "es" ? language : "en";
                 this.translations = this.getTranslations(language);
                 this.subsidiaries = [];
-                this.deploy = runtime.getCurrentScript().deploymentId;
-                this.names = this.getNames(this.deploy);
             }
 
-            getNames(deploy) {
-                let nameList = {
-                    customdeploy_lmry_co_head_wht_calc_stlt: {
-                        scriptid: 'customscript_lmry_co_head_calc_stlt_log',
-                        deployid: 'customdeploy_lmry_co_head_calc_stlt_log',
-                        scriptMapReduce: 'customscript_lmry_co_head_wht_calc_mprd',
-                        deployMapReduce: 'customdeploy_lmry_co_head_wht_calc_mprd',
-                        paramuser: 'custscript_lmry_co_head_wht_calc_user',
-                        paramstate: 'custscript_lmry_co_head_wht_calc_state'
-                    }
-                };
-                return nameList[deploy];
-            }
 
             createForm() {
 
@@ -121,8 +98,7 @@ define([
                     return {form: this.form , active:false};
                 }
 
-                this.setupFormWithSubsidiaries();
-                this.addFormButtons();
+                this.setupForm();
 
                 return {form: this.form , active:false};
             }
@@ -178,7 +154,7 @@ define([
                 myInlineHtml.defaultValue = messageHtml;
             }
 
-            setupFormWithSubsidiaries() {
+            setupForm() {
                 this.form.addButton({
                     label: this.translations.LMRY_VIEW_LOG,
                     id: "custpage_btn_log",
@@ -191,16 +167,10 @@ define([
                 this.addSelectField('custpage_period', this.translations.LMRY_TYPE_PROCESS, 'mainGroup').isMandatory();
                 this.addSelectField('custpage_entity_type', this.translations.LMRY_WTH_TYPE, 'mainGroup').isMandatory();
 
-                this.addGroup('dateRangeGroup', this.translations.LMRY_PERIOD_INTERVAL);
-                //this.addSelectField('custpage_period_type', this.translations.LMRY_PERIOD_TYPE, 'dateRangeGroup').isMandatory();
-                //this.addDateField('custpage_start_date', this.translations.LMRY_START_DATE, 'dateRangeGroup');
-                //this.addDateField('custpage_end_date', this.translations.LMRY_END_DATE, 'dateRangeGroup');
-                this.addSelectField('custpage_period', this.translations.LMRY_PERIOD, 'dateRangeGroup');
+                this.addSimpleField('custpage_log_id', 'Log ID','mainGroup');
+                this.addSimpleField('custpage_deploy_id', 'Deploy ID', 'mainGroup').setDefautValue(runtime.getCurrentScript().deploymentId);
 
-
-                this.addHiddenField('custpage_status', 'Status');
-                this.addHiddenField('custpage_log_id', 'Log ID');
-                this.addHiddenField('custpage_deploy_id', 'Deploy ID', runtime.getCurrentScript().deploymentId);
+                this.addFormButtons();
             }
 
             addGroup(groupId, label) {
@@ -226,55 +196,32 @@ define([
                     setHelpText: function (help) {
                         this.field.setHelpText(help);
                         return this;
+                    },
+                    isHidden: function () {
+                        this.field.updateDisplayType({
+                            displayType: serverWidget.FieldDisplayType.HIDDEN
+                        });
+                        return this;
+                    },
+                    setDefautValue: function (value) {
+                        this.field.defaultValue = value;
+                        return this;
                     }
                 };
             }
 
 
-            addDateField(id, label, container) {
-                return this.addCustomField(id, serverWidget.FieldType.DATE, label, container).setHelpText({ help: id });
-            }
             addSelectField(id, label, container) {
                 return this.addCustomField(id, serverWidget.FieldType.SELECT, label, container).setHelpText({ help: id });
             }
 
-            addHiddenField(id, label, defaultValue = '') {
-                let field = this.form.addField({
-                    id: id,
-                    type: serverWidget.FieldType.TEXT,
-                    label: label
-                }).updateDisplayType({
-                    displayType: serverWidget.FieldDisplayType.HIDDEN
-                });
-                if (defaultValue) field.defaultValue = defaultValue;
+            addSimpleField(id, label, container) {
+                return this.addCustomField(id, serverWidget.FieldType.TEXT, label, container).setHelpText({ help: id });
             }
 
             addFormButtons() {
-                if (!Number(this.params.status)) {
-                    this.form.addSubmitButton({ label: this.translations.LMRY_FILTER });
-                } else {
-                    this.form.addSubmitButton({ label: this.translations.LMRY_PROCESS });
-                    this.form.addButton({
-                        id: 'btn_back',
-                        label: this.translations.LMRY_BACK,
-                        functionName: 'back'
-                    });
-                    // Deshabilitar campos si es necesario
-
-                    this.disableFields();
-                }
+                this.form.addSubmitButton({ label: this.translations.LMRY_GENERATE });
                 this.form.addResetButton({ label: this.translations.LMRY_RESTART });
-            }
-
-
-            disableFields() {
-                const fieldsToDisable = ['custpage_subsidiary', 'custpage_period', 'custpage_wht_type','custpage_wht_process'];
-                fieldsToDisable.forEach(fieldId => {
-                    let field = this.form.getField({ id: fieldId });
-                    if (field) {
-                        field.updateDisplayType({ displayType: serverWidget.FieldDisplayType.DISABLED });
-                    }
-                });
             }
 
 
@@ -328,27 +275,28 @@ define([
 
             createTransactionSublist() {
                 this.form.addTab({
-                    id: 'transactions_tab',
-                    label: this.translations.LMRY_TRANSACTIONS
+                    id: 'tab_results',
+                    label: this.translations.LMRY_RESULTS
                 });
 
                 this.sublist = this.form.addSublist({
                     id: 'custpage_results_list',
                     label: this.translations.LMRY_RESULTS,
-                    tab: 'transactions_tab',
+                    tab: 'tab_results',
                     type: serverWidget.SublistType.LIST
                 });
 
                 
                 const fields = [
-                    { id: 'apply', label: this.translations.LMRY_APPLY, type: serverWidget.FieldType.CHECKBOX },
-                    { id: 'tranid', label: this.translations.LMRY_DOCUMENT_NUMBER, type: serverWidget.FieldType.TEXT },
-                    { id: 'entity', label: this.translations.LMRY_ENTITY, type: serverWidget.FieldType.TEXT },
-                    { id: 'type_transaction', label: this.translations.LMRY_TRANSACTION_TYPE, type: serverWidget.FieldType.TEXT },
-                    { id: 'legal_document_type', label: this.translations.LMRY_FISCAL_DOCUMENT, type: serverWidget.FieldType.TEXT },
-                    { id: 'currency', label: this.translations.LMRY_CURRENCY, type: serverWidget.FieldType.TEXT },
-                    { id: 'total_amt', label: this.translations.LMRY_AMOUNT, type: serverWidget.FieldType.CURRENCY, displayType: serverWidget.FieldDisplayType.DISABLED },
-                    { id: 'internalidtext', label: 'internal_id', type: serverWidget.FieldType.TEXT, displayType: serverWidget.FieldDisplayType.HIDDEN }
+                    { id: "internalid", label: this.translations.LMRY_INTERNAL_ID_LABEL, type: serverWidget.FieldType.TEXT },
+                    { id: "subsidiary", label: this.translations.LMRY_SUBSIDIARY_LABEL, type: serverWidget.FieldType.TEXT },
+                    { id: "datecreated", label: this.translations.LMRY_CREATION_DATE_LABEL, type: serverWidget.FieldType.TEXT },
+                    { id: "created_by", label: this.translations.LMRY_CREATED_BY_LABEL, type: serverWidget.FieldType.TEXT },
+                    { id: "period", label: this.translations.LMRY_WHT_TYPE_LABEL, type: serverWidget.FieldType.TEXT },
+                    { id: "details", label: this.translations.LMRY_WHT_TYPE_LABEL, type: serverWidget.FieldType.HTML },
+                    { id: "result", label: this.translations.LMRY_PROCESS_TYPE_LABEL, type: serverWidget.FieldType.HTML},
+                    { id: "description", label: this.translations.LMRY_STATUS_LABEL, type: serverWidget.FieldType.TEXT },
+                    { id: "status", label: this.translations.LMRY_STATUS_LABEL, type: serverWidget.FieldType.TEXT }
                 ];
 
 
@@ -359,16 +307,10 @@ define([
                     }
                 });
 
-
                 this.sublist.addButton({
-                    id: 'btn_mark_all',
-                    label: this.translations.LMRY_SELECT_ALL,
-                    functionName: 'toggleCheckBoxes(true)'
-                });
-                this.sublist.addButton({
-                    id: 'btn_desmark_all',
-                    label: this.translations.LMRY_DESELECT_ALL,
-                    functionName: 'toggleCheckBoxes(false)'
+                    id: "custpage_btnrefresh",
+                    label: this.translations.LMRY_REFRESH,
+                    functionName: 'updatePage'
                 });
 
                 return this.sublist;
@@ -378,11 +320,7 @@ define([
                 if (this.FEAT_SUBS) {
                     this.fillSubsidiaries();
                 }
-                const fieldWhtType = this.fillEntityType();
-                fieldWhtType.defaultValue = "header";
-                fieldWhtType.updateDisplayType({ displayType: serverWidget.FieldDisplayType.DISABLED });
-                //this.fillPeriodType();
-                this.fillProcess();
+                this.fillEntityType();
             }
 
             fillSubsidiaries() {
@@ -396,50 +334,33 @@ define([
             }
 
             fillEntityType() {
-                let whtTypeField = this.form.getField({ id: 'custpage_entity_type' });
-                whtTypeField.addSelectOption({ value: 0, text: '&nbsp;' });
-                whtTypeField.addSelectOption({ value: "customer", text: this.translations.LMRY_WHT_HEADER });
-                whtTypeField.addSelectOption({ value: "vendor", text: this.translations.LMRY_WHT_LINE });
-                return whtTypeField;
-            }
-            /*
-            fillPeriodType() {
-                let periodTypeField = this.form.getField({ id: 'custpage_period_type' });
-                periodTypeField.addSelectOption({ value: 0, text: '&nbsp;' });
-                periodTypeField.addSelectOption({ value: "range", text: this.translations.LMRY_DATE_RANGE });
-                periodTypeField.addSelectOption({ value: "month", text: this.translations.LMRY_PERIOD });
-            }*/
-            fillProcess() {
-                let typeProcessField = this.form.getField({ id: 'custpage_wht_process' });
-                typeProcessField.addSelectOption({ value: 0, text: '&nbsp;' });
-                typeProcessField.addSelectOption({ value: "sales", text: this.translations.LMRY_SALES });
-                typeProcessField.addSelectOption({ value: "purchases", text: this.translations.LMRY_PURCHASES });
-            }
+                let entityTypeField = this.form.getField({ id: 'custpage_entity_type' });
+                entityTypeField.addSelectOption({ value: 0, text: '&nbsp;' });
+                entityTypeField.addSelectOption({ value: "customer", text: this.translations.LMRY_CUSTOMER });
+                entityTypeField.addSelectOption({ value: "vendor", text: this.translations.LMRY_VENDOR });
+                return entityTypeField;
+            } 
 
-            loadTransactionSublist() {
+            loadProcessRecord() {
 
 
-                let data = this.getTransactions();
+                let data = this.getRecords();
 
                 let sublist = this.form.getSublist({ id: 'custpage_results_list' });
 
-                data.forEach((transaction, i) => {
-                    const { id, tranid, legalDocument, entityName, entityValue, type, recordType, amount, currency } = transaction;
-                    
-                    sublist.setSublistValue({ id: 'internalidtext', line: i, value: id});
-                    const tranUrl = url.resolveRecord({ recordType, recordId: id, isEditMode: false });
-                    sublist.setSublistValue({ id: "tranid", line: i, value: `<a class="dottedlink" href="${tranUrl}" target="_blank">${tranid}</a>` });
-
-                    const entityType = ["invoice", "creditmemo"].includes(recordType) ? "customer" : "vendor";
-                    const tranUrlEntity = url.resolveRecord({ recordType: entityType, recordId: entityValue, isEditMode: false });
-                    sublist.setSublistValue({ id: "entity", line: i, value: `<a class="dottedlink" href="${tranUrlEntity}" target="_blank">${entityName}</a>` });
-
-                    
+                data.forEach((form, i) => {
+                    const { id, subsidiary, created, employee, period, description, status } = form;
                     const setSublistValue = (colId, value) => sublist.setSublistValue({ id: colId, line: i, value });
-                    setSublistValue("type_transaction", type);
-                    setSublistValue("legal_document_type", legalDocument);
-                    setSublistValue("currency", currency);
-                    setSublistValue("total_amt", Number(amount).toFixed(2));
+
+                    setSublistValue("internalid",id)
+                    setSublistValue("subsidiary",subsidiary)
+                    setSublistValue("datecreated",created)
+                    setSublistValue("created_by",employee)
+                    setSublistValue("period",period)
+                    setSublistValue("description",description)
+                    setSublistValue("status",status)
+
+                    // Falata detalles y resultados
                 })
 
                 if (data.length) {
@@ -447,310 +368,50 @@ define([
                 }
 
             }
-
-            getTransactions() {
-                
-                let {
-                    subsidiary,
-                    whtType,
-                    accoutingPeriod,
-                    typeProcess
-                } = this.params;
-
-                let filters = [
-                    ["mainline", "is", "T"],
-                    "AND",
-                    ["formulatext: {custbody_lmry_reference_transaction}", "isnotempty", ""]
-
-                ];
-
-
-                if (typeProcess == "sales") {
-                    filters.push('AND');
-                    filters.push([
-                        [
-                            [
-                                "type",
-                                "anyof",
-                                "CustCred",
-                                "CustInvc"
-                            ]
-                        ],
-                        "OR",
-                        [
-                            [
-                                [
-                                    "type",
-                                    "anyof",
-                                    "Journal"
-                                ],
-                                "AND",
-                                [
-                                    "formulatext: CASE WHEN  {custbody_lmry_reference_transaction.recordType} = 'invoice'  OR {custbody_lmry_reference_transaction.recordType} = 'creditmemo' THEN 1 ELSE 0 END",
-                                    "is",
-                                    "1"
-                                ]
-                            ]
-                        ]
-                    ]);
-                } else {
-                    filters.push('AND');
-                    filters.push([
-                        [
-                            [
-                                "type",
-                                "anyof",
-                                "VendBill",
-                                "VendCred"
-                            ]
-                        ],
-                        "OR",
-                        [
-                            [
-                                [
-                                    "type",
-                                    "anyof",
-                                    "Journal"
-                                ],
-                                "AND",
-                                [
-                                    "formulatext: CASE WHEN  {custbody_lmry_reference_transaction.recordType} = 'vendorbill'  OR {custbody_lmry_reference_transaction.recordType} = 'vendorcredit' THEN 1 ELSE 0 END",
-                                    "is",
-                                    "1"
-                                ]
-                            ]
-                        ]
-                    ]);
-                }
-
-                if (whtType == "header") {
-                    filters.push('AND');
-                    filters.push(
-                        [
-                            ["formulatext: {memomain}","startswith","Latam - WHT"],
-                            "AND",
-                            ["formulatext: {memomain}","doesnotstartwith","Latam - WHT Reverse"]
-                        ]
-                    );
-
-
-                } else {
-                    filters.push('AND');
-                    filters.push(
-                        [
-                            [
-                                ["formulatext: {memomain}", "startswith", "Latam - Country WHT (Lines)"],
-                                "OR",
-                                ["formulatext: {memomain}", "startswith", "Latam - CO WHT (Lines)"]
-                            ]
-                        ]
-                    );
-                }
-
-
-
-                /*
-                if (startDate != null && startDate != '' && endDate != null && endDate != '') {
-                    filters.push('AND',['trandate', 'onorafter', startDate]);
-                    filters.push('AND',['trandate', 'onorbefore', endDate]);
-                }
-                */
-                if (accoutingPeriod != null && accoutingPeriod != '') {
-                    filters.push('AND');
-                    const periodFourmulaids = this.getPeriods(subsidiary,accoutingPeriod);
-                    filters.push([
-                        "formulatext:" + periodFourmulaids,
-                        search.Operator.IS,
-                        "1"
-                    ]);
-                }
-
-
-
-
-                let settings = [];
-
-                if (this.FEAT_SUBS) {
-                    filters.push('AND', ['subsidiary', 'anyof', subsidiary]);
-                    settings = [search.createSetting({ name: 'consolidationtype', value: 'NONE' })];
-                }
-
-                let columns = [];
-                columns.push(search.createColumn({ name: 'formulatext', formula: '{custbody_lmry_reference_transaction.internalid}', sort: search.Sort.DESC }));
-
-                //log.error("filters", filters)
-
-                let searchTransactionsWht = search.create({
-                    type: "transaction",
-                    filters: filters,
-                    columns: columns,
-                    settings: settings
-                });
-                let jsonData = {};
-                let pageData = searchTransactionsWht.runPaged({ pageSize: 1000 });
-                if (pageData) {
-                    pageData.pageRanges.forEach(function (pageRange) {
-                        let page = pageData.fetch({ index: pageRange.index });
-                        page.data.forEach(function (result) {
-                            let id = result.getValue(result.columns[0]);
-                            jsonData[id] = true;
-                        });
-                    });
-                }
-
-                return this.getTransactionsMain(Object.keys(jsonData), whtType);
-            }
-
-            getTransactionsMain(ids, whtType) {
-
-                if (whtType != "header") {
-                    ids = this.getIdsFilterTaxResult(ids);
-                }
-                
-                if (ids.length == 0) {
-                    return ids;
-                }
-
-                
+ 
+            getRecords() {
                 let data = [];
-                let filters = [
-                    ["internalid", "anyof", ids],
-                    "AND",
-                    ["mainline", "is", "T"]
 
-                ];
-
-                if (whtType == "header") {
-                    filters.push('AND');
-                    filters.push(["custrecord_lmry_br_transaction.internalid", "anyof", "@NONE@"]);
-                }
-
-                let columns = [];
-                columns.push(search.createColumn({ name: 'formulatext', formula: '{internalid}', sort: search.Sort.DESC }));
-                columns.push(search.createColumn({ name: 'formulatext', formula: '{type}' }));
-                columns.push(search.createColumn({ name: 'formulatext', formula: '{entity}' }));
-                columns.push(search.createColumn({ name: 'formulatext', formula: '{recordType}' }));
-                columns.push(search.createColumn({ name: 'formulatext', formula: '{custbody_lmry_document_type}' }));
-                columns.push(search.createColumn({ name: 'formulatext', formula: '{tranid}' }));
-                columns.push(search.createColumn({ name: 'formulatext', formula: '{fxamount}' }));
-                columns.push(search.createColumn({ name: 'formulatext', formula: '{currency}' }));
-                columns.push(search.createColumn({ name: 'formulatext', formula: '{entity.id}' }));
-
-
-                let settings = [];
-                if (this.FEAT_SUBS) {
-                    settings = [search.createSetting({ name: 'consolidationtype', value: 'NONE' })];
-                }
-                let searchTransactions = search.create({
-                    type: "transaction",
-                    filters: filters,
-                    columns: columns,
-                    settings: settings
+                let search_log = search.create({
+                    type: "customrecord_lmry_ar_massive_gener_agip",
+                    filters:
+                        [
+                            ["isinactive", "is", "F"]
+                        ],
+                    columns:
+                        [
+                            search.createColumn({ name: "internalid", sort: search.Sort.DESC }),
+                            "custrecord_lmry_ar_gen_agip_subsidiary",
+                            "created",
+                            "custrecord_lmry_ar_gen_agip_user",
+                            "custrecord_lmry_ar_gen_agip_period",
+                            "custrecord_lmry_ar_gen_agip_details",
+                            "custrecord_lmry_ar_gen_agip_status"
+                        ]
                 });
-
-
-                let pageData = searchTransactions.runPaged({ pageSize: 1000 });
+                let pageData = search_log.runPaged({ pageSize: 1000 });
                 if (pageData) {
                     pageData.pageRanges.forEach(function (pageRange) {
                         let page = pageData.fetch({ index: pageRange.index });
                         page.data.forEach(function (result) {
-                            const columns = result.columns;
-                            let transaction = {};
-                            transaction.id = result.getValue(columns[0]) || " ";
-                            transaction.legalDocument = result.getValue(columns[4]) || " ";
-                            transaction.entityName = result.getValue(columns[2])|| " ";
-                            transaction.entityValue = result.getValue(columns[8])|| " ";
-                            transaction.tranid = result.getValue(columns[5])|| " - ";
-                            transaction.type = result.getValue(columns[1])|| " ";
-                            transaction.recordType = result.getValue(columns[3])|| " ";
-                            transaction.amount = Math.abs(result.getValue(columns[6]))|| 0;
-                            transaction.currency = result.getValue(columns[7])|| " ";
-                            data.push(transaction);
+                            let columns = result.columns;
+                            let formublist = {};
+                            formublist.id = result.getValue(columns[0]) || ' ';
+                            formublist.subsidiary = result.getText(columns[1]) || ' ';
+                            formublist.created = result.getValue(columns[2]) || ' ';
+                            formublist.employee = result.getText(columns[3]) || ' ';
+                            formublist.period = result.getValue(columns[4]) || ' ';
+                            formublist.description = result.getValue(columns[5]) || ' ';
+                            formublist.status = result.getValue(columns[6]) || ' ';
+
+                            data.push(formublist);
                         });
                     });
                 }
 
-                
                 return data;
             }
 
-            getIdsFilterTaxResult = ids => {
-                if (ids.length == 0) {
-                    return ids;
-                }
-                let transactionIds = {}
-                let searchRecordLog = search.create({
-                    type: 'customrecord_lmry_br_transaction',
-                    filters: [
-                        ['custrecord_lmry_br_transaction', 'anyof', ids],
-                        "AND", 
-                        ["custrecord_lmry_co_wht_applied","anyof","@NONE@"]
-                    ],
-                    columns: [
-                        'custrecord_lmry_br_transaction.internalid'
-                    ]
-                })
-                searchRecordLog.run().each(function (result) {
-                    const id = result.getValue(result.columns[0]);
-                    transactionIds[id] = true;
-                    return true;
-                });
-                log.error("transactionIds",transactionIds)
-                return Object.keys(transactionIds);
-                
-            }
-
-            
-
-            getPeriods(subsidiaryValue,anualPeriod) {
-
-                const periodlookup = search.lookupFields({
-                    type: 'accountingperiod',
-                    id: anualPeriod,
-                    columns: ['startdate', 'enddate']
-                });
-
-                let periodIds = new Array();
-
-                let searchFilters = new Array();
-                searchFilters.push({ name: 'isyear', operator: 'is', values: false });
-                searchFilters.push({ name: 'isquarter', operator: 'is', values: false });
-
-                if (this.FEAT_SUBS && this.FEAT_CALENDAR) {
-
-                    searchFilters.push({ name: 'fiscalCalendar', operator: 'is', values: this.getFiscalCalendar(subsidiaryValue) });
-                }
-                searchFilters.push({ name: 'startdate', operator: 'onorafter', values: periodlookup.startdate });
-                searchFilters.push({ name: 'enddate', operator: 'onorbefore', values: periodlookup.enddate });
-
-                let searchColumns = new Array();
-                searchColumns.push({ name: 'internalid', sort: search.Sort.ASC, summary: 'GROUP' });
-
-                search.create({
-                    type: 'accountingperiod',
-                    filters: searchFilters,
-                    columns: searchColumns
-                }).run().each(result => {
-                    periodIds.push(result.getValue(result.columns[0]));
-                    return true;
-                });
-
-                return this.generatePeriodFormula(periodIds);
-            }
-            
-            generatePeriodFormula(idsPeriod) {
-                const periodsString = idsPeriod.map(id => `'${id}'`).join(', ');
-                return `CASE WHEN {custbody_lmry_reference_transaction.postingperiod.id} IN (${periodsString}) THEN 1 ELSE 0 END`;
-            }
-            
-            getFiscalCalendar(subsidiaryValue) {
-                let subsidiary = search.lookupFields({
-                    type: search.Type.SUBSIDIARY,
-                    id: subsidiaryValue,
-                    columns: ['fiscalCalendar']
-                })
-                return subsidiary.fiscalCalendar[0].value;
-            }
 
             getRedirectParams() {
                 let params = this.params;
@@ -776,6 +437,17 @@ define([
                         "LMRY_VENDOR": "Proveedor",
                         "LMRY_CUSTOMER": "Cliente",
                         "LMRY_TITLE_FORM": "LatamReady - Generación masiva AGIP",
+                        "LMRY_RESTART": "Reiniciar",
+                        "LMRY_GENERATE": "Generar",
+                        "LMRY_RESULTS": "Resultados",
+                        "LMRY_RESULT": "Resultado",
+                        "LMRY_INTERNALID": "ID Interno",
+                        "LMRY_CREATION_DATE_LABEL": "Fecha de Creación",
+                        "LMRY_CREATED_BY_LABEL": "Creado por",
+                        "LMRY_PERIOD": "Periodo",
+                        "LMRY_DESCRIPTION": "Descripción",
+                        "LMRY_STATUS": "Estado",
+                        "LMRY_REFRESH": "Actualizar",
                     },
                     "en": {
                         "LMRY_MESSAGE": "Message",
@@ -788,17 +460,28 @@ define([
                         "LMRY_VENDOR": "Vendor",
                         "LMRY_CUSTOMER": "Customer",
                         "LMRY_TITLE_FORM": "LatamReady - Massive generation AGIP",
+                        "LMRY_RESTART": "Restart",
+                        "LMRY_GENERATE": "Generate",
+                        "LMRY_RESULTS": "Results",
+                        "LMRY_RESULT": "Result",
+                        "LMRY_INTERNALID": "Internal ID",
+                        "LMRY_CREATION_DATE_LABEL": "Creation Date",
+                        "LMRY_CREATED_BY_LABEL": "Created By",
+                        "LMRY_PERIOD": "Period",
+                        "LMRY_DESCRIPTION": "Description",
+                        "LMRY_STATUS": "Status",
+                        "LMRY_REFRESH": "Refresh",
                         
                     }
                 }
                 return translatedFields[country];
             }
 
-
+            
             toLogSuitelet() {
                 redirect.toSuitelet({
-                    scriptId: this.names.scriptid,
-                    deploymentId: this.names.deployid
+                    scriptId: 'customscript_lmry_ar_mass_gene_agip_stlt',
+                    deploymentId: 'customdeploy_lmry_ar_mass_gene_agip_stlt'
                 });
             }
 
@@ -808,16 +491,15 @@ define([
                     : LibraryMail.getLicenses(1);
 
                 const featureLatam = LibraryMail.getAuthorization(this.FEAT_LOCALIZATION, licenses);
-                const { scriptMapReduce: MPRD_SCRIPT_ID, deployMapReduce: MPRD_DEPLOY_ID } = this.names;
                 const parameters = featureLatam ? {
-                    custscript_lmry_co_head_wht_calc_user: user,
-                    custscript_lmry_co_head_wht_calc_state: state
+                    custscript_lmry_ar_mass_gen_agip_user: user,
+                    custscript_lmry_ar_mass_gen_agip_state: state
                 } : {};
 
                 task.create({
                     taskType: task.TaskType.MAP_REDUCE,
-                    scriptId: MPRD_SCRIPT_ID,
-                    deploymentId: MPRD_DEPLOY_ID,
+                    scriptId: 'customscript_lmry_ar_mass_gene_agip_mprd',
+                    deploymentId: 'customscript_lmry_ar_mass_gene_agip_mprd',
                     params: parameters
                 }).submit();
             }
