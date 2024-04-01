@@ -310,7 +310,7 @@ define([
                 this.sublist.addButton({
                     id: "custpage_btnrefresh",
                     label: this.translations.LMRY_REFRESH,
-                    functionName: 'updatePage'
+                    functionName: 'reload'
                 });
 
                 return this.sublist;
@@ -358,7 +358,24 @@ define([
                     setSublistValue("created_by",employee)
                     setSublistValue("period",period)
                     setSublistValue("description",description)
-                    setSublistValue("status",status)
+                    let statusResult = "Cargando datos";
+                    switch (status) {
+                        case "Finalizado":
+                            statusResult = this.translations.LMRY_FINISH;
+                            break;
+                        case "Cargando datos":
+                            statusResult = this.translations.LMRY_LOADING_DATA;
+                            break;
+                        case "Ocurrió un error":
+                            statusResult = this.translations.LMRY_ERROR;
+                            break;
+                        case "Procesando":
+                            statusResult = this.translations.LMRY_PROCESING;
+                            break;
+                        default:
+                            statusResult = this.translations.LMRY_LOADING_DATA;
+                    }
+                    setSublistValue("status",statusResult)
 
                     // Falata detalles y resultados
                 })
@@ -448,6 +465,10 @@ define([
                         "LMRY_DESCRIPTION": "Descripción",
                         "LMRY_STATUS": "Estado",
                         "LMRY_REFRESH": "Actualizar",
+                        "LMRY_FINISH": "Finalizado",
+                        "LMRY_LOADING_DATA": "Cargando datos",
+                        "LMRY_ERROR": "Ocurrió un error",
+                        "LMRY_PROCESING": "Procesando",
                     },
                     "en": {
                         "LMRY_MESSAGE": "Message",
@@ -471,6 +492,10 @@ define([
                         "LMRY_DESCRIPTION": "Description",
                         "LMRY_STATUS": "Status",
                         "LMRY_REFRESH": "Refresh",
+                        "LMRY_FINISH": "Finished",
+                        "LMRY_LOADING_DATA": "Loading Data",
+                        "LMRY_ERROR": "An Error Occurred",
+                        "LMRY_PROCESING": "Processing",
                         
                     }
                 }

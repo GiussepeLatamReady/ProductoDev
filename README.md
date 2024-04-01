@@ -42,7 +42,7 @@
             Period              custrecord_lmry_ar_gen_agip_period
             User Responsible    custrecord_lmry_ar_gen_agip_user
             Process details     custrecord_lmry_ar_gen_agip_details
-            Transactions        custrecord_lmry_ar_gen_agip_transactions
+            Entities            custrecord_lmry_ar_gen_agip_entities
             status              custrecord_lmry_ar_gen_agip_status
 
 

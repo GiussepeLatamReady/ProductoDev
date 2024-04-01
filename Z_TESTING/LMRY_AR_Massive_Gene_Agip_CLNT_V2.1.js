@@ -4,7 +4,7 @@
  * @NModuleScope Public
  * @Name LMRY_CO_Header_WHT_calculation_CLNT_V2.1.js
  * @Author LatamReady - Giussepe Delgado
- * @Date 29/01/2024
+ * @Date 29/04/2024
  */
 define(['N/runtime',
     'N/search',
@@ -47,10 +47,7 @@ define(['N/runtime',
         class ClientUIManager {
             constructor() {
                 this.FEAT_SUBS = this.isValid(runtime.isFeatureInEffect({ feature: 'SUBSIDIARIES' }));
-                this.FEAT_CALENDAR = this.isValid(runtime.isFeatureInEffect({ feature: 'MULTIPLECALENDARS' }));
-                let language = runtime.getCurrentScript().getParameter({ name: "LANGUAGE" }).substring(0, 2);
-                language = language === "es" ? language : "en";
-                this.translations = this.getTranslations(language);
+                this.FEAT_CALENDAR = this.isValid(runtime.isFeatureInEffect({ feature: 'MULTIPLECALENDARS' })); 
             }
 
 
@@ -255,12 +252,8 @@ define(['N/runtime',
                 recordlog.setValue({ fieldId: 'custrecord_lmry_ar_gen_agip_entity_type', value: form.entityType });
                 recordlog.setValue({ fieldId: 'custrecord_lmry_ar_gen_agip_period', value: form.accoutingPeriod });
                 recordlog.setValue({ fieldId: 'custrecord_lmry_ar_gen_agip_user', value: runtime.getCurrentUser().id });
-                recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_transactions', value: JSON.stringify(form.ids) });
-                recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_process', value: form.typeProcess });
-                recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_whttype', value: form.whtType });
-                //recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_period_type', value: "" });
-                
-                recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_exect', value: form.executionType });
+                recordlog.setValue({ fieldId: 'custrecord_lmry_ar_gen_agip_entities', value: JSON.stringify(form.ids) });
+                recordlog.setValue({ fieldId: 'custrecord_lmry_ar_gen_agip_status', value: "Cargando datos" });
                 idlog = recordlog.save({ enableSourcing: true, ignoreMandatoryFields: true, disableTriggers: true });
 
                 currentRecord.setValue({ fieldId: 'custpage_log_id', value: idlog, ignoreFieldChange: true });
@@ -294,5 +287,5 @@ define(['N/runtime',
 
         }
 
-        return { pageInit, validateField, saveRecord, back, backLog, toggleCheckBoxes, reload, ClientUIManager };
+        return { pageInit, validateField, saveRecord, reload };
     });
