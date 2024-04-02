@@ -1,16 +1,18 @@
 /**
- * @NApiVersion 2.x
+ * @NApiVersion 2.0
  * @NScriptType ClientScript
  * @NModuleScope Public
  * @NAmdConfig ./config.json
+ * @Name LMRY_PE_generate_detractions_CLNT_v2.0.js
  */
 
 define(['N/currentRecord', 'N/url', 'N/record', 'N/search',
   '../../lib/LMRY_detrac_popup_LBRY_v2.0.js',
-  '../../lib/LMRY_detrac_metadata_LBRY_v2.0.js'
+  '../../lib/LMRY_detrac_metadata_LBRY_v2.0.js',
+        'N/runtime'
 ],
 
-  function (currentRecord, url, record, search, latamWidget, metadata) {
+  function (currentRecord, url, record, search, latamWidget, metadata,runtime) {
 
     var _dao = '';
 
@@ -266,19 +268,26 @@ define(['N/currentRecord', 'N/url', 'N/record', 'N/search',
         income: [],
       }
 
-      var searchContext = search.create({
-        type: "account",
-        filters: [
+      var _filters = 
+        [
           ["type", "anyof", "OthCurrLiab", "Bank", "Expense", "Income"],
           "AND",
           ["isinactive", "is", "F"],
           "AND",
           ["custrecord_lmry_localbook", 'is', 'T'],
           "AND",
-          ["custrecord_lmry_code_account_sunat", 'noneof', "@NONE@"],
-          "AND",
-          ["subsidiary", 'anyof', [subsi, '@NONE@']]
-        ],
+          ["custrecord_lmry_code_account_sunat", 'noneof', "@NONE@"]
+      ];
+
+      if(runtime.isFeatureInEffect('SUBSIDIARIES') == true || 
+         runtime.isFeatureInEffect('SUBSIDIARIES') == 'T' ){
+        _filters.push('AND');
+        _filters.push(["subsidiary", 'anyof', [subsi, '@NONE@']])
+         }
+
+      var searchContext = search.create({
+        type: "account",
+        filters: _filters,
         columns: [
           'internalid', 'name', 'type'
         ]

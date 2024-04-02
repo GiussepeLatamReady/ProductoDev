@@ -3,6 +3,7 @@
  * @NScriptType Suitelet
  * @NModuleScope Public
  * @NAmdConfig ./config.json
+ * @Name LMRY_PE_setup_SalesDetractions_STLT_v2.0.js
  */
 
 

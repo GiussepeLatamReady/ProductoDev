@@ -490,9 +490,9 @@ define(['N/error', 'N/log', 'N/runtime', 'N/search', 'N/url', 'N/config', 'N/for
           label: "Codigo bien o servicio"
         },
         {
-          name: "formulatext",
+          name: "formulatext",         
+          formula: "NVL({custbody_lmry_pe_operation_type_sunat.custrecord_lmry_pe_tipo_operac_sunat}, '-')",
           summary: "GROUP",
-          formula: "'01'",
           label: "Código del Tipo de Operación realizada"
         },
         {
@@ -809,9 +809,9 @@ define(['N/error', 'N/log', 'N/runtime', 'N/search', 'N/url', 'N/config', 'N/for
           //   label: "No. Cuenta Corriente Proveedor"
           // },
           {
-            name: "formulatext",
+            name: "formulatext",  
+            formula: "NVL({custbody_lmry_pe_operation_type_sunat.custrecord_lmry_pe_tipo_operac_sunat}, '-')",
             summary: "GROUP",
-            formula: "'01'",
             label: "Código del Tipo de Operación realizada"
           },
           {

@@ -535,11 +535,11 @@ define(['N/error', 'N/log', 'N/runtime', 'N/search', 'N/url', 'N/config', 'N/for
     class BatchSalesVoid {
 
       static batchSalesVoidRecord = {
-        type: 'customrecord_lmry_batch_d_void_sale_2',
+        type: 'customrecord_lmry_batch_d_void_sales',
         fields: {
           id: 'internalid',
-          status: 'custrecord_lmry_batch_d_void_sales_stts_2',
-          batchId: 'custrecord_lmry_batch_d_void_sales_id_2'
+          status: 'custrecord_lmry_batch_d_void_sales_stts',
+          batchId: 'custrecord_lmry_batch_d_void_sales_id'
         }
       }
 

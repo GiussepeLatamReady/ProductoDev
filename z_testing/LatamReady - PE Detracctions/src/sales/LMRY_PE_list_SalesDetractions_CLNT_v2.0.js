@@ -1,8 +1,9 @@
 /**
- * @NApiVersion 2.x
+ * @NApiVersion 2.0
  * @NScriptType ClientScript
  * @NModuleScope Public
  * @NAmdConfig ./config.json
+ * @Name LMRY_PE_list_SalesDetractions_CLNT_v2.0.js
  */
 
 define(['N/url', 'N/runtime', 'LR/popup', 'detraction/metadata'],
@@ -229,7 +230,7 @@ define(['N/url', 'N/runtime', 'LR/popup', 'detraction/metadata'],
     function openDelete(){
 
       var output = url.resolveScript({
-        scriptId: 'customscript_lmry_pe_det_sales_d_st_2',
+        scriptId: 'customscript_lmry_pe_det_sales_d_stlt',
         deploymentId: 'customdeploy_lmry_pe_det_sales_d_stlt'
       });
 

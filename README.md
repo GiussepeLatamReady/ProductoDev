@@ -66,7 +66,7 @@ El cliente requiere que desde el módulo de Latam - Generate Detractions (Perú)
         + **pt:** Latam - Dedução detalhada por arredondamento.
         + **Description:** If this field is enabled, the related entity is populated in the rounding lines of the Journal Entry; otherwise, the rounding will accumulate without populating the entity.
         + **type:** chexbox
- 
+
 
         + **Core:** Field record
         + **Name:** Latam - Rounding Account (credit).
@@ -76,7 +76,7 @@ El cliente requiere que desde el módulo de Latam - Generate Detractions (Perú)
         + **Description:** .
         + **type:** select
 
-        
+
     + **Update**
         + **Core:** Field record
         + **Name:** Latam - Rounding Account (debit).
@@ -99,7 +99,6 @@ El cliente requiere que desde el módulo de Latam - Generate Detractions (Perú)
         + **pt:** Latam - Dedução detalhada por arredondamento.
         + **Description:** If this field is enabled, the related entity is populated in the rounding lines of the Journal Entry; otherwise, the rounding will accumulate without populating the entity.
         + **type:** chexbox
-
 
         + **Core:** Field record
         + **Name:** Latam - Rounding Account (credit).

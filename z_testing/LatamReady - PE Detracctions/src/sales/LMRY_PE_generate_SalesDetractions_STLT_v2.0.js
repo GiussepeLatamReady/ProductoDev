@@ -101,6 +101,10 @@ define([
         _GROUP_A.addField("custfilter_ar_acc", 'select').isNewColumn(true)
           .setOptions(operations.getSearchReceivableAccount())
           .setValue(params.account);
+          
+        _GROUP_A.addField("custfilter_customer", 'select').isNewColumn(true)
+          .setOptions(operations.getSearchCustomer(params.subsidiary))
+          .setValue(params.customer);
 		
 		/* Cambio : Task - D1091 , Request REQ230900039 realizado */
 		let customerField = _GROUP_A.addField('custfilter_customer', 'select').isNewColumn(true);

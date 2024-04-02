@@ -516,8 +516,11 @@ define([
       //   textName += '0';
       // }
 
-      textName = pre + '-D' + textName + id + '.txt';
-
+      if (pre == 'CS') {
+        textName = 'D' + textName + id + '.txt';
+      } else {
+        textName = pre + '-D' + textName + id + '.txt';
+      }
       var _CONTEXT_RENDER = render.create();
 
       _CONTEXT_RENDER.templateContent = format;
@@ -830,15 +833,14 @@ define([
         var transCurrency = transactions[i].currency;
 
         var RealAmount = parseFloat(amount).toFixed(0);
-        log.error("amount",amount)
-        log.error("RealAmount",RealAmount)
+        
         var DecimalAmount = (amount - RealAmount).toFixed(2);
 
         if (transactions[i].decimal != '-')
           DecimalAmount = transactions[i].decimal;
 
           DecimalAmount = parseFloat(DecimalAmount);
-        log.error("DecimalAmount typeof",typeof DecimalAmount)
+        
         //totalRealAmount += parseFloat(parseFloat(amount).toFixed(2));
 
         // totalRealAmount += parseFloat(RealAmount);
@@ -1015,7 +1017,6 @@ define([
                 ROUDING LINE (ROUNDING LINE)
             /*--------------------------------------------------------------*/
             _journal.selectNewLine('line');
-
             
 
             if (isSales == true) {
@@ -1228,8 +1229,7 @@ define([
               ROUDING LINE (ROUNDING LINE)
           /*--------------------------------------------------------------*/
           _journal.selectNewLine('line');
-  
-         
+           
   
           if (isSales == true) {
   
