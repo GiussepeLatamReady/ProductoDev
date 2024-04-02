@@ -306,7 +306,7 @@ define([
                     anySubsidiaryActive = isAuthorized;
                 }
                 
-                //return anySubsidiaryActive;
+                return anySubsidiaryActive;
             }
             
 
