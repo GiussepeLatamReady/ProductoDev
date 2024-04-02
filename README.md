@@ -23,8 +23,12 @@ Configuración de tipo de cambio para el Journal Entry en el módulo de retencio
   
         
 + Update
-    
+    add fields 
+    Record: LatamReady - PY WHT Purchase Log (customrecord_lmry_py_wht_purchase)
 
+        Latam - Books	custrecord_lmry_py_wht_books	Long Text	 	 	No
+ 	    Latam - Exchange Rate	custrecord_lmry_py_wht_exchange_rate	Decimal Number	 	 	No
+ 	    Latam - Apply Exchange Rate	custrecord_lmry_py_wht_apply_rate	Check Box
 ## Fields
 + Create
 + Update 
