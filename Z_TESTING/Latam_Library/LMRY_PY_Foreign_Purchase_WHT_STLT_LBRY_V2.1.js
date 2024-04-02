@@ -295,6 +295,20 @@ define(["N/search","N/config","N/format","N/currency", "N/record", "N/runtime", 
                     label: "Log ID"
                 }).updateDisplayType({ displayType: serverWidget.FieldDisplayType.HIDDEN });
 
+                
+
+                if (!this.FEAT_SUBS) {
+                    let companyCurrency = form.addField({
+                        id: "custpage_currency_company",
+                        type: serverWidget.FieldType.TEXT,
+                        label: "Currency Company Information"
+                    }).updateDisplayType({ displayType: serverWidget.FieldDisplayType.HIDDEN });
+
+                    const configpage = config.load({
+                        type: config.Type.COMPANY_INFORMATION
+                    });
+                    companyCurrency.defaultValue = configpage.getValue('basecurrency');
+                }
                 form.addField({
                     id: "custpage_status",
                     type: serverWidget.FieldType.TEXT,
@@ -326,14 +340,14 @@ define(["N/search","N/config","N/format","N/currency", "N/record", "N/runtime", 
                     //Additional Information
                     form.addFieldGroup({
                         id: "journalGroup",
-                        label: "Journal Entry"
+                        label: this.getText("journal")
                     });
 
 
                     let applyExchangeRate = form.addField({
                         id: "custpage_apply_exchange_rate",
                         type: serverWidget.FieldType.CHECKBOX,
-                        label: "Apply "+this.getText("EXCHANGERATE"),
+                        label:  this.getText("apply")+" "+this.getText("EXCHANGERATE"),
                         container: "journalGroup"
                     }).setHelpText({ help: "custpage_apply_exchange_rate" });
                     
@@ -1176,7 +1190,7 @@ define(["N/search","N/config","N/format","N/currency", "N/record", "N/runtime", 
                             "classification", "department", "class", "location", "filter",
                             "additional_information", "apply_rule", "save", "back",
                             "transactions", "results", "apply", "internal_id", "tranid", "transaction", "date", "document_type",
-                            "total_amt", "wht_percent", "wht_amount", "mark_all", "desmark_all","EXCHANGERATE"
+                            "total_amt", "wht_percent", "wht_amount", "mark_all", "desmark_all","EXCHANGERATE","JOURNAL"
                         ]
                     }]
                 });

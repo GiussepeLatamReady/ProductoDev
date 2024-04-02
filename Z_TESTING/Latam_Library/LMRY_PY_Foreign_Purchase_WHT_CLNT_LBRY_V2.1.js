@@ -777,7 +777,7 @@ define(["N/runtime","N/currency", "N/search", "N/record", "N/format", "N/transla
             setExchangeRateAccountingBooks() {
                 const recordObj = this.currentRecord;
                 const subsidiary = recordObj.getValue("custpage_subsidiary");
-                let companyCurrency = "11";
+                let companyCurrency;
                 if (this.FEAT_SUBS) {
                     if (subsidiary && subsidiary!=0) {
                         companyCurrency = search.lookupFields({
@@ -786,6 +786,8 @@ define(["N/runtime","N/currency", "N/search", "N/record", "N/format", "N/transla
                             columns: ["currency"]
                         }).currency[0].value;
                     }
+                }else{
+                    companyCurrency = recordObj.getValue("custpage_currency_company");
                 }
                 const primaryExchangeRate = recordObj.getValue("custpage_exchange_rate");
                 const numberLines = recordObj.getLineCount({ sublistId: "custpage_results_list_books" });
@@ -804,7 +806,7 @@ define(["N/runtime","N/currency", "N/search", "N/record", "N/format", "N/transla
                 const numberLines = recordObj.getLineCount({ sublistId: "custpage_results_list_books" });
                 let accountingBooks = {}
                 for (let i = 0; i < numberLines; i++) {
-                    const currencyId = recordObj.getSublistValue({ sublistId: "custpage_results_list_books", fieldId: "currency_book_id", line: i }) || "11";
+                    const currencyId = recordObj.getSublistValue({ sublistId: "custpage_results_list_books", fieldId: "currency_book_id", line: i });
                     const bookId = recordObj.getSublistValue({ sublistId: "custpage_results_list_books", fieldId: "book_id", line: i })
                     const exchangeRate = recordObj.getSublistValue({ sublistId: "custpage_results_list_books", fieldId: "exchange_rate_sblt", line: i })
                     accountingBooks[bookId] = {bookId,currencyId,exchangeRate};
