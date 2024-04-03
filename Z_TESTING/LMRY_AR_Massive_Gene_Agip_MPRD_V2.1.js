@@ -21,10 +21,10 @@ define([
             try {
                 const parameters = getParameters();
                 log.error("getInputData parameters",parameters)
-                const transactions = getEntities(parameters);
-                updateState(parameters, 'Procesando', 'Se ha comenzado a procesar las transacciones...');
-                log.error("transactions",transactions)
-                return transactions;
+                const entities = getEntities(parameters);
+                updateState(parameters, 'Procesando', 'Se ha comenzado a procesar laslas entidades...');
+                log.error("entities",entities)
+                return entities;
             } catch (error) {
                 log.error("Error [getInputData]", error);
                 return [["isErrorInput", error.message]];
@@ -41,14 +41,14 @@ define([
                     });
                 } else {
 
-                    const transaction = JSON.parse(mapContext.value);
+                    const {entityId, period, subsidiary} = JSON.parse(mapContext.value);
 
                     if (transaction.whtType == "header") {
                         lbryWHTHeader.calculateHeaderWHT(transaction.id);
                     }
                     mapContext.write({
                         key: mapContext.key,
-                        value: [transaction.id, "T"]
+                        value: [entityId, "T"]
                     });
 
                 }
@@ -139,9 +139,8 @@ define([
             //return [{"id":"3947913","whtType":"header"}]
             //log.error("recordLog.idTransaction",recordLog.idTransaction);
             const entities = lbryAGIP.cargarEntity(recordLog.entityType, recordLog.subsidiary);
-
             
-            return JSON.parse(recordLog.idTransaction).map(id => ({ id: id, whtType: recordLog.whtType }));
+            return entities.map(entity => ({ entityId: entity.internalid, period:recordLog.period, subsidiary: recordLog.subsidiary }));
         }
 
         /* ------------------------------------------------------------------------------------------------------
@@ -149,11 +148,11 @@ define([
         * --------------------------------------------------------------------------------------------------- */
         let updateState = (parameters, msgState, msgDetails) => {
             record.submitFields({
-                type: 'customrecord_lmry_co_head_wht_cal_log',
+                type: 'customrecord_lmry_ar_massive_gener_agip',
                 id: parameters.idLog,
                 values: {
-                    custrecord_lmry_co_hwht_log_state: msgState,
-                    custrecord_lmry_co_hwht_log_details: msgDetails
+                    custrecord_lmry_ar_gen_agip_status: msgState,
+                    custrecord_lmry_ar_gen_agip_details: msgDetails
                 },
                 options: { ignoreMandatoryFields: true, disableTriggers: true }
             });
