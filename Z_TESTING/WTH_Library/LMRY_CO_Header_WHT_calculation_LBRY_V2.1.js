@@ -597,7 +597,11 @@ define([
     }
 
     const getExpense = (recordObj) => {
-        let expense = {};
+        let expense = {
+            sumSubtotal:0,
+            sumTaxtotal:0,
+            sumTotal:0
+        };
         const itemsLines = recordObj.getLineCount({ sublistId: 'expense' });
         for (let i = 0; i < itemsLines; i++) {
             const lineuniquekey = recordObj.getSublistValue({ sublistId: 'expense', fieldId: 'lineuniquekey', line: i });
