@@ -11,10 +11,11 @@ define([
     "N/runtime",
     "N/search",
     "N/log",
+    'N/query',
     "./AR_LIBRARY_MENSUAL/LMRY_AR_padronAGIP_LBRY",
 ],
 
-    (record, runtime, search, log, lbryAGIP) => {
+    (record, runtime, search, log, query, lbryAGIP) => {
 
 
         const getInputData = (inputContext) => {
@@ -27,7 +28,7 @@ define([
                 return entities;
             } catch (error) {
                 log.error("Error [getInputData]", error);
-                return [["isErrorInput", error.message]];
+                return [["isError", error.message]];
             }
         }
 
@@ -41,14 +42,14 @@ define([
                     });
                 } else {
 
-                    const {entityId, period, subsidiary} = JSON.parse(mapContext.value);
+                    const contextValue = JSON.parse(mapContext.value);
 
-                    if (transaction.whtType == "header") {
-                        lbryWHTHeader.calculateHeaderWHT(transaction.id);
-                    }
+                    const response = createContributoryclass(contextValue);
+
+                    
                     mapContext.write({
                         key: mapContext.key,
-                        value: [entityId, "T"]
+                        value: [entity.internalid, "T",response]   
                     });
 
                 }
@@ -66,20 +67,23 @@ define([
             try {
                 
                 const results = [];
+                const jsonResult = {};
                 summaryContext.output.iterator().each(function (key, value) {
-                    results.push(JSON.parse(value));
+                    const data = JSON.parse(value)
+                    results.push(data);
+                    jsonResult[data.entityId] = data;
                     return true;
                 });
-                const errors = results.filter(([key]) => key === 'isError' || key === 'isErrorInput');
+                const errors = results.filter(([key]) => key === 'isError');
         
-                const transactionsData = getEntities(parameters);
-                const transactionIds = transactionsData.map(({id}) => id);
+                const entitiesData = getEntities(parameters);
+                const entityIds = entitiesData.map(({entity}) => entity.internalid);
                 const idsSuccess = results.filter(([key, value]) => value === 'T').map(([id]) => id);
-                const idsError = transactionIds.filter(id => !idsSuccess.includes(id));
+                const idsError = entityIds.filter(id => !idsSuccess.includes(id));
         
                 const transactions = [
-                    ...idsSuccess.map(id => ({id, state: 'Procesada con exito'})),
-                    ...idsError.map(id => ({id, state: 'Error'}))
+                    ...idsSuccess.map(id => ({id, state: 'Procesada con exito', createSetup:jsonResult[id][2].createSetup})),
+                    ...idsError.map(id => ({id, state: 'Error',createSetup:0}))
                 ];
         
                 
@@ -119,7 +123,9 @@ define([
         }
 
         let getEntities = (parameters) => {
-            let recordLog = {};
+            let period;
+            let subsidiary;
+            let entityType;
             let searchRecordLog = search.create({
                 type: 'ccustomrecord_lmry_ar_massive_gener_agip',
                 filters: [
@@ -132,15 +138,49 @@ define([
                 ]
             })
             searchRecordLog.run().each(function (result) {
-                recordLog.period = result.getValue('custrecord_lmry_ar_gen_agip_period');
-                recordLog.subsidiary = result.getValue('custrecord_lmry_ar_gen_agip_subsidiary');
-                recordLog.entityType = result.getValue('custrecord_lmry_ar_gen_agip_entity_type');
+                period = result.getValue('custrecord_lmry_ar_gen_agip_period');
+                subsidiary = result.getValue('custrecord_lmry_ar_gen_agip_subsidiary');
+                entityType = result.getValue('custrecord_lmry_ar_gen_agip_entity_type');
             });
             //return [{"id":"3947913","whtType":"header"}]
             //log.error("recordLog.idTransaction",recordLog.idTransaction);
-            const entities = lbryAGIP.cargarEntity(recordLog.entityType, recordLog.subsidiary);
+            const entities = lbryAGIP.cargarEntity(entityType, subsidiary);
             
-            return entities.map(entity => ({ entityId: entity.internalid, period:recordLog.period, subsidiary: recordLog.subsidiary }));
+            return entities.map(entity => ({ entity, period, subsidiary }));
+        }
+
+        let createContributoryclass = ({entity, period, subsidiary}) => {
+            const fileResults = query
+                .runSuiteQL({
+                    query: `
+                    SELECT TOP 1
+                        file.id, file.name,
+                        REGEXP_SUBSTR(file.name, '([0-9]{11,})',8),  REGEXP_SUBSTR(file.name, '([0-9]{11,})',17) 
+                    FROM 
+                        file 
+                    WHERE
+                        file.name LIKE '${subsidiary};${period};%'
+                    AND 
+                        REGEXP_SUBSTR(file.name, '([0-9]{11,})',LENGTH('${subsidiary};${period};%'))<= ${entity.vatregnumber + entity.custentity_lmry_digito_verificator}
+                    AND
+                        ${entity.vatregnumber + entity.custentity_lmry_digito_verificator}  <=  REGEXP_SUBSTR(file.name, '([0-9]{11,})',LENGTH('${subsidiary};${period};${entity.vatregnumber + entity.custentity_lmry_digito_verificator}')) 
+                    ORDER BY file.id DESC
+                        `
+                })
+                .asMappedResults();
+            if (fileResults.length <= 0) {
+                return {message:'Not file for period'};
+            }
+
+            log.debug('entity', lisEntitys);
+            const AGIPObject = new lbryAGIP.AGIPTXT(fileResults[0].id,[entity] , period, subsidiary);
+            const infoCC = AGIPObject.getListContributoryClass();
+            if (infoCC.length > 0) {
+                log.debug('infoCC', infoCC);
+                return {message:'Creacion satisfactoria',createSetup:infoCC[0].createSetup};
+            } else {
+                return {message:'No tiene impuesto aplicable'};
+            }
         }
 
         /* ------------------------------------------------------------------------------------------------------
