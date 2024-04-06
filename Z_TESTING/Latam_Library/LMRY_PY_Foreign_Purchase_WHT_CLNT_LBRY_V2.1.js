@@ -123,6 +123,9 @@ define(["N/runtime","N/currency", "N/search", "N/record", "N/format", "N/transla
                                     let total = recordObj.getSublistValue({ sublistId: "custpage_results_list", fieldId: "total_amt", line: context.line });
                                     let whtamount = this.round(total * (this.whtByRule[this.ruleByEntity[vendor]] || 0) / 100, this.precision[currency]);
                                     recordObj.setCurrentSublistValue({ sublistId: "custpage_results_list", fieldId: "wht_amount", value: whtamount });
+                                    console.log("this.ruleByEntity: ",this.ruleByEntity)
+                                    console.log("vendor: ",vendor)
+                                    console.log("whtamount: ",whtamount)
                                 }
                                 sublistrule.isDisabled = false;
                             } else {
@@ -141,6 +144,9 @@ define(["N/runtime","N/currency", "N/search", "N/record", "N/format", "N/transla
                             let total = recordObj.getSublistValue({ sublistId: "custpage_results_list", fieldId: "total_amt", line: context.line });
                             let whtamount = this.round(total * (this.whtByRule[rule] || 0) / 100, this.precision[currency]);
                             recordObj.setCurrentSublistValue({ sublistId: "custpage_results_list", fieldId: "wht_amount", value: whtamount });
+                            console.log("this.whtByRule: ",this.whtByRule)
+                            console.log("rule: ",rule)
+                            console.log("whtamount: ",whtamount)
                         }
                     }
 
