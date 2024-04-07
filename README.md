@@ -11,12 +11,10 @@
 ## Scripts
 + Create
 
-    + LMRY_CO_Header_WHT_calculation_STLT_LBRY_V2.1.js
     + LMRY_CO_Header_WHT_calculation_STLT_V2.1.js
         + Name: LatamReady - CO Header WHT calc STLT
         + Id: _lmry_co_head_wht_calc_stlt
 
-    + LMRY_CO_Header_WHT_calculation_CLNT_LBRY_V2.1.js
     + LMRY_CO_Header_WHT_calculation_CLNT_V2.1.js
 
     + LMRY_CO_Header_WHT_calculation_URET_V2.1.js
@@ -31,11 +29,11 @@
             + User: custscript_lmry_co_head_wht_calc_user
             + State: custscript_lmry_co_head_wht_calc_state
 
-    + LMRY_CO_Header_WHT_calculation_STLT_LOG_LBRY_V2.1.js
     + LMRY_CO_Header_WHT_calculation_STLT_LOG_V2.1.js
         + Name: LatamReady - CO Header WHT calc STLT Log
         + Id: _lmry_co_head_calc_stlt_log
-
+        
+## Scripts resumidos
     Librerias
     LMRY_CO_Header_WHT_calculation_LBRY_V2.1.js
 
@@ -54,7 +52,13 @@
 + Update
 
 + Delete
-
+## Espejos
+    SMC_CO_Header_WHT_calculation_STLT_V2.1.js
+    SMC_CO_Header_WHT_calculation_CLNT_V2.1.js
+    SMC_CO_Header_WHT_calculation_URET_V2.1.js
+    SMC_CO_Header_WHT_calculation_LBRY_V2.1.js
+    SMC_CO_Header_WHT_calculation_MPRD_V2.1.js
+    SMC_CO_Header_WHT_calculation_STLT_LOG_V2.1.js
 ## Records
 + Create
     Name: LatamReady - WHT Calc CO Header Log
