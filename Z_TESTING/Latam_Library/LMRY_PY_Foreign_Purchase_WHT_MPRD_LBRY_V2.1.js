@@ -9,7 +9,8 @@ define(["N/search", "N/runtime", "N/record", "N/log", "N/url", "N/format"],
     function (search, runtime, record, log, url, format) {
 
         function getLogData(idLog) {
-            let dataMap = {};
+            let FEAT_MULTIBOOK = runtime.isFeatureInEffect({ feature: "MULTIBOOK" });
+            let dataMap = {};      
             let dataLog = search.lookupFields({
                 type: "customrecord_lmry_py_wht_purchase",
                 id: idLog,
@@ -21,7 +22,7 @@ define(["N/search", "N/runtime", "N/record", "N/log", "N/url", "N/format"],
                     "custrecord_lmry_py_wht_books", "custrecord_lmry_py_wht_exchange_rate","custrecord_lmry_py_wht_apply_rate"
                 ]
             });
-            log.error("dataLog", dataLog);
+            
             let subsidiary = dataLog.custrecord_lmry_py_wht_subsidiary ? dataLog.custrecord_lmry_py_wht_subsidiary[0].value : 1;
             let vendor = dataLog.custrecord_lmry_py_wht_entity.length ? dataLog.custrecord_lmry_py_wht_entity[0].value : "";
             let currency = dataLog.custrecord_lmry_py_wht_currency.length ? dataLog.custrecord_lmry_py_wht_currency[0].value : "";
@@ -36,11 +37,14 @@ define(["N/search", "N/runtime", "N/record", "N/log", "N/url", "N/format"],
             let data = JSON.parse(dataLog.custrecord_lmry_py_wht_data);
             let exchangeRate = dataLog.custrecord_lmry_py_wht_exchange_rate;
             let applyExchangeRate = dataLog.custrecord_lmry_py_wht_apply_rate;
-            let accountingBooks = JSON.parse(dataLog.custrecord_lmry_py_wht_books);
-            log.error("data", data);
+            let accountingBooks = "";
+            if (FEAT_MULTIBOOK == "T" || FEAT_MULTIBOOK == true) {
+                accountingBooks = JSON.parse(dataLog.custrecord_lmry_py_wht_books);
+            }           
+            
 
             let setupJson = setupTaxSubsidiary(subsidiary);
-            log.error("setupJson", setupJson);
+            
 
             for (const bill in data) {
                 dataMap[bill] = {
@@ -197,16 +201,13 @@ define(["N/search", "N/runtime", "N/record", "N/log", "N/url", "N/format"],
                 subtypes.push(nationalTaxes[index].subtypetext);
                 account = nationalTaxes[index].account;
             }
-            log.error("nationalTaxes", nationalTaxes)
-            log.error("nretention", retention)
-            log.error("account", account)
             if (!retention || !account) {
                 log.error("retention account feat", "entro retention account")
                 return 0;
             }
 
             let apaccount = search.lookupFields({ type: "vendorbill", id: billId, columns: ["account"] }).account[0].value;
-            log.error("apaccount",apaccount)
+            
             let journalObj = record.create({ type: "journalentry", isDynamic: true });
 
             if (formJournal != "") {
@@ -333,7 +334,7 @@ define(["N/search", "N/runtime", "N/record", "N/log", "N/url", "N/format"],
 
 
             let newBill = billpaymentObj.save({ ignoreMandatoryFields: true, disableTriggers: true });
-            log.error("newBill",newBill)
+            log.debug("newBill",newBill)
             return idJournal;
 
 
@@ -342,7 +343,6 @@ define(["N/search", "N/runtime", "N/record", "N/log", "N/url", "N/format"],
         }
 
         function setAccountingBookDetails(newTransaction,accountingBooks){
-            log.error(" accountingBooks [setAccountingBookDetails]",accountingBooks)
             const numApplyBook = newTransaction.getLineCount({ sublistId: "accountingbookdetail" });
             if (numApplyBook > 0) {
                 for (let i = 0; i < numApplyBook; i++) {
@@ -352,7 +352,6 @@ define(["N/search", "N/runtime", "N/record", "N/log", "N/url", "N/format"],
                         sublistId: "accountingbookdetail",
                         fieldId: "bookid"
                     });
-                    log.error(" bookId [setAccountingBookDetails]",bookId)
                     if (accountingBooks[bookId]) {
                         newTransaction.setCurrentSublistValue({
                             sublistId: "accountingbookdetail",
