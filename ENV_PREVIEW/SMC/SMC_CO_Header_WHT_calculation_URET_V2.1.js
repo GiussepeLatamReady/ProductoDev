@@ -14,7 +14,7 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/url'], (runtime, server
         try {
             let mainUIManager = new UIManager(scriptContext);
             if (mainUIManager.isUserInterface()) {
-                //mainUIManager.hiddenFields();
+                mainUIManager.hiddenFields();
                 mainUIManager.buildTable();
                 mainUIManager.loadTable();
             }
@@ -185,7 +185,7 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/url'], (runtime, server
         }
 
         hiddenFields() {
-            let jsonTransactions = this.form.getField('custrecord_smc_co_hwht_log_transactions');
+            let jsonTransactions = this.form.getField('custrecord_smc_co_hwh t_log_transactions');
             jsonTransactions.updateDisplayType({ displayType: 'hidden' });
         }
 

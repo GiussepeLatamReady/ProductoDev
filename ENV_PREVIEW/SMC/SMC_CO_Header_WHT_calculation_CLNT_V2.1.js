@@ -100,6 +100,10 @@ define(['N/runtime',
             }
             validateField(scriptContext) {
                 this.currentRecord = scriptContext.currentRecord;
+
+                if (scriptContext.fieldId == 'custpage_subsidiary') {
+                    this.setPeriod(false);
+                }
                 /*
                 if (scriptContext.fieldId == 'custpage_period_type') {
                     const periodTypeValue = this.currentRecord.getValue({ fieldId: 'custpage_period_type' });
