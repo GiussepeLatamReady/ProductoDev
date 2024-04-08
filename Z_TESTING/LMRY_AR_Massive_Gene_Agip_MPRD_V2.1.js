@@ -26,7 +26,8 @@ define([
                 loadEntities(parameters, entities);
                 updateState(parameters, 'Processing', 'It has begun to process the entities...');
                 log.error("entities",entities)
-                return entities;
+                return [];
+                //return entities;
             } catch (error) {
                 log.error("Error [getInputData]", error);
                 return [["isError", error.message]];

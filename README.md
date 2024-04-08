@@ -38,8 +38,8 @@
 
 ## Records
 + Create
-    Name: LatamReady - Massive generation AGIP  | LatamReady - Generación masiva AGIP
-    id: customrecord_lmry_ar_massive_gener_agip 
+    Name: LatamReady - Massive generation AGIP Log  | LatamReady - Generación masiva AGIP
+    id: customrecord_lmry_ar_massive_gener_agip
 
         Fields:
             Subsidiary          custrecord_lmry_ar_gen_agip_subsidiary

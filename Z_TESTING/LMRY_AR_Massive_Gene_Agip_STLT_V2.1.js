@@ -526,10 +526,12 @@ define([
                     custscript_lmry_ar_mass_gen_agip_state: state
                 } : {};
 
+                log.error("state",state)
+                log.error("user",user)
                 task.create({
                     taskType: task.TaskType.MAP_REDUCE,
                     scriptId: 'customscript_lmry_ar_mass_gene_agip_mprd',
-                    deploymentId: 'customscript_lmry_ar_mass_gene_agip_mprd',
+                    deploymentId: 'customdeploy_lmry_ar_mass_gene_agip_mprd',
                     params: parameters
                 }).submit();
             }
