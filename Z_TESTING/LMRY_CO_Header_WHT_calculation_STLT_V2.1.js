@@ -41,13 +41,14 @@ define([
 
                 
                 const status = Number(params.status);
-                const form = handler.createForm();
+                const {form,active} = handler.createForm();
+                if (active) {
+                    status ? handler.setFormValues() : handler.loadFormValues();
+                    handler.createTransactionSublist();
+                    if (status) handler.loadTransactionSublist();
+                    form.clientScriptModulePath = CLIENT_SCRIPT_PATH;
+                }
 
-                status ? handler.setFormValues() : handler.loadFormValues();
-                handler.createTransactionSublist();
-                if (status) handler.loadTransactionSublist();
-
-                form.clientScriptModulePath = CLIENT_SCRIPT_PATH;
                 response.writePage(form);
 
             } catch (err) {
@@ -114,13 +115,13 @@ define([
 
                 if (!this.areThereSubsidiaries()) {
                     this.addNoSubsidiaryMessage();
-                    return this.form;
+                    return {form: this.form , active:false};
                 }
 
                 this.setupFormWithSubsidiaries();
                 this.addFormButtons();
 
-                return this.form;
+                return {form: this.form , active:true};
             }
 
             addNoSubsidiaryMessage() {
@@ -134,19 +135,43 @@ define([
                     breakType: serverWidget.FieldBreakType.STARTCOL
                 });
 
-                const messageHtml = `<html>
-                <table border="0" class="table_fields" cellspacing="0" cellpadding="0">
-                    <tr></tr>
-                    <tr>
-                        <td class="text">
-                            <div style="color: gray; font-size: 12pt; margin-top: 10px; padding: 5px; border-top: 1pt solid silver">
-                                ${this.translations.LMRY_MESSAGE_LICENSE}. </br>
-                                ${this.translations.LMRY_MESSAGE_CONTACT} www.Latamready.com
-                            </div>
-                        </td>
-                    </tr>
-                </table>
-            </html>`;
+                const messageHtml = `
+                <html>
+                    <head>
+                        <style>
+                            body {
+                                font-family: Arial, sans-serif;
+                                background-color: #f7f7f7;
+                                margin: 0;
+                                padding: 0;
+                            }
+                            .container {
+                                width: 100%;
+                                max-width: 600px;
+                                margin: 0 auto;
+                                padding: 20px;
+                                border-top: 2px solid red;
+                            }
+                            .message {
+                                color: #555555;
+                                font-size: 16px;
+                                line-height: 1.5;
+                            }
+                            .message a {
+                                color: #007bff;
+                                text-decoration: none;
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="container">
+                            <p class="message">
+                                ${this.translations.LMRY_MESSAGE_LICENSE}. <br>
+                                ${this.translations.LMRY_MESSAGE_CONTACT} <a href="https://www.Latamready.com" target="_blank">www.Latamready.com</a>
+                            </p>
+                        </div>
+                    </body>
+                </html>`;
                 myInlineHtml.defaultValue = messageHtml;
             }
 
