@@ -253,7 +253,7 @@ define(['N/runtime',
                 recordlog.setValue({ fieldId: 'custrecord_lmry_ar_gen_agip_period', value: form.accoutingPeriod });
                 recordlog.setValue({ fieldId: 'custrecord_lmry_ar_gen_agip_user', value: runtime.getCurrentUser().id });
                 recordlog.setValue({ fieldId: 'custrecord_lmry_ar_gen_agip_entities', value: JSON.stringify(form.ids) });
-                recordlog.setValue({ fieldId: 'custrecord_lmry_ar_gen_agip_status', value: "Cargando datos" });
+                recordlog.setValue({ fieldId: 'custrecord_lmry_ar_gen_agip_status', value: "Loading data" });
                 idlog = recordlog.save({ enableSourcing: true, ignoreMandatoryFields: true, disableTriggers: true });
 
                 currentRecord.setValue({ fieldId: 'custpage_log_id', value: idlog, ignoreFieldChange: true });

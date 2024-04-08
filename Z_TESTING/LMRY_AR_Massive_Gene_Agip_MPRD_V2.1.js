@@ -23,7 +23,8 @@ define([
                 const parameters = getParameters();
                 log.error("getInputData parameters",parameters)
                 const entities = getEntities(parameters);
-                updateState(parameters, 'Procesando', 'Se ha comenzado a procesar laslas entidades...');
+                loadEntities(parameters, entities);
+                updateState(parameters, 'Processing', 'It has begun to process the entities...');
                 log.error("entities",entities)
                 return entities;
             } catch (error) {
@@ -46,11 +47,18 @@ define([
 
                     const response = createContributoryclass(contextValue);
 
+                    if (response.createSetup) {
+                        mapContext.write({
+                            key: mapContext.key,
+                            value: [entity.internalid, "T",response]   
+                        });
+                    }else{
+                        mapContext.write({
+                            key: mapContext.key,
+                            value: [entity.internalid, "N",response]   
+                        });
+                    }
                     
-                    mapContext.write({
-                        key: mapContext.key,
-                        value: [entity.internalid, "T",response]   
-                    });
 
                 }
             } catch (error) {
@@ -79,30 +87,67 @@ define([
                 const entitiesData = getEntities(parameters);
                 const entityIds = entitiesData.map(({entity}) => entity.internalid);
                 const idsSuccess = results.filter(([key, value]) => value === 'T').map(([id]) => id);
-                const idsError = entityIds.filter(id => !idsSuccess.includes(id));
-        
+                const idsNoProcess = results.filter(([key, value]) => value === 'N').map(([id]) => id);
+                let idsError = entityIds.filter(id => !idsSuccess.includes(id));
+                idsError = idsError.filter(id => !idsNoProcess.includes(id));
+                /*
                 const transactions = [
-                    ...idsSuccess.map(id => ({id, state: 'Procesada con exito', createSetup:jsonResult[id][2].createSetup})),
-                    ...idsError.map(id => ({id, state: 'Error',createSetup:0}))
+                    ...idsSuccess.map(id => ({id, state: 's', createSetup:jsonResult[id][2].createSetup})),
+                    ...idsError.map(id => ({id, state: 'e',createSetup:0}))
+                ];
+                */
+
+                /* 
+                    ["id de la entidad",                                    0
+                    "estado del proceso para la entidad",                   1 {'s':proceseda,'e': error, 'n': no procesada}
+                    "Si es creado por setup o por padron",                  2
+                    "id de CC creado",                                      3
+                    "(opcional) EL emnsaje por que no ha sido procesada"]   4
+                */
+                const entities = [
+                    ...idsSuccess.map(id => ([id, 's', jsonResult[id][2].createSetup,jsonResult[id][2].CCId,0])),
+                    ...idsError.map(id => ([id, 'e', 0, 0,0])),
+                    ...idsNoProcess.map(id => ([id, 'n',0,0, jsonResult[id][2].message]))
                 ];
         
+                const statusEntities = {
+                        "s":idsSuccess.length,
+                        "e":idsError.length,
+                        "p":0,
+                        "n":idsNoProcess.length,
+                    }
                 
-                updateTransactionState(parameters, transactions);
                 
+                updateEntitiesState(parameters, entities, statusEntities);
         
                 if (errors.length === 0) {
-                    updateState(parameters, 'Finalizado', 'Las transacciones han sido procesadas con exito');
+                    updateState(parameters, 'Finish', 'The process is finished');
                 } else {
                     log.error("error Summarize [interno]", errors[0][1]);
-                    updateState(parameters, 'Ocurrió un error', errors[0][1]);
+                    updateState(parameters, 'An error occurred', errors[0][1]);
                 }
+
+                
             } catch (error) {
                 log.error("error Summarize [interno]", error);
                 log.error("error Summarize [interno]", error.message);
-                updateState(parameters, 'Ocurrió un error', error.message);
+                updateState(parameters, 'An error occurred', error.message);
             }
         };
 
+        
+        let loadEntities = (parameters,entities) => {
+
+            const entityIds = entities.map(({ entity }) => entity.internalid);
+            const statusEntities = {
+                "s": 0,
+                "e": 0,
+                "p": entityIds.length,
+                "n": 0,
+            }
+            updateEntitiesState(parameters, entityIds, statusEntities);
+
+        }
 
         let getParameters = () => {
             return {
@@ -177,9 +222,9 @@ define([
             const infoCC = AGIPObject.getListContributoryClass();
             if (infoCC.length > 0) {
                 log.debug('infoCC', infoCC);
-                return {message:'Creacion satisfactoria',createSetup:infoCC[0].createSetup};
+                return {message:'Successful creation',createSetup:infoCC[0].createSetup,CCId:infoCC[0].idRetention};
             } else {
-                return {message:'No tiene impuesto aplicable'};
+                return {message:'No tax applicable'};
             }
         }
 
@@ -198,12 +243,13 @@ define([
             });
         }
 
-        let updateTransactionState = (parameters, transactions) => {
+        let updateEntitiesState = (parameters, entities, statusEntities) => {
             record.submitFields({
-                type: 'customrecord_lmry_co_head_wht_cal_log',
+                type: 'customrecord_lmry_ar_massive_gener_agip',
                 id: parameters.idLog,
                 values: {
-                    custrecord_lmry_co_hwht_log_transactions: JSON.stringify(transactions)
+                    custrecord_lmry_ar_gen_agip_entities: JSON.stringify(entities),
+                    custrecord_lmry_ar_gen_agip_summary: JSON.stringify(statusEntities)
                 },
                 options: { ignoreMandatoryFields: true, disableTriggers: true }
             });

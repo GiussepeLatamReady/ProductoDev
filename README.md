@@ -26,6 +26,11 @@
             + custscript_lmry_ar_mass_gen_agip_user
             + custscript_lmry_ar_mass_gen_agip_state
 
+    + File: LMRY_AR_Massive_Gene_Agip_URET_V2.1.js
+        + Name: LatamReady - Massive generation AGIP URET
+        + id: _lmry_ar_mass_gene_agip_uret
+        + File: LMRY_AR_Massive_Gene_Agip_URET_V2.1.js
+
 
 + Update
     
@@ -43,6 +48,7 @@
             User Responsible    custrecord_lmry_ar_gen_agip_user
             Process details     custrecord_lmry_ar_gen_agip_details
             Entities            custrecord_lmry_ar_gen_agip_entities
+            summary             custrecord_lmry_ar_gen_agip_summary
             status              custrecord_lmry_ar_gen_agip_status
 
 

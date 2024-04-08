@@ -42,7 +42,7 @@ define([
                 
                 //const status = Number(params.status);
                 const {form,active} = handler.createForm();
-
+                log.error("active",active)
                 if (active) {
                     handler.loadFormValues();
                     handler.createTransactionSublist();
@@ -100,7 +100,7 @@ define([
 
                 this.setupForm();
 
-                return {form: this.form , active:false};
+                return {form: this.form , active:true};
             }
 
             addNoSubsidiaryMessage() {
@@ -164,11 +164,11 @@ define([
                 if (this.FEAT_SUBS) {
                     this.addSelectField('custpage_subsidiary', this.translations.LMRY_SUBSIDIARY, 'mainGroup').isMandatory();
                 }
-                this.addSelectField('custpage_period', this.translations.LMRY_TYPE_PROCESS, 'mainGroup').isMandatory();
-                this.addSelectField('custpage_entity_type', this.translations.LMRY_WTH_TYPE, 'mainGroup').isMandatory();
+                this.addSelectField('custpage_period', this.translations.LMRY_PERIOD, 'mainGroup').isMandatory();
+                this.addSelectField('custpage_entity_type', this.translations.LMRY_ENTITY_TYPE, 'mainGroup').isMandatory();
 
-                this.addSimpleField('custpage_log_id', 'Log ID','mainGroup');
-                this.addSimpleField('custpage_deploy_id', 'Deploy ID', 'mainGroup').setDefautValue(runtime.getCurrentScript().deploymentId);
+                this.addSimpleField('custpage_log_id', 'Log ID','mainGroup').isHidden();
+                this.addSimpleField('custpage_deploy_id', 'Deploy ID', 'mainGroup').setDefautValue(runtime.getCurrentScript().deploymentId).isHidden();
 
                 this.addFormButtons();
             }
@@ -226,7 +226,7 @@ define([
 
 
             areThereSubsidiaries() {
-                let anySubsidiaryActive = false;
+                let anySubsidiaryActive = false; 
                 
                
                 if (this.FEAT_SUBS) {
@@ -252,7 +252,7 @@ define([
                     }];
                     anySubsidiaryActive = isAuthorized;
                 }
-            
+                log.error("anySubsidiaryActive",anySubsidiaryActive)
                 return anySubsidiaryActive;
             }
             
@@ -262,7 +262,7 @@ define([
 
                 let searchSubs = search.create({
                     type: search.Type.SUBSIDIARY,
-                    filters: [['isinactive', 'is', 'F'], 'AND', ['country', 'is', 'CO']],
+                    filters: [['isinactive', 'is', 'F'], 'AND', ['country', 'is', 'AR']],
                     columns: ['internalid', 'name']
                 });
 
@@ -289,14 +289,14 @@ define([
                 
                 const fields = [
                     { id: "internalid", label: this.translations.LMRY_INTERNAL_ID_LABEL, type: serverWidget.FieldType.TEXT },
-                    { id: "subsidiary", label: this.translations.LMRY_SUBSIDIARY_LABEL, type: serverWidget.FieldType.TEXT },
+                    { id: "subsidiary", label: this.translations.LMRY_SUBSIDIARY, type: serverWidget.FieldType.TEXT },
                     { id: "datecreated", label: this.translations.LMRY_CREATION_DATE_LABEL, type: serverWidget.FieldType.TEXT },
                     { id: "created_by", label: this.translations.LMRY_CREATED_BY_LABEL, type: serverWidget.FieldType.TEXT },
-                    { id: "period", label: this.translations.LMRY_WHT_TYPE_LABEL, type: serverWidget.FieldType.TEXT },
-                    { id: "details", label: this.translations.LMRY_WHT_TYPE_LABEL, type: serverWidget.FieldType.HTML },
-                    { id: "result", label: this.translations.LMRY_PROCESS_TYPE_LABEL, type: serverWidget.FieldType.HTML},
-                    { id: "description", label: this.translations.LMRY_STATUS_LABEL, type: serverWidget.FieldType.TEXT },
-                    { id: "status", label: this.translations.LMRY_STATUS_LABEL, type: serverWidget.FieldType.TEXT }
+                    { id: "period", label: this.translations.LMRY_PERIOD, type: serverWidget.FieldType.TEXT },
+                    { id: "details", label: this.translations.LMRY_DETAILS, type: serverWidget.FieldType.TEXT },
+                    { id: "result", label: this.translations.LMRY_RESULTS, type: serverWidget.FieldType.TEXT},
+                    { id: "description", label: this.translations.LMRY_DESCRIPTION, type: serverWidget.FieldType.TEXT },
+                    { id: "status", label: this.translations.LMRY_STATUS, type: serverWidget.FieldType.TEXT }
                 ];
 
 
@@ -358,18 +358,18 @@ define([
                     setSublistValue("created_by",employee)
                     setSublistValue("period",period)
                     setSublistValue("description",description)
-                    let statusResult = "Cargando datos";
+                    let statusResult = "Loading data";
                     switch (status) {
-                        case "Finalizado":
+                        case "Finish":
                             statusResult = this.translations.LMRY_FINISH;
                             break;
-                        case "Cargando datos":
+                        case "Loading data":
                             statusResult = this.translations.LMRY_LOADING_DATA;
                             break;
-                        case "Ocurrió un error":
+                        case "An error occurred":
                             statusResult = this.translations.LMRY_ERROR;
                             break;
-                        case "Procesando":
+                        case "Processing":
                             statusResult = this.translations.LMRY_PROCESING;
                             break;
                         default:
@@ -469,6 +469,9 @@ define([
                         "LMRY_LOADING_DATA": "Cargando datos",
                         "LMRY_ERROR": "Ocurrió un error",
                         "LMRY_PROCESING": "Procesando",
+                        "LMRY_DESCRIPTION": "Descripción",
+                        "LMRY_DETAILS": "Detalles",
+                        "LMRY_INTERNAL_ID_LABEL":"Id Interno"
                     },
                     "en": {
                         "LMRY_MESSAGE": "Message",
@@ -496,8 +499,10 @@ define([
                         "LMRY_LOADING_DATA": "Loading Data",
                         "LMRY_ERROR": "An Error Occurred",
                         "LMRY_PROCESING": "Processing",
-                        
-                    }
+                        "LMRY_DESCRIPTION": "Description",
+                        "LMRY_DETAILS": "Details",
+                        "LMRY_INTERNAL_ID_LABEL":"Internal Id"
+                    }  
                 }
                 return translatedFields[country];
             }

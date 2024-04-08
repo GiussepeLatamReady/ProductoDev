@@ -574,9 +574,7 @@ define(['N/file', 'N/search', 'N/runtime', 'N/record', 'N/log', 'N/query', 'N/fo
                     });
                 }
             }
-        }
-
-        
+        }      
         return contributoryClassRecord.save();
     }
     // const fields = {
