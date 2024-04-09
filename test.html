@@ -1,15 +1,24 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ejemplo de CSS en Línea</title>
-</head>
-<body>
-    <div style="text-align: center;">      
-        <span style="font-size: 16px; font-weight: bold;">No Procesada</span>
-        <br>
-        <span style="font-size: 12px;">Mensaje</span>
+<div style="background-color:red; display:flex; justify-content:center; height:30px; margin:5px;">
+    <button style="padding:0px 10px; background-color:#007bff; border-radius:4px; color:white; font-size:10px; cursor:pointer; transition:background-color 0.3s;" onclick="window.open('${recordUrl}', '_blank')" onmouseover="this.style.backgroundColor='#0056b3'" onmouseout="this.style.backgroundColor='#007bff'">
+      ${this.translations.LMRY_VIEW}
+    </button>
+</div>`;
+
+
+<style>.menu-arba{text-align:center}.item-arba{border:1px solid #ffffff;display:grid}.item-arba-retry{border:1px solid red;display:grid}.item-arba:hover{cursor:pointer;border:1px solid #424950;background-color:#87ceeb;color:blue}.item-link-arba{text-decoration:none}.item-arba-retry:hover{cursor:pointer;border:1px solid #c23b22;background-color:red;color:white}</style>
+<ul class='menu-arba'>
+    <li class='item-arba'>
+        <a class='item-link-arba' href='${urlval}&logId=${lg_id}'>${translations.get(Language, 16)}</a>
+    </li>
+    <li class='item-arba'>
+        <a class='item-link-arba' href='${urlval}&status=${lg_id}'>${translations.get(Language, 25)}</a>
+    </li>
+    ${((idEntityError != "" && lg_est == "Finalizado" && !frases.some(palabra => lg_des.includes(palabra))) ? "<li class='item-arba-retry'> <a class='item-link-arba' href='" + urlval + "&retry=" + lg_id + "'>" + translations.get(Language, "Reintentar") + "<a></li>" : "")}
+</ul>
+
+
+const urlID = `<a href="${recordUrl}" target="_blank" style="text-decoration: none; color: inherit;">
+    <div style="display: grid; place-items: center; background: blue; border-radius: 6px; transition: background-color 0.3s; padding: 10px; background: blue; border-radius: 6px;" onmouseover="this.style.backgroundColor='#0056b3'; this.style.color='white'" onmouseout="this.style.backgroundColor='blue'; this.style.color='inherit'">
+        <div style="color: white; font-size: 14px;">${this.translations.LMRY_VIEW}</div>
     </div>
-</body>
-</html>
+</a>`;

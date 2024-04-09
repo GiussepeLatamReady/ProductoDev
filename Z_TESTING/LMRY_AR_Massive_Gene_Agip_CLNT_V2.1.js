@@ -22,6 +22,7 @@ define(['N/runtime',
             const recordObj = context.currentRecord;
             DEPLOY_ID = recordObj.getValue('custpage_deploy_id');
             handler = new ClientUIManager({ deployid: DEPLOY_ID });
+            console.log("pageInit clnt")
             handler.pageInit(context);
         };
 
@@ -71,24 +72,19 @@ define(['N/runtime',
             saveRecord(context) {
                 try {
                     this.currentRecord = context.currentRecord;
-                    let recordObj = context.currentRecord;
-                    let status = recordObj.getValue({ fieldId: 'custpage_status' });
-                    status = Number(status);
-                    if (!status) {
-                        if (!this.validateMandatoryFields()) {
-                            return false;
-                        }
-                        
-                    } else {
-                    
-                        if (!this.validateExecution()) {
-                            return false;
-                        }
 
-                        if (!this.createRecordLog()) {
-                            return false;
-                        }
+                    if (!this.validateMandatoryFields()) {
+                        return false;
                     }
+
+                    if (!this.validateExecution()) {
+                        return false;
+                    }
+
+                    if (!this.createRecordLog()) {
+                        return false;
+                    }
+
                 } catch (err) {
                     this.handleError('[ saveRecord ]', err);
                     return false;
@@ -229,38 +225,45 @@ define(['N/runtime',
 
 
             createRecordLog() {
-                let currentRecord = this.currentRecord;
-                let form = {
-                    ids: []
-                };
-
-
-
-                form.subsidiary = Number(currentRecord.getValue({ fieldId: 'custpage_subsidiary' })) || '';
-                form.entityType = currentRecord.getValue({ fieldId: 'custpage_entity_type' });
-                form.accoutingPeriod = currentRecord.getValue({ fieldId: 'custpage_period' });
+                try {
+                    console.log(' createRecordLog start');
+                    let currentRecord = this.currentRecord;
+                    let form = {
+                        ids: []
+                    };
+    
+    
+    
+                    form.subsidiary = Number(currentRecord.getValue({ fieldId: 'custpage_subsidiary' })) || '';
+                    form.entityType = currentRecord.getValue({ fieldId: 'custpage_entity_type' });
+                    form.accoutingPeriod = currentRecord.getValue({ fieldId: 'custpage_period' });
+                    
+    
+                    // Creacion de Logs
+                    let idlog = '';
+    
+                    let recordlog = record.create({
+                        type: 'customrecord_lmry_ar_massive_gener_agip'
+                    });
+                    console.log("form :", form)
+                    recordlog.setValue({ fieldId: 'custrecord_lmry_ar_gen_agip_subsidiary', value: form.subsidiary });
+                    recordlog.setValue({ fieldId: 'custrecord_lmry_ar_gen_agip_entity_type', value: form.entityType });
+                    recordlog.setValue({ fieldId: 'custrecord_lmry_ar_gen_agip_period', value: form.accoutingPeriod });
+                    recordlog.setValue({ fieldId: 'custrecord_lmry_ar_gen_agip_user', value: runtime.getCurrentUser().id });
+                    recordlog.setValue({ fieldId: 'custrecord_lmry_ar_gen_agip_entities', value: JSON.stringify(form.ids) });
+                    recordlog.setValue({ fieldId: 'custrecord_lmry_ar_gen_agip_status', value: "Loading data" });
+                    idlog = recordlog.save({ enableSourcing: true, ignoreMandatoryFields: true, disableTriggers: true });
+    
+                    currentRecord.setValue({ fieldId: 'custpage_log_id', value: idlog, ignoreFieldChange: true });
+    
+                    this.parameters = { idlog, idUser: runtime.getCurrentUser().id }
+                    console.log('idlog: ' + idlog);
+                    return true;
+                } catch (error) {
+                    console.log('Error', error)
+                   return false;
+                }
                 
-
-                // Creacion de Logs
-                let idlog = '';
-
-                let recordlog = record.create({
-                    type: 'customrecord_lmry_ar_massive_gener_agip'
-                });
-                console.log("form :", form)
-                recordlog.setValue({ fieldId: 'custrecord_lmry_ar_gen_agip_subsidiary', value: form.subsidiary });
-                recordlog.setValue({ fieldId: 'custrecord_lmry_ar_gen_agip_entity_type', value: form.entityType });
-                recordlog.setValue({ fieldId: 'custrecord_lmry_ar_gen_agip_period', value: form.accoutingPeriod });
-                recordlog.setValue({ fieldId: 'custrecord_lmry_ar_gen_agip_user', value: runtime.getCurrentUser().id });
-                recordlog.setValue({ fieldId: 'custrecord_lmry_ar_gen_agip_entities', value: JSON.stringify(form.ids) });
-                recordlog.setValue({ fieldId: 'custrecord_lmry_ar_gen_agip_status', value: "Loading data" });
-                idlog = recordlog.save({ enableSourcing: true, ignoreMandatoryFields: true, disableTriggers: true });
-
-                currentRecord.setValue({ fieldId: 'custpage_log_id', value: idlog, ignoreFieldChange: true });
-
-                this.parameters = { idlog, idUser: runtime.getCurrentUser().id }
-                console.log('idlog: ' + idlog);
-                return true;
             }
 
             isValid(bool) {

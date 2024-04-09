@@ -25,9 +25,9 @@ define([
                 const entities = getEntities(parameters);
                 loadEntities(parameters, entities);
                 updateState(parameters, 'Processing', 'It has begun to process the entities...');
-                log.error("entities",entities)
-                return [];
-                //return entities;
+                //log.error("entities",entities)
+                //return [];
+                return entities;
             } catch (error) {
                 log.error("Error [getInputData]", error);
                 return [["isError", error.message]];
@@ -45,7 +45,7 @@ define([
                 } else {
 
                     const contextValue = JSON.parse(mapContext.value);
-
+                    const {entity} = contextValue; 
                     const response = createContributoryclass(contextValue);
 
                     if (response.createSetup) {
@@ -80,11 +80,18 @@ define([
                 summaryContext.output.iterator().each(function (key, value) {
                     const data = JSON.parse(value)
                     results.push(data);
-                    jsonResult[data.entityId] = data;
+                    jsonResult[data[0]] = data;
                     return true;
                 });
+                log.error("jsonResult",jsonResult)
                 const errors = results.filter(([key]) => key === 'isError');
-        
+                log.error("errors",errors)
+                if (errors.length) {
+                    log.error("error Summarize [interno]", errors[0][1]);
+                    updateState(parameters, 'An error occurred', errors[0][1]);
+                    return true;
+                }
+                log.error("flag","sigure despues del error")
                 const entitiesData = getEntities(parameters);
                 const entityIds = entitiesData.map(({entity}) => entity.internalid);
                 const idsSuccess = results.filter(([key, value]) => value === 'T').map(([id]) => id);
@@ -107,8 +114,8 @@ define([
                 */
                 const entities = [
                     ...idsSuccess.map(id => ([id, 's', jsonResult[id][2].createSetup,jsonResult[id][2].CCId,0])),
-                    ...idsError.map(id => ([id, 'e', 0, 0,0])),
-                    ...idsNoProcess.map(id => ([id, 'n',0,0, jsonResult[id][2].message]))
+                    ...idsError.map(id => ([id, 'e', -1, 0,0])),
+                    ...idsNoProcess.map(id => ([id, 'n',-1,0, jsonResult[id][2].message]))
                 ];
         
                 const statusEntities = {
@@ -120,18 +127,13 @@ define([
                 
                 
                 updateEntitiesState(parameters, entities, statusEntities);
-        
-                if (errors.length === 0) {
-                    updateState(parameters, 'Finish', 'The process is finished');
-                } else {
-                    log.error("error Summarize [interno]", errors[0][1]);
-                    updateState(parameters, 'An error occurred', errors[0][1]);
-                }
+                updateState(parameters, 'Finish', 'The process is finished');
+                
 
                 
             } catch (error) {
-                log.error("error Summarize [interno]", error);
-                log.error("error Summarize [interno]", error.message);
+                log.error("error Summarize ", error);
+                log.error("error Summarize ", error.message);
                 updateState(parameters, 'An error occurred', error.message);
             }
         };
@@ -173,7 +175,7 @@ define([
             let subsidiary;
             let entityType;
             let searchRecordLog = search.create({
-                type: 'ccustomrecord_lmry_ar_massive_gener_agip',
+                type: 'customrecord_lmry_ar_massive_gener_agip',
                 filters: [
                     ['internalid', 'is', parameters.idLog]
                 ],
@@ -191,7 +193,7 @@ define([
             //return [{"id":"3947913","whtType":"header"}]
             //log.error("recordLog.idTransaction",recordLog.idTransaction);
             const entities = lbryAGIP.cargarEntity(entityType, subsidiary);
-            
+            log.error("entities",entities)
             return entities.map(entity => ({ entity, period, subsidiary }));
         }
 
@@ -215,10 +217,10 @@ define([
                 })
                 .asMappedResults();
             if (fileResults.length <= 0) {
-                return {message:'Not file for period'};
+                return {message:'No list was found for this period'};
             }
 
-            log.debug('entity', lisEntitys);
+            //log.debug('entity', lisEntitys);
             const AGIPObject = new lbryAGIP.AGIPTXT(fileResults[0].id,[entity] , period, subsidiary);
             const infoCC = AGIPObject.getListContributoryClass();
             if (infoCC.length > 0) {

@@ -214,6 +214,9 @@ define([
             addSelectField(id, label, container) {
                 return this.addCustomField(id, serverWidget.FieldType.SELECT, label, container).setHelpText({ help: id });
             }
+            addHtmlField(id, label, container) {
+                return this.addCustomField(id, serverWidget.FieldType.INLINEHTML, label, container).setHelpText({ help: id });
+            }
 
             addSimpleField(id, label, container) {
                 return this.addCustomField(id, serverWidget.FieldType.TEXT, label, container).setHelpText({ help: id });
@@ -288,12 +291,12 @@ define([
 
                 
                 const fields = [
-                    { id: "internalid", label: this.translations.LMRY_INTERNAL_ID_LABEL, type: serverWidget.FieldType.TEXT },
+                    { id: "number", label: this.translations.LMRY_NUMBER, type: serverWidget.FieldType.TEXT },
                     { id: "subsidiary", label: this.translations.LMRY_SUBSIDIARY, type: serverWidget.FieldType.TEXT },
                     { id: "datecreated", label: this.translations.LMRY_CREATION_DATE_LABEL, type: serverWidget.FieldType.TEXT },
                     { id: "created_by", label: this.translations.LMRY_CREATED_BY_LABEL, type: serverWidget.FieldType.TEXT },
                     { id: "period", label: this.translations.LMRY_PERIOD, type: serverWidget.FieldType.TEXT },
-                    { id: "details", label: this.translations.LMRY_DETAILS, type: serverWidget.FieldType.TEXT },
+                    { id: "details", label: this.translations.LMRY_DETAILS, type: serverWidget.FieldType.TEXTAREA },
                     { id: "result", label: this.translations.LMRY_RESULTS, type: serverWidget.FieldType.TEXT},
                     { id: "description", label: this.translations.LMRY_DESCRIPTION, type: serverWidget.FieldType.TEXT },
                     { id: "status", label: this.translations.LMRY_STATUS, type: serverWidget.FieldType.TEXT }
@@ -347,16 +350,33 @@ define([
                 let data = this.getRecords();
 
                 let sublist = this.form.getSublist({ id: 'custpage_results_list' });
-
+                const count = data.length;
                 data.forEach((form, i) => {
                     const { id, subsidiary, created, employee, period, description, status } = form;
                     const setSublistValue = (colId, value) => sublist.setSublistValue({ id: colId, line: i, value });
+                    const recordUrl = url.resolveRecord({ recordType: "customrecord_lmry_ar_massive_gener_agip", recordId: id, isEditMode: false });
+                    const urlID = `
+                    <a href="${recordUrl}" target="_blank" style="text-decoration: none; color: inherit;">
+                        <div style="display: grid; place-items: center; background: white; border-radius: 6px; transition: background-color 0.3s; border: 0.5px solid #bbd1e9;" onmouseover="this.style.backgroundColor='#bbd1e9'" onmouseout="this.style.backgroundColor='white';">
+                            <div style="color: color:#424950; font-size: 14px;">${this.translations.LMRY_DETAILS}</div>
+                        </div>
+                    </a>`;
 
-                    setSublistValue("internalid",id)
+
+
+
+
+
+
+
+
+
+                    setSublistValue("number",id)
                     setSublistValue("subsidiary",subsidiary)
                     setSublistValue("datecreated",created)
                     setSublistValue("created_by",employee)
                     setSublistValue("period",period)
+                    setSublistValue("details",urlID)
                     setSublistValue("description",description)
                     let statusResult = "Loading data";
                     switch (status) {
@@ -412,12 +432,13 @@ define([
                         let page = pageData.fetch({ index: pageRange.index });
                         page.data.forEach(function (result) {
                             let columns = result.columns;
+                            log.error("result",result);
                             let formublist = {};
                             formublist.id = result.getValue(columns[0]) || ' ';
                             formublist.subsidiary = result.getText(columns[1]) || ' ';
                             formublist.created = result.getValue(columns[2]) || ' ';
                             formublist.employee = result.getText(columns[3]) || ' ';
-                            formublist.period = result.getValue(columns[4]) || ' ';
+                            formublist.period = result.getText(columns[4]) || ' ';
                             formublist.description = result.getValue(columns[5]) || ' ';
                             formublist.status = result.getValue(columns[6]) || ' ';
 
@@ -471,7 +492,9 @@ define([
                         "LMRY_PROCESING": "Procesando",
                         "LMRY_DESCRIPTION": "Descripción",
                         "LMRY_DETAILS": "Detalles",
-                        "LMRY_INTERNAL_ID_LABEL":"Id Interno"
+                        "LMRY_NUMBER":"Posicion",
+                        "LMRY_RECORD":"Registro",
+                        "LMRY_VIEW":"Ver"
                     },
                     "en": {
                         "LMRY_MESSAGE": "Message",
@@ -501,7 +524,9 @@ define([
                         "LMRY_PROCESING": "Processing",
                         "LMRY_DESCRIPTION": "Description",
                         "LMRY_DETAILS": "Details",
-                        "LMRY_INTERNAL_ID_LABEL":"Internal Id"
+                        "LMRY_NUMBER":"Position",
+                        "LMRY_RECORD":"Record",
+                        "LMRY_VIEW":"View"
                     }  
                 }
                 return translatedFields[country];

@@ -57,7 +57,7 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/url'], (runtime, server
                 { id: 'custpage_col_number', label: this.translations.LMRY_NUMBER, type: serverWidget.FieldType.TEXT },
                 { id: 'custpage_col_entity', label: this.translations.LMRY_ENTITY, type: serverWidget.FieldType.TEXT },
                 { id: 'custpage_col_cuit', label: "CUIT", type: serverWidget.FieldType.TEXT },
-                { id: 'custpage_col_created_from', label: this.translations.LMRY_ENTITY, type: serverWidget.FieldType.TEXT },
+                { id: 'custpage_col_created_from', label: this.translations.LMRY_CREATED_FROM, type: serverWidget.FieldType.TEXT },
                 { id: 'custpage_col_contributory_class', label: this.translations.LMRY_CC, type: serverWidget.FieldType.TEXT },
                 { id: 'custpage_col_status', label: this.translations.LMRY_STATUS, type: serverWidget.FieldType.TEXT},
             ];
@@ -69,6 +69,7 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/url'], (runtime, server
 
         loadTable() {
             const data = this.getTransactions();
+            
             const sublist = this.form.getSublist({ id: "custpage_custlist_entities" });
             const ids = Object.keys(data);
             ids.forEach((id, i) => {
@@ -82,8 +83,14 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/url'], (runtime, server
                 setSublistValue("custpage_col_entity", `<a class="dottedlink" href="${entityUrl}" target="_blank">${names}</a>` );
                 setSublistValue("custpage_col_cuit", cuit);
                 setSublistValue("custpage_col_created_from", createdSetup);
-                const ccUrl = url.resolveRecord({ recordType:"customrecord_lmry_ar_contrib_class", recordId: CCId, isEditMode: false });
-                setSublistValue("custpage_col_contributory_class", `<a class="dottedlink" href="${ccUrl}" target="_blank">${CCId}</a>`);
+
+                if (CCId) {
+                    const ccUrl = url.resolveRecord({ recordType:"customrecord_lmry_ar_contrib_class", recordId: CCId, isEditMode: false });
+                    setSublistValue("custpage_col_contributory_class", `<a class="dottedlink" href="${ccUrl}" target="_blank">${CCId}</a>`);
+                }else {
+                    setSublistValue("custpage_col_contributory_class", " ");
+                }
+                
 
                 const jsonStatus = {
                     "s":this.translations.LMRY_PROCESING_CHECK,
@@ -95,19 +102,10 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/url'], (runtime, server
                 const title = jsonStatus[status];
                 let htmlStatus;
                 if (status=="n") {
-                    htmlStatus = `
-                    <div style="text-align: center;">
-                        <span style="font-size: 16px; font-weight: bold;">${title}</span>
-                        <br>
-                        <span style="font-size: 12px;">${message}</span>
-                    </div>
-                    `;
+
+                    htmlStatus = title + " : " + message
                 }else{
-                    htmlStatus = `
-                    <div style="text-align: center;">
-                        <span style="font-size: 16px; font-weight: bold;">${title}</span>
-                    </div>
-                    `;
+                    htmlStatus = title;
                 }
                
                 setSublistValue("custpage_col_status", htmlStatus);
@@ -141,14 +139,14 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/url'], (runtime, server
                 processCompleted = typeof entities[0] === 'object';
                 if (processCompleted) {
                     entitiesIds = entities.map(entity => entity[0]);
-                    entities = entities.map(entity => entity[0])
+                    //entities = entities.map(entity => entity[0])
 
-                    for (let i = 0; i < entities.length; i++) {
-                        const [id,status,createdSetup,CCId,message] = entity[i];
+                    for (let i = 0; i < entitiesIds.length; i++) {
+                        const [id,status,createdSetup,CCId,message] = entities[i];
                         listEntities[id] = {
                             internalid:id,
                             status,
-                            createdSetup: createdSetup ? "Padron":"Setup",
+                            createdSetup: createdSetup == 0? "Setup":createdSetup ==1?"Padron":" ",
                             CCId: CCId ?? " ",
                             message: message ?? " ",
                             type:typeEntity
@@ -162,7 +160,7 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/url'], (runtime, server
            
 
             let filters = [
-                ["internalid", "anyof", entities]
+                ["internalid", "anyof", entitiesIds]
             ];
             let columns = [];
             columns.push(search.createColumn({ name: 'formulatext', formula: '{internalid}', sort: search.Sort.DESC }));
@@ -191,10 +189,11 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/url'], (runtime, server
                     listEntities[internalid].names = result.getValue(columns[6]) || " ";
                 }
                 listEntities[internalid].status = processCompleted ? listEntities[internalid].status : "p";
+                log.error("listEntities : "+internalid,listEntities[internalid])
                 return true;
             });
 
-            return entities;
+            return listEntities;
         }
 
         hiddenFields() {
@@ -223,6 +222,7 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/url'], (runtime, server
                     "LMRY_NOT_PROCESING": "No procesada",
                     "LMRY_PROCESING_CHECK": "Procesada con éxito",
                     "LMRY_REFRESH": "Actualizar Pagina",
+                    "LMRY_CREATED_FROM": "Creado desde",
                 },
                 "en": {
                     "LMRY_ENTITIES": "Entities",
@@ -238,6 +238,7 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/url'], (runtime, server
                     "LMRY_NOT_PROCESING": "Not Processed",
                     "LMRY_PROCESING_CHECK": "Successfully Processed",
                     "LMRY_REFRESH": "Refresh",
+                    "LMRY_CREATED_FROM": "Created from",
                 }
             }
             return translatedFields[country];
