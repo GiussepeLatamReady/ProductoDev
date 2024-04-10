@@ -64,7 +64,7 @@ define([
                     state: params.custpage_log_id,
                     user: runtime.getCurrentUser().id
                 };
-
+                
                 handler.runMapReduce(parameters);
                 handler.toLogSuitelet();
 
@@ -313,7 +313,7 @@ define([
                 this.sublist.addButton({
                     id: "custpage_btnrefresh",
                     label: this.translations.LMRY_REFRESH,
-                    functionName: 'reload'
+                    functionName: 'reload()'
                 });
 
                 return this.sublist;

@@ -68,7 +68,7 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/url'], (runtime, server
         }
 
         loadTable() {
-            const data = this.getTransactions();
+            const data = this.getEntities();
             
             const sublist = this.form.getSublist({ id: "custpage_custlist_entities" });
             const ids = Object.keys(data);
@@ -118,7 +118,7 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/url'], (runtime, server
         }
 
 
-        getTransactions() {
+        getEntities() {
 
             const fieldEntities = this.scriptContext.newRecord.getValue('custrecord_lmry_ar_gen_agip_entities');
             if (!fieldEntities) return {};

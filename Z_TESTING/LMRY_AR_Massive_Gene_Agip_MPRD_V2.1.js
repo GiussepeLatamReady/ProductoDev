@@ -258,6 +258,122 @@ define([
             });
         }
 
+        let buildReport = (entities,typeEntity) =>{
+            const dataEntities = getListEntities(entities,typeEntity);
+            const ids = Object.keys(dataEntities);
+
+            const jsonStatus = {
+                "s":this.translations.LMRY_PROCESING_CHECK,
+                "e":this.translations.LMRY_ERROR,
+                "p":this.translations.LMRY_PROCESING,
+                "n":this.translations.LMRY_NOT_PROCESING
+            }
+
+            ids.forEach((id, i) => {
+                const { internalid,type,names,cuit,status,createdSetup,CCId,message} = data[id];
+
+                
+
+                const title = jsonStatus[status];
+                let resultStatus;
+                if (status=="n") {
+                    resultStatus = title + " : " + message;
+                }else{
+                    resultStatus = title;
+                }
+            });
+
+        }
+
+        const generateFile = (items, extension) => {
+            const separator = extension === 'csv' ? ',' : '|';
+            const lines = items.map(item => [
+                item.period, // 1. Periodo.
+                item.catalogueCode, // 2. Código del catálogo utilizado.
+                item.typeOfExistence, // 3. Tipo de existencia.
+                item.codeOfExistence, // 4. Código propio de la existencia.
+                item.catalogueCode, // 5. Repetido: Código del catálogo utilizado.
+                item.correspondingStockCode, // 6. Código de Existencia correspondiente.
+                item.existenceDescription, // 7. Descripción de la existencia.
+                item.unitOfMeasureCode, // 8. Código de la Unidad de medida.
+                item.valuationMethodCode, // 9. Código del método de valuación.
+                item.quantity, // 10. Cantidad de la existencia.
+                item.unitCost, // 11. Costo unitario de la existencia.
+                item.totalCost, // 12. Costo total.
+                "1", // 13. Indica el estado de la operación. Siempre "1" en este caso.
+                "" // 14. Campos de libre utilización.
+            ].join(separator) + '\n');
+
+            return lines.join('');
+        };
+
+        let getListEntities = (entities,typeEntity) =>{
+
+            
+            let processCompleted = false;
+            let entitiesIds = entities;
+            let listEntities = {};
+
+            if (entities.length) {
+                processCompleted = typeof entities[0] === 'object';
+                if (processCompleted) {
+                    entitiesIds = entities.map(entity => entity[0]);
+                    //entities = entities.map(entity => entity[0])
+
+                    for (let i = 0; i < entitiesIds.length; i++) {
+                        const [id,status,createdSetup,CCId,message] = entities[i];
+                        listEntities[id] = {
+                            internalid:id,
+                            status,
+                            createdSetup: createdSetup == 0? "Setup":createdSetup ==1?"Padron":" ",
+                            CCId: CCId ?? " ",
+                            message: message ?? " ",
+                            type:typeEntity
+                        };
+                    }
+                };
+            } else {
+                return {};
+            }
+
+           
+
+            let filters = [
+                ["internalid", "anyof", entitiesIds]
+            ];
+            let columns = [];
+            columns.push(search.createColumn({ name: 'formulatext', formula: '{internalid}', sort: search.Sort.DESC }));
+            columns.push(search.createColumn({ name: 'formulatext', formula: '{vatregnumber}' }));
+            columns.push(search.createColumn({ name: 'formulatext', formula: '{isperson}' }));
+            columns.push(search.createColumn({ name: 'formulatext', formula: '{firstname}' }));
+            columns.push(search.createColumn({ name: 'formulatext', formula: '{middlename}' }));
+            columns.push(search.createColumn({ name: 'formulatext', formula: '{lastname}' }));
+            columns.push(search.createColumn({ name: 'formulatext', formula: '{companyname}' }));
+
+            search.create({
+                type: typeEntity,
+                filters: filters,
+                columns: columns
+            }).run().each(result => {
+                let columns = result.columns;
+                const internalid = result.getValue(columns[0]);
+                listEntities[internalid].cuit = result.getValue(columns[1]) || " ";
+                const isperson = result.getValue(columns[2]) || " ";
+                if (isperson == "T" || isperson == true) {
+                    const firstname = result.getValue(columns[3]) || "";
+                    const middlename = result.getValue(columns[4]) || "";
+                    const lastname = result.getValue(columns[5]) || "";
+                    listEntities[internalid].names = `${firstname} ${middlename} ${lastname}`;
+                }else{
+                    listEntities[internalid].names = result.getValue(columns[6]) || " ";
+                }
+                listEntities[internalid].status = processCompleted ? listEntities[internalid].status : "p";
+                log.error("listEntities : "+internalid,listEntities[internalid])
+                return true;
+            });
+
+            return listEntities;
+        }
 
         return { getInputData, map, summarize }
 

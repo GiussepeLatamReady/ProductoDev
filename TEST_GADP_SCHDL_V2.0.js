@@ -12,8 +12,8 @@
  * @NScriptType ScheduledScript
  * @NModuleScope Public
  */
-define(["N/search", "N/record", "N/log", "N/query", "N/runtime"],
-    function (search, record, log, query, runtime) {
+define(['N/file',"N/search", "N/record", "N/log", "N/query", "N/runtime"],
+    function (file,search, record, log, query, runtime) {
 
         function execute(Context) {
             // ID de la transacción que deseas duplicar
@@ -31,16 +31,71 @@ define(["N/search", "N/record", "N/log", "N/query", "N/runtime"],
                 //searchTransaction("3914166");
                 //log.error("account",creditMemoSearch.accountmain[0].value);
 
-                updatePercetion();
+                //updatePercetion();
 
-
+                getCustomisedFolder();
+                log.error("end","end")
             } catch (error) {
                 log.error("error", error)
             }
 
         }
 
-        function updatePercetion(){
+        function getCustomisedFolder(nameFolder) {
+            var idFichero = '';
+            var busqueda_fichero = search.create({
+                type: "folder",
+                filters: [
+                    ["internalid", "is", "902099"]
+                ],
+                columns: [
+                    search.createColumn({
+                        name: "internalid",
+                        label: "Internal ID"
+                    }),
+                    search.createColumn({
+                        name: "foldersize",
+                        label: "Size (KB)"
+                    }),
+                    search.createColumn({
+                        name: "internalid",
+                        join: "file",
+                        label: "ID File"
+                    })
+                ]
+            });
+
+            var resultado = busqueda_fichero.run()
+            var searchResult = resultado.getRange(0, 1000);
+            if (searchResult.length != 0) {
+                var arrayIDFiles = [];
+                for (var i = 0; i < searchResult.length; i++) {
+                    var columns = searchResult[i].columns;
+                    arrayIDFiles.push(searchResult[i].getValue(columns[2]));
+                }
+
+                deleteFiles(arrayIDFiles);
+                idFichero = searchResult[0].getValue('internalid');
+            }
+
+            return idFichero
+        }
+
+        function deleteFiles(arreglo) {
+            for (var i = 0; i < arreglo.length; i++) {
+
+                if (arreglo[i] !== "4875267") {
+                    var idarch= file.delete({
+                        id: arreglo[i]
+                    });
+                }
+                log.error("idarch",idarch)
+                
+            }
+        }
+
+
+        function updatePercetion() {
 
             var currentRecord = record.load({
                 type: 'salesorder',
@@ -54,7 +109,7 @@ define(["N/search", "N/record", "N/log", "N/query", "N/runtime"],
                     currentRecord.setSublistValue('item', 'rate', i, parseFloat(500));
                 }
             }
-            
+
             currentRecord.save();
         }
 
