@@ -12,17 +12,18 @@ define([
     "N/search",
     "N/log",
     'N/query',
+    "N/file",
     "./AR_LIBRARY_MENSUAL/LMRY_AR_padronAGIP_LBRY",
 ],
 
-    (record, runtime, search, log, query, lbryAGIP) => {
+    (record, runtime, search, log, query,file, lbryAGIP) => {
 
 
         const getInputData = (inputContext) => {
             try {
                 const parameters = getParameters();
-                log.error("getInputData parameters",parameters)
-                const entities = getEntities(parameters);
+                
+                const entities = getEntities(parameters).list;
                 loadEntities(parameters, entities);
                 updateState(parameters, 'Processing', 'It has begun to process the entities...');
                 //log.error("entities",entities)
@@ -36,7 +37,7 @@ define([
 
         const map = (mapContext) => {
             try {
-                log.error("value",JSON.parse(mapContext.value))
+                log.error("value", JSON.parse(mapContext.value))
                 if (mapContext.value.indexOf("isError") != -1) {
                     mapContext.write({
                         key: mapContext.key,
@@ -45,21 +46,21 @@ define([
                 } else {
 
                     const contextValue = JSON.parse(mapContext.value);
-                    const {entity} = contextValue; 
+                    const { entity } = contextValue;
                     const response = createContributoryclass(contextValue);
-
-                    if (response.createSetup) {
+                    log.error("response",response);
+                    if (response.createSetup===0 || response.createSetup===1) {
                         mapContext.write({
                             key: mapContext.key,
-                            value: [entity.internalid, "T",response]   
+                            value: [entity.internalid, "T", response]
                         });
-                    }else{
+                    } else {
                         mapContext.write({
                             key: mapContext.key,
-                            value: [entity.internalid, "N",response]   
+                            value: [entity.internalid, "N", response]
                         });
                     }
-                    
+
 
                 }
             } catch (error) {
@@ -74,7 +75,7 @@ define([
         const summarize = summaryContext => {
             const parameters = getParameters();
             try {
-                
+
                 const results = [];
                 const jsonResult = {};
                 summaryContext.output.iterator().each(function (key, value) {
@@ -83,17 +84,17 @@ define([
                     jsonResult[data[0]] = data;
                     return true;
                 });
-                log.error("jsonResult",jsonResult)
+                
                 const errors = results.filter(([key]) => key === 'isError');
-                log.error("errors",errors)
+                
                 if (errors.length) {
                     log.error("error Summarize [interno]", errors[0][1]);
                     updateState(parameters, 'An error occurred', errors[0][1]);
                     return true;
                 }
-                log.error("flag","sigure despues del error")
-                const entitiesData = getEntities(parameters);
-                const entityIds = entitiesData.map(({entity}) => entity.internalid);
+                
+                const {entityType,list: entitiesData} = getEntities(parameters);
+                const entityIds = entitiesData.map(({ entity }) => entity.internalid);
                 const idsSuccess = results.filter(([key, value]) => value === 'T').map(([id]) => id);
                 const idsNoProcess = results.filter(([key, value]) => value === 'N').map(([id]) => id);
                 let idsError = entityIds.filter(id => !idsSuccess.includes(id));
@@ -113,24 +114,24 @@ define([
                     "(opcional) EL emnsaje por que no ha sido procesada"]   4
                 */
                 const entities = [
-                    ...idsSuccess.map(id => ([id, 's', jsonResult[id][2].createSetup,jsonResult[id][2].CCId,0])),
-                    ...idsError.map(id => ([id, 'e', -1, 0,0])),
-                    ...idsNoProcess.map(id => ([id, 'n',-1,0, jsonResult[id][2].message]))
+                    ...idsSuccess.map(id => ([id, 's', jsonResult[id][2].createSetup, jsonResult[id][2].CCId, 0])),
+                    ...idsError.map(id => ([id, 'e', -1, 0, 0])),
+                    ...idsNoProcess.map(id => ([id, 'n', -1, 0, jsonResult[id][2].message]))
                 ];
-        
+
                 const statusEntities = {
-                        "s":idsSuccess.length,
-                        "e":idsError.length,
-                        "p":0,
-                        "n":idsNoProcess.length,
-                    }
-                
-                
+                    "s": idsSuccess.length,
+                    "e": idsError.length,
+                    "p": 0,
+                    "n": idsNoProcess.length,
+                }
+
+
                 updateEntitiesState(parameters, entities, statusEntities);
                 updateState(parameters, 'Finish', 'The process is finished');
-                
 
-                
+                buildReport(parameters,entities, entityType);
+
             } catch (error) {
                 log.error("error Summarize ", error);
                 log.error("error Summarize ", error.message);
@@ -138,8 +139,8 @@ define([
             }
         };
 
-        
-        let loadEntities = (parameters,entities) => {
+
+        let loadEntities = (parameters, entities) => {
 
             const entityIds = entities.map(({ entity }) => entity.internalid);
             const statusEntities = {
@@ -193,11 +194,12 @@ define([
             //return [{"id":"3947913","whtType":"header"}]
             //log.error("recordLog.idTransaction",recordLog.idTransaction);
             const entities = lbryAGIP.cargarEntity(entityType, subsidiary);
-            log.error("entities",entities)
-            return entities.map(entity => ({ entity, period, subsidiary }));
+            
+            //return entities.map(entity => ({ entity, period, subsidiary }));
+            return {entityType,list:entities.map(entity => ({ entity, period, subsidiary }))};
         }
 
-        let createContributoryclass = ({entity, period, subsidiary}) => {
+        let createContributoryclass = ({ entity, period, subsidiary }) => {
             const fileResults = query
                 .runSuiteQL({
                     query: `
@@ -217,17 +219,24 @@ define([
                 })
                 .asMappedResults();
             if (fileResults.length <= 0) {
-                return {message:'No list was found for this period'};
+                return { message: 'No list was found for this period' };
             }
 
             //log.debug('entity', lisEntitys);
-            const AGIPObject = new lbryAGIP.AGIPTXT(fileResults[0].id,[entity] , period, subsidiary);
+            const AGIPObject = new lbryAGIP.AGIPTXT(fileResults[0].id, [entity], period, subsidiary);
             const infoCC = AGIPObject.getListContributoryClass();
             if (infoCC.length > 0) {
                 log.debug('infoCC', infoCC);
-                return {message:'Successful creation',createSetup:infoCC[0].createSetup,CCId:infoCC[0].idRetention};
+                log.debug('infoCC[0]',infoCC[0]);
+                log.debug('infoCC[0].createSetup', infoCC[0].createSetup);
+                const objResult = { 
+                    message: 'Successful creation', 
+                    createSetup: infoCC[0][0].createSetup, 
+                    CCId: infoCC[0][0].idRetention
+                }
+                return objResult;
             } else {
-                return {message:'No tax applicable'};
+                return { message: 'No tax applicable' };
             }
         }
 
@@ -258,58 +267,213 @@ define([
             });
         }
 
-        let buildReport = (entities,typeEntity) =>{
-            const dataEntities = getListEntities(entities,typeEntity);
+        let buildReport = (parameters,entities, typeEntity) => {
+            const dataEntities = getListEntities(entities, typeEntity);
             const ids = Object.keys(dataEntities);
 
+            let language = runtime.getCurrentScript().getParameter({ name: "LANGUAGE" }).substring(0, 2);
+            language = language === "es" ? language : "en";
+            const translations = getTranslations(language);
+            
             const jsonStatus = {
-                "s":this.translations.LMRY_PROCESING_CHECK,
-                "e":this.translations.LMRY_ERROR,
-                "p":this.translations.LMRY_PROCESING,
-                "n":this.translations.LMRY_NOT_PROCESING
+                "s": translations.LMRY_PROCESING_CHECK,
+                "e": translations.LMRY_ERROR,
+                "p": translations.LMRY_PROCESING,
+                "n": translations.LMRY_NOT_PROCESING
             }
+            let listEntities = []
+            ids.forEach((id) => {
+                const { internalid, type, names, cuit, status, createdSetup, CCId, message } = dataEntities[id];
 
-            ids.forEach((id, i) => {
-                const { internalid,type,names,cuit,status,createdSetup,CCId,message} = data[id];
 
-                
 
                 const title = jsonStatus[status];
                 let resultStatus;
-                if (status=="n") {
+                if (status == "n") {
                     resultStatus = title + " : " + message;
-                }else{
+                } else {
                     resultStatus = title;
                 }
+
+                listEntities.push(
+                    [
+                        internalid,
+                        names,
+                        cuit,
+                        createdSetup,
+                        CCId,
+                        resultStatus
+                    ].join(',') + '\n'
+                );
             });
+
+
+            const strTitle = getTitle(translations);
+            const fileContent = listEntities.join('');
+            const strReport = `${strTitle}${fileContent}\r\n`
+
+            const file = saveFile(parameters,strReport);
+            const url = generateUrlFile(file);
+            logGenerator(parameters,url);
+
 
         }
 
-        const generateFile = (items, extension) => {
-            const separator = extension === 'csv' ? ',' : '|';
-            const lines = items.map(item => [
-                item.period, // 1. Periodo.
-                item.catalogueCode, // 2. Código del catálogo utilizado.
-                item.typeOfExistence, // 3. Tipo de existencia.
-                item.codeOfExistence, // 4. Código propio de la existencia.
-                item.catalogueCode, // 5. Repetido: Código del catálogo utilizado.
-                item.correspondingStockCode, // 6. Código de Existencia correspondiente.
-                item.existenceDescription, // 7. Descripción de la existencia.
-                item.unitOfMeasureCode, // 8. Código de la Unidad de medida.
-                item.valuationMethodCode, // 9. Código del método de valuación.
-                item.quantity, // 10. Cantidad de la existencia.
-                item.unitCost, // 11. Costo unitario de la existencia.
-                item.totalCost, // 12. Costo total.
-                "1", // 13. Indica el estado de la operación. Siempre "1" en este caso.
-                "" // 14. Campos de libre utilización.
-            ].join(separator) + '\n');
+        const generateUrlFile = (idfile) => {
+            const fileLoad = file.load({ id: idfile });
+            const netSuiteLocation = runtime.getCurrentScript().getParameter({
+                name: 'custscript_lmry_netsuite_location'
+            });
+            const urlfile = `https://${netSuiteLocation || ''}${fileLoad.url}`;
 
-            return lines.join('');
+            return urlfile;
         };
 
-        let getListEntities = (entities,typeEntity) =>{
+        const logGenerator = (parameters, urlfile) => {
+            const logRecord = record.load({
+                type: 'customrecord_lmry_ar_massive_gener_agip',
+                id: parameters.idLog
+            });
 
+            if (urlfile) {
+                logRecord.setValue({ fieldId: 'custrecord_lmry_ar_gen_agip_url', value: urlfile });
+            }
+
+            logRecord.save();
+        };
+
+        const saveFile = (parameters,fileContent) => {
+
+            const folderId = getFolder();
+            if (!folderId) return;
+            const {subsidiary,period} = getDataPrimary(parameters);
             
+            const fileGenerate = file.create({
+                name:`${subsidiary}_${period}_response`,
+                fileType: file.Type.CSV,
+                contents: fileContent,
+                encoding: file.Encoding.UTF8,
+                folder: folderId
+            });
+
+            return fileGenerate.save();
+        };
+
+        
+        const getDataPrimary = (parameters) => {
+            let period;
+            let subsidiary;
+            
+            let searchRecordLog = search.create({
+                type: 'customrecord_lmry_ar_massive_gener_agip',
+                filters: [
+                    ['internalid', 'is', parameters.idLog]
+                ],
+                columns: [
+                    'custrecord_lmry_ar_gen_agip_period',
+                    'custrecord_lmry_ar_gen_agip_subsidiary'
+                ]
+            })
+            searchRecordLog.run().each(function (result) {
+                period = result.getValue('custrecord_lmry_ar_gen_agip_period');
+                subsidiary = result.getValue('custrecord_lmry_ar_gen_agip_subsidiary');
+            });
+
+            return {subsidiary,period};
+        }
+        const getFolder = () => {
+            
+            let folderPrimaryId;
+            let searchFolderSL = search.create({
+                type: 'folder',
+                columns: ['internalid'],
+                filters: ['name', 'is', 'SuiteLatamReady']
+            });
+
+            let resultSL = searchFolderSL.run().getRange(0, 50);
+            if (!resultSL || !resultSL.length) {
+                
+                let folderRecordPrimary = record.create({ type: 'folder' });
+                folderRecordPrimary.setValue('name', 'SuiteLatamReady');
+                folderPrimaryId = folderRecordPrimary.save();
+            } else {
+                
+                folderPrimaryId = resultSL[0].getValue('internalid');
+            }
+
+            let folderId = '';
+            let searchFolder = search.create({
+                type: 'folder',
+                columns: ['internalid'],
+                filters: [
+                    ['name', 'is', 'ReportAGIP']
+                ]
+
+            });
+            let resultFolder = searchFolder.run().getRange(0, 50);
+            
+            if (!resultFolder || !resultFolder.length) {
+                
+                let folderRecord = record.create({ type: 'folder' });
+                folderRecord.setValue('name', 'ReportAGIP');
+                folderRecord.setValue('parent', folderPrimaryId);
+                folderId = folderRecord.save();
+            } else {
+                
+                folderId = resultFolder[0].getValue('internalid');
+            }
+
+            return folderId;
+        };
+
+        const getTitle = (translations) => {
+            
+
+            let strTitle = '';
+            strTitle += translations.LMRY_ID + ',';     //1.
+            strTitle += translations.LMRY_NAME + ',';   //2
+            strTitle += 'CUIT,';                        //3.
+            strTitle += translations.LMRY_CREATED + ',';//4.
+            strTitle += translations.LMRY_CCID + ',';   //5.
+            strTitle += translations.LMRY_STATUS + ','; //6.
+
+            strTitle += '\n';
+            return strTitle;
+        }
+
+
+        const getTranslations = (language) => {
+            const translatedFields = {
+                "es": {
+                    "LMRY_ID": "ID Entidad",
+                    "LMRY_NAME": "Entidad",
+                    "LMRY_CREATED": "Creada desde",
+                    "LMRY_CCID": "Id Clase contributiva",
+                    "LMRY_STATUS": "Estado",
+                    "LMRY_PROCESING": "Procesando",
+                    "LMRY_ERROR": "Error",
+                    "LMRY_NOT_PROCESING": "No procesada",
+                    "LMRY_PROCESING_CHECK": "Procesada con éxito",
+                },
+                "en": {
+                    "LMRY_ID": "ID Entity",
+                    "LMRY_NAME": "Entity",
+                    "LMRY_CREATED": "Creada desde",
+                    "LMRY_CCID": "Id Contributory Class",
+                    "LMRY_STATUS": "Status",
+                    "LMRY_PROCESING": "Processing",
+                    "LMRY_ERROR": "Error",
+                    "LMRY_NOT_PROCESING": "Not Processed",
+                    "LMRY_PROCESING_CHECK": "Successfully Processed",
+
+                }
+            }
+            return translatedFields[language];
+        }
+
+        let getListEntities = (entities, typeEntity) => {
+
+
             let processCompleted = false;
             let entitiesIds = entities;
             let listEntities = {};
@@ -321,14 +485,14 @@ define([
                     //entities = entities.map(entity => entity[0])
 
                     for (let i = 0; i < entitiesIds.length; i++) {
-                        const [id,status,createdSetup,CCId,message] = entities[i];
+                        const [id, status, createdSetup, CCId, message] = entities[i];
                         listEntities[id] = {
-                            internalid:id,
+                            internalid: id,
                             status,
-                            createdSetup: createdSetup == 0? "Setup":createdSetup ==1?"Padron":" ",
+                            createdSetup: createdSetup == 0 ? "Padron" : createdSetup == 1 ? "Setup" : " ",
                             CCId: CCId ?? " ",
                             message: message ?? " ",
-                            type:typeEntity
+                            type: typeEntity
                         };
                     }
                 };
@@ -336,7 +500,7 @@ define([
                 return {};
             }
 
-           
+
 
             let filters = [
                 ["internalid", "anyof", entitiesIds]
@@ -364,11 +528,11 @@ define([
                     const middlename = result.getValue(columns[4]) || "";
                     const lastname = result.getValue(columns[5]) || "";
                     listEntities[internalid].names = `${firstname} ${middlename} ${lastname}`;
-                }else{
+                } else {
                     listEntities[internalid].names = result.getValue(columns[6]) || " ";
                 }
                 listEntities[internalid].status = processCompleted ? listEntities[internalid].status : "p";
-                log.error("listEntities : "+internalid,listEntities[internalid])
+                
                 return true;
             });
 

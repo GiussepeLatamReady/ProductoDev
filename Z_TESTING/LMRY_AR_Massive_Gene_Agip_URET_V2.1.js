@@ -146,7 +146,7 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/url'], (runtime, server
                         listEntities[id] = {
                             internalid:id,
                             status,
-                            createdSetup: createdSetup == 0? "Setup":createdSetup ==1?"Padron":" ",
+                            createdSetup: createdSetup == 0? "Padron":createdSetup ==1?"Setup":" ",
                             CCId: CCId ?? " ",
                             message: message ?? " ",
                             type:typeEntity
@@ -206,7 +206,7 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/url'], (runtime, server
             return runtime.executionContext == 'USERINTERFACE';
         }
 
-        getTranslations(country) {
+        getTranslations(lenguage) {
             const translatedFields = {
                 "es": {
                     "LMRY_ENTITIES": "Entidades",
@@ -241,7 +241,7 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/url'], (runtime, server
                     "LMRY_CREATED_FROM": "Created from",
                 }
             }
-            return translatedFields[country];
+            return translatedFields[lenguage];
         }
 
         isValid(bool) {

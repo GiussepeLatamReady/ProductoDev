@@ -6,7 +6,7 @@
 define(['N/file', 'N/search', 'N/runtime', 'N/record', 'N/log', 'N/query', 'N/format'], function (file, search, runtime, record, log, query, format) {
     class AGIPTXT {
         constructor(fileID, listEntitys, period, subsidiary) {
-            log.debug('[AGIPTXT]', [fileID, listEntitys, period, subsidiary]);
+            
             if (!Number(fileID) || typeof listEntitys !== 'object' || listEntitys.length !== 1) {
                 throw new Error('Incorrect Parameters');
             }
@@ -24,7 +24,7 @@ define(['N/file', 'N/search', 'N/runtime', 'N/record', 'N/log', 'N/query', 'N/fo
             this.loadFile(fileID);
             // this.config = getConfigAGIP();
             const ccConfig = getConfigContributoryClass(this.subsidiaryID, this.period, this.typeEntity === 'customer');
-            log.debug('ccConfig', ccConfig);
+
             if (ccConfig.length === 0) throw new Error('No hay configfuracion de AGIP Contributory class disponible');
 
             this.configCC = ccConfig[0];
@@ -41,10 +41,7 @@ define(['N/file', 'N/search', 'N/runtime', 'N/record', 'N/log', 'N/query', 'N/fo
             const entityIDS = listCuitsByEntity.map((result) => {
                 return Number(String(result.vatregnumber) + result.custentity_lmry_digito_verificator);
             });
-            log.debug({
-                title: 'entityIDS',
-                details: entityIDS
-            });
+           
             const iterator = this.file.lines.iterator();
             let contador = 0;
             let conx = 0;
@@ -53,7 +50,7 @@ define(['N/file', 'N/search', 'N/runtime', 'N/record', 'N/log', 'N/query', 'N/fo
                 const lineValues = line.value.split(';');
                 const index = entityIDS.indexOf(Number(lineValues[3]));
                 if (conx < 50) {
-                    log.debug('text', [lineValues, Number(lineValues[3]), index]);
+                   
                     conx++;
                 }
                 const isPerception = this.typeEntity === 'customer';
@@ -180,7 +177,7 @@ define(['N/file', 'N/search', 'N/runtime', 'N/record', 'N/log', 'N/query', 'N/fo
             const entityIDS = listCuitsByEntity.map((result) => {
                 return Number(String(result.vatregnumber) + result.custentity_lmry_digito_verificator);
             });
-            log.debug('CUIT Entitys', entityIDS);
+            
             const iterator = this.file.lines.iterator();
             let contador = 0;
 
@@ -191,7 +188,7 @@ define(['N/file', 'N/search', 'N/runtime', 'N/record', 'N/log', 'N/query', 'N/fo
                 const rate = isPerception ? Number(lineValues[7].replace(',', '.')) : Number(lineValues[8].replace(',', '.'));
                 if (index >= 0) {
                     if (rate > 0) {
-                        log.debug('Generando del archivo', index);
+                        
                         this.listContributoryClass.push({
                             key: contador,
                             values: [
@@ -260,10 +257,10 @@ define(['N/file', 'N/search', 'N/runtime', 'N/record', 'N/log', 'N/query', 'N/fo
 
                 return true;
             });
-            log.debug('contador', contador);
+            
             listCuitsByEntity.forEach((entity) => {
                 if ((this.typeEntity === 'customer' && entity.stateBuenosAires) || this.typeEntity === 'vendor') {
-                    log.debug('Generando del setup', entity);
+                    
                     this.listContributoryClass.push({
                         key: contador,
                         values: [
@@ -340,7 +337,7 @@ define(['N/file', 'N/search', 'N/runtime', 'N/record', 'N/log', 'N/query', 'N/fo
      * @returns {Array<any>} Arreglo de objetos Result
      */
     function cargarEntity(type, subsidiary, juridicPerson, nroID, isvalidCuit, isOpenTransactions) {
-        log.debug('cargarEntity', [type, subsidiary, juridicPerson, nroID, isvalidCuit, isOpenTransactions]);
+        
         let filters = [
             search.createFilter({
                 name: 'isinactive',
@@ -558,7 +555,7 @@ define(['N/file', 'N/search', 'N/runtime', 'N/record', 'N/log', 'N/query', 'N/fo
         return newValues;
     }
     function createContributory(value) {
-        log.debug('precc', value);
+        
 
         const contributoryClassRecord = record.create({
             type: 'customrecord_lmry_ar_contrib_class',
@@ -691,11 +688,7 @@ define(['N/file', 'N/search', 'N/runtime', 'N/record', 'N/log', 'N/query', 'N/fo
             filters.push('AND', ['custrecord_lmry_ar_ccl_subtype', 'is', CCObject.custrecord_lmry_ar_ccl_subtype]);
             filters.push('AND', ['custrecord_lmry_sub_type', 'is', CCObject.custrecord_lmry_sub_type]);
         }
-        log.debug('filtros', {
-            type: 'customrecord_lmry_ar_contrib_class',
-            filters: filters,
-            columns: ['internalid']
-        });
+        
         const idResult = search
             .create({
                 type: 'customrecord_lmry_ar_contrib_class',
@@ -711,7 +704,7 @@ define(['N/file', 'N/search', 'N/runtime', 'N/record', 'N/log', 'N/query', 'N/fo
         }
     }
     function getConfigContributoryClass(subsidiaryID, { startdate, enddate }, isPerception) {
-        log.debug('getConfigContributoryClass', [subsidiaryID, { startdate, enddate }, isPerception]);
+        
         const parsedResults = [];
         const columns = [
             'custrecord_lmry_ar_agip_subsidiary_cc',
@@ -760,7 +753,7 @@ define(['N/file', 'N/search', 'N/runtime', 'N/record', 'N/log', 'N/query', 'N/fo
             ['custrecord_lmry_ar_agip_subsidiary_cc', search.Operator.IS, subsidiaryID]
         ];
         if (isPerception) {
-            log.debug('isPerception', isPerception);
+            
             filters.push('AND', ['custrecord_lmry_ar_agip_taxtype', 'equalto', '2']);
         } else {
             filters.push('AND', ['custrecord_lmry_ar_agip_taxtype', 'equalto', '1']);

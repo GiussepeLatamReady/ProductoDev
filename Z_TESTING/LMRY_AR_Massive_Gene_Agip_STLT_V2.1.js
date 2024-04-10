@@ -296,9 +296,9 @@ define([
                     { id: "datecreated", label: this.translations.LMRY_CREATION_DATE_LABEL, type: serverWidget.FieldType.TEXT },
                     { id: "created_by", label: this.translations.LMRY_CREATED_BY_LABEL, type: serverWidget.FieldType.TEXT },
                     { id: "period", label: this.translations.LMRY_PERIOD, type: serverWidget.FieldType.TEXT },
-                    { id: "details", label: this.translations.LMRY_DETAILS, type: serverWidget.FieldType.TEXTAREA },
-                    { id: "result", label: this.translations.LMRY_RESULTS, type: serverWidget.FieldType.TEXT},
                     { id: "description", label: this.translations.LMRY_DESCRIPTION, type: serverWidget.FieldType.TEXT },
+                    { id: "details", label: this.translations.LMRY_DETAILS, type: serverWidget.FieldType.TEXTAREA },
+                    { id: "result", label: this.translations.LMRY_RESULTS, type: serverWidget.FieldType.TEXTAREA},
                     { id: "status", label: this.translations.LMRY_STATUS, type: serverWidget.FieldType.TEXT }
                 ];
 
@@ -352,7 +352,7 @@ define([
                 let sublist = this.form.getSublist({ id: 'custpage_results_list' });
                 const count = data.length;
                 data.forEach((form, i) => {
-                    const { id, subsidiary, created, employee, period, description, status } = form;
+                    const { id, subsidiary, created, employee, period, description, status, urlFile } = form;
                     const setSublistValue = (colId, value) => sublist.setSublistValue({ id: colId, line: i, value });
                     const recordUrl = url.resolveRecord({ recordType: "customrecord_lmry_ar_massive_gener_agip", recordId: id, isEditMode: false });
                     const urlID = `
@@ -395,6 +395,17 @@ define([
                         default:
                             statusResult = this.translations.LMRY_LOADING_DATA;
                     }
+
+                    if (urlFile) {
+                            const htmlUrlFile = `
+                            <a href="${urlFile}" target="_blank" style="text-decoration: none; color: inherit;">
+    <div style="display: grid; place-items: center; background: white; border-radius: 6px; transition: background-color 0.3s; border: 0.5px solid #b3ecae;" onmouseover="this.style.backgroundColor='#b3ecae'" onmouseout="this.style.backgroundColor='white';">
+        <div style="color: color:#424950; font-size: 14px;">${"Response"}</div>
+    </div>
+</a>`;
+                        setSublistValue("result", htmlUrlFile)
+                    }
+                    
                     setSublistValue("status",statusResult)
 
                     // Falata detalles y resultados
@@ -423,7 +434,8 @@ define([
                             "custrecord_lmry_ar_gen_agip_user",
                             "custrecord_lmry_ar_gen_agip_period",
                             "custrecord_lmry_ar_gen_agip_details",
-                            "custrecord_lmry_ar_gen_agip_status"
+                            "custrecord_lmry_ar_gen_agip_status",
+                            "custrecord_lmry_ar_gen_agip_url"
                         ]
                 });
                 let pageData = search_log.runPaged({ pageSize: 1000 });
@@ -441,7 +453,7 @@ define([
                             formublist.period = result.getText(columns[4]) || ' ';
                             formublist.description = result.getValue(columns[5]) || ' ';
                             formublist.status = result.getValue(columns[6]) || ' ';
-
+                            formublist.urlFile = result.getValue(columns[7]);
                             data.push(formublist);
                         });
                     });
@@ -462,7 +474,7 @@ define([
                 };
             }
 
-            getTranslations(country) {
+            getTranslations(language) {
                 const translatedFields = {
                     "es": {
                         "LMRY_MESSAGE": "Mensaje",
@@ -529,7 +541,7 @@ define([
                         "LMRY_VIEW":"View"
                     }  
                 }
-                return translatedFields[country];
+                return translatedFields[language];
             }
 
             

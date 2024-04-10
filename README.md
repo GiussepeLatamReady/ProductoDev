@@ -50,6 +50,7 @@
             Entities            custrecord_lmry_ar_gen_agip_entities
             summary             custrecord_lmry_ar_gen_agip_summary
             status              custrecord_lmry_ar_gen_agip_status
+            URL                 custrecord_lmry_ar_gen_agip_url   
 
 
         
