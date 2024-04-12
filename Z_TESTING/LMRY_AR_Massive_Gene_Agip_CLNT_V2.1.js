@@ -50,6 +50,9 @@ define(['N/runtime',
             constructor() {
                 this.FEAT_SUBS = this.isValid(runtime.isFeatureInEffect({ feature: 'SUBSIDIARIES' }));
                 this.FEAT_CALENDAR = this.isValid(runtime.isFeatureInEffect({ feature: 'MULTIPLECALENDARS' })); 
+                let language = runtime.getCurrentScript().getParameter({ name: "LANGUAGE" }).substring(0, 2);
+                language = language === "es" ? language : "en";
+                this.transalations = this.getTranslations(language);
             }
 
 
@@ -233,7 +236,7 @@ define(['N/runtime',
                 const licenses = this.FEAT_SUBS
                     ? LibraryMail.getAllLicenses()[subsidiary]
                     : LibraryMail.getLicenses(1);
-
+                alert(this.transalations.LMRY_ACTIVE_FEATURE)
                 return LibraryMail.getAuthorization(1092, licenses)
             }
             createRecordLog() {
@@ -285,10 +288,10 @@ define(['N/runtime',
             getTranslations(country) {
                 const translatedFields = {
                     "es": {
-                        "LMRY_LOADING_DATA": "Cargando Datos",
+                        "LMRY_ACTIVE_FEATURE": "Active la carasteristica: Generacion masiva AGIP",
                     },
                     "en": {
-                        "LMRY_LOADING_DATA": "Loading data",
+                        "LMRY_ACTIVE_FEATURE": "Activate the feature: AGIP massive generation",
                     }
                 }
                 return translatedFields[country];
