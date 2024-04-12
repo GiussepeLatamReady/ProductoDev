@@ -11,7 +11,7 @@ define([
     "N/runtime",
     "N/search",
     "N/log",
-    "./CO_Library/LMRY_CO_Header_WHT_calculation_LBRY_V2.1",
+    "./CO_Library_Mensual/LMRY_CO_Header_WHT_calculation_LBRY_V2.1",
 ],
 
     (record, runtime, search, log, lbryWHTHeader) => {

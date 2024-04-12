@@ -38,7 +38,7 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/url'], (runtime, server
 
         buildTable() {
 
-            this.form.clientScriptModulePath = './LMRY_CO_Header_WHT_calculation_CLNT_V2.1.js';
+            this.form.clientScriptModulePath = './CO_Library_Mensual/LMRY_CO_Header_WHT_calculation_CLNT_V2.1.js';
             this.form.addButton({
                 id: "custpage_btn_reload",
                 label: this.translations.LMRY_REFRESH,

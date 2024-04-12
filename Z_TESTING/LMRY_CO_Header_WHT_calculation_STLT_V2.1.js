@@ -17,7 +17,7 @@ define([
     'SuiteBundles/Bundle 37714/Latam_Library/LMRY_libSendingEmailsLBRY_V2.0'
 ],
     (log, search, redirect, runtime, serverWidget, url, task, LibraryMail) => {
-        const CLIENT_SCRIPT_PATH = "./LMRY_CO_Header_WHT_calculation_CLNT_V2.1.js";
+        const CLIENT_SCRIPT_PATH = "./CO_Library_Mensual/LMRY_CO_Header_WHT_calculation_CLNT_V2.1.js";
 
         const onRequest = (context) => {
             const scriptContext = {
