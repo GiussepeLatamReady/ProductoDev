@@ -11,7 +11,7 @@ define([
     "N/runtime",
     "N/search",
     "N/log",
-    "./WTH_Library/LMRY_CO_Header_WHT_calculation_LBRY_V2.1",
+    "./CO_Library/LMRY_CO_Header_WHT_calculation_LBRY_V2.1",
 ],
 
     (record, runtime, search, log, lbryWHTHeader) => {
@@ -20,10 +20,10 @@ define([
         const getInputData = (inputContext) => {
             try {
                 const parameters = getParameters();
-                log.error("getInputData parameters",parameters)
+                
                 const transactions = getTransactions(parameters);
                 updateState(parameters, 'Procesando', 'Se ha comenzado a procesar las transacciones...');
-                log.error("transactions",transactions)
+                
                 return transactions;
             } catch (error) {
                 log.error("Error [getInputData]", error);
@@ -33,7 +33,7 @@ define([
 
         const map = (mapContext) => {
             try {
-                log.error("value",JSON.parse(mapContext.value))
+                
                 if (mapContext.value.indexOf("isError") != -1) {
                     mapContext.write({
                         key: mapContext.key,
@@ -93,7 +93,7 @@ define([
                     updateState(parameters, 'Ocurrió un error', errors[0][1]);
                 }
             } catch (error) {
-                log.error("error Summarize [interno]", error);
+                
                 log.error("error Summarize [interno]", error.message);
                 updateState(parameters, 'Ocurrió un error', error.message);
             }
@@ -135,7 +135,7 @@ define([
                 recordLog.whtType = result.getValue('custrecord_lmry_co_hwht_log_whttype');
             });
             //return [{"id":"3947913","whtType":"header"}]
-            log.error("recordLog.idTransaction",recordLog.idTransaction);
+            
             return JSON.parse(recordLog.idTransaction).map(id => ({ id: id, whtType: recordLog.whtType }));
         }
 

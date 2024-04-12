@@ -121,6 +121,10 @@ define(['N/runtime',
                     }
                 }
                 */
+                if (scriptContext.fieldId == 'custpage_subsidiary') {
+                    this.setFieldPeriod();
+                }
+                
                 return true
             }
 

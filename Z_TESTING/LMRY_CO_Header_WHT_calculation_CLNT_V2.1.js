@@ -107,23 +107,6 @@ define(['N/runtime',
                 if (scriptContext.fieldId == 'custpage_subsidiary') {
                     this.setPeriod(false);
                 }
-                /*
-                if (scriptContext.fieldId == 'custpage_period_type') {
-                    const periodTypeValue = this.currentRecord.getValue({ fieldId: 'custpage_period_type' });
-                    const startDateField = this.currentRecord.getField({ fieldId: 'custpage_start_date' });
-                    const endDateField = this.currentRecord.getField({ fieldId: 'custpage_end_date' });
-                    const accountingperiodField = this.currentRecord.getField({ fieldId: 'custpage_period' });
-                    this.hiddenFields();
-                    console.log("periodTypeValue", periodTypeValue)
-                    if (periodTypeValue == "month") {
-                        accountingperiodField.isDisplay = true;
-                        this.setPeriod();
-                    } else {
-                        startDateField.isDisplay = true;
-                        endDateField.isDisplay = true;
-                    }
-                }
-                */
                 if (scriptContext.fieldId == 'custpage_subsidiary') {
                     this.setFieldPeriod();
                 }
@@ -141,11 +124,7 @@ define(['N/runtime',
                         if (!this.validateMandatoryFields()) {
                             return false;
                         }
-                        /*
-                        if (!this.validateDates()) {
-                            return false;
-                        }
-                        */
+                        
                     } else {
                         if (!this.validateSublist()) {
                             return false;
@@ -181,8 +160,6 @@ define(['N/runtime',
                     const accoutingPeriodValue = urlObject.searchParams.get('accoutingPeriod');
                     filters.push('AND',['internalid', 'anyof',accoutingPeriodValue]);
 
-                    console.log('urlObject :', 'urlObject')
-                    console.log('accoutingPeriodValue :', 'accoutingPeriodValue')
                 }
 
                 if (this.FEAT_SUBS && this.FEAT_CALENDAR) {
@@ -193,8 +170,6 @@ define(['N/runtime',
                         id: subsidiary,
                         columns: ['fiscalcalendar']
                     });
-
-                    console.log("fiscalcalendar:",fiscalcalendar)
 
                     if (fiscalcalendar && fiscalcalendar.length > 0) {
                         filters.push('AND',['fiscalcalendar', 'anyof', fiscalcalendar[0].value]);
@@ -235,24 +210,14 @@ define(['N/runtime',
                     'custpage_wht_process',
                     'custpage_wht_type'
                 ];
-                /*
-                if (this.FEAT_SUBS) {
-                    mandatoryFields.unshift('custpage_subsidiary');
-                }
-                if (periodTypeValue == "month") {
-                    mandatoryFields.push('custpage_period');
-                } else {
-                    mandatoryFields.push('custpage_start_date');
-                    mandatoryFields.push('custpage_end_date');
-                }
-                */
+                
                 mandatoryFields.push('custpage_period');
                 const isFieldInvalid = (fieldId) => {
                     const value = recordObj.getValue({ fieldId });
                     console.log(fieldId, value)
                     if (value == 0 || !value) {
                         const fieldLabel = recordObj.getField({ fieldId }).label;
-                        alert(`Ingrese un valor para: ${fieldLabel}`);
+                        alert(`${this.translations.LMRY_VALIDATE_VALUES} ${fieldLabel}`);
                         return true;
                     }
                     return false;
@@ -271,31 +236,12 @@ define(['N/runtime',
                 return fields.filter(element => element !== id);
             }
 
-            /*
-            validateDates() {
-                const { getValue, getField } = this.currentRecord;
-                const periodType = getValue('custpage_period_type');
-                if (periodType == "range") {
-                    const startDate = getValue('custpage_start_date') ? format.parse({ value: getValue('custpage_start_date'), type: format.Type.DATE }) : null;
-                    const endDate = getValue('custpage_end_date') ? format.parse({ value: getValue('custpage_end_date'), type: format.Type.DATE }) : null;
-
-                    if (startDate && endDate && startDate > endDate) {
-                        const startFieldLabel = getField({ fieldId: 'custpage_start_date' }).label;
-                        const endFieldLabel = getField({ fieldId: 'custpage_end_date' }).label;
-                        alert(`La ${startFieldLabel} debe ser igual o anterior a la ${endFieldLabel}`);
-                        return false;
-                    }
-                }
-
-                return true;
-            }
-            */
             validateSublist() {
                 const recordObj = this.currentRecord;
                 const numberLines = recordObj.getLineCount({ sublistId: 'custpage_results_list' });
 
                 if (numberLines < 1) {
-                    alert("No hay transacciones Filtradas");
+                    alert(this.translations.LMRY_FILTER_TRANSACTIONS);
                     return false;
                 }
 
@@ -303,7 +249,7 @@ define(['N/runtime',
                     count + (recordObj.getSublistValue({ sublistId: 'custpage_results_list', fieldId: 'apply', line: i }) ? 1 : 0), 0);
 
                 if (numApplieds === 0) {
-                    alert("No hay transacciones Seleccionadas");
+                    alert(this.translations.LMRY_SELECTED_TRANSACTIONS);
                     return false;
                 }
 
@@ -313,25 +259,6 @@ define(['N/runtime',
 
 
             setFieldPeriod(isInit) {
-                //const fields = ['custpage_start_date', 'custpage_end_date', 'custpage_period'];
-                //fields.forEach(id => this.currentRecord.getField({ fieldId: id }).isDisplay = false);
-                
-                //const periodType = this.currentRecord.getValue('custpage_period_type');
-                /*
-                if (status == 1 || status == "1") {
-                    /*
-                    if (periodType == "range") {
-                        this.currentRecord.getField({ fieldId: 'custpage_start_date' }).isDisplay = true;
-                        this.currentRecord.getField({ fieldId: 'custpage_end_date' }).isDisplay = true;
-                    } else {
-                        this.setPeriod(isInit);
-                        this.currentRecord.getField({ fieldId: 'custpage_period' }).isDisplay = true;
-                    }
-                    
-                    this.setPeriod(isInit);
-                    this.currentRecord.getField({ fieldId: 'custpage_period' }).isDisplay = true;
-                }
-                */
                 
                 this.setPeriod(isInit);
                 this.currentRecord.getField({ fieldId: 'custpage_period' }).isDisplay = true;
@@ -366,8 +293,8 @@ define(['N/runtime',
 
                 if (results && results.length) {
                     let myMsg = message.create({
-                        title: 'Alerta',
-                        message: 'Espere un momento por favor, el proceso se encuentra en curso.',
+                        title: this.translations.LMRY_ALERT,
+                        message: this.translations.LMRY_PROCESS_ACTIVATE,
                         type: message.Type.INFORMATION,
                         duration: 8000
                     });
@@ -389,10 +316,9 @@ define(['N/runtime',
 
                     form.subsidiary = Number(currentRecord.getValue({ fieldId: 'custpage_subsidiary' })) || '';
                     form.typeProcess = currentRecord.getValue({ fieldId: 'custpage_wht_process' });
-                    //form.startDate = currentRecord.getValue({ fieldId: 'custpage_start_date' });
-                    //form.endDate = currentRecord.getValue({ fieldId: 'custpage_end_date' });
+                   
                     form.whtType = currentRecord.getValue({ fieldId: 'custpage_wht_type' });
-                    //form.periodType = currentRecord.getValue({ fieldId: 'custpage_period_type' });
+                       
                     form.accoutingPeriod = currentRecord.getValue({ fieldId: 'custpage_period' });
                     form.executionType = "UI";
 
@@ -429,14 +355,12 @@ define(['N/runtime',
                 });
                 console.log("form :", form)
                 recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_subsi', value: form.subsidiary });
-                //recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_start_date', value: new Date() });
-                //recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_end_date', value: new Date() });
+                
                 recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_state', value: "Cargando datos" });
                 recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_employee', value: runtime.getCurrentUser().id });
                 recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_transactions', value: JSON.stringify(form.ids) });
                 recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_process', value: form.typeProcess });
                 recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_whttype', value: form.whtType });
-                //recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_period_type', value: "" });
                 recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_period', value: form.accoutingPeriod });
                 recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_exect', value: form.executionType });
                 idlog = recordlog.save({ enableSourcing: true, ignoreMandatoryFields: true, disableTriggers: true });
@@ -444,7 +368,6 @@ define(['N/runtime',
                 currentRecord.setValue({ fieldId: 'custpage_log_id', value: idlog, ignoreFieldChange: true });
 
                 this.parameters = { idlog,idUser: runtime.getCurrentUser().id }
-                console.log('idlog: ' + idlog);
                 return true;
             }
 
@@ -455,12 +378,20 @@ define(['N/runtime',
             getTranslations(country) {
                 const translatedFields = {
                     "es": {
-                        "LMRY_LOADING_DATA": "Cargando Datos",
+                      "LMRY_VALIDATE_VALUES": "Ingrese un valor para:",
+                      "LMRY_PROCESS_ACTIVATE": "Espere un momento por favor, el proceso se encuentra en curso.",
+                      "LMRY_FILTER_TRANSACTIONS": "No hay transacciones Filtradas",
+                      "LMRY_SELECTED_TRANSACTIONS": "No hay transacciones Seleccionadas",
+                      "LMRY_ALERT": "Alerta",
                     },
                     "en": {
-                        "LMRY_LOADING_DATA": "Loading data",
+                      "LMRY_VALIDATE_VALUES": "Enter a value for:",
+                      "LMRY_PROCESS_ACTIVATE": "Please wait a moment, the process is in progress.",
+                      "LMRY_FILTER_TRANSACTIONS": "No Filtered Transactions",
+                      "LMRY_SELECTED_TRANSACTIONS": "No Selected Transactions",
+                      "LMRY_ALERT": "Alert",
                     }
-                }
+                  };
                 return translatedFields[country];
             }
 

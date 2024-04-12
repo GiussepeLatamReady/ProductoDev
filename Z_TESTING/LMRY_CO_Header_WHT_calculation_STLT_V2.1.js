@@ -345,7 +345,11 @@ define([
                     { id: 'legal_document_type', label: this.translations.LMRY_FISCAL_DOCUMENT, type: serverWidget.FieldType.TEXT },
                     { id: 'currency', label: this.translations.LMRY_CURRENCY, type: serverWidget.FieldType.TEXT },
                     { id: 'total_amt', label: this.translations.LMRY_AMOUNT, type: serverWidget.FieldType.CURRENCY, displayType: serverWidget.FieldDisplayType.DISABLED },
-                    { id: 'internalidtext', label: 'internal_id', type: serverWidget.FieldType.TEXT, displayType: serverWidget.FieldDisplayType.HIDDEN }
+                    { id: 'internalidtext', label: 'internal_id', type: serverWidget.FieldType.TEXT, displayType: serverWidget.FieldDisplayType.HIDDEN },
+                    { id: 'reteica', label: this.translations.LMRY_RETEICA, type: serverWidget.FieldType.TEXT },
+                    { id: 'reteiva', label: this.translations.LMRY_RETEIVA, type: serverWidget.FieldType.TEXT },
+                    { id: 'retefte', label: this.translations.LMRY_RETEFTE, type: serverWidget.FieldType.TEXT },
+                    { id: 'retecre', label: this.translations.LMRY_RETECRE, type: serverWidget.FieldType.TEXT }
                 ];
 
 
@@ -460,7 +464,7 @@ define([
                 let sublist = this.form.getSublist({ id: 'custpage_results_list' });
 
                 data.forEach((transaction, i) => {
-                    const { id, tranid, legalDocument, entityName, entityValue, type, recordType, amount, currency } = transaction;
+                    const { id, tranid, legalDocument, entityName, entityValue, type, recordType, amount, currency, co_reteiva, co_reteica, co_retefte, co_retecre } = transaction;
                     
                     sublist.setSublistValue({ id: 'internalidtext', line: i, value: id});
                     const tranUrl = url.resolveRecord({ recordType, recordId: id, isEditMode: false });
@@ -470,6 +474,10 @@ define([
                     const tranUrlEntity = url.resolveRecord({ recordType: entityType, recordId: entityValue, isEditMode: false });
                     sublist.setSublistValue({ id: "entity", line: i, value: `<a class="dottedlink" href="${tranUrlEntity}" target="_blank">${entityName}</a>` });
 
+                    sublist.setSublistValue({ id: "reteiva", line: i, value: co_reteiva});
+                    sublist.setSublistValue({ id: "reteica", line: i, value: co_reteica});
+                    sublist.setSublistValue({ id: "retefte", line: i, value: co_retefte});
+                    sublist.setSublistValue({ id: "retecre", line: i, value: co_retecre});
                     
                     const setSublistValue = (colId, value) => sublist.setSublistValue({ id: colId, line: i, value });
                     setSublistValue("type_transaction", type);
@@ -614,7 +622,7 @@ define([
                 let columns = [];
                 columns.push(search.createColumn({ name: 'formulatext', formula: '{custbody_lmry_reference_transaction.internalid}', sort: search.Sort.DESC }));
 
-                //log.error("filters", filters)
+                
 
                 let searchTransactionsWht = search.create({
                     type: "transaction",
@@ -672,6 +680,12 @@ define([
                 columns.push(search.createColumn({ name: 'formulatext', formula: '{currency}' }));
                 columns.push(search.createColumn({ name: 'formulatext', formula: '{entity.id}' }));
 
+                // Se agrego las columnas de retenciones
+                columns.push(search.createColumn({ name: 'formulatext', formula: '{custbody_lmry_co_reteiva}' }));
+                columns.push(search.createColumn({ name: 'formulatext', formula: '{custbody_lmry_co_reteica}' }));
+                columns.push(search.createColumn({ name: 'formulatext', formula: '{custbody_lmry_co_retefte}' }));
+                columns.push(search.createColumn({ name: 'formulatext', formula: '{custbody_lmry_co_autoretecree}' }));
+
 
                 let settings = [];
                 if (this.FEAT_SUBS) {
@@ -701,6 +715,12 @@ define([
                             transaction.recordType = result.getValue(columns[3])|| " ";
                             transaction.amount = Math.abs(result.getValue(columns[6]))|| 0;
                             transaction.currency = result.getValue(columns[7])|| " ";
+
+                            // Se agrego las columnas de retenciones
+                            transaction.co_reteiva = result.getValue(columns[9])|| " ";
+                            transaction.co_reteica = result.getValue(columns[10])|| " ";
+                            transaction.co_retefte = result.getValue(columns[11])|| " ";
+                            transaction.co_retecre = result.getValue(columns[12])|| " ";
                             data.push(transaction);
                         });
                     });
@@ -731,7 +751,7 @@ define([
                     transactionIds[id] = true;
                     return true;
                 });
-                log.error("transactionIds",transactionIds)
+                
                 return Object.keys(transactionIds);
                 
             }
@@ -836,6 +856,10 @@ define([
                         "LMRY_ENTITY": "Entidad",
                         "LMRY_CURRENCY": "Moneda",
                         "LMRY_VIEW_LOG": "Ver registro",
+                        "LMRY_RETEICA": "ReteIVA",
+                        "LMRY_RETEIVA": "ReteICA",
+                        "LMRY_RETEFTE": "ReteFte",
+                        "LMRY_RETECRE": "ReteCre",
                     },
                     "en": {
                         "LMRY_MESSAGE": "Message",
@@ -872,6 +896,10 @@ define([
                         "LMRY_ENTITY": "Entity",
                         "LMRY_CURRENCY": "Currency",
                         "LMRY_VIEW_LOG": "View Log",
+                        "LMRY_RETEICA": "ReteIVA",
+                        "LMRY_RETEIVA": "ReteICA",
+                        "LMRY_RETEFTE": "ReteFte",
+                        "LMRY_RETECRE": "ReteCre",
                     }
                 }
                 return translatedFields[country];

@@ -104,7 +104,7 @@ define([
         transaction.relatedRecords = [...relatedRecords];
         setTransactionWht(transaction);
         deleteProperty(transaction);
-        log.error("transaction", transaction);
+
 
         return transaction;
     }

@@ -97,7 +97,7 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/url'], (runtime, server
                 setSublistValue("custpage_col_total_amt", Number(amount).toFixed(2));
 
                 let stateResult;
-                log.error("state",state)
+                
                 switch (state) {
                     case "Procesando":
                         stateResult = this.translations.LMRY_PROCESING;
@@ -170,7 +170,7 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/url'], (runtime, server
                 };
                 return true;
             });
-            log.error("state", state)
+            
             if (!state) {
                 transactionsState.forEach(({ id, state }) => {
                     Object.assign(transactions[id], { state: state });

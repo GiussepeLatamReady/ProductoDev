@@ -87,6 +87,8 @@
 
     + Name: LatamReady - WHT Type
     + Id: customrecord_lmry_wht_type
+        Create: WHT Subtype
+                custrecord_lmry_wht_subtype
     
 
 ## Fields

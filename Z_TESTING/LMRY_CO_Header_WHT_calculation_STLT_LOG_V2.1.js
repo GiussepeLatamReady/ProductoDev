@@ -129,10 +129,10 @@ define([
                     sublist.setSublistValue({ id: "subsidiary", line: i, value: subsidiary });
                     sublist.setSublistValue({ id: "datecreated", line: i, value: created });
                     sublist.setSublistValue({ id: "created_by", line: i, value: employee });
-                    log.error("whtType", whtType)
+                    
                     let whtTypeTemp = whtType == "header" ? this.translations.LMRY_HEADER : this.translations.LMRY_LINE;
                     sublist.setSublistValue({ id: "wht_type", line: i, value: whtTypeTemp });
-                    log.error("process", process)
+                    
                     let processTemp = process == "purchases" ? this.translations.LMRY_PURCHASES : this.translations.LMRY_SALES;
                     sublist.setSublistValue({ id: "process", line: i, value: processTemp });
 
