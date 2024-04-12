@@ -13,8 +13,9 @@ define(['N/runtime',
     'N/ui/message',
     'SuiteBundles/Bundle 37714/Latam_Library/LMRY_Log_LBRY_V2.0',
     'N/url',
-    'N/currentRecord'],
-    (runtime, search, record, format, message, lbryLog, urlApi, currentRecord) => {
+    'N/currentRecord',
+    'SuiteBundles/Bundle 37714/Latam_Library/LMRY_libSendingEmailsLBRY_V2.0'],
+    (runtime, search, record, format, message, lbryLog, urlApi, currentRecord, LibraryMail) => {
         const STLT_ID = 'customscript_lmry_ar_mass_gene_agip_stlt';
         let DEPLOY_ID, handler;
 
@@ -68,7 +69,7 @@ define(['N/runtime',
                       
                 return true
             }
-
+            /*
             saveRecord(context) {
                 try {
                     this.currentRecord = context.currentRecord;
@@ -85,12 +86,26 @@ define(['N/runtime',
                         return false;
                     }
 
+                    if (!this.validateFeatureMassive()) {
+                        return false;
+                    }
+
                 } catch (err) {
                     this.handleError('[ saveRecord ]', err);
                     return false;
                 }
 
                 return true;
+            }
+            */
+            saveRecord(context) {
+                try {
+                    this.currentRecord = context.currentRecord;
+                    return this.validateMandatoryFields() && this.validateExecution() && this.createRecordLog() && this.validateFeatureMassive();
+                } catch (err) {
+                    this.handleError('[ saveRecord ]', err);
+                    return false;
+                }
             }
 
             setPeriod() {
@@ -152,17 +167,7 @@ define(['N/runtime',
                     'custpage_period',
                     'custpage_entity_type'
                 ];
-                /*
-                if (this.FEAT_SUBS) {
-                    mandatoryFields.unshift('custpage_subsidiary');
-                }
-                if (periodTypeValue == "month") {
-                    mandatoryFields.push('custpage_period');
-                } else {
-                    mandatoryFields.push('custpage_start_date');
-                    mandatoryFields.push('custpage_end_date');
-                }
-                */
+                
                 const isFieldInvalid = (fieldId) => {
                     const value = recordObj.getValue({ fieldId });
                     console.log(fieldId, value)
@@ -223,7 +228,14 @@ define(['N/runtime',
                 return true;
             }
 
+            validateFeatureMassive(){
+                const subsidiary = this.currentRecord.getValue({ fieldId: 'custpage_subsidiary' });
+                const licenses = this.FEAT_SUBS
+                    ? LibraryMail.getAllLicenses()[subsidiary]
+                    : LibraryMail.getLicenses(1);
 
+                return LibraryMail.getAuthorization(1092, licenses)
+            }
             createRecordLog() {
                 try {
                     console.log(' createRecordLog start');
