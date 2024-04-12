@@ -104,7 +104,7 @@ define(['N/runtime',
             saveRecord(context) {
                 try {
                     this.currentRecord = context.currentRecord;
-                    return this.validateMandatoryFields() && this.validateExecution() && this.createRecordLog() && this.validateFeatureMassive();
+                    return this.validateMandatoryFields() && this.validateExecution() && this.validateFeatureMassive() && this.createRecordLog() ;
                 } catch (err) {
                     this.handleError('[ saveRecord ]', err);
                     return false;

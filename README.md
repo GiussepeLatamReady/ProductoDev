@@ -72,14 +72,7 @@
 + 35754 (development environment)
 
 ## Observations
- En las transacciones 
- Invoice
- Creditmemo
- Estimate
- Sales order
- Cash Sale
-
-Se pone la logica de percepciones en el after submit y se quita del before submit
+ 
 
 ## Error
 No puede cambiar el artículo en esta línea porque tiene un elemento de ingreso existente. Elimine la línea e ingrese una nueva línea para corregir el elemento.

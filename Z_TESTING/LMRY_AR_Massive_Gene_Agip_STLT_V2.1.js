@@ -418,8 +418,10 @@ define([
             }
  
             getRecords() {
-                let data = [];
 
+                
+                let data = [];
+                const jsonPeriods = this.getPeriod();
                 let search_log = search.create({
                     type: "customrecord_lmry_ar_massive_gener_agip",
                     filters:
@@ -444,13 +446,13 @@ define([
                         let page = pageData.fetch({ index: pageRange.index });
                         page.data.forEach(function (result) {
                             let columns = result.columns;
-                            log.error("result",result);
+                           
                             let formublist = {};
                             formublist.id = result.getValue(columns[0]) || ' ';
                             formublist.subsidiary = result.getText(columns[1]) || ' ';
                             formublist.created = result.getValue(columns[2]) || ' ';
                             formublist.employee = result.getText(columns[3]) || ' ';
-                            formublist.period = result.getText(columns[4]) || ' ';
+                            formublist.period = jsonPeriods[result.getValue(columns[4])] || ' ';
                             formublist.description = result.getValue(columns[5]) || ' ';
                             formublist.status = result.getValue(columns[6]) || ' ';
                             formublist.urlFile = result.getValue(columns[7]);
@@ -579,6 +581,31 @@ define([
             }
             setParams(parameters){
                 this.params = parameters;
+            }
+
+            getPeriod(){
+                let jsonPeriod = {};
+                const search_log = search.create({
+                    type: "accountingperiod",
+                    columns:
+                        [
+                            "internalid",
+                            "periodname"
+                        ]
+                });
+                let pageData = search_log.runPaged({ pageSize: 1000 });
+                if (pageData) {
+                    pageData.pageRanges.forEach(function (pageRange) {
+                        let page = pageData.fetch({ index: pageRange.index });
+                        page.data.forEach(function (result) {
+                            const id  = result.getValue("internalid");
+                            const periodname = result.getValue("periodname") || ' ';
+                            jsonPeriod[id] = periodname;
+                        });
+                    });
+                }
+                log.error("jsonPeriod",jsonPeriod);
+                return jsonPeriod;
             }
 
         }
