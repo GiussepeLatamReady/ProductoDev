@@ -225,9 +225,7 @@ define([
             const AGIPObject = new lbryAGIP.AGIPTXT(fileResults[0].id, [entity], period, subsidiary);
             const infoCC = AGIPObject.getListContributoryClass();
             if (infoCC.length > 0) {
-                log.debug('infoCC', infoCC);
-                log.debug('infoCC[0]',infoCC[0]);
-                log.debug('infoCC[0].createSetup', infoCC[0].createSetup);
+
                 const objResult = { 
                     message: 'Successful creation', 
                     createSetup: infoCC[0][0].createSetup, 
