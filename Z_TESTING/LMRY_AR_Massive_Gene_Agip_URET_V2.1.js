@@ -17,6 +17,7 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/url'], (runtime, server
                 mainUIManager.hiddenFields();
                 mainUIManager.buildTable();
                 mainUIManager.loadTable();
+                mainUIManager.getButtomResponse();
             }
         } catch (error) {
             log.error('Error beforeLoad ', error)
@@ -34,6 +35,7 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/url'], (runtime, server
             this.subsidiaries = [];
             this.scriptContext = scriptContext;
             this.form = scriptContext.form;
+            this.newRecord = scriptContext.newRecord;
         }
 
         buildTable() {
@@ -59,7 +61,7 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/url'], (runtime, server
                 { id: 'custpage_col_cuit', label: "CUIT", type: serverWidget.FieldType.TEXT },
                 { id: 'custpage_col_created_from', label: this.translations.LMRY_CREATED_FROM, type: serverWidget.FieldType.TEXT },
                 { id: 'custpage_col_contributory_class', label: this.translations.LMRY_CC, type: serverWidget.FieldType.TEXT },
-                { id: 'custpage_col_status', label: this.translations.LMRY_STATUS, type: serverWidget.FieldType.TEXT},
+                { id: 'custpage_col_status', label: this.translations.LMRY_STATUS, type: serverWidget.FieldType.TEXTAREA},
             ];
             fields.forEach(fieldInfo => {
                 this.sublist.addField(fieldInfo);
@@ -101,12 +103,22 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/url'], (runtime, server
 
                 const title = jsonStatus[status];
                 let htmlStatus;
+                /*
                 if (status=="n") {
 
                     htmlStatus = title + " : " + message
                 }else{
                     htmlStatus = title;
                 }
+                */
+                const JsonMessage = this.translations[message];
+                htmlStatus= `
+                        <div style="display:flex; flex-direction: column; justify-content: center;">
+                            <h3>${title}</h3>
+                            ${status=="n" &&  JsonMessage ? `<span style="font-size: 0.9em; font-style: italic; margin: 5px 0">${JsonMessage}</span>`:""}
+                        </div>
+                        
+                    `;
                
                 setSublistValue("custpage_col_status", htmlStatus);
                 
@@ -197,8 +209,28 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/url'], (runtime, server
         }
 
         hiddenFields() {
-            let jsonTransactions = this.form.getField('custrecord_lmry_ar_gen_agip_entities');
-            jsonTransactions.updateDisplayType({ displayType: 'hidden' });
+
+            const fieldsHideen = ['custrecord_lmry_ar_gen_agip_entities','custrecord_lmry_ar_gen_agip_summary','custrecord_lmry_ar_gen_agip_url'];
+            fieldsHideen.forEach(field => this.form.getField(field).updateDisplayType({ displayType: 'hidden' }));
+        }
+
+        getButtomResponse(){
+            const responseField = this.form.addField({
+                id: "custpage_response",
+                type: serverWidget.FieldType.TEXTAREA,
+                label: "File"
+            });
+            const urlFile = this.newRecord.getValue("custrecord_lmry_ar_gen_agip_url");
+            if (urlFile) {
+                const htmlUrlFile = `
+                            <a href="${urlFile}" target="_blank" >
+                                Response.csv
+                            </a>
+                            `;
+                responseField.defaultValue = htmlUrlFile;
+            }
+            
+            
         }
 
 
@@ -223,6 +255,10 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/url'], (runtime, server
                     "LMRY_PROCESING_CHECK": "Procesada con éxito",
                     "LMRY_REFRESH": "Actualizar Pagina",
                     "LMRY_CREATED_FROM": "Creado desde",
+                    "LMRY_NOT_PROCESING": "No procesada",
+                    "LMRY_PROCESING_CHECK": "Procesada con éxito",
+                    "LMRY_NOT_TAX_APPLY": "Entidad no registrada o con configuración incorrecta",
+                    "LMRY_NOT_LIST": "No se ha encontrado ninguna lista para este periodo",
                 },
                 "en": {
                     "LMRY_ENTITIES": "Entities",
@@ -239,6 +275,8 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/url'], (runtime, server
                     "LMRY_PROCESING_CHECK": "Successfully Processed",
                     "LMRY_REFRESH": "Refresh",
                     "LMRY_CREATED_FROM": "Created from",
+                    "LMRY_NOT_TAX_APPLY": "Entity not registered or incorrectly configured",
+                    "LMRY_NOT_LIST": "No list was found for this period",
                 }
             }
             return translatedFields[lenguage];

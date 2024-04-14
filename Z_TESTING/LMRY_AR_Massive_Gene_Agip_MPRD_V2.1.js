@@ -99,12 +99,6 @@ define([
                 const idsNoProcess = results.filter(([key, value]) => value === 'N').map(([id]) => id);
                 let idsError = entityIds.filter(id => !idsSuccess.includes(id));
                 idsError = idsError.filter(id => !idsNoProcess.includes(id));
-                /*
-                const transactions = [
-                    ...idsSuccess.map(id => ({id, state: 's', createSetup:jsonResult[id][2].createSetup})),
-                    ...idsError.map(id => ({id, state: 'e',createSetup:0}))
-                ];
-                */
 
                 /* 
                     ["id de la entidad",                                    0
@@ -200,6 +194,11 @@ define([
         }
 
         let createContributoryclass = ({ entity, period, subsidiary }) => {
+
+            let language = runtime.getCurrentScript().getParameter({ name: "LANGUAGE" }).substring(0, 2);
+            language = language === "es" ? language : "en";
+            const translations = getTranslations(language);
+
             const fileResults = query
                 .runSuiteQL({
                     query: `
@@ -219,7 +218,7 @@ define([
                 })
                 .asMappedResults();
             if (fileResults.length <= 0) {
-                return { message: 'No list was found for this period' };
+                return { message: "LMRY_NOT_LIST" };
             }
 
             //log.debug('entity', lisEntitys);
@@ -236,7 +235,7 @@ define([
                 }
                 return objResult;
             } else {
-                return { message: 'No tax applicable' };
+                return { message: "LMRY_NOT_TAX_APPLY" };
             }
         }
 
@@ -290,7 +289,7 @@ define([
                 const title = jsonStatus[status];
                 let resultStatus;
                 if (status == "n") {
-                    resultStatus = title + " : " + message;
+                    resultStatus = title + " : " + (translations[message] || " ");
                 } else {
                     resultStatus = title;
                 }
@@ -454,17 +453,21 @@ define([
                     "LMRY_ERROR": "Error",
                     "LMRY_NOT_PROCESING": "No procesada",
                     "LMRY_PROCESING_CHECK": "Procesada con éxito",
+                    "LMRY_NOT_TAX_APPLY": "Entidad no registrada o con configuración incorrecta",
+                    "LMRY_NOT_LIST": "No se ha encontrado ninguna lista para este periodo",
                 },
                 "en": {
                     "LMRY_ID": "ID Entity",
                     "LMRY_NAME": "Entity",
-                    "LMRY_CREATED": "Creada desde",
+                    "LMRY_CREATED": "Created from",
                     "LMRY_CCID": "Id Contributory Class",
                     "LMRY_STATUS": "Status",
                     "LMRY_PROCESING": "Processing",
                     "LMRY_ERROR": "Error",
                     "LMRY_NOT_PROCESING": "Not Processed",
                     "LMRY_PROCESING_CHECK": "Successfully Processed",
+                    "LMRY_NOT_TAX_APPLY": "Entity not registered or incorrectly configured",
+                    "LMRY_NOT_LIST": "No list was found for this period",
 
                 }
             }

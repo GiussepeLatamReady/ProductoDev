@@ -180,7 +180,7 @@ define(['N/file', 'N/search', 'N/runtime', 'N/record', 'N/log', 'N/query', 'N/fo
             
             const iterator = this.file.lines.iterator();
             let contador = 0;
-
+            
             iterator.each((/** @type {{value:string}} */ line) => {
                 const lineValues = line.value.split(';');
                 const index = entityIDS.indexOf(Number(lineValues[3]));
@@ -259,8 +259,10 @@ define(['N/file', 'N/search', 'N/runtime', 'N/record', 'N/log', 'N/query', 'N/fo
             });
             
             listCuitsByEntity.forEach((entity) => {
+                log.error("flag","antes")
+                log.error("this.typeEntity",this.typeEntity)
                 if ((this.typeEntity === 'customer' && entity.stateBuenosAires) || this.typeEntity === 'vendor') {
-                    
+                    log.error("flag","entre")
                     this.listContributoryClass.push({
                         key: contador,
                         values: [

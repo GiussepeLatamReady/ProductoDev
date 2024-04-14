@@ -296,7 +296,7 @@ define([
                     { id: "datecreated", label: this.translations.LMRY_CREATION_DATE_LABEL, type: serverWidget.FieldType.TEXT },
                     { id: "created_by", label: this.translations.LMRY_CREATED_BY_LABEL, type: serverWidget.FieldType.TEXT },
                     { id: "period", label: this.translations.LMRY_PERIOD, type: serverWidget.FieldType.TEXT },
-                    { id: "description", label: this.translations.LMRY_DESCRIPTION, type: serverWidget.FieldType.TEXT },
+                    { id: "summary", label: this.translations.LMRY_SUMMARY, type: serverWidget.FieldType.TEXTAREA },
                     { id: "details", label: this.translations.LMRY_DETAILS, type: serverWidget.FieldType.TEXTAREA },
                     { id: "result", label: this.translations.LMRY_RESULTS, type: serverWidget.FieldType.TEXTAREA},
                     { id: "status", label: this.translations.LMRY_STATUS, type: serverWidget.FieldType.TEXT }
@@ -310,11 +310,7 @@ define([
                     }
                 });
 
-                this.sublist.addButton({
-                    id: "custpage_btnrefresh",
-                    label: this.translations.LMRY_REFRESH,
-                    functionName: 'reload()'
-                });
+                this.sublist.addRefreshButton();
 
                 return this.sublist;
             }
@@ -352,7 +348,7 @@ define([
                 let sublist = this.form.getSublist({ id: 'custpage_results_list' });
                 const count = data.length;
                 data.forEach((form, i) => {
-                    const { id, subsidiary, created, employee, period, description, status, urlFile } = form;
+                    const { id, subsidiary, created, employee, period, summary, status, urlFile } = form;
                     const setSublistValue = (colId, value) => sublist.setSublistValue({ id: colId, line: i, value });
                     const recordUrl = url.resolveRecord({ recordType: "customrecord_lmry_ar_massive_gener_agip", recordId: id, isEditMode: false });
                     const urlID = `
@@ -364,20 +360,13 @@ define([
 
 
 
-
-
-
-
-
-
-
                     setSublistValue("number",id)
                     setSublistValue("subsidiary",subsidiary)
                     setSublistValue("datecreated",created)
                     setSublistValue("created_by",employee)
                     setSublistValue("period",period)
                     setSublistValue("details",urlID)
-                    setSublistValue("description",description)
+                    setSublistValue("summary",this.getSummary(summary));
                     let statusResult = "Loading data";
                     switch (status) {
                         case "Finish":
@@ -399,13 +388,19 @@ define([
                     if (urlFile) {
                             const htmlUrlFile = `
                             <a href="${urlFile}" target="_blank" style="text-decoration: none; color: inherit;">
-    <div style="display: grid; place-items: center; background: white; border-radius: 6px; transition: background-color 0.3s; border: 0.5px solid #b3ecae;" onmouseover="this.style.backgroundColor='#b3ecae'" onmouseout="this.style.backgroundColor='white';">
-        <div style="color: color:#424950; font-size: 14px;">${"Response"}</div>
-    </div>
-</a>`;
+                                <div style="display: grid; place-items: center; background: white; border-radius: 6px; transition: background-color 0.3s; border: 0.5px solid #b3ecae;" onmouseover="this.style.backgroundColor='#b3ecae'" onmouseout="this.style.backgroundColor='white';">
+                                    <div style="color: color:#424950; font-size: 14px;">${"Response"}</div>
+                                </div>
+                            </a>
+                            `;
                         setSublistValue("result", htmlUrlFile)
                     }
-                    
+                    statusResult= `
+                        <div style ="display: flex; align-items: center; height:80%">
+                            <h3>${statusResult}</h3>
+                        </div>
+                        
+                    `;
                     setSublistValue("status",statusResult)
 
                     // Falata detalles y resultados
@@ -431,13 +426,14 @@ define([
                     columns:
                         [
                             search.createColumn({ name: "internalid", sort: search.Sort.DESC }),
-                            "custrecord_lmry_ar_gen_agip_subsidiary",
+                            "custrecord_lmry_ar_gen_agip_subsidiary.legalname",
                             "created",
                             "custrecord_lmry_ar_gen_agip_user",
                             "custrecord_lmry_ar_gen_agip_period",
-                            "custrecord_lmry_ar_gen_agip_details",
+                            "custrecord_lmry_ar_gen_agip_summary",
                             "custrecord_lmry_ar_gen_agip_status",
-                            "custrecord_lmry_ar_gen_agip_url"
+                            "custrecord_lmry_ar_gen_agip_url",
+                            
                         ]
                 });
                 let pageData = search_log.runPaged({ pageSize: 1000 });
@@ -449,11 +445,11 @@ define([
                            
                             let formublist = {};
                             formublist.id = result.getValue(columns[0]) || ' ';
-                            formublist.subsidiary = result.getText(columns[1]) || ' ';
+                            formublist.subsidiary = result.getValue(columns[1]) || ' ';
                             formublist.created = result.getValue(columns[2]) || ' ';
                             formublist.employee = result.getText(columns[3]) || ' ';
                             formublist.period = jsonPeriods[result.getValue(columns[4])] || ' ';
-                            formublist.description = result.getValue(columns[5]) || ' ';
+                            formublist.summary = result.getValue(columns[5]);
                             formublist.status = result.getValue(columns[6]) || ' ';
                             formublist.urlFile = result.getValue(columns[7]);
                             data.push(formublist);
@@ -464,17 +460,30 @@ define([
                 return data;
             }
 
+            getSummary(summary) {
+                if (!summary) return " ";
 
-            getRedirectParams() {
-                let params = this.params;
-                return {
-                    subsidiary: params.custpage_subsidiary || '',
-                    whtType: params.custpage_wht_type || '',
-                    accoutingPeriod: params.custpage_period || '',
-                    typeProcess: params.custpage_wht_process || '',
-                    status: '1'
-                };
+                const jsonSummary = JSON.parse(summary);
+                const { s, p, n, e } = jsonSummary;
+                const total = s + p + n + e;
+
+                const getLi = (count, text, color) => count === 0 ? '' : `<li style="color: ${color};" margin: 5px 0>${count} ${text}</li>`;
+
+                const html = `
+                  <div style="display:flex; flex-direction: column; justify-content: center; align-items: center;  height: 80%; font-family: Arial, sans-serif;">
+                    <h3 style="margin-top: 20px;">${total} ${this.translations.LMRY_ENTITIES_FOUND}</h3>
+                    <ul style="margin-top: 10px; padding-left: 0px;">
+                      ${getLi(s, this.translations.LMRY_SUCESS, 'rgb(18, 179, 18)') }
+                      ${getLi(p, this.translations.LMRY_PROCESING, 'blue')}
+                      ${getLi(n, this.translations.LMRY_RAW, 'orange')}
+                      ${getLi(e, this.translations.LMRY_WITH_ERROR, 'red')}
+                    </ul>
+                  </div>
+                `.trim().replace(/\s+/g, ' ');
+
+                return html;
             }
+
 
             getTranslations(language) {
                 const translatedFields = {
@@ -497,18 +506,21 @@ define([
                         "LMRY_CREATION_DATE_LABEL": "Fecha de Creación",
                         "LMRY_CREATED_BY_LABEL": "Creado por",
                         "LMRY_PERIOD": "Periodo",
-                        "LMRY_DESCRIPTION": "Descripción",
                         "LMRY_STATUS": "Estado",
                         "LMRY_REFRESH": "Actualizar",
                         "LMRY_FINISH": "Finalizado",
                         "LMRY_LOADING_DATA": "Cargando datos",
                         "LMRY_ERROR": "Ocurrió un error",
                         "LMRY_PROCESING": "Procesando",
-                        "LMRY_DESCRIPTION": "Descripción",
+                        "LMRY_SUMMARY": "Resumen",
                         "LMRY_DETAILS": "Detalles",
                         "LMRY_NUMBER":"Posicion",
                         "LMRY_RECORD":"Registro",
-                        "LMRY_VIEW":"Ver"
+                        "LMRY_VIEW":"Ver",
+                        "LMRY_SUCESS":"con éxito",
+                        "LMRY_RAW":"sin procesar",
+                        "LMRY_WITH_ERROR":"con error",
+                        "LMRY_ENTITIES_FOUND":"entidades encontradas",
                     },
                     "en": {
                         "LMRY_MESSAGE": "Message",
@@ -529,18 +541,21 @@ define([
                         "LMRY_CREATION_DATE_LABEL": "Creation Date",
                         "LMRY_CREATED_BY_LABEL": "Created By",
                         "LMRY_PERIOD": "Period",
-                        "LMRY_DESCRIPTION": "Description",
+                        "LMRY_SUMMARY": "Summary",
                         "LMRY_STATUS": "Status",
                         "LMRY_REFRESH": "Refresh",
                         "LMRY_FINISH": "Finished",
                         "LMRY_LOADING_DATA": "Loading Data",
                         "LMRY_ERROR": "An Error Occurred",
                         "LMRY_PROCESING": "Processing",
-                        "LMRY_DESCRIPTION": "Description",
                         "LMRY_DETAILS": "Details",
                         "LMRY_NUMBER":"Position",
                         "LMRY_RECORD":"Record",
-                        "LMRY_VIEW":"View"
+                        "LMRY_VIEW":"View",
+                        "LMRY_SUCESS":"successful",
+                        "LMRY_RAW":"unprocessed",
+                        "LMRY_WITH_ERROR":"with error",
+                        "LMRY_ENTITIES_FOUND":"entities found",
                     }  
                 }
                 return translatedFields[language];

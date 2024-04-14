@@ -72,35 +72,7 @@ define(['N/runtime',
                       
                 return true
             }
-            /*
-            saveRecord(context) {
-                try {
-                    this.currentRecord = context.currentRecord;
-
-                    if (!this.validateMandatoryFields()) {
-                        return false;
-                    }
-
-                    if (!this.validateExecution()) {
-                        return false;
-                    }
-
-                    if (!this.createRecordLog()) {
-                        return false;
-                    }
-
-                    if (!this.validateFeatureMassive()) {
-                        return false;
-                    }
-
-                } catch (err) {
-                    this.handleError('[ saveRecord ]', err);
-                    return false;
-                }
-
-                return true;
-            }
-            */
+           
             saveRecord(context) {
                 try {
                     this.currentRecord = context.currentRecord;
@@ -236,8 +208,15 @@ define(['N/runtime',
                 const licenses = this.FEAT_SUBS
                     ? LibraryMail.getAllLicenses()[subsidiary]
                     : LibraryMail.getLicenses(1);
-                alert(this.transalations.LMRY_ACTIVE_FEATURE)
-                return LibraryMail.getAuthorization(1092, licenses)
+                
+                const active = LibraryMail.getAuthorization(1092, licenses);
+                if (active) {
+                    return true;
+                } else{
+                    alert(this.transalations.LMRY_ACTIVE_FEATURE);
+                    return false;
+                }
+                
             }
             createRecordLog() {
                 try {
@@ -288,10 +267,10 @@ define(['N/runtime',
             getTranslations(country) {
                 const translatedFields = {
                     "es": {
-                        "LMRY_ACTIVE_FEATURE": "Active la carasteristica: Generacion masiva AGIP",
+                        "LMRY_ACTIVE_FEATURE": "Active la caracteristica por subsidiaria: Generacion masiva AGIP",
                     },
                     "en": {
-                        "LMRY_ACTIVE_FEATURE": "Activate the feature: AGIP massive generation",
+                        "LMRY_ACTIVE_FEATURE": "Activate the feature by subsidiary: AGIP massive generation",
                     }
                 }
                 return translatedFields[country];

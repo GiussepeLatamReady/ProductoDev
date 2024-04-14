@@ -1,30 +1,20 @@
-<div style="background-color:red; display:flex; justify-content:center; height:30px; margin:5px;">
-    <button style="padding:0px 10px; background-color:#007bff; border-radius:4px; color:white; font-size:10px; cursor:pointer; transition:background-color 0.3s;" onclick="window.open('${recordUrl}', '_blank')" onmouseover="this.style.backgroundColor='#0056b3'" onmouseout="this.style.backgroundColor='#007bff'">
-      ${this.translations.LMRY_VIEW}
-    </button>
-</div>`;
-
-
-<style>.menu-arba{text-align:center}.item-arba{border:1px solid #ffffff;display:grid}.item-arba-retry{border:1px solid red;display:grid}.item-arba:hover{cursor:pointer;border:1px solid #424950;background-color:#87ceeb;color:blue}.item-link-arba{text-decoration:none}.item-arba-retry:hover{cursor:pointer;border:1px solid #c23b22;background-color:red;color:white}</style>
-<ul class='menu-arba'>
-    <li class='item-arba'>
-        <a class='item-link-arba' href='${urlval}&logId=${lg_id}'>${translations.get(Language, 16)}</a>
-    </li>
-    <li class='item-arba'>
-        <a class='item-link-arba' href='${urlval}&status=${lg_id}'>${translations.get(Language, 25)}</a>
-    </li>
-    ${((idEntityError != "" && lg_est == "Finalizado" && !frases.some(palabra => lg_des.includes(palabra))) ? "<li class='item-arba-retry'> <a class='item-link-arba' href='" + urlval + "&retry=" + lg_id + "'>" + translations.get(Language, "Reintentar") + "<a></li>" : "")}
-</ul>
-
-
-const urlID = `<a href="${recordUrl}" target="_blank" style="text-decoration: none; color: inherit;">
-    <div style="display: grid; place-items: center; background: blue; border-radius: 6px; transition: background-color 0.3s; padding: 10px; background: blue; border-radius: 6px;" onmouseover="this.style.backgroundColor='#0056b3'; this.style.color='white'" onmouseout="this.style.backgroundColor='blue'; this.style.color='inherit'">
-        <div style="color: white; font-size: 14px;">${this.translations.LMRY_VIEW}</div>
-    </div>
-</a>`;
-
-<a href="${urlFile}" target="_blank" style="text-decoration: none; color: inherit;">
-    <div style="display: grid; place-items: center; background: white; border-radius: 6px; transition: background-color 0.3s; border: 0.5px solid #b3ecae;" onmouseover="this.style.backgroundColor='#b3ecae'" onmouseout="this.style.backgroundColor='white';">
-        <div style="color: color:#424950; font-size: 14px;">${"Response"}</div>
-    </div>
-</a>
+<a href="response.csv" download style="display: inline-block; position: relative; color: #333; text-decoration: none; font-size: 16px; padding: 10px 20px; transition: color 0.3s, box-shadow 0.3s; border-radius: 4px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);">
+    <span style="position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background-color: #4CAF50; transform: scaleX(0); transition: transform 0.3s;"></span>
+    <i class="fas fa-file-csv" style="margin-right: 5px; color: #4CAF50; transition: color 0.3s;"></i>
+    Descargar response.csv
+  </a>
+  
+  <style>
+    a:hover {
+      color: #4CAF50;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    
+    a:hover span {
+      transform: scaleX(1);
+    }
+    
+    a:hover i {
+      color: #45a049;
+    }
+  </style>
