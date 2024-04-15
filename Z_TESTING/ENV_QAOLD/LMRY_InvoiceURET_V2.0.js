@@ -1875,7 +1875,7 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
                 if (LMRY_Result[0] == 'AR' && (type_event == 'create' || type_event == 'edit' || type_event == 'copy')) {
                     Library_AutoPercepcionDesc.processDiscount(scriptContext);
                     if (Library_Mail.getAuthorization(142, licenses)) {
-                        Library_AutoPercepcionDesc.autoperc_beforeSubmit(scriptContext, LMRY_Result[0], scriptContext.type);
+                        Library_AutoPercepcionDesc.processPerception(scriptContext, LMRY_Result[0], scriptContext.type);
                     }
                 }
 
