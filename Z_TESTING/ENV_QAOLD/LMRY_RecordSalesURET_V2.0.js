@@ -712,25 +712,7 @@ define(['N/config', 'N/currency', 'N/record', 'N/runtime', 'N/search', 'N/ui/ser
 
                 var LMRY_Result = ValidateAccessTransaction(RCD_OBJ);
                 if (scriptContext.type != 'delete') {
-                    // Para todos los paises que tengan acceso
-                    log.debug('LMRY_Result', LMRY_Result);
-                    
-                    if (LMRY_Result[2] == true && RCD_OBJ.getValue({ fieldId: 'memo' }) != 'VOID') {
-                        
-                        var swAutoPe = false;
-                        if (LMRY_Result[0] == 'AR') {
-                            swAutoPe = Library_Mail.getAuthorization(142, licenses);
-                        }
-                        // Si hay acceso Procesa
-                        if (ST_FEATURE == false || ST_FEATURE == "F") {
-                            if (swAutoPe) {
-                                // Realiza el seteo de percepciones
-                                //Library_AutoPercepcionDesc.autoperc_beforeSubmit(scriptContext, LMRY_Result[0], scriptContext.type);
-                            }
-                        }
-
-                    }
-                    
+                                       
                     if (LMRY_Result[0] == 'AR') {
                         var feaUnitPrice = Library_Mail.getAuthorization(1089, licenses);
                         if (feaUnitPrice) {
@@ -840,17 +822,11 @@ define(['N/config', 'N/currency', 'N/record', 'N/runtime', 'N/search', 'N/ui/ser
                 if (LMRY_countr[0] == 'AR' && (type_event == 'create' || type_event == 'edit' || type_event == 'copy')) {
 
                     Library_AutoPercepcionDesc.processDiscount(scriptContext);
-                    var swAutoPe = false;
-                    if (LMRY_countr[0] == 'AR') {
-                        swAutoPe = Library_Mail.getAuthorization(142, licenses);
+                    if (Library_Mail.getAuthorization(142, licenses)) {
+                        // Realiza el seteo de percepciones
+                        Library_AutoPercepcionDesc.processPerception(scriptContext, LMRY_countr[0], scriptContext.type);
                     }
-                    // Si hay acceso Procesa
-                    if (ST_FEATURE == false || ST_FEATURE == "F") {
-                        if (swAutoPe) {
-                            // Realiza el seteo de percepciones
-                            Library_AutoPercepcionDesc.autoperc_beforeSubmit(scriptContext, LMRY_countr[0], scriptContext.type);
-                        }
-                    }
+                    
                 }
 
             } catch (err) {

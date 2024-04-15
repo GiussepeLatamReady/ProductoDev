@@ -8,7 +8,7 @@
   ||  2.0     Jan 29 2018  LatamReady    Update Contries          ||
    \= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = */
 /**
- * @NApiVersion 2.x
+ * @NApiVersion 2.0
  * @NModuleScope Public
  */
 
@@ -44,7 +44,7 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
 
         var sumaPercepciones = 0;
 
-        function autoperc_beforeSubmit(paramContext, CodeCountry, evento) {
+        function processPerception(paramContext, CodeCountry, evento) {
 
             try {
 
@@ -110,7 +110,7 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
                 }
 
                 var transaction = {
-                    applyWhtCode: invoiceRecord.getValue('custbody_lmry_apply_wht_code'),
+                    applyWhtCode: isValid(invoiceRecord.getValue('custbody_lmry_apply_wht_code')),
                     documentType: invoiceRecord.getValue("custbody_lmry_document_type"),
                     eiStatus: {
                         field: invoiceRecord.getField({ fieldId: 'custbody_psg_ei_status' }),
@@ -126,6 +126,7 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
                     currency: invoiceRecord.getValue("currency"),
                     countryCode: CodeCountry,
                     createdFrom: invoiceRecord.getValue("createdfrom"),
+                    unapplied: Number(invoiceRecord.getValue("unapplied")),
                 }
 
                 
@@ -192,7 +193,7 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
                 //Busqueda de las Clases Contributiva
                 const contributoryClass = getContributoryClass(transaction);
                 log.error('contributoryClass', contributoryClass);
-                log.error("transaction", transaction)
+                log.error("calculatePerception transaction 1", transaction)
                 transaction.currentRecord = invoiceRecord;
 
                 
@@ -208,10 +209,11 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
                             setLinePerception("2", contributoryClass, transaction, setupTaxSubsidiary, item);
                         })
                     }
-                    removePerceptionLines(transaction);
+                    
                 }
-                transaction.currentRecord.save();
 
+                removePerceptionLines(transaction);
+                transaction.currentRecord.save();
             } catch (errmsg) {
                 log.error("Error [calculatePerception]", errmsg)
                 // Envio de mail con errores
@@ -659,16 +661,11 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
             var lineuniquekePerception;
             var items = transaction.items
             var lines = transaction.currentRecord.getLineCount('item');
-            log.error("lines",lines)
-            log.error("items",items)
+            
             for (var i = 0; i < lines; i++) {
                 var memoCode = recordTax.key + recordTax.internalid
                 var unikey = transaction.currentRecord.getSublistValue('item', 'lineuniquekey', i);
-                var Amount = transaction.currentRecord.getSublistValue('item', 'amount', i);
                 var item = items[unikey];
-                log.error("unikey",unikey)
-                log.error("item",item)
-                log.error("Amount",Amount)
                 if (item) {
                     if (recordTax.appliesTo == "2") {
                         memoCode += " - " + itemLine.lineuniquekey;  
@@ -764,6 +761,27 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
             }
 
             return exchangerate;
+        }
+
+        function validateCreditMemoPartials(transaction){
+          
+          if (!transaction.createdFrom) return true;
+          var recordType = search.lookupFields({
+            type: 'transaction',
+            id: transaction.createdFrom,
+            columns: ['recordType','fxamount']
+          }).recordType;
+
+          if (recordType == "returnauthorization") {
+            
+          }else{
+             return transaction.unapplied == 0;
+          }
+
+        }
+
+        function isValid(bool) {
+          return (bool === "T" || bool === true);
         }
 
         /* ***************************************************
@@ -897,6 +915,8 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
                     deletedTransactions.push(items[lineuniquekey].line);
                 }
             })
+
+            deletedTransactions.sort(function(a, b){ return b - a} );
             log.error("deletedTransactions", deletedTransactions);
             deletedTransactions.forEach(function (id) {
                 transaction.currentRecord.removeLine({
@@ -1843,7 +1863,7 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
           }
         // Regresa la funcion para el User Event
         return {
-            autoperc_beforeSubmit: autoperc_beforeSubmit,
+            processPerception: processPerception,
             disabledSalesDiscount: disabledSalesDiscount,
             processDiscount: processDiscount,
             setDiscountRate: setDiscountRate

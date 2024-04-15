@@ -78,7 +78,7 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
          */
         function beforeLoad(scriptContext) {
             try {
-                log.debug('scriptContext.type beforeload', scriptContext.type);
+
                 ST_FEATURE = runtime.isFeatureInEffect({
                     feature: "tax_overhauling"
                 });
@@ -852,7 +852,7 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
                 if (scriptContext.type == "copy" && LMRY_Result[0] == "MX" && Library_Mail.getAuthorization(672, licenses) == true) {
                     libraryTaxWithholding.resetLines(RCD_OBJ);
                 }
-
+                /*
                 if (LMRY_Result[0] == 'AR') {
                     if (type_interface == 'USERINTERFACE') {
                         Library_AutoPercepcionDesc.disabledSalesDiscount(OBJ_FORM);
@@ -862,6 +862,7 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
                     }
                     Library_AutoPercepcionDesc.removePerceptionLines(RCD_OBJ);
                 }
+                */
                 if (LMRY_Result[0] == 'BR' && (scriptContext.type == "create" || scriptContext.type == "edit" || scriptContext.type == "view" || scriptContext.type == "copy")) {
                     librarySecondClient.setSecondClient(RCD_OBJ, OBJ_FORM, scriptContext.type);
                 }
@@ -883,7 +884,7 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
          */
         function beforeSubmit(scriptContext) {
             try {
-                log.debug('scriptContext.type beforesubmit', scriptContext.type);
+
                 ST_FEATURE = runtime.isFeatureInEffect({
                     feature: "tax_overhauling"
                 });
@@ -1126,6 +1127,8 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
                          * Auto Percepcions para Argentina,
                          * Brasil y Paraguay antes // Ahora los 14 paises
                          *************************************/
+
+                        /*
                         var swAutoPe = false;
                         if (LMRY_Result[0] == 'AR') {
                             swAutoPe = Library_Mail.getAuthorization(142, licenses);
@@ -1177,6 +1180,7 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
                                 Library_AutoPercepcionDesc.autoperc_beforeSubmit(scriptContext, LMRY_Result[0], scriptContext.type);
                             }
                         }
+                        */
 
                     }
                 }
@@ -1458,7 +1462,7 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
          */
         function afterSubmit(scriptContext) {
             try {
-                log.debug('scriptContext.type after', scriptContext.type);
+
                 ST_FEATURE = runtime.isFeatureInEffect({
                     feature: "tax_overhauling"
                 });
@@ -1870,7 +1874,11 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
 
                 if (LMRY_Result[0] == 'AR' && (type_event == 'create' || type_event == 'edit' || type_event == 'copy')) {
                     Library_AutoPercepcionDesc.processDiscount(scriptContext);
+                    if (Library_Mail.getAuthorization(142, licenses)) {
+                        Library_AutoPercepcionDesc.autoperc_beforeSubmit(scriptContext, LMRY_Result[0], scriptContext.type);
+                    }
                 }
+
                 /*****************************************************/
             } catch (err) {
                 RCD_OBJ = scriptContext.newRecord;
@@ -3682,6 +3690,7 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
 
         function setCOLineValueWTH(recordObj) {
             try {
+                var omitTypeItem = ["Group", "EndGroup"];
                 var typeTransaction = recordObj.type;
 
                 if (typeTransaction == 'invoice' || typeTransaction == 'creditmemo' || typeTransaction == 'vendorbill' || typeTransaction == 'vendorcredit') {
@@ -3689,6 +3698,8 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
                         sublistId: 'item'
                     });
                     for (var i = 0; i < numItems; i++) {
+                        var itemType = recordObj.getSublistValue({ sublistId: "item", fieldId: "itemtype", line: i });
+                        if (omitTypeItem.indexOf(itemType) != -1) continue;
                         var custpageReteCree = recordObj.getSublistValue({
                             sublistId: 'item',
                             fieldId: 'custpage_lmry_co_autoretecree',
