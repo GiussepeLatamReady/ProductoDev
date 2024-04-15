@@ -196,7 +196,10 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
                 log.error("calculatePerception transaction 1", transaction)
                 transaction.currentRecord = invoiceRecord;
 
-                
+                if (transaction.type.text=='creditmemo') {
+                  transaction.applyWhtCode = validateCreditMemoTotal(transaction);
+                }
+
                 if (transaction.applyWhtCode && validateDocumentType(transaction) && transaction.notSend) {
 
                     setLinePerception("1", nationalTaxs, transaction, setupTaxSubsidiary, {});
@@ -763,20 +766,54 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
             return exchangerate;
         }
 
-        function validateCreditMemoPartials(transaction){
+        /*
+        *  C1064
+        *  @Description: Validación para que se agregue la línea (s) de percepción siempre y 
+        *  cuando la nota de crédito sea por el total de la factura
+        */
+
+        function validateCreditMemoTotal(transaction){
           
           if (!transaction.createdFrom) return true;
-          var recordType = search.lookupFields({
+          var transactionSearch = search.lookupFields({
             type: 'transaction',
             id: transaction.createdFrom,
-            columns: ['recordType','fxamount']
-          }).recordType;
+            columns: ['recordType','createdfrom','total']
+          });
 
-          if (recordType == "returnauthorization") {
-            
+          log.error("transactionSearch",transactionSearch);
+          
+          
+          var isTotal;
+          if (transactionSearch[0].recordType == "returnauthorization") {
+
+            var transactionOrigin = {};
+            transactionOrigin.load = record.load(
+              {
+                  id: transaction.createdFrom,
+                  type: transactionSearch[0].recordType
+              }
+            );
+
+            transactionOrigin.createdFrom = parseFloat(transactionOrigin.load.getValue("createdfrom"));
+            transactionOrigin.total = parseFloat(transactionOrigin.load.getValue("total"));
+            var transactionRelated = {};
+            transactionRelated.load = record.load(
+              {
+                  id: transactionOrigin.createdFrom,
+                  type: "invoice"
+              }
+            );
+
+            transactionRelated.total = parseFloat(transactionRelated.load.getValue("total"));
+
+            isTotal = transactionOrigin.total == transactionRelated.total;
+
           }else{
-             return transaction.unapplied == 0;
+            isTotal = transaction.unapplied == 0;
           }
+          if (!isTotal) transaction.currentRecord.setValue("custbody_lmry_apply_wht_code",false);
+          return isTotal
 
         }
 
