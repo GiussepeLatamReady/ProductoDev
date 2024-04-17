@@ -470,7 +470,7 @@ define([
                 const getLi = (count, text, color) => count === 0 ? '' : `<li style="color: ${color};" margin: 5px 0>${count} ${text}</li>`;
 
                 const html = `
-                  <div style="display:flex; flex-direction: column; justify-content: center; align-items: center;  height: 80%; font-family: Arial, sans-serif;">
+                  <div style="display:flex; flex-direction: column; justify-content: center;  height: 80%; font-family: Arial, sans-serif;">
                     <h3 style="margin-top: 20px;">${total} ${this.translations.LMRY_ENTITIES_FOUND}</h3>
                     <ul style="margin-top: 10px; padding-left: 0px;">
                       ${getLi(s, this.translations.LMRY_SUCESS, 'rgb(18, 179, 18)') }

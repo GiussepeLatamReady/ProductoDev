@@ -154,17 +154,6 @@ define([
             }
         }
 
-        let getFeatures = () => {
-
-            return {
-                department: runtime.isFeatureInEffect({ feature: "DEPARTMENTS" }),
-                "class": runtime.isFeatureInEffect({ feature: "CLASS" }),
-                location: runtime.isFeatureInEffect({ feature: "LOCATIONS" }),
-                multibook: runtime.isFeatureInEffect({ feature: "MULTIBOOK" }),
-                subsidiary: runtime.isFeatureInEffect({ feature: 'SUBSIDIARIES' })
-            }
-        }
-
         let getEntities = (parameters) => {
             let period;
             let subsidiary;
@@ -343,10 +332,10 @@ define([
 
             const folderId = getFolder();
             if (!folderId) return;
-            const {subsidiary,period} = getDataPrimary(parameters);
+            const {subsidiary,period,entityType} = getDataPrimary(parameters);
             
             const fileGenerate = file.create({
-                name:`${subsidiary}_${period}_response`,
+                name:`${subsidiary}_${period}_${entityType}_response`,
                 fileType: file.Type.CSV,
                 contents: fileContent,
                 encoding: file.Encoding.UTF8,
@@ -358,9 +347,8 @@ define([
 
         
         const getDataPrimary = (parameters) => {
-            let period;
-            let subsidiary;
-            
+
+            let jsonData = {};
             let searchRecordLog = search.create({
                 type: 'customrecord_lmry_ar_massive_gener_agip',
                 filters: [
@@ -368,15 +356,17 @@ define([
                 ],
                 columns: [
                     'custrecord_lmry_ar_gen_agip_period',
-                    'custrecord_lmry_ar_gen_agip_subsidiary'
+                    'custrecord_lmry_ar_gen_agip_subsidiary',
+                    'custrecord_lmry_ar_gen_agip_entity_type'
                 ]
             })
             searchRecordLog.run().each(function (result) {
-                period = result.getValue('custrecord_lmry_ar_gen_agip_period');
-                subsidiary = result.getValue('custrecord_lmry_ar_gen_agip_subsidiary');
+                jsonData.period = result.getValue('custrecord_lmry_ar_gen_agip_period');
+                jsonData.subsidiary = result.getValue('custrecord_lmry_ar_gen_agip_subsidiary');
+                jsonData.entityType = result.getValue('custrecord_lmry_ar_gen_agip_entity_type');
             });
 
-            return {subsidiary,period};
+            return jsonData;
         }
         const getFolder = () => {
             
