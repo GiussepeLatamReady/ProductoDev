@@ -42,15 +42,15 @@
     id: customrecord_lmry_ar_massive_gener_agip
 
         Fields:
-            Subsidiary          custrecord_lmry_ar_gen_agip_subsidiary
-            Entity Type         custrecord_lmry_ar_gen_agip_entity_type
-            Period              custrecord_lmry_ar_gen_agip_period
-            User Responsible    custrecord_lmry_ar_gen_agip_user
-            Process details     custrecord_lmry_ar_gen_agip_details
-            Entities            custrecord_lmry_ar_gen_agip_entities
-            summary             custrecord_lmry_ar_gen_agip_summary
-            status              custrecord_lmry_ar_gen_agip_status
-            URL                 custrecord_lmry_ar_gen_agip_url   
+            	Subsidiary	        custrecord_lmry_ar_gen_agip_subsidiary	        List/Record	Subsidiary	 
+                Entity Type	        custrecord_lmry_ar_gen_agip_entity_type	        Free-Form Text	 	 	
+                Period	            custrecord_lmry_ar_gen_agip_period	            List/Record	Accounting Period	 	
+                User Responsible	custrecord_lmry_ar_gen_agip_user	            List/Record	Employee	 	
+                Process details	    custrecord_lmry_ar_gen_agip_details	            Free-Form Text	 	 	
+                Entities	        custrecord_lmry_ar_gen_agip_entities	        Long Text	 	 	
+                Summary	            custrecord_lmry_ar_gen_agip_summary	            Free-Form Text	 	 	
+                Status	            custrecord_lmry_ar_gen_agip_status	            Free-Form Text	 	 	
+                Url File	        custrecord_lmry_ar_gen_agip_url	                Long Text	 	 	  
 
 
         
