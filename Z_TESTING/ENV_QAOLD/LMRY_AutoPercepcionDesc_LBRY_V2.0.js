@@ -831,15 +831,20 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
         }
 
         function updateApplyAmount(currentRecord){
-          const lines = currentRecord.getLineCount("apply");
+          const lines = currentRecord.getLineCount({ sublistId: "apply" });
           for (var i = 0; i < lines; i++) {
-            const contextApply = currentRecord.selectLine("apply",i);
-            const apply = contextApply.getCurrentSublistValue("apply","apply");
+            const contextApply = currentRecord.selectLine({sublistId:"apply",line:i});
+            const apply = contextApply.getCurrentSublistValue({ sublistId: "apply", fieldId: "apply" });
+            //log.error("contextApply "+i,contextApply)
+            log.error("line "+i,apply)
             if (apply === "T" || apply === true ) {
-              contextApply.setCurrentSublistValue("apply","apply",false);
-              contextApply.setCurrentSublistValue("apply","apply",true);
-              contextApply.commitLine("apply");
+              log.error("line entro"+i,"entro")
+              //currentRecord.setSublistValue("apply","apply",i,false);
+              //contextApply.commitLine("apply");
+              //currentRecord.setSublistValue("apply","apply",i,true);
+              //contextApply.commitLine("apply");
             } 
+            
           }
         }
 

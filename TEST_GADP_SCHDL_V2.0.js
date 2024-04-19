@@ -31,8 +31,16 @@ define(["N/search", "N/record", "N/log", "N/query", "N/runtime"],
                 //searchTransaction("3914166");
                 //log.error("account",creditMemoSearch.accountmain[0].value);
 
-                updatePercetion();
+                //updatePercetion();
+                var transactionRecord = record.load(
+                    {
+                        id: "3976810",
+                        type: "creditmemo",
+                        isDynamic: true
+                    }
+                );
 
+                updateApplyAmount(transactionRecord);
 
             } catch (error) {
                 log.error("error", error)
@@ -40,7 +48,25 @@ define(["N/search", "N/record", "N/log", "N/query", "N/runtime"],
 
         }
 
-        function updatePercetion(){
+        function updateApplyAmount(currentRecord) {
+            const lines = currentRecord.getLineCount({ sublistId: "apply" });
+            for (var i = 0; i < lines; i++) {
+                const contextApply = currentRecord.selectLine({ sublistId: "apply", line: i });
+                const apply = contextApply.getCurrentSublistValue({ sublistId: "apply", fieldId: "apply" });
+                //log.error("contextApply "+i,contextApply)
+                log.error("line " + i, apply)
+                if (apply === "T" || apply === true) {
+                    log.error("line entro" + i, "entro")
+                    //currentRecord.setSublistValue("apply","apply",i,false);
+                    //contextApply.commitLine("apply");
+                    //currentRecord.setSublistValue("apply","apply",i,true);
+                    //contextApply.commitLine("apply");
+                }
+
+            }
+        }
+
+        function updatePercetion() {
 
             var currentRecord = record.load({
                 type: 'salesorder',
@@ -54,7 +80,7 @@ define(["N/search", "N/record", "N/log", "N/query", "N/runtime"],
                     currentRecord.setSublistValue('item', 'rate', i, parseFloat(500));
                 }
             }
-            
+
             currentRecord.save();
         }
 
