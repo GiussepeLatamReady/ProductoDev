@@ -42,7 +42,6 @@ define([
                 
                 //const status = Number(params.status);
                 const {form,active} = handler.createForm();
-                log.error("active",active)
                 if (active) {
                     handler.loadFormValues();
                     handler.createTransactionSublist();
@@ -255,7 +254,7 @@ define([
                     }];
                     anySubsidiaryActive = isAuthorized;
                 }
-                log.error("anySubsidiaryActive",anySubsidiaryActive)
+            
                 return anySubsidiaryActive;
             }
             
@@ -580,8 +579,6 @@ define([
                     custscript_lmry_ar_mass_gen_agip_state: state
                 } : {};
 
-                log.error("state",state)
-                log.error("user",user)
                 task.create({
                     taskType: task.TaskType.MAP_REDUCE,
                     scriptId: 'customscript_lmry_ar_mass_gene_agip_mprd',
@@ -619,7 +616,6 @@ define([
                         });
                     });
                 }
-                log.error("jsonPeriod",jsonPeriod);
                 return jsonPeriod;
             }
 

@@ -201,7 +201,6 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/url'], (runtime, server
                     listEntities[internalid].names = result.getValue(columns[6]) || " ";
                 }
                 listEntities[internalid].status = processCompleted ? listEntities[internalid].status : "p";
-                log.error("listEntities : "+internalid,listEntities[internalid])
                 return true;
             });
 

@@ -26,8 +26,7 @@ define([
                 const entities = getEntities(parameters).list;
                 loadEntities(parameters, entities);
                 updateState(parameters, 'Processing', 'It has begun to process the entities...');
-                //log.error("entities",entities)
-                //return [];
+                
                 return entities;
             } catch (error) {
                 log.error("Error [getInputData]", error);
@@ -37,7 +36,7 @@ define([
 
         const map = (mapContext) => {
             try {
-                log.error("value", JSON.parse(mapContext.value))
+
                 if (mapContext.value.indexOf("isError") != -1) {
                     mapContext.write({
                         key: mapContext.key,
@@ -48,7 +47,7 @@ define([
                     const contextValue = JSON.parse(mapContext.value);
                     const { entity } = contextValue;
                     const response = createContributoryclass(contextValue);
-                    log.error("response",response);
+                    
                     if (response.createSetup===0 || response.createSetup===1) {
                         mapContext.write({
                             key: mapContext.key,
@@ -127,7 +126,6 @@ define([
                 buildReport(parameters,entities, entityType);
 
             } catch (error) {
-                log.error("error Summarize ", error);
                 log.error("error Summarize ", error.message);
                 updateState(parameters, 'An error occurred', error.message);
             }
@@ -174,11 +172,8 @@ define([
                 subsidiary = result.getValue('custrecord_lmry_ar_gen_agip_subsidiary');
                 entityType = result.getValue('custrecord_lmry_ar_gen_agip_entity_type');
             });
-            //return [{"id":"3947913","whtType":"header"}]
-            //log.error("recordLog.idTransaction",recordLog.idTransaction);
-            const entities = lbryAGIP.cargarEntity(entityType, subsidiary);
             
-            //return entities.map(entity => ({ entity, period, subsidiary }));
+            const entities = lbryAGIP.cargarEntity(entityType, subsidiary);
             return {entityType,list:entities.map(entity => ({ entity, period, subsidiary }))};
         }
 

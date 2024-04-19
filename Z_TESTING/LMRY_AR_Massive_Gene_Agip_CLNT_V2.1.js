@@ -23,7 +23,7 @@ define(['N/runtime',
             const recordObj = context.currentRecord;
             DEPLOY_ID = recordObj.getValue('custpage_deploy_id');
             handler = new ClientUIManager({ deployid: DEPLOY_ID });
-            console.log("pageInit clnt")
+            
             handler.pageInit(context);
         };
 
@@ -101,7 +101,7 @@ define(['N/runtime',
                         columns: ['fiscalcalendar']
                     });
 
-                    console.log("fiscalcalendar:",fiscalcalendar)
+                    
 
                     if (fiscalcalendar && fiscalcalendar.length > 0) {
                         filters.push('AND',['fiscalcalendar', 'anyof', fiscalcalendar[0].value]);
@@ -145,7 +145,7 @@ define(['N/runtime',
                 
                 const isFieldInvalid = (fieldId) => {
                     const value = recordObj.getValue({ fieldId });
-                    console.log(fieldId, value)
+                    
                     if (value == 0 || !value) {
                         const fieldLabel = recordObj.getField({ fieldId }).label;
                         alert(`Ingrese un valor para: ${fieldLabel}`);
@@ -153,7 +153,7 @@ define(['N/runtime',
                     }
                     return false;
                 };
-                console.log("mandatoryFields", mandatoryFields)
+                
                 return !mandatoryFields.some(isFieldInvalid);
             }
 
@@ -220,7 +220,7 @@ define(['N/runtime',
             }
             createRecordLog() {
                 try {
-                    console.log(' createRecordLog start');
+                    
                     let currentRecord = this.currentRecord;
                     let form = {
                         ids: []
@@ -239,7 +239,7 @@ define(['N/runtime',
                     let recordlog = record.create({
                         type: 'customrecord_lmry_ar_massive_gener_agip'
                     });
-                    console.log("form :", form)
+                    
                     recordlog.setValue({ fieldId: 'custrecord_lmry_ar_gen_agip_subsidiary', value: form.subsidiary });
                     recordlog.setValue({ fieldId: 'custrecord_lmry_ar_gen_agip_entity_type', value: form.entityType });
                     recordlog.setValue({ fieldId: 'custrecord_lmry_ar_gen_agip_period', value: form.accoutingPeriod });
@@ -251,7 +251,7 @@ define(['N/runtime',
                     currentRecord.setValue({ fieldId: 'custpage_log_id', value: idlog, ignoreFieldChange: true });
     
                     this.parameters = { idlog, idUser: runtime.getCurrentUser().id }
-                    console.log('idlog: ' + idlog);
+                    
                     return true;
                 } catch (error) {
                     console.log('Error', error)
