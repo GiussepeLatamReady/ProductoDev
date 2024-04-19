@@ -52,13 +52,12 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
                     // Registro actual
 
 
-                    var invoiceRecord = paramContext.newRecord;
-                    log.error("invoiceRecord", invoiceRecord)
-                    log.error("invoiceRecord", invoiceRecord.id)
-                    invoiceRecord = record.load(
+                    var transactionRecord = paramContext.newRecord;
+                    transactionRecord = record.load(
                         {
-                            id: invoiceRecord.id,
-                            type: invoiceRecord.type
+                            id: transactionRecord.id,
+                            type: transactionRecord.type,
+                            isDynamic: true
                         }
                     );
                     /********************************************
@@ -68,17 +67,17 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
                      ********************************************/
                     //log.error("Step [01] recordType [ open ]", contextRecord.type);
 
-                    numLines = invoiceRecord.getLineCount('item');
+                    numLines = transactionRecord.getLineCount('item');
                     soloItems = numLines;
 
                     // Logica de Auto Percepciones por Linea
-                    calculatePerception(invoiceRecord, numLines, CodeCountry);
+                    calculatePerception(transactionRecord, numLines, CodeCountry);
 
                     /*************************************
                      * Logica de Descuentos por Linea solo
                      * para Argentina
                      *************************************/
-                    if (CodeCountry == "AR" && (invoiceRecord.type == 'invoice' || invoiceRecord.type == 'creditmemo' || invoiceRecord.type == 'cashsale')) {
+                    if (CodeCountry == "AR" && (transactionRecord.type == 'invoice' || transactionRecord.type == 'creditmemo' || transactionRecord.type == 'cashsale')) {
                         //calculateDiscount(invoiceRecord, numLines);
                     }
                 }
@@ -216,6 +215,7 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
                 }
 
                 removePerceptionLines(transaction);
+                if (transaction.type.text=='creditmemo') updateApplyAmount(transaction.currentRecord);
                 transaction.currentRecord.save();
             } catch (errmsg) {
                 log.error("Error [calculatePerception]", errmsg)
@@ -775,28 +775,41 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
         function validateCreditMemoTotal(transaction){
           
           if (!transaction.createdFrom) return true;
-          var transactionSearch = search.lookupFields({
+          var transactionOrigin = {};
+
+          var transactionSearch = search.create({
             type: 'transaction',
-            id: transaction.createdFrom,
-            columns: ['recordType','createdfrom','total']
+            filters: [
+              ['internalid', 'ANYOF', transaction.createdFrom],
+              "AND",
+              ['mainline', 'is', "T"]
+            ],
+            columns: [
+              'recordType'
+            ]
+          })
+          transactionSearch.run().each(function (result) {
+            log.error("result",result)
+            transactionOrigin.recordType = result.getValue('recordType');
           });
 
-          log.error("transactionSearch",transactionSearch);
           
-          
+          transactionOrigin.load = record.load(
+            {
+              id: transaction.createdFrom,
+              type: transactionOrigin.recordType
+            }
+          );
+          transactionOrigin.createdFrom = parseFloat(transactionOrigin.load.getValue("createdfrom"));
+          transactionOrigin.total = parseFloat(transactionOrigin.load.getValue("total"));
+          transactionOrigin.amountremaining = parseFloat(transactionOrigin.load.getValue("amountremaining"));
+
           var isTotal;
-          if (transactionSearch[0].recordType == "returnauthorization") {
+          if (transactionOrigin.recordType == "returnauthorization") {
 
-            var transactionOrigin = {};
-            transactionOrigin.load = record.load(
-              {
-                  id: transaction.createdFrom,
-                  type: transactionSearch[0].recordType
-              }
-            );
+            
 
-            transactionOrigin.createdFrom = parseFloat(transactionOrigin.load.getValue("createdfrom"));
-            transactionOrigin.total = parseFloat(transactionOrigin.load.getValue("total"));
+            
             var transactionRelated = {};
             transactionRelated.load = record.load(
               {
@@ -810,11 +823,24 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
             isTotal = transactionOrigin.total == transactionRelated.total;
 
           }else{
-            isTotal = transaction.unapplied == 0;
+            isTotal = transactionOrigin.amountremaining == 0;
           }
           if (!isTotal) transaction.currentRecord.setValue("custbody_lmry_apply_wht_code",false);
           return isTotal
 
+        }
+
+        function updateApplyAmount(currentRecord){
+          const lines = currentRecord.getLineCount("apply");
+          for (var i = 0; i < lines; i++) {
+            const contextApply = currentRecord.selectLine("apply",i);
+            const apply = contextApply.getCurrentSublistValue("apply","apply");
+            if (apply === "T" || apply === true ) {
+              contextApply.setCurrentSublistValue("apply","apply",false);
+              contextApply.setCurrentSublistValue("apply","apply",true);
+              contextApply.commitLine("apply");
+            } 
+          }
         }
 
         function isValid(bool) {
