@@ -57,7 +57,7 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
                         {
                             id: transactionRecord.id,
                             type: transactionRecord.type,
-                            isDynamic: true
+                            //isDynamic: true
                         }
                     );
                     /********************************************
@@ -126,6 +126,7 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
                     countryCode: CodeCountry,
                     createdFrom: invoiceRecord.getValue("createdfrom"),
                     unapplied: Number(invoiceRecord.getValue("unapplied")),
+                    validateTotalCreditMemo: true
                 }
 
                 
@@ -196,11 +197,11 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
                 transaction.currentRecord = invoiceRecord;
 
                 if (transaction.type.text=='creditmemo') {
-                  transaction.applyWhtCode = validateCreditMemoTotal(transaction);
+                  transaction.validateTotalCreditMemo = validateCreditMemoTotal(transaction);
                 }
 
-                if (transaction.applyWhtCode && validateDocumentType(transaction) && transaction.notSend) {
-
+                if (transaction.validateTotalCreditMemo && transaction.applyWhtCode && validateDocumentType(transaction) && transaction.notSend) {
+                    log.error("Entro","entro setLine")
                     setLinePerception("1", nationalTaxs, transaction, setupTaxSubsidiary, {});
                     setLinePerception("1", contributoryClass, transaction, setupTaxSubsidiary, {});
 
@@ -215,7 +216,7 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
                 }
 
                 removePerceptionLines(transaction);
-                if (transaction.type.text=='creditmemo') updateApplyAmount(transaction.currentRecord);
+                if (transaction.type.text=='creditmemo' && transaction.amountRemoved !==0) updateApplyAmount(transaction);
                 transaction.currentRecord.save();
             } catch (errmsg) {
                 log.error("Error [calculatePerception]", errmsg)
@@ -830,23 +831,28 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
 
         }
 
-        function updateApplyAmount(currentRecord){
+        function updateApplyAmount(transaction) {
+
+          var currentRecord = transaction.currentRecord;
           const lines = currentRecord.getLineCount({ sublistId: "apply" });
+          const newTotal = transaction.total - transaction.amountRemoved;
           for (var i = 0; i < lines; i++) {
-            const contextApply = currentRecord.selectLine({sublistId:"apply",line:i});
-            const apply = contextApply.getCurrentSublistValue({ sublistId: "apply", fieldId: "apply" });
-            //log.error("contextApply "+i,contextApply)
-            log.error("line "+i,apply)
-            if (apply === "T" || apply === true ) {
-              log.error("line entro"+i,"entro")
-              //currentRecord.setSublistValue("apply","apply",i,false);
-              //contextApply.commitLine("apply");
-              //currentRecord.setSublistValue("apply","apply",i,true);
-              //contextApply.commitLine("apply");
-            } 
-            
+              //const contextApply = currentRecord.selectLine({ sublistId: "apply", line: i });
+              var apply = currentRecord.getSublistValue({ sublistId: "apply", fieldId: "apply" , line: i});
+              var amount = currentRecord.getSublistValue({ sublistId: "apply", fieldId: "amount" , line: i});
+              //log.error("contextApply "+i,contextApply)
+              log.error("line " + i, apply)
+              log.error("line amount " + i, amount)
+              if (apply === "T" || apply === true) {
+                  log.error("line entro" + i, "entro")
+                  currentRecord.setSublistValue("apply","amount",i,newTotal);
+                  //contextApply.commitLine("apply");
+                  //currentRecord.setSublistValue("apply","apply",i,true);
+                  //contextApply.commitLine("apply");
+              }
+
           }
-        }
+      }
 
         function isValid(bool) {
           return (bool === "T" || bool === true);
@@ -944,6 +950,7 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
                     return true;
                 }
                 if (transaction.documentType == '' || transaction.documentType == null) {
+                    log.error("Step [04] validateDocumentType:", documentFound);
                     return documentFound;
                 }
 
@@ -961,7 +968,7 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
                 LibraryMail.sendemail('[ validateDocumentType ] ' + errmsg, Name_script);
             }
 
-            //log.error("Step [04] validateDocumentType:", tipoDocEncontrado);
+            log.error("Step [04] validateDocumentType:", documentFound);
 
             return documentFound;
         }
@@ -976,11 +983,13 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
         function removePerceptionLines(transaction) {
 
             var items = transaction.items;
+            transaction.amountRemoved = 0;
             log.error("items remove", items);
             var deletedTransactions = [];
             Object.keys(items).forEach(function (lineuniquekey) {
                 if (!items[lineuniquekey].revised && items[lineuniquekey].isTribute) {
                     deletedTransactions.push(items[lineuniquekey].line);
+                    transaction.amountRemoved += items[lineuniquekey].amount;
                 }
             })
 
