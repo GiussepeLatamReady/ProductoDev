@@ -1,8 +1,9 @@
-# [C1063 - ARG Mejora facturas desde ov con Percepciones](https://docs.google.com/document/d/1Png59TUJYHZK8h_obwWwtvpcEv8ywkrI/edit)
+# [C0967 -2 - L : BR Anulacion de Item Receipt](https://docs.google.com/document/d/1Fx7R373MRITeUzp1uuCuTEsrNxw7ENeosfTEHt6zs48/edit)
 
 
 ## Description of the Requirement
 
+Se requiere desarrollar un librería para ser consumida por Facturación Electrónica para el proceso de anulación de Item Receipt
 
 
 ## Description of the solution
@@ -10,27 +11,7 @@
 
 ## Scripts
 + Create
-    + Title: LatamReady - AR Massive generation AGIP STLT | LatamReady - AR Generación Masiva AGIP STLT
-        + Name: LatamReady - Massive generation AGIP STLT
-        + id: _lmry_ar_mass_gene_agip_stlt
-        + File: LMRY_AR_Massive_Gene_Agip_STLT_V2.1.js
-
-    + File: LMRY_AR_Massive_Gene_Agip_CLNT_V2.1.js
-
-    + Title: LatamReady - AR Massive generation AGIP MPRD | LatamReady - AR Generación Masiva AGIP STLT
-        + Name: LatamReady - Massive generation AGIP MPRD
-        + id: _lmry_ar_mass_gene_agip_mprd
-        + File: LMRY_AR_Massive_Gene_Agip_MPRD_V2.1.js
-
-        + Parametros:
-            + custscript_lmry_ar_mass_gen_agip_user
-            + custscript_lmry_ar_mass_gen_agip_state
-
-    + File: LMRY_AR_Massive_Gene_Agip_URET_V2.1.js
-        + Name: LatamReady - Massive generation AGIP URET
-        + id: _lmry_ar_mass_gene_agip_uret
-        + File: LMRY_AR_Massive_Gene_Agip_URET_V2.1.js
-
+    
 
 + Update
     
@@ -38,20 +19,6 @@
 
 ## Records
 + Create
-    Name: LatamReady - Massive generation AGIP Log  | LatamReady - Generación masiva AGIP
-    id: customrecord_lmry_ar_massive_gener_agip
-
-        Fields:
-            	Subsidiary	        custrecord_lmry_ar_gen_agip_subsidiary	        List/Record	Subsidiary	 
-                Entity Type	        custrecord_lmry_ar_gen_agip_entity_type	        Free-Form Text	 	 	
-                Period	            custrecord_lmry_ar_gen_agip_period	            List/Record	Accounting Period	 	
-                User Responsible	custrecord_lmry_ar_gen_agip_user	            List/Record	Employee	 	
-                Process details	    custrecord_lmry_ar_gen_agip_details	            Free-Form Text	 	 	
-                Entities	        custrecord_lmry_ar_gen_agip_entities	        Long Text	 	 	
-                Summary	            custrecord_lmry_ar_gen_agip_summary	            Free-Form Text	 	 	
-                Status	            custrecord_lmry_ar_gen_agip_status	            Free-Form Text	 	 	
-                Url File	        custrecord_lmry_ar_gen_agip_url	                Long Text	 	 	  
-
 
         
 + Update
