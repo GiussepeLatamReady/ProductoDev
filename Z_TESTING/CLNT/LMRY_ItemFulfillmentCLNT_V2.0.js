@@ -275,11 +275,11 @@ define(['N/log', 'N/search', 'N/query', 'N/url', 'N/https', 'N/runtime', 'N/reco
                 }
 
                 if (LMRY_countr[0] == 'AR') {
-                    console.log("entro a AR")
+                    
                     libraryUnitPrice.disabledField();
                     
                 }
-                console.log("tODOS LOS PAISES")
+                
             } catch (err) {
                 log.error('Error pageInit', err);
                 library_mail.sendemail2(' [ pageInit ] ' + err, LMRY_script, recordObj, 'tranid', 'entity');
