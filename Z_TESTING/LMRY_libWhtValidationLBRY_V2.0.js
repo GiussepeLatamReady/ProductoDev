@@ -115,7 +115,7 @@ define([
                 var retefte_amount = parseFloat(Search_WHT(Transaction, ID, Obj_RCD, RETEFTE));
                 reteamout = reteamout + retefte_amount;
 
-                //log.error('impuestos', RETEICA + ',' + RETEIVA + ',' + RETEFTE + ',' + RETECRE);
+                
                 var retecre_amount = Search_WHT(Transaction, ID, Obj_RCD, RETECRE);
 
             }
