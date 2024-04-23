@@ -21,7 +21,7 @@ define([
     './Latam_Library/LMRY_libSendingEmailsLBRY_V2.0',
     './Latam_Library/LMRY_HideViewLBRY_V2.0',
     './Latam_Library/LMRY_UniversalSetting_Purchase_LBRY',
-    './WTH_Library/LMRY_WhtValidattionEntity_LBRY_V2.0'
+    './Latam_Library/LMRY_WhtValidattionEntity_LBRY_V2.0'
 ],
 
     function (search, runtime, serverWidget, log, Library_Mail, Library_HideView, library_Uni_Setting, library_WHT_Validation) {
