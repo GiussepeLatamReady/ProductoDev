@@ -24,10 +24,7 @@ define(['N/record', 'N/log', 'N/search', 'N/runtime'],
 
         function setFieldWhtIVA(recordEntity, form, isURET) {
             try {
-                log.debug("Debug", "Entro a setFieldWhtIVA");
-
-
-                log.debug("Debug", "Creando campo");
+                
                 var whtCodeIvaField = form.addField({
                     id: 'custpage_lmry_ety_bo_reteiva',
                     type: 'select',
@@ -39,7 +36,9 @@ define(['N/record', 'N/log', 'N/search', 'N/runtime'],
                     value: '',
                     text: '&nbsp;'
                 });
-                var whtCodeIvaList = getWhtCodeList();
+
+
+                var whtCodeIvaList = getWhtCodeList("custpage_lmry_ety_bo_reteiva");
 
                 var idsWhtCodeList = Object.keys(whtCodeIvaList);
 
@@ -52,15 +51,10 @@ define(['N/record', 'N/log', 'N/search', 'N/runtime'],
 
                 if (['edit', 'view'].indexOf(isURET) > -1) {
                     var entityField = getEntityField(recordEntity.id);
-                    log.error("entityField ", entityField)
                     if (entityField.exist && entityField.whtCodeIva != "") {
                         recordEntity.setValue('custpage_lmry_ety_bo_reteiva', entityField.whtCodeIva);
                     }
                 }
-
-
-
-                log.debug("Debug", "Salio a setFieldWhtIVA");
             } catch (error) {
                 log.error(" error [setFieldWhtIVA]", error)
             }
@@ -69,7 +63,7 @@ define(['N/record', 'N/log', 'N/search', 'N/runtime'],
 
         }
 
-        function getWhtCodeList() {
+        function getWhtCodeList(custpage) {
 
             var whtCodeList = {};
             var codeSearchObj = search.create({
@@ -78,7 +72,12 @@ define(['N/record', 'N/log', 'N/search', 'N/runtime'],
                     [
                         ["custrecord_lmry_wht_countries", "anyof", "29"],
                         "AND",
-                        ["custrecord_lmry_wht_types", "anyof", "113"]
+                        [
+                            ["custrecord_lmry_wht_types.custrecord_lmry_wht_tranfield", "is", custpage],
+                            "OR",
+                            ["custrecord_lmry_wht_types.custrecord_lmry_wht_entityfield", "is", custpage],
+                        ]
+                        
                     ],
                 columns:
                     [

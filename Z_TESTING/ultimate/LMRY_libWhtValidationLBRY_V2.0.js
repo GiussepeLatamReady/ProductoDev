@@ -1832,9 +1832,7 @@ define(['N/ui/serverWidget','./LMRY_libSendingEmailsLBRY_V2.0', './LMRY_libNumbe
                     value: whtCodeIvaList[id].id,
                     text: whtCodeIvaList[id].name
                 });
-            })
-            
-            
+            }) 
             
         }
 
@@ -1895,9 +1893,6 @@ define(['N/ui/serverWidget','./LMRY_libSendingEmailsLBRY_V2.0', './LMRY_libNumbe
                 whtCodeIva: recordTransaction.getValue({ fieldId: 'custpage_lmry_bo_reteiva' }) || "",
                 whtAmountIva: recordTransaction.getValue({ fieldId: 'custpage_lmry_bo_reteiva_whtamount' }) || 0
             }
-
-           
-
             saveBOTransactionField(transaction);
 
         }
@@ -1921,7 +1916,7 @@ define(['N/ui/serverWidget','./LMRY_libSendingEmailsLBRY_V2.0', './LMRY_libNumbe
 
                     updateTransactionField.setValue({
                         fieldId: 'custrecord_lmry_bo_reteiva',
-                        value: 1,
+                        value: "",
                         ignoreFieldChange: true
                     });
                     
