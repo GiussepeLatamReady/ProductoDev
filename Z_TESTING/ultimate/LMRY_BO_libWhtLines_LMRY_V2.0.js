@@ -51,9 +51,12 @@ function(search, record, runtime,serverWidget, libWhtValidation, libSendingEmail
             if (reteit) whtIds.push(reteit);
             var reteiu = recordObj.getValue({fieldId: 'custbody_lmry_bo_reteiue'});
             if (reteiu) whtIds.push(reteiu);
-            var reteiva = recordTransaction.getValue({fieldId: 'custpage_lmry_bo_reteiva'});
-            if (reteiva) whtIds.push(reteiva);
-            log.error("reteiva [createWHTbyLines]",recordObj.getValue({fieldId: 'custpage_lmry_bo_reteiva'}));
+
+            if (runtime.executionContext == 'USERINTERFACE') {
+                var reteiva = recordTransaction.getValue({fieldId: 'custpage_lmry_bo_reteiva'});
+                if (reteiva) whtIds.push(reteiva);
+            }
+            
 
             var exchangeRate = libWhtValidation.getExchangeRate(recordObj);
             var dataWht = libWhtValidation.Search_WHT(tranType, tranId, recordObj, whtIds, exchangeRate, setupTax);
@@ -71,7 +74,7 @@ function(search, record, runtime,serverWidget, libWhtValidation, libSendingEmail
                     libWhtValidation.Create_WHT_1(tranId, recordObj, reteiu);*/
                 }
             } else if (tranType == 'vendorcredit') {
-                var transToDelete = libWhtValidation.getTransactionsToDelete(tranId, 'vendorbill');log.debug('transToDelete', transToDelete);
+                var transToDelete = libWhtValidation.getTransactionsToDelete(tranId, 'vendorbill');
                 var arApply = Array();
                 if (isWHTline && Object.keys(transactionLines).length > 0) {
                     arApply = createWHT(recordObj, transactionLines, dataWht, bookRates, setupTax);
@@ -82,7 +85,7 @@ function(search, record, runtime,serverWidget, libWhtValidation, libSendingEmail
                     /*arApply.push(libWhtValidation.Create_WHT_2(tranId, recordObj, reteit));
                     arApply.push(libWhtValidation.Create_WHT_2(tranId, recordObj, reteiu));*/
                 }
-                log.debug('arApply', arApply);
+                
                 libWhtValidation.ApplyInvoice(tranId, tranType, arApply, transToDelete);
             }
 
@@ -111,8 +114,6 @@ function(search, record, runtime,serverWidget, libWhtValidation, libSendingEmail
                 });
             }
 
-            
-            log.error("valuesCustpageToSet",valuesCustpageToSet)
             if(Object.keys(valuesCustpageToSet).length){
 
                 saveWhtIva(valuesCustpageToSet,tranId);
@@ -222,7 +223,7 @@ function(search, record, runtime,serverWidget, libWhtValidation, libSendingEmail
 
     function createWHT(recordObj, transactionLines, dataWht, bookRates, setupTax) {
         try {
-            var result = []; log.debug('dataWht', dataWht);
+            var result = []; 
             if (!Object.keys(dataWht).length) return result;
             var typetran = recordObj.getValue({fieldId: 'type'});
             var savedSrchWht = search.load({id: 'customsearch_lmry_wht_base'});
@@ -231,7 +232,7 @@ function(search, record, runtime,serverWidget, libWhtValidation, libSendingEmail
                 operator: search.Operator.ANYOF,
                 values: Object.keys(dataWht)
             }));
-            savedSrchWht = savedSrchWht.run().getRange(0, 1000);log.debug('savedSrchWht', savedSrchWht);
+            savedSrchWht = savedSrchWht.run().getRange(0, 1000);
             if (savedSrchWht.length < 1) return result;
 
             var exchangeRate = libWhtValidation.getExchangeRate(recordObj);
@@ -250,7 +251,7 @@ function(search, record, runtime,serverWidget, libWhtValidation, libSendingEmail
                 var assetAccount = whtCode.getValue('custrecord_lmry_wht_taxcredacc');
                 var liabilityAccount = whtCode.getValue('custrecord_lmry_wht_taxliabacc');
                 var purchaseWhtBase = whtCode.getValue(columns[16]); // custrecord_lmry_wht_purcbase
-                log.debug('purchaseWhtBase', purchaseWhtBase);
+                
                 var amount = 0;
                 var amountresult = 0;
                 var amountto = 0;
@@ -405,7 +406,7 @@ function(search, record, runtime,serverWidget, libWhtValidation, libSendingEmail
 
                     //Linea de credito
                     transactionLines = adjustLineAmount(transactionLines, amountresult, rate, amountto);
-                    log.debug('createWHT',transactionLines);
+                    
                     if (Object.keys(transactionLines).length > 0) 
                     for (var key in transactionLines) {
                         var transactionLine = transactionLines[key];
@@ -617,7 +618,7 @@ function(search, record, runtime,serverWidget, libWhtValidation, libSendingEmail
                 bookRatesJson[lineaCurrencyMB] = recordObj.getSublistValue({ sublistId: 'accountingbookdetail', fieldId: 'exchangerate', line: i });
             }
         }
-        log.debug('bookRatesJson', bookRatesJson);
+        
 
         return bookRatesJson;
     }
@@ -666,9 +667,9 @@ function(search, record, runtime,serverWidget, libWhtValidation, libSendingEmail
                 type: "customrecord_lmry_bo_transaction_fields",
                 id: transactionField.id
             });
-            log.error("value")
+            
             for (var value in valuesCustpageToSet) {
-                log.error("value",value)
+                
                 if (valuesCustpageToSet[value].whtID) {
                     updateTransactionField.setValue({
                         fieldId: relatedFields[value].code,
@@ -786,14 +787,14 @@ function(search, record, runtime,serverWidget, libWhtValidation, libSendingEmail
         var entityField = library_validation_entity.getEntityField(vendor);
         if (typeContext == "create" || typeContext == "copy") {
             
-            log.error("entityField {setFieldWhtCodeIva}",entityField)
+            
             if (entityField.exist && entityField.whtCodeIva != "") {
                 recordTransaction.setValue('custpage_lmry_bo_reteiva', entityField.whtCodeIva);
                 recordTransaction.setValue('custpage_lmry_bo_reteiva_whtamount', 0.00);
             }
         } else { // view - edit
             var transactionField = getBoTransactionField(recordTransaction.id);
-            log.error("transactionField {setFieldWhtCodeIva}",transactionField)
+            
             if (transactionField.exist && transactionField.whtCodeIva != "") {
                 recordTransaction.setValue('custpage_lmry_bo_reteiva', transactionField.whtCodeIva);
                 recordTransaction.setValue('custpage_lmry_bo_reteiva_whtamount', transactionField.whtAmountIva);
