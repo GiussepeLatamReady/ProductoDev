@@ -12,8 +12,16 @@
  * @NScriptType ScheduledScript
  * @NModuleScope Public
  */
-define(['N/file',"N/search", "N/record", "N/log", "N/query", "N/runtime"],
-    function (file,search, record, log, query, runtime) {
+define([
+    'N/file',
+    "N/search", 
+    "N/record", 
+    "N/log", 
+    "N/query", 
+    "N/runtime",
+    'SuiteBundles/Bundle 245636/EI_Library/LMRY_BR_Void_Inventory_Transaction_LBRY_V2.0'
+],
+    function (file,search, record, log, query, runtime,libryVoidItemReceipt) {
 
         function execute(Context) {
             // ID de la transacción que deseas duplicar
@@ -33,7 +41,9 @@ define(['N/file',"N/search", "N/record", "N/log", "N/query", "N/runtime"],
 
                 //updatePercetion();
 
-                getCustomisedFolder();
+                //getCustomisedFolder();
+
+                voidItemReceipt("3976106");
                 log.error("end","end")
             } catch (error) {
                 log.error("error", error)
@@ -94,7 +104,15 @@ define(['N/file',"N/search", "N/record", "N/log", "N/query", "N/runtime"],
             }
         }
 
+        function voidItemReceipt(id){
+            var currentRecord = record.load({
+                type: 'itemreceipt', 
+                id: id
+            });
 
+            libryVoidItemReceipt.voidReceipt(currentRecord);
+
+        }
         function updatePercetion() {
 
             var currentRecord = record.load({
@@ -138,7 +156,7 @@ define(['N/file',"N/search", "N/record", "N/log", "N/query", "N/runtime"],
             log.error('Transacción duplicada', 'Nueva transacción ID: ' + newTransactionId);
         }
 
-        /*
+        
         function searchTransaction(id) {
             var transaction = {};
             var searchFilters = [
@@ -150,7 +168,7 @@ define(['N/file',"N/search", "N/record", "N/log", "N/query", "N/runtime"],
             var searchColumns = [];
             searchColumns.push(search.createColumn({ name: 'formulatext', formula: '{internalid}'}));
             searchColumns.push(search.createColumn({name: 'amount', join: 'item'}))
-            let settings = [];
+            var settings = [];
             
             settings = [search.createSetting({ name: 'consolidationtype', value: 'NONE' })];
             
@@ -166,7 +184,7 @@ define(['N/file',"N/search", "N/record", "N/log", "N/query", "N/runtime"],
             });
             log.error("transaction",transaction)
         }
-        */
+        
 
 
         return {
