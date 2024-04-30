@@ -11,7 +11,7 @@ Se requiere desarrollar un librería para ser consumida por Facturación Electr�
 
 ## Scripts
 + Create
-    
+    LMRY_BR_Void_Inventory_Transaction_LBRY_V2.0.js
 
 + Update
     
@@ -19,7 +19,8 @@ Se requiere desarrollar un librería para ser consumida por Facturación Electr�
 
 ## Records
 + Create
-
+    + LatamReady - Setup Tax Subsidiary (customrecord_lmry_setup_tax_subsidiary)
+    Crear el campo : Latam - BR void item receipt (custrecord_lmry_br_void_item_receipt)
         
 + Update
     
