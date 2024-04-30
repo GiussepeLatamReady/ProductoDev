@@ -264,6 +264,9 @@ define([
             return error;
         }
     }
+
+    
+
     function getApplyTransactionsByTransferOrder(transferOrderID) {
         var rcdTransferOrder = search.load({
             id: 'customsearch_lmry_br_anul_transf'
