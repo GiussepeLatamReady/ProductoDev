@@ -24,8 +24,9 @@ define([
             idInvAdjustment: [],
             error: null
         };
+        var subsidiaryID = recordReceipt.getValue('subsidiary');
         var transferOrderID = recordReceipt.getValue('createdfrom');
-        if(isTransferOrder(transferOrderID)) {
+        if(isItemReceiptVoid(subsidiaryID) && isTransferOrder(transferOrderID)) {
             try {
                 var accounts = getAccounts({
                     receiptSubsidiary: recordReceipt.getValue('subsidiary')
@@ -38,7 +39,7 @@ define([
                     var adjustWTP = createInventoryAdjustment({
                         transferOrderID: transferOrderID,
                         account: accounts.defaultReceipt,
-                        subsidiary: recordReceipt.getValue('subsidiary'),
+                        subsidiary: subsidiaryID,
                         classFinal: accounts.classFul,
                         deptFinal: accounts.deptFul,
                         listItems: items.itemsWithoutTransfPrice,
@@ -52,7 +53,7 @@ define([
                     var adjustTP = createInventoryAdjustment({
                         transferOrderID: transferOrderID,
                         account: accounts.defaultReceipt,
-                        subsidiary: recordReceipt.getValue('subsidiary'),
+                        subsidiary: subsidiaryID,
                         classFinal: accounts.classReceipt,
                         deptFinal: accounts.deptReceipt,
                         listItems: items.itemsTransferPrice,
@@ -401,6 +402,25 @@ define([
         });
 
         return recordType == "transferorder";
+    }
+
+    function isItemReceiptVoid(subsidiary){
+        var isActive;
+        var searchTransaction = search.create({
+            type: 'customrecord_lmry_setup_tax_subsidiary',
+            filters: [
+                ['custrecord_lmry_setuptax_subsidiary', 'is', subsidiary]
+            ],
+            columns: [
+                'custrecord_lmry_br_void_item_receipt'
+            ]
+        })
+
+        searchTransaction.run().each(function (result) {
+            isActive = result.getValue('custrecord_lmry_br_void_item_receipt');
+        });
+
+        return isActive === "T" || isActive === true;
     }
     return {
         voidFulfillment: voidFulfillment,
