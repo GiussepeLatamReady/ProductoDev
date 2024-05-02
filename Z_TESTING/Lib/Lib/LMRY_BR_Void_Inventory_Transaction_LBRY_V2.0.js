@@ -67,7 +67,6 @@ define([
                     type: record.Type.ITEM_RECEIPT,
                     id: recordReceipt.id
                 });
-                trans.setValue('memo', "voided transaction");
                 trans.save();
             } catch (error) {
                 status.error = {
