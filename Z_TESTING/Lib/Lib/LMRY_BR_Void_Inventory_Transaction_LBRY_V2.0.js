@@ -203,60 +203,27 @@ define([
             for (var itemID in listItems) {
                 if (listItems[itemID]) {
                     var quantity = listItems[itemID].itemQuantity;
-                    invAdjustment.selectNewLine({
-                        sublistId: 'inventory'
-                    });
-                    invAdjustment.setCurrentSublistValue({
-                        sublistId: 'inventory',
-                        fieldId: 'item',
-                        value: listItems[itemID].item
-                    });
-                    invAdjustment.setCurrentSublistValue({
-                        sublistId: 'inventory',
-                        fieldId: 'location',
-                        value: location
-                    });
-                    if (!isFulfillment) {
-                        // Si es para crear Inventory Adjustment para la reversa de Item Receipt, la cantidad va con -
-                        invAdjustment.setCurrentSublistValue({
-                            sublistId: 'inventory',
-                            fieldId: 'adjustqtyby',
-                            value: -quantity
-                        });
-                    } else if (isFulfillment) {
-                        // Si es para crear Inventory Adjustment para la reversa de Item Fulfillment, la cantidad va con +
-                        invAdjustment.setCurrentSublistValue({
-                            sublistId: 'inventory',
-                            fieldId: 'adjustqtyby',
-                            value: quantity
-                        });
-                    }
-                    if (contentTransferPrice) {
-                        // Si tiene Transfer Price, se utiliza el monto ingresado en dicho campo
-                        invAdjustment.setCurrentSublistValue({
-                            sublistId: 'inventory',
-                            fieldId: 'unitcost',
-                            value: listItems[itemID].itemPrice
-                        });
-                    }
-                    if (classFinal) {
-                        invAdjustment.setCurrentSublistValue({
-                            sublistId: 'inventory',
-                            fieldId: 'class',
-                            value: classFinal
-                        });
-                    }
-                    if (deptFinal) {
-                        invAdjustment.setCurrentSublistValue({
-                            sublistId: 'inventory',
-                            fieldId: 'department',
-                            value: deptFinal
-                        });
-                    }
-                    invAdjustment.commitLine({
-                        sublistId: 'inventory'
-                    });
+                    invAdjustment.selectNewLine({sublistId:'inventory'});
+                    invAdjustment.setCurrentSublistValue({sublistId:'inventory',fieldId:'item',value:listItems[itemID].item});
+                    invAdjustment.setCurrentSublistValue({sublistId:'inventory',fieldId:'location',value:location});
+                    var adjustQty = isFulfillment ? quantity : -quantity;
+                    invAdjustment.setCurrentSublistValue({sublistId:'inventory',fieldId:'adjustqtyby',value:adjustQty});
+                    if (contentTransferPrice) invAdjustment.setCurrentSublistValue({sublistId:'inventory',fieldId:'unitcost',value:listItems[itemID].itemPrice});
+                    if (classFinal) invAdjustment.setCurrentSublistValue({sublistId:'inventory',fieldId:'class',value:classFinal});
+                    if (deptFinal) invAdjustment.setCurrentSublistValue({sublistId:'inventory',fieldId:'department',value:deptFinal});
+                    invAdjustment.commitLine({sublistId:'inventory'});
+                
+                    var oppositeQty = isFulfillment ? -quantity : quantity;
+                    invAdjustment.selectNewLine({sublistId:'inventory'});
+                    invAdjustment.setCurrentSublistValue({sublistId:'inventory',fieldId:'item',value:listItems[itemID].item});
+                    invAdjustment.setCurrentSublistValue({sublistId:'inventory',fieldId:'location',value:getLocation(transferOrderID,isFulfillment ? "itemreceipt":"itemfulfillment")});
+                    invAdjustment.setCurrentSublistValue({sublistId:'inventory',fieldId:'adjustqtyby',value:oppositeQty});
+                    if (contentTransferPrice) invAdjustment.setCurrentSublistValue({sublistId:'inventory',fieldId:'unitcost',value:listItems[itemID].itemPrice});
+                    if (classFinal) invAdjustment.setCurrentSublistValue({sublistId:'inventory',fieldId:'class',value:classFinal});
+                    if (deptFinal) invAdjustment.setCurrentSublistValue({sublistId:'inventory',fieldId:'department',value:deptFinal});
+                    invAdjustment.commitLine({sublistId:'inventory'});
                 }
+                
             }
             return invAdjustment.save();
         } catch (error) {
@@ -329,6 +296,46 @@ define([
             itemsWithoutTransfPrice: itemsWithoutTransfPrice
         };
     }
+
+    function getLocation(transferOrderID,recordType){
+        
+        var inventoryTransactionID;
+        var itemLocation;
+
+        var searchTransaction = search.create({
+            type: 'transaction',
+            filters: [
+                ['createdfrom', "anyof", transferOrderID],
+                "AND",
+                ['recordType', 'is', recordType],
+                "AND",
+                ['mainline', 'is', "T"]
+            ],
+            columns: [
+                'internalid',
+            ]
+        })
+        searchTransaction.run().each(function (result) {
+            inventoryTransactionID = result.getValue('internalid');
+        });
+
+        var currentTransacction = record.load({
+            type: recordType,
+            id: inventoryTransactionID
+        });
+
+        var itemLines = currentTransacction.getLineCount({
+            sublistId: 'item'
+        });
+        if (itemLines > 0) {
+            itemLocation = currentTransacction.getSublistValue('item', 'location', 0);
+        }
+
+        return itemLocation;
+
+    }
+
+
     function getAccounts(_ref2) {
         var receiptSubsidiary = _ref2.receiptSubsidiary,
             fulfillmentSubsidiary = _ref2.fulfillmentSubsidiary;
