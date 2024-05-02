@@ -190,7 +190,7 @@ define([
                 custrecord_lmry_br_total: round(retentionAmount),
                 custrecord_lmry_br_percent: parseFloat(retention.rate), 
 
-                custrecord_lmry_total_base_currency: round(retentionAmounttLocal).toFixed(4),
+                custrecord_lmry_total_base_currency: round(retentionAmounttLocal),
                 custrecord_lmry_base_amount_local_currc: round(baseAmount * transaction.exchangeRate),
                 custrecord_lmry_amount_local_currency: round(retentionAmounttLocal),
 
@@ -206,8 +206,8 @@ define([
                 baseAmount = round(parseFloat(retention.baseamount) * item.factor);
 
 
-                commonValues.custrecord_lmry_base_amount = (baseAmount / transaction.exchangeRate).toFixed(4);
-                commonValues.custrecord_lmry_br_total = (retentionAmount / transaction.exchangeRate).toFixed(4);
+                commonValues.custrecord_lmry_base_amount = round(baseAmount / transaction.exchangeRate);
+                commonValues.custrecord_lmry_br_total = round(retentionAmount / transaction.exchangeRate);
 
                 commonValues.custrecord_lmry_total_base_currency = retentionAmount;
                 commonValues.custrecord_lmry_base_amount_local_currc = baseAmount;
