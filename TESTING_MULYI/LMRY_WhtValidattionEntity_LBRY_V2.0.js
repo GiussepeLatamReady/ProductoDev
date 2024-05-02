@@ -24,11 +24,12 @@ define(['N/record', 'N/log', 'N/search', 'N/runtime'],
 
         function setFieldWhtIVA(recordEntity, form, isURET) {
             try {
-                
+                var language = runtime.getCurrentScript().getParameter({ name: "LANGUAGE" }).substring(0, 2);
+                var entityLabel = language == "es" ? "ENTIDAD": "ENTITY"
                 var whtCodeIvaField = form.addField({
                     id: 'custpage_lmry_ety_bo_reteiva',
                     type: 'select',
-                    label: 'Latam Entity -  BO IVA'
+                    label: 'Latam '+ entityLabel +' -  BO IVA'
                 });
 
 
@@ -39,7 +40,7 @@ define(['N/record', 'N/log', 'N/search', 'N/runtime'],
 
 
                 var whtCodeIvaList = getWhtCodeList("custpage_lmry_ety_bo_reteiva");
-                console.log(whtCodeIvaList)
+
                 var idsWhtCodeList = Object.keys(whtCodeIvaList);
 
                 idsWhtCodeList.forEach(function (id) {
@@ -95,7 +96,7 @@ define(['N/record', 'N/log', 'N/search', 'N/runtime'],
                     id: id,
                     name: result.getValue("name")
                 }
-                return true
+                return true;
             });
             return whtCodeList;
 
@@ -128,7 +129,7 @@ define(['N/record', 'N/log', 'N/search', 'N/runtime'],
 
 
         function saveFieldWhtIva(recordEntity) {
-            log.error("debug","saveFieldWhtIva")
+            
             var entity = {
                 id: recordEntity.id,
                 whtCodeIva: recordEntity.getValue({ fieldId: 'custpage_lmry_ety_bo_reteiva' }) || "",
@@ -136,7 +137,7 @@ define(['N/record', 'N/log', 'N/search', 'N/runtime'],
             }
 
             if (entity.whtIva == "") {
-                log.error("afuera","no tiene retencion configurada")
+                
                 return false;
             }
             saveRecordEntityField(entity);
@@ -145,9 +146,9 @@ define(['N/record', 'N/log', 'N/search', 'N/runtime'],
 
 
         function saveRecordEntityField(entity) {
-            log.error("debug","saveRecordEntityField")
+            
             var entityField = getEntityField(entity.id);
-            log.error("entity",entity)
+            
             if (entityField.exist) {
                 var updateEntityField = record.load({
                     type: "customrecord_lmry_entity_fields",
@@ -184,13 +185,13 @@ define(['N/record', 'N/log', 'N/search', 'N/runtime'],
                     fieldId: 'custrecord_lmry_bo_ety_reteiva',
                     value: entity.whtCodeIva
                 });
-                log.error("debug","antes de guardar")
+                
                 newEntityField.save({
                     disableTriggers: true,
                     ignoreMandatoryFields: true
                 });
 
-                log.error("debug","despues de guardar")
+                
             }
         }
         return {
