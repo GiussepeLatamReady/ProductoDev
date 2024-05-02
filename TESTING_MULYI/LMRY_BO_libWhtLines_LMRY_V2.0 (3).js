@@ -54,10 +54,9 @@ function(search, record, runtime,serverWidget, libWhtValidation, libSendingEmail
 
             if (runtime.executionContext == 'USERINTERFACE') {
                 var reteiva = recordTransaction.getValue({fieldId: 'custpage_lmry_bo_reteiva'});
-                log.error("reteiva gadp",reteiva)
-                if (reteiva) {
-                    whtIds.push(reteiva)
-                    saveWhtIvaCode(tranId,reteiva,"iva")
+               
+                if (reteiva) {               
+                    whtIds.push(reteiva)               
                 };
                 
             }
@@ -731,12 +730,13 @@ function(search, record, runtime,serverWidget, libWhtValidation, libSendingEmail
 
     }
 
-    function saveWhtIvaCode(transactionId,WHTID,WHTType){
+    function saveWhtIvaCode(transactionId,recordTransaction){
+        
+        var WHTID = recordTransaction.getValue({fieldId: 'custpage_lmry_bo_reteiva'});
+
         if (!WHTID) return false;
         var transactionField = getBoTransactionField(transactionId);
-        var jsonWht = {
-            iva: "custrecord_lmry_bo_reteiva"
-        }
+        
         if (transactionField.exist) {
             
             var updateTransactionField = record.load({
@@ -744,7 +744,7 @@ function(search, record, runtime,serverWidget, libWhtValidation, libSendingEmail
                 id: transactionField.id
             });
             updateTransactionField.setValue({
-                fieldId: jsonWht[WHTType],
+                fieldId: "custrecord_lmry_bo_reteiva",
                 value: WHTID,
                 ignoreFieldChange: true
             });
@@ -762,7 +762,7 @@ function(search, record, runtime,serverWidget, libWhtValidation, libSendingEmail
             
 
             newTransactionField.setValue({
-                fieldId: jsonWht[WHTType],
+                fieldId: "custrecord_lmry_bo_reteiva",
                 value: WHTID,
                 ignoreFieldChange: true
             });
@@ -778,7 +778,7 @@ function(search, record, runtime,serverWidget, libWhtValidation, libSendingEmail
                 ignoreMandatoryFields: true
             });
         }
-        log.error("transactionField",transactionField)
+        
     }
 
     function setFieldWhtIVA(recordTransaction, form, typeContext, useOnlyAtmainLevel) {
@@ -814,12 +814,12 @@ function(search, record, runtime,serverWidget, libWhtValidation, libSendingEmail
                 label: 'Latam - BO IVA ' + amountLabel
             });
 
-            if (useOnlyAtmainLevel) {
-                whtCodeIvaFieldAmount.updateDisplayType({
-                    displayType : serverWidget.FieldDisplayType.DISABLED
-                });
-                setFieldsWhtIva(recordTransaction, typeContext);
-            }
+
+            whtCodeIvaFieldAmount.updateDisplayType({
+                displayType: serverWidget.FieldDisplayType.DISABLED
+            });
+            setFieldsWhtIva(recordTransaction, typeContext, useOnlyAtmainLevel);
+
         
         } catch (error) {
             log.error(" error [setFieldWhtIVA]", error)
@@ -828,9 +828,10 @@ function(search, record, runtime,serverWidget, libWhtValidation, libSendingEmail
 
     
 
-    function setFieldsWhtIva(recordTransaction, typeContext){
+    function setFieldsWhtIva(recordTransaction, typeContext,useOnlyAtmainLevel){
         var vendor = recordTransaction.getValue({ fieldId: 'entity' }) || ""
         var entityField = library_validation_entity.getEntityField(vendor);
+        
         if (typeContext == "create" || typeContext == "copy") {
             
             
@@ -851,11 +852,14 @@ function(search, record, runtime,serverWidget, libWhtValidation, libSendingEmail
             recordTransaction.setValue('custbody_lmry_bo_autoreteit_whtamount', 0.00);
             recordTransaction.setValue('custbody_lmry_bo_reteiue_whtamount', 0.00);
         }
+
+        if (!useOnlyAtmainLevel) recordTransaction.setValue('custpage_lmry_bo_reteiva_whtamount', 0.00);
     }
 
     return {
         createWHTbyLines: createWHTbyLines,
-        setFieldWhtIVA:setFieldWhtIVA
+        setFieldWhtIVA:setFieldWhtIVA,
+        saveWhtIvaCode:saveWhtIvaCode
     }
 
 });
