@@ -83,6 +83,16 @@ LatamReady - WHT Code
 https://tstdrv1774174.app.netsuite.com/app/common/custom/custrecordentry.nl?id=139&rectype=1069&whence=
 
 
+qa fix 
+Se realiza el cambio y se agrega una funcion en la libreria LMRY_BO_libWhtLines_LMRY_V2.0.js
+
+Se agrega dicha funcion en el vendor y vendor credit que poermite setear el valor de la retencion antes de guardar su monto
+
+Se modifica el id del feature para bolivia de 27 a 46 en la libreria LMRY_KofaxIntegrations_LBRY_V2.0.js
+
+Se cambio como parametro el objrecord por newrecord en el vendorcredit
+
+
 
 
 
