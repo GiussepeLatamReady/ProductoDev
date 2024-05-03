@@ -11,9 +11,9 @@
  * @NApiVersion 2.0
  * @NModuleScope Public
  */
-define(['N/search', 'N/record', 'N/runtime','N/ui/serverWidget', './LMRY_libWhtValidationLBRY_V2.0', './LMRY_libSendingEmailsLBRY_V2.0','./LMRY_WhtValidattionEntity_LBRY_V2.0'],
+define(['N/search', 'N/record','N/url', 'N/runtime','N/ui/serverWidget', './LMRY_libWhtValidationLBRY_V2.0', './LMRY_libSendingEmailsLBRY_V2.0','./LMRY_WhtValidattionEntity_LBRY_V2.0'],
 
-function(search, record, runtime,serverWidget, libWhtValidation, libSendingEmail,library_validation_entity) {
+function(search, record,url, runtime,serverWidget, libWhtValidation, libSendingEmail,library_validation_entity) {
     
     const LMRY_script = 'LMRY_BO_libWhtLines_LMRY_V2.0';
     const F_SUBSIDIARIES = runtime.isFeatureInEffect({feature: "SUBSIDIARIES"});
@@ -252,7 +252,9 @@ function(search, record, runtime,serverWidget, libWhtValidation, libSendingEmail
                 var amountto = 0;
                 
                 //Validate field
-                if (purchaseWhtBase == '' || purchaseWhtBase == null || isAvailableOnPurchases == false || isAvailableOnPurchases == 'F') return result;
+                if (purchaseWhtBase == '' || purchaseWhtBase == null || isAvailableOnPurchases == false || isAvailableOnPurchases == 'F'){
+                    return result;
+                } 
 
                 if (purchaseWhtBase == 'subtotal') {
                     amount = parseFloat(recordObj.getValue({fieldId: 'total'})) - parseFloat(recordObj.getValue({fieldId: 'taxtotal'}));
@@ -734,10 +736,8 @@ function(search, record, runtime,serverWidget, libWhtValidation, libSendingEmail
     function saveWhtIvaCode(transactionId,recordTransaction){
         
         var WHTID = recordTransaction.getValue({fieldId: 'custpage_lmry_bo_reteiva'});
-        
         if (!WHTID) return false;
         var transactionField = getBoTransactionField(transactionId);
-        
         if (transactionField.exist) {
             
             var updateTransactionField = record.load({
@@ -801,11 +801,12 @@ function(search, record, runtime,serverWidget, libWhtValidation, libSendingEmail
             var idsWhtCodeList = Object.keys(whtCodeIvaList);
     
             idsWhtCodeList.forEach(function (id) {
+                var urlWhtCode = url.resolveRecord({ recordType: "customrecord_lmry_wht_code", recordId:  id, isEditMode: false });
                 whtCodeIvaField.addSelectOption({
-                    value: whtCodeIvaList[id].id,
-                    text: whtCodeIvaList[id].name
+                    value: id,
+                    text: '<a class="dottedlink" href="'+urlWhtCode+'" target="_blank">'+whtCodeIvaList[id].name+'</a>'
                 });
-            }) 
+            })           
 
             var amountLabel = language == "es" ? "IMPORTE" : "AMOUNT"
             // Create Field  Wht Iva amount
@@ -819,7 +820,15 @@ function(search, record, runtime,serverWidget, libWhtValidation, libSendingEmail
             whtCodeIvaFieldAmount.updateDisplayType({
                 displayType: serverWidget.FieldDisplayType.DISABLED
             });
-            setFieldsWhtIva(recordTransaction, typeContext, useOnlyAtmainLevel);
+
+            setFieldsWhtIva(recordTransaction, typeContext,useOnlyAtmainLevel);
+            
+            // establecer por defecto el valor 0 cuando las transaccion es creada
+            if (typeContext == "create" && useOnlyAtmainLevel) {
+                recordTransaction.setValue('custbody_lmry_bo_autoreteit_whtamount', 0.00);
+                recordTransaction.setValue('custbody_lmry_bo_reteiue_whtamount', 0.00);
+            }
+            
 
         
         } catch (error) {
@@ -832,11 +841,9 @@ function(search, record, runtime,serverWidget, libWhtValidation, libSendingEmail
     function setFieldsWhtIva(recordTransaction, typeContext,useOnlyAtmainLevel){
         var vendor = recordTransaction.getValue({ fieldId: 'entity' }) || ""
         var entityField = library_validation_entity.getEntityField(vendor);
-        
         if (typeContext == "create" || typeContext == "copy") {
             
-            
-            if (entityField.exist && entityField.whtCodeIva != "") {
+            if ((entityField.exist && entityField.whtCodeIva != "") && useOnlyAtmainLevel) {
                 recordTransaction.setValue('custpage_lmry_bo_reteiva', entityField.whtCodeIva);
                 recordTransaction.setValue('custpage_lmry_bo_reteiva_whtamount', 0.00);
             }
@@ -848,13 +855,7 @@ function(search, record, runtime,serverWidget, libWhtValidation, libSendingEmail
                 recordTransaction.setValue('custpage_lmry_bo_reteiva_whtamount', transactionField.whtAmountIva);
             }
         }
-        // establecer por defecto el valor 0 cuando las transaccion es creada
-        if (typeContext == "create") {
-            recordTransaction.setValue('custbody_lmry_bo_autoreteit_whtamount', 0.00);
-            recordTransaction.setValue('custbody_lmry_bo_reteiue_whtamount', 0.00);
-        }
 
-        if (!useOnlyAtmainLevel) recordTransaction.setValue('custpage_lmry_bo_reteiva_whtamount', 0.00);
     }
 
     return {
