@@ -852,17 +852,19 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
                 if (scriptContext.type == "copy" && LMRY_Result[0] == "MX" && Library_Mail.getAuthorization(672, licenses) == true) {
                     libraryTaxWithholding.resetLines(RCD_OBJ);
                 }
-                /*
+                
                 if (LMRY_Result[0] == 'AR') {
                     if (type_interface == 'USERINTERFACE') {
                         Library_AutoPercepcionDesc.disabledSalesDiscount(OBJ_FORM);
                     }
-                    if (RCD_OBJ.getValue('createdfrom') && scriptContext.type == 'create') {
-                        Library_AutoPercepcionDesc.setDiscountRate(RCD_OBJ);
-                    }
-                    Library_AutoPercepcionDesc.removePerceptionLines(RCD_OBJ);
                 }
-                */
+                
+
+                if (LMRY_Result[0] == 'AR') {
+                    if (type_interface == 'USERINTERFACE') {
+                        Library_AutoPercepcionDesc.disabledSalesDiscount(OBJ_FORM);
+                    }
+                }
                 if (LMRY_Result[0] == 'BR' && (scriptContext.type == "create" || scriptContext.type == "edit" || scriptContext.type == "view" || scriptContext.type == "copy")) {
                     librarySecondClient.setSecondClient(RCD_OBJ, OBJ_FORM, scriptContext.type);
                 }

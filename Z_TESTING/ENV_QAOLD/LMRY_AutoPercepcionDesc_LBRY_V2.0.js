@@ -65,7 +65,7 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
            * realizar la autopercepcion y descuento
            * por pais.
            ********************************************/
-          //log.error("Step [01] recordType [ open ]", contextRecord.type);
+
 
           numLines = transactionRecord.getLineCount('item');
           soloItems = numLines;
@@ -77,8 +77,8 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
            * Logica de Descuentos por Linea solo
            * para Argentina
            *************************************/
-          if (CodeCountry == "AR" && (transactionRecord.type == 'invoice' || transactionRecord.type == 'creditmemo' || transactionRecord.type == 'cashsale')) {
-            //calculateDiscount(invoiceRecord, numLines);
+          if (CodeCountry == "AR" && (transactionRecord.type == 'salesorder' && transactionRecord.type == 'cashsale' && transactionRecord.type == 'invoice' || transactionRecord.type == 'creditmemo' || transactionRecord.type == 'cashsale')) {
+            logicaDescuentos(transactionRecord, numLines);
           }
         }
       } catch (msg) {
@@ -164,18 +164,18 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
         const setupTaxSubsidiary = getSetupTaxSubsidiary(transaction.subsidiary);
 
         if (!Object.keys(setupTaxSubsidiary).length) return true;
-        log.error('op', 'op 1');
+
         transaction.items = getItems(invoiceRecord);
-        log.error('op', 'op 2');
+
         // El tipo de cambio sera establecida para convertir los montos a moneda del pais
         transaction.exchangerate = getExchangeRate(setupTaxSubsidiary, transaction, invoiceRecord);
 
         if (transaction.type.text == "creditmemo") {
           var discountGlobal = getDiscountGlobal(invoiceRecord);
-          log.debug('discountGlobal 1', discountGlobal)
+
         } else {
           var discountGlobal = invoiceRecord.getValue("discountrate") || 0;
-          log.debug('discountGlobal 2', discountGlobal);
+
         }
 
         discountGlobal = parseFloat(discountGlobal);
@@ -185,15 +185,14 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
         transaction.total = parseFloat(invoiceRecord.getValue("total")) * parseFloat(transaction.exchangerate) - parseFloat(discountGlobal) * parseFloat(transaction.exchangerate);
         transaction.taxtotal = parseFloat(invoiceRecord.getValue("taxtotal")) * parseFloat(transaction.exchangerate) - parseFloat(discountGlobal) * parseFloat(transaction.exchangerate);
 
-        log.error('op', 'op 3');
+
         //Busqueda de National Taxes
         const nationalTaxs = getNationaltaxs(transaction);
-        log.error('nationalTaxs', nationalTaxs);
+
 
         //Busqueda de las Clases Contributiva
         const contributoryClass = getContributoryClass(transaction);
-        log.error('contributoryClass', contributoryClass);
-        log.error("calculatePerception transaction 1", transaction)
+
         transaction.currentRecord = invoiceRecord;
 
         if (transaction.type.text == 'creditmemo') {
@@ -201,7 +200,7 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
         }
 
         if (transaction.validateTotalCreditMemo && transaction.applyWhtCode && validateDocumentType(transaction) && transaction.notSend) {
-          log.error("Entro", "entro setLine")
+
           setLinePerception("1", nationalTaxs, transaction, setupTaxSubsidiary, {});
           setLinePerception("1", contributoryClass, transaction, setupTaxSubsidiary, {});
 
@@ -216,6 +215,7 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
         }
 
         removePerceptionLines(transaction);
+
         if (transaction.type.text == 'creditmemo' && transaction.amountRemoved !== 0) updateApplyAmount(transaction);
         transaction.currentRecord.save();
       } catch (errmsg) {
@@ -425,11 +425,11 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
           var recordTax = recordTaxs[i];
 
           // Valida si es articulo para las ventas
-          log.error("stop ", "stop 1")
+
           if (['Para la venta', 'For Sale', 'Para reventa', 'For Resale'].indexOf(recordTax.taxItemSubtype) == -1) continue;
-          log.error("stop ", "stop 2")
+
           if (!recordTax.taxCode) continue;
-          log.error("stop ", "stop 3")
+
 
 
 
@@ -441,7 +441,7 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
             if (transaction.countryCode == 'BR') {
               if (recordTax.catalog != item.catalog) continue;
             } else {
-              log.error("stop ", "stop 4")
+
               if (recordTax.appliesToItem != item.id) continue;
             }
           }
@@ -466,7 +466,7 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
               if (transaction.taxtotal > 0) {
                 baseAmount = transaction.taxtotal;
               } else {
-                log.error("stop ", "stop 4")
+
                 continue;
               }
             }
@@ -481,14 +481,14 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
               if (item.taxAmount > 0) {
                 baseAmount = parseFloat(item.taxAmount) * parseFloat(transaction.exchangerate);
               } else {
-                log.error("stop ", "stop 5")
+
                 continue;
               }
             }
             if (recordTax.amount == 3) { baseAmount = parseFloat(item.amount) * parseFloat(transaction.exchangerate); } //NET
           }
           baseAmount = parseFloat(baseAmount) - parseFloat(recordTax.notTaxableMinimum);
-          log.error("stop ", "stop 6")
+
           if (baseAmount <= 0) continue;
 
 
@@ -501,11 +501,11 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
                     if (recordTax.baseAmount == 3) { baseAmount = recordTax.minAmount; }
                     if (recordTax.baseAmount == 4) { baseAmount = recordTax.maxAmount; }
                   } else {
-                    log.error("stop ", "stop 7")
+
                     continue;
                   }
                 } else {
-                  log.error("stop ", "stop 8")
+
                   continue;
                 }
               } else {
@@ -513,7 +513,7 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
                 if (recordTax.baseAmount == 3) { baseAmount = recordTax.minAmount; }
               }
             } else {
-              log.error("stop ", "stop 9")
+
               continue;
             }
           } else {
@@ -523,7 +523,7 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
                 if (recordTax.baseAmount == 3) { baseAmount = recordTax.minAmount; }
                 if (recordTax.baseAmount == 4) { baseAmount = recordTax.maxAmount; }
               } else {
-                log.error("stop ", "stop 10")
+
                 continue;
               }
             }
@@ -565,7 +565,7 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
           adjustment = adjustment.toFixed(4);
 
           var index;
-          //log.error("updatePercetion",updatePercetion)
+
           index = findLinePerception(transaction, recordTax, item);
           var memo;
           if (recordTax.taxMemo) {
@@ -579,15 +579,15 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
           }
           if (index != -1) {
             // Busca la linea de percepcion a actualizar
-            log.error("updatePercetion", "Busca la linea de percepcion a actualizar")
+
             try {
               transaction.currentRecord.setSublistValue('item', 'rate', index, parseFloat(retention));
               transaction.currentRecord.setSublistValue('item', 'description', index, memo);
             } catch (error) {
-              log.error("error Controlado", error)
+              log.error("Set rate", error)
             }
           } else {
-            log.error("updatePercetion", "Agrega una linea en blanco")
+
             // Agrega una linea en blanco
             transaction.currentRecord.insertLine('item', numLines);
             index = numLines
@@ -785,7 +785,7 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
           columns: ['recordType']
         })
         transactionSearch.run().each(function (result) {
-          log.error("result", result)
+
           transactionOrigin.recordType = result.getValue('recordType');
         });
 
@@ -861,12 +861,12 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
             var amount = currentRecordOrigin.getSublistValue({ sublistId: "item", fieldId: "amount", line: i });
 
             if (!isTribute) {
-              log.error("flag", "entre")
+
               transactionOrigin.subtotal += amount;
             }
 
           }
-          log.error("transactionOrigin.subtotal", transactionOrigin.subtotal)
+
           isTotal = transactionOrigin.subtotal == transaction.subtotal;
 
           if (isTotal) {
@@ -882,8 +882,6 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
 
       if (!isTotal) transaction.currentRecord.setValue("custbody_lmry_apply_wht_code", false);
 
-
-      log.error("isTotal [ultimate]", isTotal)
       return isTotal;
 
     }
@@ -894,25 +892,16 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
       const lines = currentRecord.getLineCount({ sublistId: "apply" });
       const newTotal = transaction.total - transaction.amountRemoved;
       for (var i = 0; i < lines; i++) {
-        //const contextApply = currentRecord.selectLine({ sublistId: "apply", line: i });
+        
         var apply = currentRecord.getSublistValue({ sublistId: "apply", fieldId: "apply", line: i });
-        //var amount = currentRecord.getSublistValue({ sublistId: "apply", fieldId: "amount" , line: i});
-        //log.error("contextApply "+i,contextApply)
-        log.error("line " + i, apply)
-        //log.error("line amount " + i, amount)
+
         if (apply === "T" || apply === true) {
-          log.error("line entro" + i, "entro")
+
           currentRecord.setSublistValue("apply", "amount", i, newTotal);
-          //contextApply.commitLine("apply");
-          //currentRecord.setSublistValue("apply","apply",i,true);
-          //contextApply.commitLine("apply");
+        
         }
 
       }
-    }
-
-    function validatePerception(){
-      
     }
 
     function isValid(bool) {
@@ -924,7 +913,7 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
      * ISSUE : Nose considerba la linea de descuentos
      *         por total
      * ************************************************ */
-    function calculateDiscount(invoiceRecord, numLines) {
+    function logicaDescuentos(invoiceRecord, numLines) {
       try {
         var pos = 0;
         var trantype = '';
@@ -934,7 +923,7 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
           var type_anterior = invoiceRecord.getSublistValue('item', 'itemtype', i - 1);
           var type_actual = invoiceRecord.getSublistValue('item', 'itemtype', i);
 
-          // log.debug("Line : " + i + " - type_anterior : " + type_anterior, "type_actual : " + type_actual);
+          
 
           // Guarda la posicion inicial del ItemGroup
           if (type_actual == "Group") {
@@ -946,7 +935,7 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
             var disc_amount = invoiceRecord.getSublistValue('item', 'amount', i);
 
             // 2023-07-18 : Solo actualiza si la linea anterior no es un EndGroup
-            // log.debug("Line : " + i + " - calculateDiscount : ", 'SaleDisc : ' + disc_amount);
+            
             if (type_anterior != "EndGroup") {
               // Valida que el campo Latam Col - Sales Discount este vacio
               var SaleDisc = invoiceRecord.getSublistValue('item', 'custcol_lmry_col_sales_discount', i - 1);
@@ -955,7 +944,7 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
               }
             } else {
               // Actualiza la linea principal del ItemGroup
-              // log.debug("Group : ", 'Pos : ' + posgroup);
+              
               if (posgroup != -1) {
                 // Valida que el campo Latam Col - Sales Discount este vacio
                 var SaleDisc = invoiceRecord.getSublistValue('item', 'custcol_lmry_col_sales_discount', posgroup);
@@ -969,7 +958,7 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
         } // End for
       } catch (errmsg) {
         // Envio de mail con errores
-        LibraryMail.sendemail('[ calculateDiscount ] ' + errmsg, Name_script);
+        LibraryMail.sendemail('[ logicaDescuentos ] ' + errmsg, Name_script);
       }
     }
 
@@ -987,7 +976,7 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
         var perception_percentage = invoiceRecord.getSublistValue('item', 'custcol_lmry_ar_perception_percentage', i);
         if (tiene_tributo == true && (perception_percentage != null && perception_percentage != '')) {
           tributo = true;
-          //log.error('rate', invoiceRecord.getSublistValue('item', 'rate', i));
+
           if (cantidad > 0) {
             sumaPercepciones = sumaPercepciones + parseFloat(invoiceRecord.getSublistValue('item', 'rate', i));
           }
@@ -1011,7 +1000,7 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
           return true;
         }
         if (transaction.documentType == '' || transaction.documentType == null) {
-          log.error("Step [04] validateDocumentType:", documentFound);
+
           return documentFound;
         }
 
@@ -1029,7 +1018,7 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
         LibraryMail.sendemail('[ validateDocumentType ] ' + errmsg, Name_script);
       }
 
-      log.error("Step [04] validateDocumentType:", documentFound);
+
 
       return documentFound;
     }
@@ -1045,7 +1034,7 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
 
       var items = transaction.items;
       transaction.amountRemoved = 0;
-      log.error("items remove", items);
+
       var deletedTransactions = [];
       Object.keys(items).forEach(function (lineuniquekey) {
         if (!items[lineuniquekey].revised && items[lineuniquekey].isTribute) {
@@ -1055,31 +1044,13 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
       })
 
       deletedTransactions.sort(function (a, b) { return b - a });
-      log.error("deletedTransactions", deletedTransactions);
+
       deletedTransactions.forEach(function (id) {
         transaction.currentRecord.removeLine({
           sublistId: 'item',
           line: id
         });
       });
-    }
-
-    function disabledSalesDiscount(form) {
-      try {
-        var sublistItem = form.getSublist('item');
-        if (sublistItem) {
-          var salesDiscountColumn = sublistItem.getField({
-            id: 'custcol_lmry_col_sales_discount'
-          });
-          if (salesDiscountColumn && JSON.stringify(salesDiscountColumn) != '{}') {
-            salesDiscountColumn.updateDisplayType({
-              displayType: 'disabled'
-            });
-          }
-        }
-      } catch (error) {
-        log.error('error disabledSalesDiscount', error);
-      }
     }
 
     function getSetupTaxSubsidiary(subsidiary) {
@@ -1578,427 +1549,6 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
       return jsonSetup;
     }
 
-    function processDiscount(scriptContext) {
-      try {
-        var recordObj = scriptContext.newRecord;
-        var subsidiary = recordObj.getValue("subsidiary");
-        var setupTaxValues = getSetupTaxSubsidiary(subsidiary);
-        log.debug("setupTaxValues", setupTaxValues);
-        if (Object.keys(setupTaxValues).length > 0) {
-          if (
-            setupTaxValues["salesDiscount"] == true ||
-            setupTaxValues["salesDiscount"] == "T"
-          ) {
-            log.debug("inicia discount", "disc");
-            var objRecord = record.load({
-              type: recordObj.type,
-              id: recordObj.id,
-            });
-            setBlankDiscount(objRecord);
-            setGlobalDiscount(objRecord);
-            setLineDiscount(objRecord);
-            objRecord.save({
-              disableTriggers: true,
-              ignoreMandatoryFields: true,
-            });
-          }
-        }
-      } catch (error) {
-        log.error("error processDiscount", error);
-      }
-    }
-
-    function setBlankDiscount(objRecord) {
-      for (var i = 0; i < objRecord.getLineCount({ sublistId: "item" }); i++) {
-        objRecord.setSublistValue({
-          sublistId: "item",
-          fieldId: "custcol_lmry_col_sales_discount",
-          line: i,
-          value: "",
-        });
-      }
-    }
-
-    function setGlobalDiscount(objRecord) {
-      log.debug("objRecord", objRecord);
-      var discountRate = objRecord.getValue("discountrate");
-      log.debug("discountRate", discountRate);
-      var discountRateText = objRecord.getText("discountrate");
-      if (!discountRate) {
-        return true;
-      }
-      var isPercent = discountRateText.indexOf("%") != -1;
-      //Logica
-      var sumAmount = 0,
-        sumWithout = 0;
-      sumConDescLinea = 0;
-      for (var i = 0; i < objRecord.getLineCount({ sublistId: "item" }); i++) {
-        var amount = objRecord.getSublistValue({
-          sublistId: "item",
-          fieldId: "amount",
-          line: i,
-        });
-        log.debug("amount", amount);
-        var tributo = objRecord.getSublistValue({
-          sublistId: "item",
-          fieldId: "custcol_lmry_ar_item_tributo",
-          line: i,
-        });
-        log.debug("tributo", tributo);
-        var itemType = objRecord.getSublistValue({
-          sublistId: "item",
-          fieldId: "custcol_lmry_item_type",
-          line: i,
-        });
-        log.debug("itemType", itemType);
-
-        sumAmount += parseFloat(amount);
-        log.debug("sumAmount", sumAmount);
-        if (tributo != "T" && !tributo) {
-          sumConDescLinea += parseFloat(amount);
-          log.debug("sumConDescLinea", sumConDescLinea);
-        }
-
-        if (
-          tributo == "T" ||
-          tributo == true ||
-          itemType == "Descuento" ||
-          itemType == "Discount"
-        ) {
-          log.debug("continua", "continua");
-          continue;
-        }
-        log.debug("322", "322");
-        sumWithout += parseFloat(amount);
-        log.debug("sumWithout", sumWithout);
-      }
-      //Porcentaje
-      if (isPercent) {
-        var totalDiscountGlobal =
-          (parseFloat(sumConDescLinea) * parseFloat(discountRate)) / 100;
-        totalDiscountGlobal =
-          Math.round(parseFloat(totalDiscountGlobal) * 100) / 100;
-        log.debug("totalDiscountGlobal", totalDiscountGlobal);
-        for (var i = 0; i < objRecord.getLineCount({ sublistId: "item" }); i++) {
-          var itemType = objRecord.getSublistValue({
-            sublistId: "item",
-            fieldId: "custcol_lmry_item_type",
-            line: i,
-          });
-          var tributo = objRecord.getSublistValue({
-            sublistId: "item",
-            fieldId: "custcol_lmry_ar_item_tributo",
-            line: i,
-          });
-          var amount = objRecord.getSublistValue({
-            sublistId: "item",
-            fieldId: "amount",
-            line: i,
-          });
-          if (
-            tributo == "T" ||
-            tributo == true ||
-            itemType == "Descuento" ||
-            itemType == "Discount"
-          ) {
-            continue;
-          }
-          var prorrateo =
-            (parseFloat(amount) * parseFloat(totalDiscountGlobal)) /
-            parseFloat(sumWithout);
-          log.debug("prorrateo 1", prorrateo);
-          prorrateo = Math.round(parseFloat(prorrateo) * 100) / 100;
-          log.debug("prorrateo 2", prorrateo);
-          prorrateo = Math.abs(prorrateo);
-          log.debug("prorrateo 3", prorrateo);
-          objRecord.setSublistValue({
-            sublistId: "item",
-            fieldId: "custcol_lmry_col_sales_discount",
-            line: i,
-            value: prorrateo,
-          });
-        }
-        objRecord.setValue("discountrate", totalDiscountGlobal);
-        createARTransactionField(objRecord, discountRate, isPercent);
-      } else {
-        //Número
-        for (var i = 0; i < objRecord.getLineCount({ sublistId: "item" }); i++) {
-          var itemType = objRecord.getSublistValue({
-            sublistId: "item",
-            fieldId: "custcol_lmry_item_type",
-            line: i,
-          });
-          var tributo = objRecord.getSublistValue({
-            sublistId: "item",
-            fieldId: "custcol_lmry_ar_item_tributo",
-            line: i,
-          });
-          var amount = objRecord.getSublistValue({
-            sublistId: "item",
-            fieldId: "amount",
-            line: i,
-          });
-
-          if (
-            tributo == "T" ||
-            tributo == true ||
-            itemType == "Descuento" ||
-            itemType == "Discount"
-          ) {
-            continue;
-          }
-
-          var prorrateo =
-            (parseFloat(amount) * parseFloat(discountRate)) / sumWithout;
-          prorrateo = Math.round(parseFloat(prorrateo) * 100) / 100;
-
-          prorrateo = Math.abs(prorrateo);
-
-          objRecord.setSublistValue({
-            sublistId: "item",
-            fieldId: "custcol_lmry_col_sales_discount",
-            line: i,
-            value: prorrateo,
-          });
-        }
-        createARTransactionField(objRecord, discountRate, isPercent);
-      }
-    }
-
-    function createARTransactionField(objRecord, discountRate, isPercent) {
-      try {
-        var idTransaction = objRecord.id;
-        log.debug("idTransaction", idTransaction);
-        var typeTransaction = objRecord.type;
-        log.debug("typeTransaction", typeTransaction);
-        var createdFrom = objRecord.getValue("createdfrom");
-        log.debug("createdFrom", createdFrom);
-        log.debug("test", discountRate + "%");
-        var typeFrom = "";
-        if (createdFrom && createdFrom != "" && createdFrom != null) {
-          var resultFrom = search.lookupFields({
-            type: search.Type.TRANSACTION,
-            id: createdFrom,
-            columns: ["type"],
-          });
-          typeFrom = resultFrom.type[0].value;
-        }
-
-        if (typeFrom && typeFrom != "" && typeFrom != null) {
-          var searchArTransactionFrom = search.create({
-            type: "customrecord_lmry_ar_transaction_fields",
-            filters: [
-              ["isinactive", "is", "F"],
-              "AND",
-              ["custrecord_lmry_ar_transaction_related", "anyof", createdFrom],
-            ],
-            columns: [
-              search.createColumn({
-                name: "id",
-                sort: search.Sort.ASC,
-                label: "ID",
-              }),
-              search.createColumn({
-                name: "custrecord_lmry_ar_glob_disc_rate",
-                label: "LATAM - GLOBAL DISCOUNT RATE",
-              }),
-            ],
-          });
-          var resultFrom = searchArTransactionFrom.run().getRange(0, 1);
-          log.debug("result 1", result);
-          if (resultFrom.length > 0) {
-            var discRate = resultFrom[0].getValue(
-              "custrecord_lmry_ar_glob_disc_rate"
-            );
-            log.debug("discRate", discRate);
-            var searchArTransaction = search.create({
-              type: "customrecord_lmry_ar_transaction_fields",
-              filters: [
-                ["isinactive", "is", "F"],
-                "AND",
-                [
-                  "custrecord_lmry_ar_transaction_related",
-                  "anyof",
-                  idTransaction,
-                ],
-              ],
-              columns: [
-                search.createColumn({
-                  name: "id",
-                  sort: search.Sort.ASC,
-                  label: "ID",
-                }),
-              ],
-            });
-            var result = searchArTransaction.run().getRange(0, 1);
-            log.debug("result", result);
-            if (result.length > 0) {
-              var arTransaction = record.load({
-                type: "customrecord_lmry_ar_transaction_fields",
-                id: result[0].id,
-              });
-              arTransaction.setValue({
-                fieldId: "custrecord_lmry_ar_glob_disc_rate",
-                value: discRate,
-              });
-              arTransaction.save({
-                enableSourcing: true,
-                ignoreMandatoryFields: true,
-                disableTriggers: true,
-              });
-            } else {
-              // Record LatamReady - AR Transaction fields
-              var newArTransaction = record.create({
-                type: "customrecord_lmry_ar_transaction_fields",
-              });
-              newArTransaction.setValue({
-                fieldId: "custrecord_lmry_ar_transaction_related",
-                value: idTransaction,
-              });
-              newArTransaction.setValue({
-                fieldId: "custrecord_lmry_ar_glob_disc_rate",
-                value: discRate,
-              });
-              newArTransaction.save({
-                enableSourcing: true,
-                ignoreMandatoryFields: true,
-                disableTriggers: true,
-              });
-            }
-          }
-        } else {
-          var searchArTransaction = search.create({
-            type: "customrecord_lmry_ar_transaction_fields",
-            filters: [
-              ["isinactive", "is", "F"],
-              "AND",
-              ["custrecord_lmry_ar_transaction_related", "anyof", idTransaction],
-            ],
-            columns: [
-              search.createColumn({
-                name: "id",
-                sort: search.Sort.ASC,
-                label: "ID",
-              }),
-            ],
-          });
-          var result = searchArTransaction.run().getRange(0, 1);
-          if (result.length > 0) {
-            var arTransaction = record.load({
-              type: "customrecord_lmry_ar_transaction_fields",
-              id: result[0].id,
-            });
-            var customrate = discountRate;
-            if (isPercent) {
-              customrate = customrate + "%";
-            }
-            arTransaction.setValue({
-              fieldId: "custrecord_lmry_ar_glob_disc_rate",
-              value: customrate,
-            });
-            arTransaction.save({
-              enableSourcing: true,
-              ignoreMandatoryFields: true,
-              disableTriggers: true,
-            });
-          } else {
-            // Record LatamReady - AR Transaction fields
-            var newArTransaction = record.create({
-              type: "customrecord_lmry_ar_transaction_fields",
-            });
-            newArTransaction.setValue({
-              fieldId: "custrecord_lmry_ar_transaction_related",
-              value: idTransaction,
-            });
-
-            var customrate = discountRate;
-            if (isPercent) {
-              customrate = customrate + "%";
-            }
-            newArTransaction.setValue({
-              fieldId: "custrecord_lmry_ar_glob_disc_rate",
-              value: customrate,
-            });
-            newArTransaction.save({
-              enableSourcing: false,
-              ignoreMandatoryFields: true,
-              disableTriggers: true,
-            });
-          }
-        }
-      } catch (error) {
-        log.error("error createARTransactionField", error);
-      }
-    }
-
-    function setDiscountRate(objRecord) {
-      var createdFrom = objRecord.getValue("createdfrom");
-      var searchArTransactionFrom = search.create({
-        type: "customrecord_lmry_ar_transaction_fields",
-        filters: [
-          ["isinactive", "is", "F"],
-          "AND",
-          ["custrecord_lmry_ar_transaction_related", "anyof", createdFrom],
-        ],
-        columns: [
-          search.createColumn({
-            name: "id",
-            sort: search.Sort.ASC,
-            label: "ID",
-          }),
-          search.createColumn({
-            name: "custrecord_lmry_ar_glob_disc_rate",
-            label: "LATAM - GLOBAL DISCOUNT RATE",
-          }),
-        ],
-      });
-      var resultFrom = searchArTransactionFrom.run().getRange(0, 1);
-      if (resultFrom.length > 0) {
-        var discRate = resultFrom[0].getValue(
-          "custrecord_lmry_ar_glob_disc_rate"
-        );
-        if (discRate) {
-          objRecord.setText("discountrate", discRate);
-        }
-      }
-    }
-
-    function setLineDiscount(objRecord) {
-      for (var i = 0; i < objRecord.getLineCount({ sublistId: "item" }); i++) {
-        log.debug("i", i);
-        var itemType = objRecord.getSublistValue({
-          sublistId: "item",
-          fieldId: "custcol_lmry_item_type",
-          line: i,
-        });
-        var amount = objRecord.getSublistValue({
-          sublistId: "item",
-          fieldId: "amount",
-          line: i,
-        });
-        log.debug("amount", amount);
-        if (itemType != "Descuento" && itemType != "Discount") {
-          continue;
-        }
-        if (i - 1 >= 0) {
-          var salesDiscount =
-            objRecord.getSublistValue({
-              sublistId: "item",
-              fieldId: "custcol_lmry_col_sales_discount",
-              line: i - 1,
-            }) || 0;
-          log.debug("salesDiscount 1", salesDiscount);
-          salesDiscount += parseFloat(Math.abs(amount));
-          log.debug("salesDiscount 2", salesDiscount);
-          objRecord.setSublistValue({
-            sublistId: "item",
-            fieldId: "custcol_lmry_col_sales_discount",
-            line: i - 1,
-            value: salesDiscount,
-          });
-        }
-      }
-    }
     // Regresa la funcion para el User Event
     return {
       processPerception: processPerception,

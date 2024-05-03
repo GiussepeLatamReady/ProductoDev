@@ -843,6 +843,12 @@ define(['N/currency', 'N/log', 'N/config', 'N/ui/serverWidget', 'N/record', 'N/s
             }
           }
 
+          if (LMRY_Result[0] == 'AR') {
+            if (type_interface == 'USERINTERFACE') {
+              Library_AutoPercepcionDesc.disabledSalesDiscount(form);
+            }
+          }
+
         } // Fin if (type != 'print' && type != 'email')
 
 
@@ -2230,13 +2236,12 @@ define(['N/currency', 'N/log', 'N/config', 'N/ui/serverWidget', 'N/record', 'N/s
         }
         /*****************************************************/
 
-        if (LMRY_Result[0] == 'AR') {
-          // Calcula de percepciones
+        if (LMRY_Result[0] == 'AR' && (type_event == 'create' || type_event == 'edit' || type_event == 'copy')) {
+          Library_AutoPercepcionDesc.processDiscount(scriptContext);
           if (libraryMail.getAuthorization(142, licenses)) {
-
-            Library_AutoPercepcionDesc.processPerception(scriptContext, LMRY_Result[0], scriptContext.type);
+              Library_AutoPercepcionDesc.processPerception(scriptContext, LMRY_Result[0], scriptContext.type);
           }
-        }
+      }
         
 
       } catch (err) {
