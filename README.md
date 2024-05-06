@@ -1,10 +1,11 @@
-# [C0967 -2 - L : BR Anulacion de Item Receipt](https://docs.google.com/document/d/1Fx7R373MRITeUzp1uuCuTEsrNxw7ENeosfTEHt6zs48/edit)
+# [C1041 - C1065 : BR Mejora - Pagos solo por el Módulo Latam](https://docs.google.com/document/d/1mIRbg0fRekUGNTjgBxUO1RAYA2cyMbtVToAnTI0m9uU/edit)
 
 
 ## Description of the Requirement
 
-Se requiere desarrollar un librería para ser consumida por Facturación Electrónica para el proceso de anulación de Item Receipt
+Se requiere un nuevo Feature By Subsidiary con una funcionalidad específica para los pagos de Proveedores y cobranzas de Clientes.
 
+Solo aplica a Brazil
 
 ## Description of the solution
 
@@ -17,10 +18,26 @@ Se requiere desarrollar un librería para ser consumida por Facturación Electr�
     
 + Delete
 
++ revision
+    LMRY_BR_WHT_CustPaymnt_STLT.js
+    LMRY_BR_WHT_Purchase_STLT_V2.1.js
+
+    LMRY_VendorURET_V2.0.js
+    LMRY_VendorCLNT_V2.0.js
+
+    LMRY_EntityURET_V2.0.js
+    LMRY_EntityCLNT_V2.0.js
+
+    LMRY_VendorBillURET_V2.0.js
+    LMRY_VendorBillCLNT_V2.0.js
+
+    LMRY_InvoiceURET_V2.0.js
+    LMRY_InvoiceCLNT_V2.0.js
+
 ## Records
 + Create
     + LatamReady - Setup Tax Subsidiary (customrecord_lmry_setup_tax_subsidiary)
-    Crear el campo : Latam - BR void item receipt (custrecord_lmry_br_void_item_receipt)
+    Crear el campo : PAGAMENTO LATAMREADY (custrecord_lmry_setuptax_br_pagamento_lr)
         
 + Update
     
