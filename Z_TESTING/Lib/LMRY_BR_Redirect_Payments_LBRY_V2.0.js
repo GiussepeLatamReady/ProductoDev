@@ -68,7 +68,7 @@ define([
     function callModulePayment(id) {
 
         var recordType;
-        var aplplyWht;
+        var applyWht;
         var searchTransaction = search.create({
             type: 'transaction',
             filters: [
@@ -85,10 +85,10 @@ define([
         searchTransaction.run().each(function (result) {
             var columns = result.columns;
             recordType = result.getValue(columns[0]);
-            aplplyWht = result.getValue(columns[1]);
+            applyWht = result.getValue(columns[1]);
         });
         var translations = getTranslations();
-        if (aplplyWht !== "T" && aplplyWht !== true) {
+        if (applyWht !== "T" && applyWht !== true) {
             alert(translations.LMRY_NOT_APPLY_WHT)
             return false;
         }

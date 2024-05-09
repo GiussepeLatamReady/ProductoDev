@@ -140,7 +140,7 @@
                         FORM.clientScriptModulePath = "./LMRY_VendorCLNT_V2.0.js";
                         FORM.addButton({
                             id: 'custpage_custom_button_pagamento_latam',
-                            label: 'Pagamento LatamReady',
+                            label: 'Latam Payment',
                             functionName: 'callModuleVendorPayment(' + subsidiary + ',' + idEntity + ')',
                         });
                     }
