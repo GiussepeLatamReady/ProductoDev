@@ -14,8 +14,8 @@
  * @Author gerson@latamready.com
 **/
 
-define(["N/redirect", "N/task", "N/runtime", "./Latam_Library/LMRY_BR_WHT_Purchase_STLT_LBRY_V2.1"],
-    function (redirect, task, runtime, lbryBRWHTPurchase) {
+define(["N/log","N/redirect", "N/task", "N/runtime", "./Latam_Library/LMRY_BR_WHT_Purchase_STLT_LBRY_V2.1"],
+    function (log,redirect, task, runtime, lbryBRWHTPurchase) {
         const ScriptName = "LatamReady - BR WHT Purchase STLT";
         const CLIENT_SCRIPT = "./Latam_Library/LMRY_BR_WHT_Purchase_CLNT_V2.1.js"; 
 
@@ -25,6 +25,7 @@ define(["N/redirect", "N/task", "N/runtime", "./Latam_Library/LMRY_BR_WHT_Purcha
             const DEPLOY_ID = runtime.getCurrentScript().deploymentId;
 
             let params = context.request.parameters;
+            log.error("params",params)
             let handler = new lbryBRWHTPurchase.LibraryHandler({
                 params: context.request.parameters,
                 method: context.request.method

@@ -71,19 +71,19 @@ define(['N/log', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/error', 'N/red
                     var status = context.request.parameters.status;
                     log.error("status ", status)
                     if (!status) {
-                        var requestparam = context.request.parameters;
-                        log.debug("requestparam", requestparam);
-                        form.getField({ id: "custpage_subsidiary" }).defaultValue = "16";                        
-                        
+                        var subsi = context.request.parameters.idS;
+                        var idEnt = context.request.parameters.idE;
+                        if (idEnt) {
+                            log.error("subsi parameter", subsi)
+                            form.getField({ id: "custpage_subsidiary" }).defaultValue = subsi;
+                            addCustomer(form, idEnt);
+                        }                         
                         form.getField({ id: "custpage_currency" }).defaultValue = localCurrency;
                         form.getField({ id: "custpage_exchangerate" }).defaultValue = 1.0;
-
                         form.getField({ id: 'custpage_memo' }).updateDisplayType({ displayType: serverWidget.FieldDisplayType.DISABLED });
                         form.getField({ id: "custpage_exchangerate" }).updateDisplayType({ displayType: serverWidget.FieldDisplayType.DISABLED });
                         form.getField({ id: 'custpage_status' }).updateDisplayType({ displayType: serverWidget.FieldDisplayType.HIDDEN });
-                        form.addSubmitButton({
-                            label: getText('filter')
-                        });
+                        form.addSubmitButton({ label: getText('filter') });
 
                     } else if (status == '1') {
                       
@@ -109,11 +109,8 @@ define(['N/log', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/error', 'N/red
                         disableFields(form);
                         var transactions = getTransactions(context);
                         log.debug('transactions', JSON.stringify(transactions));
-                        loadTransactions(transactions, sublist);
-
-                        form.addSubmitButton({
-                            label: getText('save')
-                        });
+                        loadTransactions(transactions, sublist,context);
+                        form.addSubmitButton({ label: getText('save') });
 
                         form.addButton({
                             id: 'button_cancel',
@@ -124,8 +121,6 @@ define(['N/log', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/error', 'N/red
 
                     form.clientScriptModulePath = CLIENT_SCRIPT;
                     context.response.writePage(form);
-                  form.getField({ id: "custpage_customer" }).defaultValue = "4501";
-
                 } catch (err) {
                     log.error("[ onRequest - GET ]", err);
                     library_mail.sendemail('[ onRequest - GET ]' + err, LMRY_script);
@@ -495,9 +490,19 @@ define(['N/log', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/error', 'N/red
             customer = Number(customer);
             var araccount = context.request.parameters.araccount;
             araccount = Number(araccount);
-            var date = context.request.parameters.date;
-            var period = context.request.parameters.period;
+            var date = context.request.parameters.date ? context.request.parameters.date : new Date() ;
+            
+            var period = context.request.parameters.period ? context.request.parameters.period : getPeriodByDate(date);
             period = Number(period);
+            log.error("period",period)
+            log.error("date",date)
+            log.error("typeof date",typeof date)
+
+            var dateParse = format.parse({ value: date, type: format.Type.DATE });
+            log.error("dateParse",dateParse)
+            var dateFormat = format.format({ type: format.Type.DATE, value: dateParse });
+            log.error("dateFormat",dateFormat)
+            date = dateFormat;
             var currency = context.request.parameters.currency;
             var exchangeRate = context.request.parameters.exchangerate;
             var document = context.request.parameters.document;
@@ -513,6 +518,8 @@ define(['N/log', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/error', 'N/red
             location = Number(location);
             var paymentMethod = context.request.parameters.paymentmethod;
             paymentMethod = Number(paymentMethod);
+
+            var byTransaction = context.request.parameters.byTransaction;
 
             log.debug('params', JSON.stringify(context.request.parameters));
 
@@ -922,7 +929,7 @@ define(['N/log', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/error', 'N/red
             var date = context.request.parameters.date;
             var document = context.request.parameters.document;
             document = Number(document);
-
+            log.error("araccount",araccount)
             var search_transactions = search.load({
                 id: 'customsearch_lmry_br_wht_invoices_to_pay'
             });
@@ -1022,6 +1029,8 @@ define(['N/log', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/error', 'N/red
                         'amountadvance': results[i].getValue(columns[13])
                     };
 
+                    log.error("get transaction",transaction);
+
                     if (FEAT_INSTALLMENTS == "T" || FEAT_INSTALLMENTS == true) {
                         transaction["installnum"] = results[i].getValue(columns[14]) || "";
                         if (transaction["installnum"]) {
@@ -1077,13 +1086,20 @@ define(['N/log', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/error', 'N/red
             return transactions;
         }
 
-        function loadTransactions(transactions, sublist) {
+        function loadTransactions(transactions, sublist, context) {
             var numInstallments = 0;
 
             for (var i = 0; i < transactions.length; i++) {
                 var transaction = transactions[i];
                 if (transaction['internalid']) {
-                    sublist.setSublistValue({ id: 'apply', line: i, value: 'F' });
+                    log.error("transaction['internalid']",transaction['internalid'])
+                    var idTransaction = context.request.parameters.idTransaction;
+                    if (idTransaction && (idTransaction == transaction['internalid'])) {
+                        sublist.setSublistValue({ id: 'apply', line: i, value: 'T' });
+                    }else{
+                        sublist.setSublistValue({ id: 'apply', line: i, value: 'F' });
+                    }
+                    
 
                     var url_invoice = url.resolveRecord({
                         recordType: 'invoice',
@@ -1092,6 +1108,7 @@ define(['N/log', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/error', 'N/red
                     });
 
                     var baselink = '<a class="dottedlink" href ="' + url_invoice + '" target="_blank">#TEXT</a>';
+                    
 
                     if (transaction['date']) {
                         sublist.setSublistValue({ id: 'date', line: i, value: baselink.replace('#TEXT', transaction['date']) });
@@ -1235,9 +1252,12 @@ define(['N/log', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/error', 'N/red
         }
 
         function createBookSublist(form, context) {
+            log.error("createBookSublist","start")
             var subsidiary = context.request.parameters.subsidiary || "";
             var currencyId = context.request.parameters.currency;
-            var trandate = context.request.parameters.date || "";
+            var trandate = context.request.parameters.date || new Date();
+
+            log.error("createBookSublist","start")
             if (subsidiary && currencyId && trandate) {
                 form.addTab({
                     id: "book_tab",
@@ -1331,6 +1351,47 @@ define(['N/log', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/error', 'N/red
                 return sublist;
             }
         }
+
+        function getAccountingPeriods() {
+            var periods = [];
+            var search_periods = search.load({
+                id: 'customsearch_lmry_open_accounting_period'
+            });
+    
+            var columns = search_periods.columns;
+            var results = search_periods.run().getRange(0, 1000);
+            if (results && results.length) {
+                for (var i = 0; i < results.length; i++) {
+                    var id = results[i].getValue(columns[0]);
+                    var name = results[i].getValue(columns[1]);
+                    var startdate = results[i].getValue(columns[2]);
+                    startdate = format.parse({ value: startdate, type: format.Type.DATE });
+                    var enddate = results[i].getValue(columns[3]);
+                    enddate = format.parse({ value: enddate, type: format.Type.DATE });
+    
+                    periods.push({
+                        value: id,
+                        text: name,
+                        startDate: startdate,
+                        endDate: enddate
+                    });
+                }
+            }
+            return periods;
+        }
+    
+        function getPeriodByDate(date) {
+            var periods = getAccountingPeriods();
+            var period = 0;
+            for (var i = 0; i < periods.length; i++) {
+                if (periods[i]['startDate'] <= date && date <= periods[i]['endDate'].getTime()) {
+                    period = periods[i]['value'];
+                    break;
+                }
+            }
+            return period;
+        }
+
 
         return {
             onRequest: onRequest

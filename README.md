@@ -15,6 +15,10 @@ Solo aplica a Brazil
     LMRY_BR_Void_Inventory_Transaction_LBRY_V2.0.js
 
 + Update
+    LMRY_InvoiceCLNT_V2.0.js
+    LMRY_InvoiceURET_V2.0.js
+    LMRY_BR_WHT_CustPaymnt_CLNT.js
+    LMRY_BR_WHT_CustPaymnt_CLNT.js
     
 + Delete
 

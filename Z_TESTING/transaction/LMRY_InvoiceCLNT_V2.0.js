@@ -20,9 +20,9 @@
  './Latam_Library/LMRY_AlertTraductorSale_LBRY_V2.0', './Latam_Library/LMRY_WebService_LBRY_v2.0.js',
  './Latam_Library/LMRY_ST_Transaction_ConfigFields_LBRY_V2.0', './Latam_Library/LMRY_BR_ValidateDuplicate_LBRY_V2.0',
  './Latam_Library/LMRY_CO_Duplicate_Credit_Memos_CLTN_LBRY_V2.0', './Latam_Library/LMRY_libToolsFunctionsLBRY_V2.0.js',
- './Latam_Library/LMRY_Custom_ExchangeRate_LBRY_V2.0.js'
+ './Latam_Library/LMRY_Custom_ExchangeRate_LBRY_V2.0.js','./Latam_Library/LMRY_BR_Redirect_Payments_LBRY_V2.0'
 ],
- function (Library_Val, Library_Mail, Library_Number, Library_WHT_Transaction, library_ExchRate, currency, record, log, currentRecord, search, runtime, https, url, translation, library_translator, LR_webService, ST_ConfigFields, LbryBRDuplicate, Library_Duplicate_Clnt, Library_libTools, Library_ExchangeRate) {
+ function (Library_Val, Library_Mail, Library_Number, Library_WHT_Transaction, library_ExchRate, currency, record, log, currentRecord, search, runtime, https, url, translation, library_translator, LR_webService, ST_ConfigFields, LbryBRDuplicate, Library_Duplicate_Clnt, Library_libTools, Library_ExchangeRate,Library_RedirecPayment) {
 
         var LMRY_script = 'LatamReady - Invoice CLNT V2.0';
         var LMRY_access = false;
@@ -2900,6 +2900,10 @@
             }
         }
 
+        function callModulePayment(id){
+            Library_RedirecPayment.callModulePayment(id);
+        }
+
         return {
             pageInit: INVClnt_PageInit,
             fieldChanged: fieldChanged,
@@ -2911,7 +2915,8 @@
             // validateInsert: validateInsert,
             // validateDelete: validateDelete,
             saveRecord: INVClnt_SaveRecord,
-            onclick_event_co_wht_lines: onclick_event_co_wht_lines
+            onclick_event_co_wht_lines: onclick_event_co_wht_lines,
+            callModulePayment: callModulePayment
         };
 
     })

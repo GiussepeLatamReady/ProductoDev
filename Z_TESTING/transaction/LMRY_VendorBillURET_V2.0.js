@@ -32,7 +32,8 @@ define(['require', './Latam_Library/LMRY_UniversalSetting_Purchase_LBRY', 'N/rec
   './WTH_Library/LMRY_MX_STE_Bill_WHT_Total_LBRY_V2.0', './Latam_Library/LMRY_MX_CREATE_JsonTaxResult_LBRY_V2.0',
   './Latam_Library/LMRY_PE_STE_Purchases_Tax_Transaction_LBRY_V2.0', './WTH_Library/LMRY_CR_STE_WhtTransactionOnPurchaseByTotal_LBRY_V2.0', './Latam_Library/LMRY_BO_libWhtLines_LMRY_V2.0',
   './Latam_Library/LMRY_Custom_ExchangeRate_Field_LBRY_V2.0.js', './Latam_Library/LMRY_KofaxIntegrations_LBRY_V2.0',
-  './Latam_Library/LMRY_Custom_ExchangeRate_LBRY_V2.0', './Latam_Library/LMRY_RenameFields_LBRY'
+  './Latam_Library/LMRY_Custom_ExchangeRate_LBRY_V2.0', './Latam_Library/LMRY_RenameFields_LBRY',
+  './Latam_Library/LMRY_BR_Redirect_Payments_LBRY_V2.0'
 ],
 
   function (require, library_Uni_Setting, record, runtime, search, log, config, https, url, serverWidget, library, library1, libraryDIOT, Library_WHT_Transaction, ST_Library_Transaction,
@@ -41,7 +42,7 @@ define(['require', './Latam_Library/LMRY_UniversalSetting_Purchase_LBRY', 'N/rec
     CO_STE_TaxLibrary, CO_STE_WhtLibrary_Total, libraryTranIdCSV, AR_ST_TaxLibrary, AR_ST_Perception, AR_ST_TransFields, LibraryValidatePeriod, library_UY_Retencion,
     CO_STE_WhtLibrary_Lines, errorAPI, CL_ST_WhtLibrary_Total, MX_TaxLibrary, PA_ST_TaxLibrary, libraryIGVNoDom, MX_WhtLibrary, libraryFleteGlobales, libLog, libBoTaxes,
     MX_STE_WhtLibrary_Total, libraryMxJsonResult, PE_STE_TaxLibrary, CR_STE_WhtLibrary_Total, BO_libWHTLines, Library_ExchangeRate_Field, kofaxModule,
-    Library_ExchangeRate, Library_RenameFields) {
+    Library_ExchangeRate, Library_RenameFields,Library_RedirecPayment) {
 
     var scriptObj = runtime.getCurrentScript();
     var type = '';
@@ -1151,6 +1152,10 @@ define(['require', './Latam_Library/LMRY_UniversalSetting_Purchase_LBRY', 'N/rec
         }
         if (type == "copy" && LMRY_Result[0] == "MX" && library.getAuthorization(671, licenses) && (ST_FEATURE == false || ST_FEATURE == "F")) {
           MX_TaxLibrary.resetLines(recordObj);
+        }
+
+        if (LMRY_Result[0] == 'BR' && type == "view" && type_interface == 'USERINTERFACE') {
+          Library_RedirecPayment.redirectModulePayment(form, recordObj);
         }
 
       } catch (err) {

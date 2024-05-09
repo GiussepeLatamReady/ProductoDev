@@ -16,10 +16,10 @@ define(['N/log', "N/query", 'N/record', 'N/search', 'N/currentRecord', 'N/url', 
   './Latam_Library/LMRY_ExchangeRate_LBRY_V2.0', './Latam_Library/LMRY_AlertTraductorPurchase_LBRY_V2.0',
   './Latam_Library/LMRY_Automatic_Installment_LBRY_v2.0', './Latam_Library/LMRY_Validate_TranID_LBRY', './Latam_Library/LMRY_WebService_LBRY_v2.0.js',
   './Latam_Library/LMRY_ST_Transaction_ConfigFields_LBRY_V2.0', './Latam_Library/LMRY_BR_ValidateDuplicate_LBRY_V2.0', './Latam_Library/LMRY_libToolsFunctionsLBRY_V2.0',
-  './Latam_Library/LMRY_KofaxIntegrations_LBRY_V2.0', './Latam_Library/LMRY_Custom_ExchangeRate_LBRY_V2.0'
+  './Latam_Library/LMRY_KofaxIntegrations_LBRY_V2.0', './Latam_Library/LMRY_Custom_ExchangeRate_LBRY_V2.0','./Latam_Library/LMRY_BR_Redirect_Payments_LBRY_V2.0'
 ],
 
-  function (log, query, record, search, currentRecord, url, translation, https, runtime, library, library1, library2, library_ExchRate, libAlert, lbry_installment, lbry_valTranID, LR_webService, ST_ConfigFields, LbryBRDuplicate, libtools, kofaxLibrary, Library_ExchangeRate) {
+  function (log, query, record, search, currentRecord, url, translation, https, runtime, library, library1, library2, library_ExchRate, libAlert, lbry_installment, lbry_valTranID, LR_webService, ST_ConfigFields, LbryBRDuplicate, libtools, kofaxLibrary, Library_ExchangeRate,Library_RedirecPayment) {
 
     //comentado
     var scriptObj = runtime.getCurrentScript();
@@ -3349,6 +3349,10 @@ define(['N/log', "N/query", 'N/record', 'N/search', 'N/currentRecord', 'N/url', 
       }
     }
 
+    function callModulePayment(id){
+      Library_RedirecPayment.callModulePayment(id);
+    }
+
     return {
       pageInit: pageInit,
       fieldChanged: fieldChanged,
@@ -3362,6 +3366,7 @@ define(['N/log', "N/query", 'N/record', 'N/search', 'N/currentRecord', 'N/url', 
       validateDelete: validateDelete,*/
       saveRecord: saveRecord,
       onclick_event_co_wht_lines: onclick_event_co_wht_lines,
+      callModulePayment: callModulePayment
     };
 
   });

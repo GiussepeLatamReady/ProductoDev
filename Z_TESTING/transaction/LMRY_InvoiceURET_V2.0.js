@@ -32,7 +32,8 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
     './WTH_Library/LMRY_MX_Withholding_Sales_LBRY_V2.0', './WTH_Library/LMRY_TransferIva_Subtype_LBRY', './Latam_Library/LMRY_libToolsFunctionsLBRY_V2.0',
     './Latam_Library/LMRY_BR_UPDATE_Flete_Transaction_Field_LBRY_2.0', './WTH_Library/LMRY_BO_Taxes_LBRY_V2.0',
     './Latam_Library/LMRY_PE_STE_Sales_Tax_Transaction_LBRY_V2.0', './WTH_Library/LMRY_CR_STE_WhtTransactionOnSalesByTotal_LBRY_V2.0',
-    './Latam_Library/LMRY_Custom_ExchangeRate_Field_LBRY_V2.0.js', './Latam_Library/LMRY_second_Entity_LBRY_V2.0', './Latam_Library/LMRY_Custom_ExchangeRate_LBRY_V2.0.js'
+    './Latam_Library/LMRY_Custom_ExchangeRate_Field_LBRY_V2.0.js', './Latam_Library/LMRY_second_Entity_LBRY_V2.0', './Latam_Library/LMRY_Custom_ExchangeRate_LBRY_V2.0.js',
+    './Latam_Library/LMRY_BR_Redirect_Payments_LBRY_V2.0'
 ],
 
     function (library_Uni_Setting, library_hideview3, Library_BoletoBancario, Library_Mail, Library_Number,
@@ -43,7 +44,8 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
         MX_STE_TaxLibrary, PE_libMapTransactions, CO_STE_TaxLibrary, CO_STE_WhtLibrary_Lines, CO_STE_WhtLibrary_Total,
         MX_ST_WhtLibrary_Total, AR_ST_TaxLibrary, LibraryValidatePeriod, library_PE_Detraction, AR_ST_PerceptionLibrary,
         AR_ST_TransFields, PA_ST_TaxLibrary, libraryTaxWithholding, library_BR_minimum, TaxWithholdingSales, LibraryTransferIvaSubtype, libTools,
-        libraryFleteGlobales, libBoTaxes, PE_STE_TaxLibrary, CR_STE_WhtLibrary_Total, Library_ExchangeRate_Field, librarySecondClient, Library_ExchangeRate) {
+        libraryFleteGlobales, libBoTaxes, PE_STE_TaxLibrary, CR_STE_WhtLibrary_Total, Library_ExchangeRate_Field, librarySecondClient, Library_ExchangeRate,
+        Library_RedirecPayment) {
 
         /**
          * Variable Universal del Registro personalizado
@@ -867,6 +869,10 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
                 }
                 if (LMRY_Result[0] == 'BR' && (scriptContext.type == "create" || scriptContext.type == "edit" || scriptContext.type == "view" || scriptContext.type == "copy")) {
                     librarySecondClient.setSecondClient(RCD_OBJ, OBJ_FORM, scriptContext.type);
+                }
+
+                if (LMRY_Result[0] == 'BR' && scriptContext.type == "view" && type_interface == 'USERINTERFACE') {
+                    Library_RedirecPayment.redirectModulePayment(OBJ_FORM, RCD_OBJ);
                 }
 
             } catch (err) {
