@@ -1,18 +1,10 @@
-/* = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =\
-||   This script for Reverse cancellation                       ||
-||                                                              ||
-||  File Name: LMRY_MX_Reverse_Cancellation_LBRY_V2.1.js         ||
-||                                                              ||
-||  Version Date         Author        Remarks                  ||
-||  2.1     Jul 15 2023  LatamReady    Use Script 2.1           ||
-\= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = */
-
 /**
  * @NApiVersion 2.1
  * @NModuleScope Public
- * @Author master@latamready.com
- **/
-
+ * @Name LMRY_MX_Reverse_Cancellation_LBRY_V2.1.js
+ * @Author LatamReady - Giussepe Delgado
+ * @Date 29/01/2024
+ */
 define([
     'N/log',
     'N/search',
@@ -42,7 +34,7 @@ define([
             this.FEAT_REVERSALVOIDING = runtime.getCurrentScript().getParameter({ name: 'REVERSALVOIDING' });
             this.deploy = runtime.getCurrentScript().deploymentId;
             this.names = this.getNames(this.deploy);
-            log.debug('this.names', this.names);
+            this.translations = this.getTranslations();
         }
 
         getNames(deploy) {
@@ -128,7 +120,7 @@ define([
         createForm() {
 
             this.form = serverWidget.createForm({
-                title: 'LatamReady - MX Canceled Documents Reversed'
+                title: this.translations.LMRY_CANCELED_DOCUMENTS_REVERSED 
             });
 
             let form = this.form;
@@ -139,15 +131,13 @@ define([
                 // Mensaje para el cliente
                 var myInlineHtml = form.addField({
                     id: 'custpage_lmry_v_message',
-                    label: 'Mensaje',
+                    label: this.translations.LMRY_MESSAGE, // Traducción de 'Mensaje'
                     type: serverWidget.FieldType.INLINEHTML
                 });
-
+                
                 myInlineHtml.updateLayoutType({ layoutType: serverWidget.FieldLayoutType.OUTSIDEBELOW });
-                myInlineHtml.updateBreakType({
-                    breakType: serverWidget.FieldBreakType.STARTCOL
-                });
-
+                myInlineHtml.updateBreakType({ breakType: serverWidget.FieldBreakType.STARTCOL });
+                
                 var strhtml = '<html>';
                 strhtml +=
                     '<table border="0" class="table_fields" cellspacing="0" cellpadding="0">' +
@@ -156,10 +146,10 @@ define([
                     '<tr>' +
                     '<td class="text">' +
                     '<div style="color: gray; font-size: 12pt; margin-top: 10px; padding: 5px; border-top: 1pt solid silver">' +
-                    'AVISO: Actualmente la licencia para este módulo está vencida, por favor contacte al equipo comercial de LatamReady' +
+                    this.translations.LMRY_LICENSE_EXPIRED_NOTICE + 
                     '. </br>' +
-                    'También puedes contactar con nosotros a través de ' +
-                    'www.Latamready.com' +
+                    this.translations.LMRY_CONTACT_US_THROUGH + 
+                    ' www.Latamready.com' +
                     '</div>' +
                     '</td>' +
                     '</tr>' +
@@ -167,12 +157,14 @@ define([
                     '</html>';
                 myInlineHtml.defaultValue = strhtml;
 
-                return form;
+                return {
+                    form:form, isActive:false
+                };
             }
 
             form.addFieldGroup({
                 id: 'mainGroup',
-                label: 'Información Primaria'
+                label: this.translations.LMRY_PRIMARY_INFO
             });
 
             let subsidiaryField;
@@ -182,7 +174,7 @@ define([
                     .addField({
                         id: 'custpage_subsidiary',
                         type: serverWidget.FieldType.SELECT,
-                        label: 'Subsidiária',
+                        label: this.translations.LMRY_SUBSIDIARY,
                         container: 'mainGroup'
                     })
                     .setHelpText({
@@ -194,7 +186,7 @@ define([
             let typeTransaction = form.addField({
                 id: 'custpage_type_transaction',
                 type: serverWidget.FieldType.SELECT,
-                label: 'Tipo de transaccion',
+                label: this.translations.LMRY_TRANSACTION_TYPE,
                 container: 'mainGroup'
             })
                 .setHelpText({
@@ -202,12 +194,9 @@ define([
                 });
 
             typeTransaction.isMandatory = true;
-            // Para la etapa 1 solo quedará invoice, en la etapa 2 se agrega credit memo y payment.
-            //typeTransaction.addSelectOption({ value: 'CustInvc', text: this.typesTransaction['CustInvc'] });
-            //typeTransaction.updateDisplayType({ displayType: serverWidget.FieldDisplayType.DISABLED });
             form.addFieldGroup({
                 id: 'dateRangeGroup',
-                label: 'Rango de fechas'
+                label: this.translations.LMRY_DATE_RANGE
             });
 
 
@@ -215,7 +204,7 @@ define([
                 .addField({
                     id: 'custpage_start_date',
                     type: serverWidget.FieldType.DATE,
-                    label: 'Fecha de inicio',
+                    label: this.translations.LMRY_START_DATE,
                     container: 'dateRangeGroup'
                 })
                 .setHelpText({
@@ -227,7 +216,7 @@ define([
                 .addField({
                     id: 'custpage_end_date',
                     type: serverWidget.FieldType.DATE,
-                    label: 'Fecha de fin',
+                    label: this.translations.LMRY_END_DATE,
                     container: 'dateRangeGroup'
                 })
                 .setHelpText({
@@ -236,14 +225,14 @@ define([
 
             form.addFieldGroup({
                 id: 'setup',
-                label: 'Configuración'
+                label: this.translations.LMRY_SETUP
             });
 
             let account = form
                 .addField({
                     id: 'custpage_account',
                     type: serverWidget.FieldType.SELECT,
-                    label: 'Account',
+                    label: this.translations.LMRY_ACCOUNT,
                     container: 'setup'
                 })
                 .setHelpText({
@@ -254,26 +243,26 @@ define([
             form.addField({
                 id: 'custpage_status',
                 type: serverWidget.FieldType.TEXT,
-                label: 'Status'
+                label: this.translations.LMRY_STATUS
             }).updateDisplayType({ displayType: serverWidget.FieldDisplayType.HIDDEN });
 
             form.addField({
                 id: 'custpage_feature_latam',
                 type: serverWidget.FieldType.TEXT,
-                label: 'Feature Latam'
+                label: this.translations.LMRY_FEATURE_LATAM
             }).updateDisplayType({ displayType: serverWidget.FieldDisplayType.HIDDEN });
 
             form.addField({
                 id: 'custpage_log_id',
                 type: serverWidget.FieldType.TEXT,
-                label: 'Log ID'
+                label: this.translations.LMRY_LOG_ID
             }).updateDisplayType({ displayType: serverWidget.FieldDisplayType.HIDDEN });
 
             let deployIdField = form
                 .addField({
                     id: 'custpage_deploy_id',
                     type: serverWidget.FieldType.TEXT,
-                    label: 'Deploy ID'
+                    label: this.translations.LMRY_DEPLOY_ID
                 })
                 .updateDisplayType({ displayType: serverWidget.FieldDisplayType.HIDDEN });
             deployIdField.defaultValue = runtime.getCurrentScript().deploymentId;
@@ -281,16 +270,16 @@ define([
 
             if (!Number(this.params.status)) {
                 form.addSubmitButton({
-                    label: 'Filtrar'
+                    label: this.translations.LMRY_FILTER
                 });
 
             } else {
                 form.addSubmitButton({
-                    label: 'Procesar'
+                    label: this.translations.LMRY_PROCESS
                 });
                 form.addButton({
                     id: 'btn_back',
-                    label: 'Atras',
+                    label: this.translations.LMRY_BACK,
                     functionName: 'back'
                 });
 
@@ -310,10 +299,12 @@ define([
             }
 
             form.addResetButton({
-                label: 'Reiniciar'
+                label: this.translations.LMRY_RESTART
             });
 
-            return form;
+            return {
+                form:form, isActive:true
+            };
         }
 
         loadFormValues() {
@@ -361,7 +352,6 @@ define([
         getTypeTransaction() {
             return {
                 "invoice": "Invoice",
-                "creditmemo": "Credit Memo",
                 "customerpayment": "Payment"
             }
         }
@@ -436,77 +426,76 @@ define([
         createTransactionSublist() {
             this.form.addTab({
                 id: 'transactions_tab',
-                label: 'transaccciones'
+                label: this.translations.LMRY_TAB_TRANSACTIONS 
             });
-
+        
             this.sublist = this.form.addSublist({
                 id: 'custpage_results_list',
-                label: 'resultados',
+                label: this.translations.LMRY_SUBLIST_RESULTS, 
                 tab: 'transactions_tab',
                 type: serverWidget.SublistType.LIST
             });
-
+        
             let sublist = this.sublist;
-
+        
             sublist.addField({
                 id: 'apply',
-                label: 'aplicar',
+                label: this.translations.LMRY_APPLY, 
                 type: serverWidget.FieldType.CHECKBOX
             });
-
+        
             sublist.addField({
                 id: 'tranid',
-                label: 'Nùmero de Documento',
+                label: this.translations.LMRY_DOCUMENT_NUMBER, 
                 type: serverWidget.FieldType.TEXT
             });
-
+        
             sublist.addField({
                 id: 'internalid',
-                label: 'Id interno',
+                label: this.translations.LMRY_INTERNAL_ID, 
                 type: serverWidget.FieldType.TEXT
             });
             sublist.addField({
                 id: 'type_transaction',
-                label: 'Tipo de transaccion',
+                label: this.translations.LMRY_TRANSACTION_TYPE, 
                 type: serverWidget.FieldType.TEXT
             });
             sublist.addField({
                 id: 'legal_document_type',
-                label: 'Numero de documento fiscal',
+                label: this.translations.LMRY_FISCAL_DOCUMENT_NUMBER, 
                 type: serverWidget.FieldType.TEXT
             });
-
-
-
+        
             let totalAmtField = sublist.addField({
                 id: 'total_amt',
-                label: 'Importe documento',
+                label: this.translations.LMRY_DOCUMENT_AMOUNT, 
                 type: serverWidget.FieldType.CURRENCY
             });
-
+        
             totalAmtField.updateDisplayType({ displayType: serverWidget.FieldDisplayType.ENTRY });
             totalAmtField.updateDisplayType({ displayType: serverWidget.FieldDisplayType.DISABLED });
-
+        
             let internalidtextField = sublist.addField({
                 id: 'internalidtext',
-                label: 'internal_id',
+                label: this.translations.LMRY_INTERNAL_ID_FIELD, 
                 type: serverWidget.FieldType.TEXT
             });
             internalidtextField.updateDisplayType({ displayType: serverWidget.FieldDisplayType.HIDDEN });
             sublist.addButton({
                 id: 'btn_mark_all',
-                label: 'Seleccionar todo',
+                label: this.translations.LMRY_SELECT_ALL, 
                 functionName: 'toggleCheckBoxes(true)'
             });
-
+        
             sublist.addButton({
                 id: 'btn_desmark_all',
-                label: 'Deseleccionar todo',
+                label: this.translations.LMRY_DESELECT_ALL, 
                 functionName: 'toggleCheckBoxes(false)'
             });
-
+        
             return sublist;
         }
+        
 
         loadTransactionSublist() {
 
@@ -614,7 +603,6 @@ define([
                 });
             }
 
-            log.error("data [getTransactions]", data);
             return data;
         }
         getPaymentsIds(subsidiary) {
@@ -644,14 +632,11 @@ define([
             saerchPaymentIds.run().each(function (result) {
                 let columns = result.columns;
                 let paymentId = result.getValue(columns[0]);
-                log.error("paymentId antes",paymentId)
                 if (!paymentIds.includes(paymentId)) {
                     paymentIds.push(paymentId)
-                    log.error("paymentId push",paymentId)
                 }
                 return true;
-            });
-            log.error("paymentIds",paymentIds)    
+            });   
             return paymentIds;
         }
         runMapReduce(parametros) {
@@ -690,6 +675,83 @@ define([
                 deploymentId: DEPLOY_LOG_ID
             });
         }
+
+
+        getTranslations() {
+            let language = runtime.getCurrentScript().getParameter({ name: "LANGUAGE" }).substring(0, 2);
+            language = language === "es" ? language : "en";
+            const translatedFields = {
+                "es": {
+                    "LMRY_TAB_TRANSACTIONS": "transaccciones",
+                    "LMRY_SUBLIST_RESULTS": "resultados",
+                    "LMRY_APPLY": "aplicar",
+                    "LMRY_DOCUMENT_NUMBER": "Nùmero de Documento",
+                    "LMRY_INTERNAL_ID": "Id interno",
+                    "LMRY_TRANSACTION_TYPE": "Tipo de transaccion",
+                    "LMRY_FISCAL_DOCUMENT_NUMBER": "Numero de documento fiscal",
+                    "LMRY_DOCUMENT_AMOUNT": "Importe documento",
+                    "LMRY_INTERNAL_ID_FIELD": "Id Interno",
+                    "LMRY_SELECT_ALL": "Seleccionar todo",
+                    "LMRY_DESELECT_ALL": "Deseleccionar todo",
+                    "LMRY_CANCELED_DOCUMENTS_REVERSED": "LatamReady - MX Reversion de Documentos Anulados",
+                    "LMRY_MESSAGE": "Mensaje",
+                    "LMRY_LICENSE_EXPIRED_NOTICE": "AVISO: Actualmente la licencia para este módulo está vencida, por favor contacte al equipo comercial de LatamReady",
+                    "LMRY_CONTACT_US_THROUGH": "También puedes contactar con nosotros a través de ",
+                    "LMRY_PRIMARY_INFO": "Información Primaria",
+                    "LMRY_SUBSIDIARY": "Subsidiaria",
+                    "LMRY_TRANSACTION_TYPE": "Tipo de transacción",
+                    "LMRY_DATE_RANGE": "Rango de fechas",
+                    "LMRY_START_DATE": "Fecha de inicio",
+                    "LMRY_END_DATE": "Fecha de fin",
+                    "LMRY_SETUP": "Configuración",
+                    "LMRY_ACCOUNT": "Cuenta",
+                    "LMRY_STATUS": "Estado",
+                    "LMRY_FEATURE_LATAM": "Feature Latam",
+                    "LMRY_LOG_ID": "ID de registro",
+                    "LMRY_DEPLOY_ID": "ID de implementación",
+                    "LMRY_FILTER": "Filtrar",
+                    "LMRY_PROCESS": "Procesar",
+                    "LMRY_BACK": "Atrás",
+                    "LMRY_RESTART": "Reiniciar"
+        
+                },
+                "en": {
+                    "LMRY_TAB_TRANSACTIONS": "transactions",
+                    "LMRY_SUBLIST_RESULTS": "results",
+                    "LMRY_APPLY": "apply",
+                    "LMRY_DOCUMENT_NUMBER": "Document Number",
+                    "LMRY_INTERNAL_ID": "Internal ID",
+                    "LMRY_TRANSACTION_TYPE": "Transaction Type",
+                    "LMRY_FISCAL_DOCUMENT_NUMBER": "Fiscal Document Number",
+                    "LMRY_DOCUMENT_AMOUNT": "Document Amount",
+                    "LMRY_INTERNAL_ID_FIELD": "internal_id",
+                    "LMRY_SELECT_ALL": "Select all",
+                    "LMRY_DESELECT_ALL": "Deselect all",
+                    "LMRY_CANCELED_DOCUMENTS_REVERSED": "LatamReady - MX Canceled Documents Reversed",
+                    "LMRY_MESSAGE": "Message",
+                    "LMRY_LICENSE_EXPIRED_NOTICE": "NOTICE: Currently the license for this module is expired, please contact LatamReady's commercial team",
+                    "LMRY_CONTACT_US_THROUGH": "You can also contact us through ",
+                    "LMRY_PRIMARY_INFO": "Primary Information",
+                    "LMRY_SUBSIDIARY": "Subsidiary",
+                    "LMRY_TRANSACTION_TYPE": "Transaction Type",
+                    "LMRY_DATE_RANGE": "Date Range",
+                    "LMRY_START_DATE": "Start Date",
+                    "LMRY_END_DATE": "End Date",
+                    "LMRY_SETUP": "Setup",
+                    "LMRY_ACCOUNT": "Account",
+                    "LMRY_STATUS": "Status",
+                    "LMRY_FEATURE_LATAM": "Feature Latam",
+                    "LMRY_LOG_ID": "Log ID",
+                    "LMRY_DEPLOY_ID": "Deploy ID",
+                    "LMRY_FILTER": "Filter",
+                    "LMRY_PROCESS": "Process",
+                    "LMRY_BACK": "Back",
+                    "LMRY_RESTART": "Restart"
+                },
+            }
+            return translatedFields[language];
+        }
+        
 
     }
 

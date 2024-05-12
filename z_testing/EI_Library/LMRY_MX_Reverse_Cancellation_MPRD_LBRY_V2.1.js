@@ -1,16 +1,9 @@
-/* eslint-disable no-eq-null */
-/* eslint-disable eqeqeq */
-/* = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = \
-||   This script for customer center (Time)                      ||
-||                                                               ||
-||  File Name: LMRY_MX_Reverse_Cancellation_MPRD_LBRY_V2.1.js     ||
-||                                                               ||
-||  Version Date         Author        Remarks                   ||
-||  2.1     Oct 04 2023  LatamReady    Use Script 2.1            ||
- \= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = */
 /**
  * @NApiVersion 2.1
  * @NModuleScope Public
+ * @Name LMRY_MX_Reverse_Cancellation_MPRD_LBRY_V2.1.js
+ * @Author LatamReady - Giussepe Delgado
+ * @Date 29/01/2024
  */
 
 define([
@@ -105,10 +98,8 @@ define([
     * --------------------------------------------------------------------------------------------------- */
     let reverseCancellation = (transactionMain) => {
         let transactionsResult;
-        transactionMain.typeTransaction = getTypeTransaction(transactionMain.typeTransaction);
-        log.error("cancellations",transactionMain)
+        transactionMain.typeTransaction = getTypeTransaction(transactionMain.typeTransaction);  
         if (transactionMain.typeTransaction == "invoice") { 
-            log.error("debug","entro al proceso de invoice")
             transactionsResult = processInvoice(transactionMain);
         } else if(transactionMain.typeTransaction == "creditmemo" || transactionMain.typeTransaction == "customerpayment"){ 
             transactionsResult = processOtherTransaction(transactionMain);
@@ -178,7 +169,7 @@ define([
 
 
         searchCreditMemo.run().each(function (result) {
-            log.error("result",result);
+            
             transactionVoided.id = result.getValue('internalid');
             transactionVoided.subsidiary = result.getValue('subsidiary');
             transactionVoided.currency = result.getValue('currency');
@@ -190,11 +181,7 @@ define([
             transactionVoided.entity = result.getValue('entity');
             transactionVoided.debit.amount = result.getValue('debitamount');
             
-            log.error("transactionVoided.debit.amoun",transactionVoided.debit.amount);
-            log.error("result.getValue('debitamount')",result.getValue('debitamount'));
-            log.error("result.getValue('debitamount')",typeof result.getValue('debitamount'));
             if (transactionVoided.debit.amount == '') { 
-                log.error("debug","cuenta secundaria");
                 transactionVoided["credit"]["account"] = result.getValue('account');   
             }else{
                 transactionVoided["debit"]["account"] = result.getValue('account'); 
@@ -410,7 +397,6 @@ define([
     * Esta funcion permite crear una reserva contable de la anulación 
     * --------------------------------------------------------------------------------------------------- */
     let createTransactionReserve = (transactionVoid, cancellations) => {
-        log.error("transactionVoid",transactionVoid)
         const { idTransaction, accountSetup, typeTransaction } = cancellations;
         let preference = getPreference();
         let newType = typeTransaction == "invoice" ? record.Type.JOURNAL_ENTRY : "customtransaction_lmry_ei_voided_transac";

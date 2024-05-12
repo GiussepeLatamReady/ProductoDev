@@ -1,16 +1,9 @@
-/* eslint-disable no-alert */
-/* = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =\
-||   This script for WTH on Purchases                           ||
-||                                                              ||
-||  File Name: LMRY_MX_Reverse_Cancellation_CLNT_LBRY_V2.1.js    ||
-||                                                              ||
-||  Version Date         Author        Remarks                  ||
-||  2.1     Oct 04 2023  LatamReady    Use Script 2.1           ||
- \= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = */
 /**
  * @NApiVersion 2.1
  * @NModuleScope Public
- * @Author master@latamready.com
+ * @Name LMRY_MX_Reverse_Cancellation_CLNT_LBRY_V2.1.js
+ * @Author LatamReady - Giussepe Delgado
+ * @Date 29/01/2024
  */
 
 define([
@@ -36,6 +29,7 @@ define([
             this.deploy = options.deployid;
             this.featurelatam = options.featurelatam || 'F';
             this.names = this.getNames(this.deploy);
+            this.translations = this.getTranslations();
 
         }
         getNames(deploy) {
@@ -107,7 +101,7 @@ define([
                         if (mandatoryFields[i] == "custpage_account" && type != "invoice") {
                             return true;
                         }
-                        alert('Ingrese un valor para :' + [fieldObj.label]);
+                        alert(this.translations.LMRY_VALUE + [fieldObj.label]);
                         return false;
                     }
                 }
@@ -141,7 +135,7 @@ define([
             let numberLines = recordObj.getLineCount({ sublistId: 'custpage_results_list' });
             if (numberLines < 1) {
                 // No transactions selected.
-                alert("No hay transacciones Seleccionadas");
+                alert(this.translations.LMRY_NOT_TRANSACTIONS);
                 return false;
             }
 
@@ -236,8 +230,8 @@ define([
 
             if (results && results.length) {
                 let myMsg = message.create({
-                    title: 'Alerta',
-                    message: 'Espere un momento por favor, el proceso se encuentra en curso.',
+                    title: this.translations.LMRY_ALERT,
+                    message: this.translations.LMRY_WAIT,
                     type: message.Type.INFORMATION,
                     duration: 8000
                 });
@@ -253,7 +247,7 @@ define([
             if (FEAT_REVERSALVOIDING == "T"||FEAT_REVERSALVOIDING == true) {
                 return true;
             }else{
-                alert("Activa el feature VOID TRANSACTIONS USING REVERSING JOURNALS");
+                alert(this.translations.LMRY_ACTIVE_FEATURE);
                 return false;
             }
         }
@@ -316,6 +310,29 @@ define([
                 "customerpayment": 9
             }
             return typeTransaction[typeText]
+        }
+
+        getTranslations() {
+            let language = runtime.getCurrentScript().getParameter({ name: "LANGUAGE" }).substring(0, 2);
+            language = language === "es" ? language : "en";
+            const translatedFields = {
+                "es": {
+                    "LMRY_VALUE": "Ingrese un valor para :",
+                    "LMRY_NOT_TRANSACTIONS": "No hay transacciones Seleccionadas",
+                    "LMRY_WAIT": "Espere un momento por favor, el proceso se encuentra en curso.",
+                    "LMRY_ALERT": "Alerta",
+                    "LMRY_ACTIVE_FEATURE": "Activa el feature VOID TRANSACTIONS USING REVERSING JOURNALS",
+                },
+                "en": {
+                    "LMRY_VALUE": "Enter a value for :",
+                    "LMRY_NOT_TRANSACTIONS": "There are no selected transactions",
+                    "LMRY_WAIT": "Please wait a moment, the process is in progress.",
+                    "LMRY_ALERT": "Alert",
+                    "LMRY_ACTIVE_FEATURE": "Activate the feature VOID TRANSACTIONS USING REVERSING JOURNALS",
+                    
+                },
+            }
+            return translatedFields[language];
         }
 
     }

@@ -1,19 +1,12 @@
-/* = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =\
-||   This script for WTH on Purchases                           ||
-||                                                              ||
-||  File Name: LMRY_MX_Reverse_Cancellation_CLNT_V2.1.js         ||
-||                                                              ||
-||  Version Date         Author        Remarks                  ||
-||  2.1     Oct 04 2023  LatamReady    Use Script 2.1           ||
- \= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = */
-
 /**
- *@NApiVersion 2.1
- *@NScriptType ClientScript
- *@NModuleScope Public
- *@Author master@latamready.com
+ * @NApiVersion 2.1
+ * @NScriptType ClientScript
+ * @NModuleScope Public
+ * @Name LMRY_MX_Reverse_Cancellation_CLNT_V2.1.js
+ * @Author LatamReady - Giussepe Delgado
+ * @Date 29/04/2024
  */
- define(['./EI_Library/LMRY_MX_Reverse_Cancellation_CLNT_LBRY_V2.1', 'N/url', 'N/currentRecord'], function (
+ define(['./LMRY_MX_Reverse_Cancellation_CLNT_LBRY_V2.1', 'N/url', 'N/currentRecord'], function (
     lbryReverseCancelationClnt,
     urlApi, 
     currentRecord

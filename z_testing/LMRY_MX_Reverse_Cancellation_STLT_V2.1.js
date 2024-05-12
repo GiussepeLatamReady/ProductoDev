@@ -1,23 +1,15 @@
-/* = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =\
-||   This script for WTH on Purchases                           ||
-||                                                              ||
-||  File Name:  LMRY_MX_Reverse_Cancellation_STLT_V2.1.js        ||
-||                                                              ||
-||  Version Date         Author        Remarks                  ||
-||  2.1     Oct 04 2023  LatamReady    Use Script 2.1           ||
- \= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = */
-
 /**
  * @NApiVersion 2.1
  * @NScriptType Suitelet
  * @NModuleScope Public
- * @Author master@latamready.com
- **/
-
+ * @Name LMRY_MX_Reverse_Cancellation_STLT_V2.1.js
+ * @Author LatamReady - Giussepe Delgado
+ * @Date 29/01/2024
+ */
 define(["N/log","N/redirect", "N/runtime", "./EI_Library/LMRY_MX_Reverse_Cancellation_LBRY_V2.1"],
     function (log,redirect, runtime, lbryMXReverseCancellation) {
         const ScriptName = "LMRY - MX Canceled Documents Reversed STLT";
-        const CLIENT_SCRIPT = "./LMRY_MX_Reverse_Cancellation_CLNT_V2.1.js";
+        const CLIENT_SCRIPT = "./EI_Library/LMRY_MX_Reverse_Cancellation_CLNT_V2.1.js";
 
         function onRequest(context) {
 
@@ -34,15 +26,19 @@ define(["N/log","N/redirect", "N/runtime", "./EI_Library/LMRY_MX_Reverse_Cancell
                 try {
                     const status = Number(params.status);
 
-                    let form = handler.createForm();
-                    handler.createTransactionSublist();
+                    let {form,isActive} = handler.createForm();
 
-                    if (!status) {
-                        handler.loadFormValues();
-                    } else {
-                        handler.setFormValues();
-                        handler.loadTransactionSublist();
+                    if (isActive) {
+                        handler.createTransactionSublist();
+
+                        if (!status) {
+                            handler.loadFormValues();
+                        } else {
+                            handler.setFormValues();
+                            handler.loadTransactionSublist();
+                        }
                     }
+                    
 
                     form.clientScriptModulePath = CLIENT_SCRIPT;
 

@@ -1,15 +1,10 @@
-/* = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =\
-||   This script for customer center (Time)                     ||
-||                                                              ||
-||  File Name: LMRY_MX_Reverse_Cancellation_MPRD_V2.1.js         ||
-||                                                              ||
-||  Version Date         Author        Remarks                  ||
-||  2.1     Oct 04 2023  LatamReady    Use Script 2.1           ||
- \= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = */
 /**
  * @NApiVersion 2.1
  * @NScriptType MapReduceScript
  * @NModuleScope Public
+ * @Name LMRY_MX_Reverse_Cancellation_MPRD_V2.1.js
+ * @Author LatamReady - Giussepe Delgado
+ * @Date 02/04/2024
  */
 define(['N/log', 'N/runtime', 'N/search', './EI_Library/LMRY_MX_Reverse_Cancellation_MPRD_LBRY_V2.1.js'],
 
