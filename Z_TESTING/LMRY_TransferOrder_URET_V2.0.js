@@ -90,7 +90,6 @@ define(['N/runtime', 'N/log', 'N/search', 'N/record', 'N/ui/serverWidget',
 					}
 				}
 
-
 			} catch (err) {
 				log.error(' [ beforeLoad ] ', err);
 				library_mail.sendemail(' [ beforeLoad ] ' + err, LMRY_script);

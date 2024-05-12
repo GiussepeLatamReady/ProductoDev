@@ -56,7 +56,6 @@ define(['N/runtime', 'N/search', 'N/record', 'N/url', 'N/https', './Latam_Librar
                 if (LMRY_countr[0] == 'AR') {
                     libraryUnitPrice.disabledField();
                 }
-
             } catch (error) {
                 libraryMail.sendemail(' [ pageInit ] ' + error, LMRY_script);
             }

@@ -24,8 +24,7 @@ define(['N/log', 'N/search', 'N/query', 'N/url', 'N/https', 'N/runtime', 'N/reco
         function pageInit(context) {
             recordObj = context.currentRecord;
             type = context.mode;
-            try {
-                
+            try {               
                 var idSubsidiary = recordObj.getValue({
                     fieldId: 'subsidiary'
                 });
@@ -284,8 +283,7 @@ define(['N/log', 'N/search', 'N/query', 'N/url', 'N/https', 'N/runtime', 'N/reco
                 log.error('Error pageInit', err);
                 library_mail.sendemail2(' [ pageInit ] ' + err, LMRY_script, recordObj, 'tranid', 'entity');
             }
-        }
-        
+        }       
 
         function cleanAndDisableFields() {
             var disableFields = ['custbody_lmry_subsidiary_country', 'custbody_lmry_ref_guia_numero', 'custbody_lmry_ref_guia_fecha'];

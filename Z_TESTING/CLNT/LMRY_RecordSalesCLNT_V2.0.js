@@ -327,7 +327,6 @@ define(['./Latam_Library/LMRY_Custom_ExchangeRate_LBRY_V2.0.js', './Latam_Librar
 
         }//FIN BR CFOP
 
-
         if (LMRY_countr[0] == 'AR') {  
           libraryUnitPrice.disabledField();   
         }
