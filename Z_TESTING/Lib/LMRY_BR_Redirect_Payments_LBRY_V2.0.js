@@ -75,7 +75,7 @@ define([
     function callModulePayment(id) {
 
         var recordType;
-        var applyWht;
+        var subsidiaryID;
         var searchTransaction = search.create({
             type: 'transaction',
             filters: [
@@ -85,23 +85,28 @@ define([
             ],
             columns: [
                 'recordType',
-                'custbody_lmry_document_type.custrecord_lmry_document_apply_wht'
+                'subsidiary'
             ]
         })
 
         searchTransaction.run().each(function (result) {
             var columns = result.columns;
             recordType = result.getValue(columns[0]);
-            applyWht = result.getValue(columns[1]);
+            subsidiaryID = result.getValue(columns[1]);
         });
 
-        /*
-        var translations = getTranslations();
-        if (applyWht !== "T" && applyWht !== true) {
-            alert(translations.LMRY_NOT_APPLY_WHT)
+        var allLicenses = LibraryMail.getAllLicenses();
+        var licenses = allLicenses[subsidiaryID];
+
+        if (recordType == "invoice" && !LibraryMail.getAuthorization(141, licenses)) {
+            alert(getTranslations().LMRY_FEATURE)
             return false;
         }
-        */
+
+        if (recordType == "vendorbill" && !LibraryMail.getAuthorization(464, licenses)) {
+            alert(getTranslations().LMRY_FEATURE_PURCHASE)
+            return false;
+        }
         var newRecord = record.load({
             type: recordType,
             id: id
@@ -174,10 +179,7 @@ define([
 
         var allLicenses = LibraryMail.getAllLicenses();
         var licenses = allLicenses[subsidiaryID];
-        if (!LibraryMail.getAuthorization(141, licenses)) {
-            alert(getTranslations().LMRY_FEATURE)
-            return false;
-        }
+        
 
         var recordType;
         var searchEntity = search.create({
@@ -194,6 +196,15 @@ define([
             recordType = result.getValue('type');
         });
         
+        if (recordType == "Vendor" && !LibraryMail.getAuthorization(464, licenses)) {
+            alert(getTranslations().LMRY_FEATURE_PURCHASE)
+            return false;
+        }
+
+        if (recordType == "CustJob" && !LibraryMail.getAuthorization(141, licenses)) {
+            alert(getTranslations().LMRY_FEATURE)
+            return false;
+        }
         var params = { idS: subsidiaryID, idE: entityID };
         
         paramsResolveScript = {
@@ -265,17 +276,20 @@ define([
             "es": {
                 "LMRY_BUTTOM_PAYMENT": "Pago Latam",
                 "LMRY_FEATURE": "Se debe activar la caracteristica EN PAGOS DE CLIENTES",
-                "LMRY_VALIDATE": "Esta transacción debe pagarse a través del módulo de pago LatamReady"
+                "LMRY_VALIDATE": "Esta transacción debe pagarse a través del módulo de pago LatamReady",
+                "LMRY_FEATURE_PURCHASE": "Se debe activar la caracteristica PAGOS COMPRAS",
             },
             "en": {
                 "LMRY_BUTTOM_PAYMENT": "Latam Payment",
                 "LMRY_FEATURE": "The feature must be activated IN CUSTOMER PAYMENTS",
-                "LMRY_VALIDATE": "This transaction must be paid via the LatamReady payment module"
+                "LMRY_VALIDATE": "This transaction must be paid via the LatamReady payment module",
+                "LMRY_FEATURE_PURCHASE": "The feature must be activated PURCHASE PAYMENTS",
             },
             "pt": {
                 "LMRY_BUTTOM_PAYMENT": "Pagamento Latam",
                 "LMRY_FEATURE": "O recurso deve ser ativado EM PAGAMENTOS DO CLIENTE",
-                "LMRY_VALIDATE": "Esta transação deve ser paga pelo módulo de pagamentos da LatamReady"
+                "LMRY_VALIDATE": "Esta transação deve ser paga pelo módulo de pagamentos da LatamReady",
+                "LMRY_FEATURE_PURCHASE": "O recurso deve ser ativado PAGAMENTO DA COMPRA",
             }  
         }
         return translatedFields[language];

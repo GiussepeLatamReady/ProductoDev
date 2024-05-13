@@ -75,8 +75,10 @@ define(['N/log', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/error', 'N/red
                         var idEnt = context.request.parameters.idE;
                         if (idEnt) {
                             //log.error("subsi",subsi)
-                            //form.getField({ id: "custpage_subsidiary" }).defaultValue = subsi;
+                            form.getField({ id: "custpage_idsubsi" }).defaultValue = subsi;
                             addCustomer(form, idEnt);
+                        }else{
+                            form.getField({ id: "custpage_idsubsi" }).defaultValue = "999";
                         }                         
                         form.getField({ id: "custpage_currency" }).defaultValue = localCurrency;
                         form.getField({ id: "custpage_exchangerate" }).defaultValue = 1.0;
@@ -135,7 +137,8 @@ define(['N/log', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/error', 'N/red
                     for (var i = 0; i < fieldNames.length; i++) {
                         params[fieldNames[i]] = context.request.parameters['custpage_' + fieldNames[i]];
                     }
-                  
+
+                    params["idS"] = context.request.parameters['custpage_idsubsi'];
                     if (!params['status']) {
                         params['status'] = '1';
                         redirect.toSuitelet({
@@ -346,6 +349,12 @@ define(['N/log', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/error', 'N/red
                 label: 'ID Log'
             }).updateDisplayType({ displayType: serverWidget.FieldDisplayType.HIDDEN });
 
+            form.addField({
+                id: 'custpage_idsubsi',
+                type: serverWidget.FieldType.TEXT,
+                label: 'ID Subsi'
+            }).updateDisplayType({ displayType: serverWidget.FieldDisplayType.HIDDEN });
+
             return form;
         }
 
@@ -522,7 +531,7 @@ define(['N/log', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/error', 'N/red
             subsidiary = context.request.parameters.idS ? Number(context.request.parameters.idS):subsidiary;
             
             addSubsidiaries(form, subsidiary);
-            addDocuments(form, document);
+            addDocuments(form, document,context);
             addPaymentMethods(form, paymentMethod);
             addCurrencies(form);
             if (status == '1') {
@@ -776,19 +785,25 @@ define(['N/log', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/error', 'N/red
         }
 
 
-        function addDocuments(form, document) {
+        function addDocuments(form, document,context) {
             var field_document = form.getField({ id: 'custpage_document' });
             if (!document) {
                 //field_document.addSelectOption({ value: 0, text: '&nbsp;' });
+
+                filters = [
+                    ['isinactive', 'is', 'F'], 'AND',
+                    ['custrecord_lmry_country_applied', 'anyof', ID_COUNTRY], 'AND',
+                    ['custrecord_lmry_tipo_transaccion', 'anyof', TYPE_TRANSACTION]
+                ]
+                var subsidiaryId = context.request.parameters.idS;
+                log.error("subsidiaryId:", subsidiaryId)
+                if (!subsidiaryId) {
+                    filters.push('AND',['custrecord_lmry_document_apply_wht', 'is', 'T'])
+                }
+                
                 var search_documents = search.create({
                     type: 'customrecord_lmry_tipo_doc',
-                    filters: [
-                        ['isinactive', 'is', 'F'], 'AND',
-                        ['custrecord_lmry_country_applied', 'anyof', ID_COUNTRY], 'AND',
-                        ['custrecord_lmry_tipo_transaccion', 'anyof', TYPE_TRANSACTION], 'AND',
-                        ['custrecord_lmry_tipo_transaccion', 'anyof', '7'], 'AND',//Invoice
-                        ['custrecord_lmry_document_apply_wht', 'is', 'T']
-                    ],
+                    filters: filters,
                     columns: ['internalid', search.createColumn({
                         name: "name",
                         sort: search.Sort.ASC
@@ -935,7 +950,7 @@ define(['N/log', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/error', 'N/red
             var byTransaction = context.request.parameters.byTransaction;
             
             var idTransaction = context.request.parameters.idTransaction;
-
+            var idS = context.request.parameters.idS
             var search_transactions = search.load({
                 id: 'customsearch_lmry_br_wht_invoices_to_pay'
             });
@@ -964,7 +979,7 @@ define(['N/log', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/error', 'N/red
 
             var filters = search_transactions.filters;
             
-            if (byTransaction) {
+            if (byTransaction || idS!="999") {
                 filters.splice(3, 1);
             }
             
