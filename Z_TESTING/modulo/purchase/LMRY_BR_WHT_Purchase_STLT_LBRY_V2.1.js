@@ -639,9 +639,9 @@ define(["N/log","N/search", "N/runtime", "N/translation", "N/redirect", "N/ui/se
                 }
                 
                 if (Number(period)) {
-
+                    let periodField = form.getField({ id: "custpage_period" });
                     if (!this.params.byTransaction) {
-                        let periodField = form.getField({ id: "custpage_period" });
+                        
                         let name = search.lookupFields({
                             type: "accountingperiod",
                             id: period,
@@ -669,8 +669,9 @@ define(["N/log","N/search", "N/runtime", "N/translation", "N/redirect", "N/ui/se
                 }
 
                 if ((this.FEAT_DPT == true || this.FEAT_DPT == "T") && Number(department)) {
+                    let departmentField = form.getField({ id: "custpage_department" });
                     if (!this.params.byTransaction) {
-                        let departmentField = form.getField({ id: "custpage_department" });
+                        
                         let name = search.lookupFields({
                             type: "department",
                             id: department,
@@ -683,9 +684,9 @@ define(["N/log","N/search", "N/runtime", "N/translation", "N/redirect", "N/ui/se
                 }
 
                 if ((this.FEAT_CLASS == true || this.FEAT_CLASS == "T") && Number(class_)) {
-
+                    let classField = form.getField({ id: "custpage_class" });
                     if (!this.params.byTransaction) {
-                        let classField = form.getField({ id: "custpage_class" });
+                        
                         let name = search.lookupFields({
                             type: "classification",
                             id: class_,
@@ -698,8 +699,9 @@ define(["N/log","N/search", "N/runtime", "N/translation", "N/redirect", "N/ui/se
                 }
 
                 if ((this.FEAT_LOC == true || this.FEAT_LOC == "T") && Number(location)) {
+                    let locationField = form.getField({ id: "custpage_location" });
                     if (!this.params.byTransaction) {
-                        let locationField = form.getField({ id: "custpage_location" });
+                        
                         let name = search.lookupFields({
                             type: "location",
                             id: location,
