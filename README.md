@@ -15,13 +15,32 @@ Solo aplica a Brazil
     LMRY_BR_Void_Inventory_Transaction_LBRY_V2.0.js
 
 + Update
+
+    LMRY_VendorBillCLNT_V2.0.js
+    LMRY_VendorBillURET_V2.0.js
+
     LMRY_InvoiceCLNT_V2.0.js
     LMRY_InvoiceURET_V2.0.js
+
+    LMRY_CustomerPaymentCLNT_V2.0.js
+    LMRY_CustomerPaymentURET_V2.0.js
+
+
+    LMRY_VendorPaymentCLNT_V2.0.js
+    LMRY_VendorPaymentURET_V2.0.js
+
     LMRY_BR_WHT_CustPaymnt_CLNT.js
     LMRY_BR_WHT_CustPaymnt_CLNT.js
 
     LMRY_BR_WHT_Purchase_CLNT_LBRY_V2.1.js
     LMRY_BR_WHT_Purchase_STLT_LBRY_V2.1.js
+
+    LMRY_EntityCLNT_V2.0.js
+    LMRY_EntityURET_V2.0.js
+    LMRY_VendorCLNT_V2.0.js
+    LMRY_VendorURET_V2.0.js
+    
+
     
 + Delete
 

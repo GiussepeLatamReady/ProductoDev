@@ -1,24 +1,24 @@
 {
-    type: "error.SuiteScriptError",
-    name: "USER_ERROR",
-    message: "You must enter at least one line item for this transaction.",
-    id: "",
-    stack: [
-       "Error\n    at RecordInvoker.save (suitescript/resources/javascript/record/serverRecordService.js:371:13)\n   
-        at NetSuiteObject.thenableFunction() (suitescript/resources/javascript/record/proxy.js:115:24)\n    
-        at Object.creadoTransacciones (/SuiteBundles/Bundle 35754/Latam_Library/LMRY_BR_WHT_Purchase_MPRD_LBRY_V2.1.js:588:45)\n   
-         at Object.reduce (/SuiteBundles/Bundle 35754/LMRY_BR_WHT_Purchase_MPRD_V2.1.js:109:33)"
-    ],
-    cause: {
-       type: "internal error",
-       code: "USER_ERROR",
-       details: "You must enter at least one line item for this transaction.",
-       userEvent: null,
-       stackTrace: [
-          "Error\n    at RecordInvoker.save (suitescript/resources/javascript/record/serverRecordService.js:371:13)\n    at NetSuiteObject.thenableFunction() (suitescript/resources/javascript/record/proxy.js:115:24)\n    at Object.creadoTransacciones (/SuiteBundles/Bundle 35754/Latam_Library/LMRY_BR_WHT_Purchase_MPRD_LBRY_V2.1.js:588:45)\n    at Object.reduce (/SuiteBundles/Bundle 35754/LMRY_BR_WHT_Purchase_MPRD_V2.1.js:109:33)"
-       ],
-       notifyOff: false
-    },
-    notifyOff: false,
-    userFacing: true
- }
+   type: "error.SuiteScriptError",
+   name: "USER_ERROR",
+   message: "You must enter at least one line item for this transaction.",
+   id: "",
+   stack: [
+      "Error\n    at RecordInvoker.save (suitescript/resources/javascript/record/serverRecordService.js:371:13)\n    
+      at NetSuiteObject.thenableFunction() (suitescript/resources/javascript/record/proxy.js:115:24)\n    
+      at Object.creadoTransacciones (/SuiteBundles/Bundle 35754/Latam_Library/LMRY_BR_WHT_Purchase_MPRD_LBRY_V2.1.js:588:45)\n    
+      at Object.reduce (/SuiteBundles/Bundle 35754/LMRY_BR_WHT_Purchase_MPRD_V2.1.js:109:33)"
+   ],
+   cause: {
+      type: "internal error",
+      code: "USER_ERROR",
+      details: "You must enter at least one line item for this transaction.",
+      userEvent: null,
+      stackTrace: [
+         "Error\n    at RecordInvoker.save (suitescript/resources/javascript/record/serverRecordService.js:371:13)\n    at NetSuiteObject.thenableFunction() (suitescript/resources/javascript/record/proxy.js:115:24)\n    at Object.creadoTransacciones (/SuiteBundles/Bundle 35754/Latam_Library/LMRY_BR_WHT_Purchase_MPRD_LBRY_V2.1.js:588:45)\n    at Object.reduce (/SuiteBundles/Bundle 35754/LMRY_BR_WHT_Purchase_MPRD_V2.1.js:109:33)"
+      ],
+      notifyOff: false
+   },
+   notifyOff: false,
+   userFacing: true
+}

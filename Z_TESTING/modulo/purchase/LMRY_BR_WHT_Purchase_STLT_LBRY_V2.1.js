@@ -952,9 +952,12 @@ define(["N/log","N/search", "N/runtime", "N/translation", "N/redirect", "N/ui/se
                         ["status", "anyof", "VendBill:A"], "AND",
                         ["currency", "anyof", currency], "AND",
                         ["account", "anyof", ap_account], "AND",
-                        ["amountremaining", "greaterthan", "0.00"], "AND",
-                        ["custbody_lmry_document_type.custrecord_lmry_document_apply_wht", "is", "T"]
+                        ["amountremaining", "greaterthan", "0.00"]
                     ];
+
+                    if (!this.params.byTransaction) {
+                        filters.push("AND", ["custbody_lmry_document_type.custrecord_lmry_document_apply_wht", "is", "T"]);
+                    }
 
                     if (Number(vendor)) {
                         filters.push("AND", ["entity", "anyof", vendor]);
@@ -1066,12 +1069,25 @@ define(["N/log","N/search", "N/runtime", "N/translation", "N/redirect", "N/ui/se
                         });
                     }
 
-
+                    
                     //Remover bills que pasan por epayment
                     this.removeEpaymentBills(data);
 
+                    if (this.params.byTransaction) {
+                        data = this.moveTransactionToFirst(data,this.params.idTransaction);
+                    }
+                    
                 }
                 return data;
+            }
+
+            moveTransactionToFirst(transactions, idTransaction) {
+                const index = transactions.findIndex(transaction => transaction.id === idTransaction);  
+                if (index !== -1) {
+                    const transaction = transactions.splice(index, 1)[0];
+                    transactions.unshift(transaction);
+                }
+                return transactions;
             }
 
             removeEpaymentBills(bills) {
@@ -1483,9 +1499,9 @@ define(["N/log","N/search", "N/runtime", "N/translation", "N/redirect", "N/ui/se
                     parameters[this.names["paramuser"]] = parametros.user;
                 };
 
-                log.debug("MPRD_SCRIPT_ID", MPRD_SCRIPT_ID);
-                log.debug("MPRD_DEPLOY_ID", MPRD_DEPLOY_ID);
-                log.debug("parameters", parameters);
+                log.error("MPRD_SCRIPT_ID", MPRD_SCRIPT_ID);
+                log.error("MPRD_DEPLOY_ID", MPRD_DEPLOY_ID);
+                log.error("parameters", parameters);
                 task.create({
                     taskType: task.TaskType.MAP_REDUCE,
                     scriptId: MPRD_SCRIPT_ID,

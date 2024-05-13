@@ -62,20 +62,20 @@ define(['N/log', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/error', 'N/red
             if (context.request.method == 'GET') {
                 try {
                     LIC_BY_SUBSIDIARY = library_mail.getAllLicenses();
-                    log.debug('licenses', JSON.stringify(LIC_BY_SUBSIDIARY));
+                    
                     var form = createForm();
                     var localCurrency = getLocalCurrency();
                     var sublist = createApplySublist(form);                    
                     setValues(context, form, localCurrency);
 
                     var status = context.request.parameters.status;
-                    log.error("status ", status)
+                    
                     if (!status) {
                         var subsi = context.request.parameters.idS;
                         var idEnt = context.request.parameters.idE;
                         if (idEnt) {
-                            log.error("subsi parameter", subsi)
-                            form.getField({ id: "custpage_subsidiary" }).defaultValue = subsi;
+                            //log.error("subsi",subsi)
+                            //form.getField({ id: "custpage_subsidiary" }).defaultValue = subsi;
                             addCustomer(form, idEnt);
                         }                         
                         form.getField({ id: "custpage_currency" }).defaultValue = localCurrency;
@@ -108,7 +108,7 @@ define(['N/log', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/error', 'N/red
 
                         disableFields(form);
                         var transactions = getTransactions(context);
-                        log.debug('transactions', JSON.stringify(transactions));
+                        
                         loadTransactions(transactions, sublist,context);
                         form.addSubmitButton({ label: getText('save') });
 
@@ -147,7 +147,7 @@ define(['N/log', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/error', 'N/red
                     } else if (params['status'] == '1') {
 
                         var idlog = context.request.parameters.custpage_idlog;
-                        log.debug('idlog', idlog);
+                        
                         if (idlog) {
                             var task_mr = task.create({
                                 taskType: task.TaskType.MAP_REDUCE,
@@ -494,14 +494,12 @@ define(['N/log', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/error', 'N/red
             
             var period = context.request.parameters.period ? context.request.parameters.period : getPeriodByDate(date);
             period = Number(period);
-            log.error("period",period)
-            log.error("date",date)
-            log.error("typeof date",typeof date)
+            
 
             var dateParse = format.parse({ value: date, type: format.Type.DATE });
-            log.error("dateParse",dateParse)
+            
             var dateFormat = format.format({ type: format.Type.DATE, value: dateParse });
-            log.error("dateFormat",dateFormat)
+            
             date = dateFormat;
             var currency = context.request.parameters.currency;
             var exchangeRate = context.request.parameters.exchangerate;
@@ -519,11 +517,11 @@ define(['N/log', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/error', 'N/red
             var paymentMethod = context.request.parameters.paymentmethod;
             paymentMethod = Number(paymentMethod);
 
-            var byTransaction = context.request.parameters.byTransaction;
 
             log.debug('params', JSON.stringify(context.request.parameters));
-
-            addSubsidiaries(form, localCurrency, subsidiary);
+            subsidiary = context.request.parameters.idS ? Number(context.request.parameters.idS):subsidiary;
+            
+            addSubsidiaries(form, subsidiary);
             addDocuments(form, document);
             addPaymentMethods(form, paymentMethod);
             addCurrencies(form);
@@ -853,9 +851,10 @@ define(['N/log', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/error', 'N/red
             }
         }
 
-        function addSubsidiaries(form, localCurrency, subsidiary) {
+        function addSubsidiaries(form, subsidiary) {
             var field_subsidiary = form.getField('custpage_subsidiary');
             if (!subsidiary) {
+                log.error("flag","No hay subsidiaria")
                 var search_subsidiaries = search.create({
                     type: 'subsidiary',
                     filters: [
@@ -873,23 +872,29 @@ define(['N/log', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/error', 'N/red
                         var id = results[i].getValue('internalid');
                         var name = results[i].getValue('name');
                         if (LIC_BY_SUBSIDIARY[String(id)] && LIC_BY_SUBSIDIARY[String(id)].indexOf(ID_FEATURE) != -1) {
+                            log.error("flag","Agregar 1")
+                            log.error("name",name)
                             field_subsidiary.addSelectOption({ value: id, text: name });
                         }
                     }
                 }
             } else {
+                log.error("flag","Hay subsidiaria")
                 if (LIC_BY_SUBSIDIARY[String(subsidiary)] && LIC_BY_SUBSIDIARY[String(subsidiary)].indexOf(ID_FEATURE) != -1) {
                     var name = search.lookupFields({
                         type: 'subsidiary',
                         id: subsidiary,
                         columns: 'name'
                     }).name;
-
+                    log.error("name",name)
                     if (name) {
+                        log.error("flag","Agregar 2")
+                        log.error("name",name)
                         field_subsidiary.addSelectOption({ value: subsidiary, text: name });
                     }
                 }
             }
+
         }
 
         function getLocalCurrency() {
@@ -929,7 +934,10 @@ define(['N/log', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/error', 'N/red
             var date = context.request.parameters.date;
             var document = context.request.parameters.document;
             document = Number(document);
-            log.error("araccount",araccount)
+            var byTransaction = context.request.parameters.byTransaction;
+            
+            var idTransaction = context.request.parameters.idTransaction;
+
             var search_transactions = search.load({
                 id: 'customsearch_lmry_br_wht_invoices_to_pay'
             });
@@ -957,7 +965,12 @@ define(['N/log', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/error', 'N/red
 
 
             var filters = search_transactions.filters;
-
+            
+            if (byTransaction) {
+                filters.splice(3, 1);
+            }
+            
+            
             if (subsidiary) {
                 filters.push(search.createFilter({ name: 'subsidiary', operator: 'anyof', values: [subsidiary] }));
             }
@@ -1029,7 +1042,7 @@ define(['N/log', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/error', 'N/red
                         'amountadvance': results[i].getValue(columns[13])
                     };
 
-                    log.error("get transaction",transaction);
+                    
 
                     if (FEAT_INSTALLMENTS == "T" || FEAT_INSTALLMENTS == true) {
                         transaction["installnum"] = results[i].getValue(columns[14]) || "";
@@ -1047,7 +1060,28 @@ define(['N/log', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/error', 'N/red
             }
 
             transactions = removeInvoicesWithCreditMemos(transactions);
+            if (byTransaction) {
+                transactions = moveTransactionToFirst(transactions,idTransaction);
+            }
+            
+            return transactions;
+        }
 
+        function moveTransactionToFirst(transactions, idTransaction) {
+            
+            var index = -1;
+            for (var i = 0; i < transactions.length; i++) {
+                if (transactions[i].internalid === idTransaction) {
+                    index = i;
+                    break;
+                }
+            }
+
+            if (index !== -1) {
+                var transaction = transactions.splice(index, 1)[0]; 
+                transactions.unshift(transaction); 
+            }
+            
             return transactions;
         }
 
@@ -1092,7 +1126,7 @@ define(['N/log', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/error', 'N/red
             for (var i = 0; i < transactions.length; i++) {
                 var transaction = transactions[i];
                 if (transaction['internalid']) {
-                    log.error("transaction['internalid']",transaction['internalid'])
+                    
                     var idTransaction = context.request.parameters.idTransaction;
                     if (idTransaction && (idTransaction == transaction['internalid'])) {
                         sublist.setSublistValue({ id: 'apply', line: i, value: 'T' });
@@ -1252,12 +1286,12 @@ define(['N/log', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/error', 'N/red
         }
 
         function createBookSublist(form, context) {
-            log.error("createBookSublist","start")
+            
             var subsidiary = context.request.parameters.subsidiary || "";
             var currencyId = context.request.parameters.currency;
             var trandate = context.request.parameters.date || new Date();
 
-            log.error("createBookSublist","start")
+            
             if (subsidiary && currencyId && trandate) {
                 form.addTab({
                     id: "book_tab",

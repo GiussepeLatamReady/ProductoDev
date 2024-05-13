@@ -10,48 +10,55 @@ define([
     'N/runtime',
     'N/log',
     'N/search',
-    'N/url'
-], function (record, runtime, log, search,url) {
-
+    'N/url',
+    "./LMRY_libSendingEmailsLBRY_V2.0"
+], function (record, runtime, log, search,url, LibraryMail) {
+    
     function redirectModulePayment(form, newRecord) {
-
-        var status = newRecord.getValue("approvalstatus");
-        log.error("status",status)
-        if (status!= 2) return false;
-        
-        var subsidiary = newRecord.getValue("subsidiary");
-        if (!validatePaymentLR(subsidiary)) return false;
-
-        log.error("type",newRecord.type)
-        var pathScriptClient;
-        var idBtn;
-        var translations = getTranslations();
-        if (newRecord.type == "invoice") {
-            pathScriptClient = "../LMRY_InvoiceCLNT_V2.0.js";
-            idBtn = 'acceptpayment';
+        if (newRecord.type == "invoice" || newRecord.type == "vendorbill") {
+            redirectForTransaction(form, newRecord);
         }else{
-            pathScriptClient = "../LMRY_VendorBillCLNT_V2.0.js";
-            idBtn = 'payment';
+            redirectForEntity(form, newRecord);
         }
+    }
 
+    function redirectForEntity(form, newRecord){
 
-        var btnPayment = form.getButton({
-            id: idBtn
-        });
-        if (btnPayment) {
-            btnPayment.isHidden = true;
-        }
-        var id = newRecord.id;
-        var type = newRecord.type;
-        log.error("id",typeof id)
-        log.error("type",typeof type)
+        const subsidiary = newRecord.getValue("subsidiary");
+        const pathScriptClient = newRecord.type == "customer" ? "../LMRY_EntityCLNT_V2.0.js" : "../LMRY_VendorCLNT_V2.0.js";
+        const idBtn = newRecord.type == "customer" ? 'acceptpayment' : 'payment';
+        var btnPayment = form.getButton({ id: idBtn });
+
+        if (!validatePaymentLR(subsidiary) || !btnPayment) return false;
+        
+        btnPayment.isHidden = true;
         form.clientScriptModulePath = pathScriptClient;
         form.addButton({
             id: 'custpage_custom_button_pagamento_latam',
-            label: translations.LMRY_BUTTOM_PAYMENT,
-            functionName: "callModulePayment(" + id +")",
+            label: getTranslations().LMRY_BUTTOM_PAYMENT,
+            functionName: "callModulePaymentForEntity(" + subsidiary  +","+ newRecord.id+")",
         });
     }
+
+    function redirectForTransaction(form, newRecord){
+        const status = newRecord.getValue("approvalstatus");
+        const subsidiary = newRecord.getValue("subsidiary");
+        const pathScriptClient = newRecord.type == "invoice" ? "../LMRY_InvoiceCLNT_V2.0.js" : "../LMRY_VendorBillCLNT_V2.0.js";
+        const idBtn = newRecord.type == "invoice" ? 'acceptpayment' : 'payment';
+        var btnPayment = form.getButton({ id: idBtn });
+        
+        if (status != 2 || !validatePaymentLR(subsidiary) || !btnPayment) return false;
+        
+        btnPayment.isHidden = true;
+        form.clientScriptModulePath = pathScriptClient;
+        form.addButton({
+            id: 'custpage_custom_button_pagamento_latam',
+            label: getTranslations().LMRY_BUTTOM_PAYMENT,
+            functionName: "callModulePayment(" + newRecord.id + ")",
+        });
+    }
+    
+    
     
     function validatePaymentLR(subsidiary){
         var searchSetupTaxSubsi = search.create({
@@ -87,18 +94,19 @@ define([
             recordType = result.getValue(columns[0]);
             applyWht = result.getValue(columns[1]);
         });
+
+        /*
         var translations = getTranslations();
         if (applyWht !== "T" && applyWht !== true) {
             alert(translations.LMRY_NOT_APPLY_WHT)
             return false;
         }
-
+        */
         var newRecord = record.load({
             type: recordType,
             id: id
         });
-        console.log(id);
-        console.log("type:", recordType);
+        
         var parameters = {
             "invoice": {
                 status: "1",
@@ -143,7 +151,7 @@ define([
             }
         }
         
-        console.log("parameters: ",parameters[recordType]);
+        
         var redirectObject = {
             "invoice": {
                 scriptId: "customscript_lmry_br_custpayments_stlt",
@@ -159,6 +167,51 @@ define([
             }
         }
         var output = url.resolveScript(redirectObject[recordType]);
+        window.location.href = output;
+    }
+
+    function callModulePaymentForEntity(subsidiaryID,entityID){
+
+        var allLicenses = LibraryMail.getAllLicenses();
+        var licenses = allLicenses[subsidiaryID];
+        if (!LibraryMail.getAuthorization(141, licenses)) {
+            alert(getTranslations().LMRY_FEATURE)
+            return false;
+        }
+
+        var recordType;
+        var searchEntity = search.create({
+            type: 'entity',
+            filters: [
+                ['internalid', 'anyof', entityID]
+            ],
+            columns: [
+                'type'
+            ]
+        });
+        
+        searchEntity.run().each(function (result) {
+            recordType = result.getValue('type');
+        });
+        
+        var params = { idS: subsidiaryID, idE: entityID };
+        
+        paramsResolveScript = {
+            "Vendor":{
+                scriptId: "customscript_lmry_br_wht_pur_stlt",
+                deploymentId: "customdeploy_lmry_br_wht_pur_stlt",
+                returnExternalUrl: false,
+                params: params,
+            },
+            "CustJob":{
+                scriptId: "customscript_lmry_br_custpayments_stlt",
+                deploymentId: "customdeploy_lmry_br_custpayments_stlt",
+                returnExternalUrl: false,
+                params: params,
+            }
+        }
+
+        var output = url.resolveScript(paramsResolveScript[recordType]);
         window.location.href = output;
     }
 
@@ -211,24 +264,42 @@ define([
         var translatedFields = {
             "es": {
                 "LMRY_BUTTOM_PAYMENT": "Pago Latam",
-                "LMRY_NOT_APPLY_WHT": "No aplica retencion para el tipo de documento fiscal",
+                "LMRY_FEATURE": "Se debe activar la caracteristica EN PAGOS DE CLIENTES",
+                "LMRY_VALIDATE": "Esta transacción debe pagarse a través del módulo de pago LatamReady"
             },
             "en": {
                 "LMRY_BUTTOM_PAYMENT": "Latam Payment",
-                "LMRY_NOT_APPLY_WHT": "Does not apply withholding tax for this fiscal document type",
+                "LMRY_FEATURE": "The feature must be activated IN CUSTOMER PAYMENTS",
+                "LMRY_VALIDATE": "This transaction must be paid via the LatamReady payment module"
             },
             "pt": {
                 "LMRY_BUTTOM_PAYMENT": "Pagamento Latam",
-                "LMRY_NOT_APPLY_WHT": "Não se aplica retenção para este tipo de documento fiscal",
+                "LMRY_FEATURE": "O recurso deve ser ativado EM PAGAMENTOS DO CLIENTE",
+                "LMRY_VALIDATE": "Esta transação deve ser paga pelo módulo de pagamentos da LatamReady"
             }  
         }
         return translatedFields[language];
     }
 
+    function validatePaymentSave(country,subsidiary){
+        
+        if (country == "BR" && validatePaymentLR(subsidiary)) {
+            alert(getTranslations().LMRY_VALIDATE)
+            return false
+        }
+        
+        return true;
+    }
+
+    
+
     return {
       
         redirectModulePayment: redirectModulePayment,
         callModulePayment: callModulePayment,
-        getPeriodByDate:getPeriodByDate
+        getPeriodByDate: getPeriodByDate,
+        callModulePaymentForEntity: callModulePaymentForEntity,
+        validatePaymentSave: validatePaymentSave,
+        getTranslations: getTranslations
     };
 });
