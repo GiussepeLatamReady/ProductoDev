@@ -1,7 +1,7 @@
 /**
  * @NApiVersion 2.0
  * @NModuleScope Public
- * @Name LMRY_Unit_Price_LBRY_V2.1.js
+ * @Name LMRY_AR_Unit_Price_LBRY_V2.0.js
  * @Author LatamReady - Giussepe Delgado
  * @Date 04/03/2024
  */
