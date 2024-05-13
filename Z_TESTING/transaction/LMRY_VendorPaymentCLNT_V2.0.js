@@ -681,7 +681,7 @@ define(['N/log', 'N/record', 'N/https', 'N/search', 'N/format', 'N/currentRecord
                     }
                 }
                 
-                if (!Library_RedirecPayment.validatePaymentSave(LMRY_countr[0],subsidiary)) {
+                if (!Library_RedirecPayment.validatePaymentSave(LMRY_countr[0],subsidiary,true)) {
                     return false;
                 }
                 

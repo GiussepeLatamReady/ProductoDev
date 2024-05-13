@@ -281,10 +281,11 @@ define([
         return translatedFields[language];
     }
 
-    function validatePaymentSave(country,subsidiary){
+    function validatePaymentSave(country,subsidiary,isClnt){
         
         if (country == "BR" && validatePaymentLR(subsidiary)) {
-            alert(getTranslations().LMRY_VALIDATE)
+            if (isClnt) alert(getTranslations().LMRY_VALIDATE)
+
             return false
         }
         
