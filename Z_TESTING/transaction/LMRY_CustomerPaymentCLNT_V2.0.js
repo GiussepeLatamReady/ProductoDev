@@ -441,12 +441,12 @@ define(['N/log', 'N/search', 'N/runtime', 'N/email', 'N/format', 'N/url', 'N/htt
             value: '1'
           });
         }
+
         var subsidiary = recordObj.getValue({ fieldId: 'subsidiary'})
 
         if (!Library_RedirecPayment.validatePaymentSave(LMRY_countr[0],subsidiary)) {
           return false;
         }
-        
 
       } catch (error) {
         recordObj = scriptContext.currentRecord;

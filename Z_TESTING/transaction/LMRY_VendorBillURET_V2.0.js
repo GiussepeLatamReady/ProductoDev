@@ -1157,7 +1157,6 @@ define(['require', './Latam_Library/LMRY_UniversalSetting_Purchase_LBRY', 'N/rec
         if (LMRY_Result[0] == 'BR' && type == "view" && type_interface == 'USERINTERFACE') {
           Library_RedirecPayment.redirectModulePayment(form, recordObj);
         }
-
       } catch (err) {
         recordObj = context.newRecord;
         log.error("[ beforeLoad ]", err);

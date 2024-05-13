@@ -115,7 +115,6 @@ define(['N/search', 'N/format', 'N/runtime', 'N/currentRecord', 'N/record', 'N/u
                 var byTransaction = queryParams.get('byTransaction');
 
 
-                console.log("byTransaction :",byTransaction)
                 if (!status || byTransaction == "1") { //Estado inicial
                     currentRecord.setValue({ fieldId: 'custpage_date', value: new Date(), ignoreFieldChange: true });
                     currentRecord.setValue({ fieldId: 'custpage_undepfunds', value: 'T', ignoreFieldChange: true });
@@ -415,10 +414,8 @@ define(['N/search', 'N/format', 'N/runtime', 'N/currentRecord', 'N/record', 'N/u
                 accountField.insertSelectOption({ value: 0, text: "&nbsp;" });
                 var currency = recordObj.getValue({ fieldId: "custpage_currency" }) || "";
 
-                console.log("currency :",currency)
                 if (currency) {
                     var subsidiary = recordObj.getValue({ fieldId: "custpage_subsidiary" });
-                    console.log("subsidiary :",subsidiary)
                     var accountQuery = query.create({
                         type: "account",
                     });
@@ -465,10 +462,8 @@ define(['N/search', 'N/format', 'N/runtime', 'N/currentRecord', 'N/record', 'N/u
                         var id = results[i]["id"];
                         var name = results[i]["name"];
                         if (id) {
-                            console.log("insertar")
                             accountField.insertSelectOption({ value: id, text: name });
-                        }
-                        
+                        }                        
                     }
                 }
             }

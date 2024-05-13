@@ -30,7 +30,7 @@ Solo aplica a Brazil
     LMRY_VendorPaymentURET_V2.0.js
 
     LMRY_BR_WHT_CustPaymnt_CLNT.js
-    LMRY_BR_WHT_CustPaymnt_CLNT.js
+    LMRY_BR_WHT_CustPaymnt_STLT.js
 
     LMRY_BR_WHT_Purchase_CLNT_LBRY_V2.1.js
     LMRY_BR_WHT_Purchase_STLT_LBRY_V2.1.js

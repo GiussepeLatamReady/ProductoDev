@@ -45,7 +45,6 @@ define(['N/search', 'N/runtime', 'N/ui/serverWidget', 'N/log', './Latam_Library/
                 var LMRY_Result = new Array();
 
                 var subsidiary = RCD.getValue('subsidiary');
-                var idEntity = RCD.getValue('id');
                 licenses = Library_Mail.getLicenses(subsidiary);
 
                 var country = new Array();

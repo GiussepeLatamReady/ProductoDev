@@ -52,7 +52,6 @@
                 RCD = scriptContext.newRecord;
                 executionContext = runtime.executionContext;
                 var subsidiary = RCD.getValue('subsidiary');
-                var idEntity = RCD.getValue('id');
                 licenses = Library_Mail.getLicenses(subsidiary);
 
                 var country = new Array();

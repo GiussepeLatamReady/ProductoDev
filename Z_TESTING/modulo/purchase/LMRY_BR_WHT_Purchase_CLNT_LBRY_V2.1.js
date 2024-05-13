@@ -81,7 +81,6 @@ define(["N/runtime", "N/search", "N/record", "N/format", "N/translation", "N/que
 
 
                     if (!this.status) {
-                        console.log("entre al status")
                         recordObj.setValue({ fieldId: "custpage_date", value: new Date() });
                         //recordObj.setValue({ fieldId: "custpage_duedate", value: new Date(), ignoreFieldChange: true });
                         this.fillPeriod();

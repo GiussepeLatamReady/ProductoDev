@@ -505,7 +505,7 @@ define(["N/log","N/search", "N/runtime", "N/translation", "N/redirect", "N/ui/se
                 }
 
                 if (thereIsSubsi) {
-                    log.error("param library", this.params.idS)
+                    
                     this.form.getField({ id: "custpage_subsidiary" }).defaultValue = thereIsSubsi;
                 }
                 if (thereIsVendor) {
@@ -608,7 +608,7 @@ define(["N/log","N/search", "N/runtime", "N/translation", "N/redirect", "N/ui/se
                     vendorField.addSelectOption({ value: vendor, text: name });
                     vendorField.defaultValue = vendor;
                 }
-                log.error("multivendor 1", multivendor);
+                
                 //log.debug("multivendor", multivendor.split("\u0005"));
                 if (multivendor && multivendor.length) {
                     this.createVendorsField(form, multivendor.split("\u0005"));
@@ -624,7 +624,6 @@ define(["N/log","N/search", "N/runtime", "N/translation", "N/redirect", "N/ui/se
                     currencyField.addSelectOption({ value: currency, text: name });
                     currencyField.defaultValue = currency;
                 }
-                log.error("byTransaction",byTransaction)
 
                 if (!this.params.byTransaction) {
                     if (Number(bankaccount)) {
@@ -711,7 +710,7 @@ define(["N/log","N/search", "N/runtime", "N/translation", "N/redirect", "N/ui/se
                     
                     locationField.defaultValue = location;
                 }
-                log.error("paymethod",paymethod)
+                
                 if (Number(paymethod)) {
                     let paymentMethodField = form.getField({ id: "custpage_payment_method" });
                     let name = search.lookupFields({
@@ -1499,9 +1498,6 @@ define(["N/log","N/search", "N/runtime", "N/translation", "N/redirect", "N/ui/se
                     parameters[this.names["paramuser"]] = parametros.user;
                 };
 
-                log.error("MPRD_SCRIPT_ID", MPRD_SCRIPT_ID);
-                log.error("MPRD_DEPLOY_ID", MPRD_DEPLOY_ID);
-                log.error("parameters", parameters);
                 task.create({
                     taskType: task.TaskType.MAP_REDUCE,
                     scriptId: MPRD_SCRIPT_ID,

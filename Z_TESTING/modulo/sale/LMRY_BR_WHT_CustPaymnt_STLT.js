@@ -854,7 +854,7 @@ define(['N/log', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/error', 'N/red
         function addSubsidiaries(form, subsidiary) {
             var field_subsidiary = form.getField('custpage_subsidiary');
             if (!subsidiary) {
-                log.error("flag","No hay subsidiaria")
+                
                 var search_subsidiaries = search.create({
                     type: 'subsidiary',
                     filters: [
@@ -872,24 +872,22 @@ define(['N/log', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/error', 'N/red
                         var id = results[i].getValue('internalid');
                         var name = results[i].getValue('name');
                         if (LIC_BY_SUBSIDIARY[String(id)] && LIC_BY_SUBSIDIARY[String(id)].indexOf(ID_FEATURE) != -1) {
-                            log.error("flag","Agregar 1")
-                            log.error("name",name)
+                            
                             field_subsidiary.addSelectOption({ value: id, text: name });
                         }
                     }
                 }
             } else {
-                log.error("flag","Hay subsidiaria")
+                
                 if (LIC_BY_SUBSIDIARY[String(subsidiary)] && LIC_BY_SUBSIDIARY[String(subsidiary)].indexOf(ID_FEATURE) != -1) {
                     var name = search.lookupFields({
                         type: 'subsidiary',
                         id: subsidiary,
                         columns: 'name'
                     }).name;
-                    log.error("name",name)
+                    
                     if (name) {
-                        log.error("flag","Agregar 2")
-                        log.error("name",name)
+                        
                         field_subsidiary.addSelectOption({ value: subsidiary, text: name });
                     }
                 }
