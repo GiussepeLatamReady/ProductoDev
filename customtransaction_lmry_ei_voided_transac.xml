@@ -1,0 +1,29 @@
+<customtransactiontype scriptid="customtransaction_lmry_ei_voided_transac">
+  <cancloseorder>F</cancloseorder>
+  <isposting>T</isposting>
+  <isvoidable>F</isvoidable>
+  <name>Latam - EI Voided Transaction</name>
+  <showstatus>F</showstatus>
+  <transactionstyle>JOURNAL</transactionstyle>
+  <segments>
+    <classposition>LINES</classposition>
+    <departmentposition>LINES</departmentposition>
+    <isclassmandatory>F</isclassmandatory>
+    <isdepartmentmandatory>F</isdepartmentmandatory>
+    <islocationmandatory>F</islocationmandatory>
+    <locationposition>LINES</locationposition>
+  </segments>
+  <permissions>
+    <permission>
+      <permittedlevel>FULL</permittedlevel>
+      <permittedrole>ADMINISTRATOR</permittedrole>
+    </permission>
+  </permissions>
+  <links>
+    <link>
+      <linkcategory>BASICTRANSACTIONSFINANCIAL</linkcategory>
+      <linklabel>Latam - EI Voided Transaction</linklabel>
+      <linktasktype>LIST</linktasktype>
+    </link>
+  </links>
+</customtransactiontype>
