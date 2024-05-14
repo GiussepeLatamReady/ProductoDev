@@ -223,7 +223,7 @@ define([
         }
 
         var output = url.resolveScript(paramsResolveScript[recordType]);
-        window.location.href = output;
+        // window.location.href = output;
     }
 
 
@@ -298,8 +298,14 @@ define([
     function validatePaymentSave(country,subsidiary,isClnt){
         
         if (country == "BR" && validatePaymentLR(subsidiary)) {
-            if (isClnt) alert(getTranslations().LMRY_VALIDATE)
-
+            if (isClnt) {
+                alert(getTranslations().LMRY_VALIDATE)
+            }else{
+                if (runtime.executionContext == runtime.ContextType.MAP_REDUCE || runtime.executionContext == runtime.ContextType.SUITELET) {
+                    log.error("flag","validacion mprd o stlt")
+                    return true;
+                }
+            }
             return false
         }
         
