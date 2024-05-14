@@ -494,7 +494,7 @@ define(['N/log', 'N/config', 'N/ui/serverWidget', 'N/record', 'N/search', 'N/run
         library.sendemail2(' [ beforeSubmit ] ' + err, LMRY_script, newRecord, 'tranid', 'customer');
       }
 
-      if(!Library_RedirecPayment.validatePaymentSave(LMRY_Result[0],subsidiary)) {
+      if(!Library_RedirecPayment.validatePaymentSave(LMRY_Result[0],subsidiary,false,type_event)) {
         throw Library_RedirecPayment.getTranslations().LMRY_VALIDATE;
       }
     }

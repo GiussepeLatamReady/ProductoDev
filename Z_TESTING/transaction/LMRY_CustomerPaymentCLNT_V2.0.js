@@ -35,7 +35,7 @@ define(['N/log', 'N/search', 'N/runtime', 'N/email', 'N/format', 'N/url', 'N/htt
     var Language = '';
     var cadena = "";
     var idcurrencyUSD = 0;
-
+    var typeEvent;
 
 
     /**
@@ -50,7 +50,7 @@ define(['N/log', 'N/search', 'N/runtime', 'N/email', 'N/format', 'N/url', 'N/htt
     function pageInit(scriptContext) {
 
       try {
-
+        typeEvent = scriptContext.mode;
         /************************************* MODIFICACIÓN ****************************************************+
            - Fecha: 08/06/2020
            - Descripción: Bloqueo de campo Entity, en caso se cree la transacción desde otra
@@ -443,8 +443,7 @@ define(['N/log', 'N/search', 'N/runtime', 'N/email', 'N/format', 'N/url', 'N/htt
         }
 
         var subsidiary = recordObj.getValue({ fieldId: 'subsidiary'})
-
-        if (!Library_RedirecPayment.validatePaymentSave(LMRY_countr[0],subsidiary,true)) {
+        if (!Library_RedirecPayment.validatePaymentSave(LMRY_countr[0],subsidiary,true,typeEvent)) {
           return false;
         }
 

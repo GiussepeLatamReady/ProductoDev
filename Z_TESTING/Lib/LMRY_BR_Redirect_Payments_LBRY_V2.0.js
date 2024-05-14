@@ -1,7 +1,7 @@
 /** 
  * @NApiVersion 2.1
  * @NModuleScope Public
- * @Name LMRY_BR_VOID_INVENTORY_TRAN_LBRY_V2.0.js
+ * @Name LMRY_BR_Redirect_Payments_LBRY_V2.0.js
  * @Author LatamReady - Giussepe Delgado
  * @Date 24/04/2024
  */
@@ -223,7 +223,7 @@ define([
         }
 
         var output = url.resolveScript(paramsResolveScript[recordType]);
-        // window.location.href = output;
+        window.location.href = output;
     }
 
 
@@ -295,16 +295,17 @@ define([
         return translatedFields[language];
     }
 
-    function validatePaymentSave(country,subsidiary,isClnt){
+    function validatePaymentSave(country,subsidiary,isClnt,typeEvent){
         
+        if (typeEvent != "create" && typeEvent != "copy") return true;
         if (country == "BR" && validatePaymentLR(subsidiary)) {
             if (isClnt) {
                 alert(getTranslations().LMRY_VALIDATE)
             }else{
                 if (runtime.executionContext == runtime.ContextType.MAP_REDUCE || runtime.executionContext == runtime.ContextType.SUITELET) {
-                    log.error("flag","validacion mprd o stlt")
                     return true;
                 }
+
             }
             return false
         }

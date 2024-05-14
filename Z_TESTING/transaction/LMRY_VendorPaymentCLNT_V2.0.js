@@ -35,7 +35,7 @@ define(['N/log', 'N/record', 'N/https', 'N/search', 'N/format', 'N/currentRecord
         var mode_type = '';
         var cadena = '';
         var licenses = [];
-
+        var typeEvent;
         var featuresubs = runtime.isFeatureInEffect({
             feature: 'SUBSIDIARIES'
         });
@@ -49,7 +49,7 @@ define(['N/log', 'N/record', 'N/https', 'N/search', 'N/format', 'N/currentRecord
          */
         function pageInit(context) {
             try {
-
+                typeEvent = context.mode;
                 /************************************* MODIFICACIÓN ****************************************************+
                    - Fecha: 08/06/2020
                    - Descripción: Bloqueo de campo Entity, en caso se cree la transacción desde otra
@@ -681,7 +681,7 @@ define(['N/log', 'N/record', 'N/https', 'N/search', 'N/format', 'N/currentRecord
                     }
                 }
                 
-                if (!Library_RedirecPayment.validatePaymentSave(LMRY_countr[0],subsidiary,true)) {
+                if (!Library_RedirecPayment.validatePaymentSave(LMRY_countr[0],subsidiary,true,typeEvent)) {
                     return false;
                 }
                 

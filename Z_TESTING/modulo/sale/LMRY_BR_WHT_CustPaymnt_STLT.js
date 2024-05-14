@@ -74,11 +74,11 @@ define(['N/log', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/error', 'N/red
                         var subsi = context.request.parameters.idS;
                         var idEnt = context.request.parameters.idE;
                         if (idEnt) {
-                            //log.error("subsi",subsi)
+                            
                             form.getField({ id: "custpage_idsubsi" }).defaultValue = subsi;
                             addCustomer(form, idEnt);
                         }else{
-                            form.getField({ id: "custpage_idsubsi" }).defaultValue = "999";
+                            form.getField({ id: "custpage_idsubsi" }).defaultValue = "-1";
                         }                         
                         form.getField({ id: "custpage_currency" }).defaultValue = localCurrency;
                         form.getField({ id: "custpage_exchangerate" }).defaultValue = 1.0;
@@ -796,8 +796,7 @@ define(['N/log', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/error', 'N/red
                     ['custrecord_lmry_tipo_transaccion', 'anyof', TYPE_TRANSACTION]
                 ]
                 var subsidiaryId = context.request.parameters.idS;
-                log.error("subsidiaryId:", subsidiaryId)
-                if (!subsidiaryId) {
+                if (subsidiaryId!="-1") {
                     filters.push('AND',['custrecord_lmry_document_apply_wht', 'is', 'T'])
                 }
                 
@@ -979,7 +978,7 @@ define(['N/log', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/error', 'N/red
 
             var filters = search_transactions.filters;
             
-            if (byTransaction || idS!="999") {
+            if (byTransaction || idS!="-1") {
                 filters.splice(3, 1);
             }
             

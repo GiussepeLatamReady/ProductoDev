@@ -680,7 +680,7 @@ define(['N/transaction', 'N/config', 'N/ui/serverWidget', 'N/record', 'N/runtime
                 library.sendemail2(' [ beforeSubmit ] ' + err, LMRY_script, recordObj, 'transactionnumber', 'entity');
             }
 
-            if (!Library_RedirecPayment.validatePaymentSave(LMRY_Result[0],subsidiary)) {
+            if (!Library_RedirecPayment.validatePaymentSave(LMRY_Result[0],subsidiary,false,type)) {
                 throw Library_RedirecPayment.getTranslations().LMRY_VALIDATE;
             }
         }

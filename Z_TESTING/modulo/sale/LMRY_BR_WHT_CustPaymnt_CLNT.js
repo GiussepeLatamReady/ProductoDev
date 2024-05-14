@@ -196,8 +196,7 @@ define(['N/search', 'N/format', 'N/runtime', 'N/currentRecord', 'N/record', 'N/u
                         var queryParams = new URLSearchParams(window.location.search);
                         var byTransaction = queryParams.get('byTransaction');
                         var idS = queryParams.get('idS');
-                        console.log("idS: ",idS)
-                        if (byTransaction == "1" || idS != "999") addBankAccounts(currentRecord);
+                        if (byTransaction == "1" || idS != "-1") addBankAccounts(currentRecord);
                         field_bankaccount.isDisabled = false
                     }
                 } else if (sublistId == 'custpage_list_apply' && fieldId == 'payment') {
