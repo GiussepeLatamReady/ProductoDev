@@ -796,7 +796,7 @@ define(['N/log', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/error', 'N/red
                     ['custrecord_lmry_tipo_transaccion', 'anyof', TYPE_TRANSACTION]
                 ]
                 var subsidiaryId = context.request.parameters.idS;
-                if (subsidiaryId!="-1") {
+                if (subsidiaryId=="-1") {
                     filters.push('AND',['custrecord_lmry_document_apply_wht', 'is', 'T'])
                 }
                 
@@ -808,7 +808,7 @@ define(['N/log', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/error', 'N/red
                         sort: search.Sort.ASC
                     })]
                 });
-
+                log.error("search_documents",search_documents)
                 var results = search_documents.run().getRange(0, 1000);
 
                 if (results) {
