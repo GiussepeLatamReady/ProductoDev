@@ -90,6 +90,10 @@ No puede cambiar el artículo en esta línea porque tiene un elemento de ingreso
 
 
 
+https://tstdrv2083663.app.netsuite.com/app/accounting/transactions/vendbill.nl?id=548535&whence=&cmid=1715804158181_20808
+
+
+
 
 
 
