@@ -59,6 +59,9 @@
         var subsi_OW = runtime.isFeatureInEffect({
             feature: "SUBSIDIARIES"
         });
+        var FEAT_MULTISUBCUSTOMER = runtime.isFeatureInEffect({
+            feature: "multisubsidiarycustomer"
+        });
         /**
          * Function to be executed after page is initialized.
          *
@@ -546,36 +549,38 @@
             }
 
             if (subsi_OW == 'T' || subsi_OW == true) {
-                // if (name == 'entity' && type == 'create') {
-                //     var cf = currentRCD.getValue('customform');
-                //     var ent = currentRCD.getValue('entity');
-
-                //     if (ent != '' && ent != null && ent != -1 && cf != '' && cf != null && cf != -1) {
-                //         var objSearch = search.lookupFields({
-                //             type: 'entity',
-                //             id: ent,
-                //             columns: ['subsidiary']
-                //         });
-
-                //         var sub = objSearch.subsidiary[0].value;
-
-                //         setWindowChanged(window, false);
-                //         window.location.href = window.location.href.split('?')[0] + '?whence=&cf=' + cf + '&entity=' + ent + '&subsidiary=' + sub;
-                //     }
-                //     return true;
-                // }
-
-                if (name == 'subsidiary' && type == 'create') {
-                    var cf = currentRCD.getValue('customform');
-                    var ent = currentRCD.getValue('entity');
-                    var sub = currentRCD.getValue('subsidiary');
-
-                    if (ent != '' && ent != null && ent != -1 && cf != '' && cf != null && cf != -1 && sub != '' && sub != null && sub != -1) {
-
-                        setWindowChanged(window, false);
-                        window.location.href = window.location.href.split('?')[0] + '?whence=&cf=' + cf + '&entity=' + ent + '&subsidiary=' + sub;
+                /* ************************************************ *
+                    * 2024.05.10 Se activo la validacion por entidad
+                    * Solo para el caso que  la subsidiaria no sea
+                    * una lista desplegable por el feature 
+                    * multisubsidiarycustomer
+                    * ************************************************ */
+                if (FEAT_MULTISUBCUSTOMER == 'T' || FEAT_MULTISUBCUSTOMER == true) {
+                    if (name == 'subsidiary' && type == 'create') {
+                        var cf = currentRCD.getValue('customform');
+                        var ent = currentRCD.getValue('entity');
+                        var sub = currentRCD.getValue('subsidiary');
+    
+                        if (ent != '' && ent != null && ent != -1 && cf != '' && cf != null && cf != -1 && sub != '' && sub != null && sub != -1) {
+    
+                            setWindowChanged(window, false);
+                            window.location.href = window.location.href.split('?')[0] + '?whence=&cf=' + cf + '&entity=' + ent + '&subsidiary=' + sub;
+                        }
+                        return true;
                     }
-                    return true;
+                } else {
+                    if (name == 'entity' && type == 'create') {
+                        var cf = currentRCD.getValue('customform');
+                        var ent = currentRCD.getValue('entity');
+                        var sub = currentRCD.getValue('subsidiary');
+    
+                        if (ent != '' && ent != null && ent != -1 && cf != '' && cf != null && cf != -1 && sub != '' && sub != null && sub != -1) {
+    
+                            setWindowChanged(window, false);
+                            window.location.href = window.location.href.split('?')[0] + '?whence=&cf=' + cf + '&entity=' + ent + '&subsidiary=' + sub;
+                        }
+                        return true;
+                    } // 2024.05.15 : Fin del cambio realizado
                 }
             } else {
                 if (name == 'entity' && type == 'create') {
