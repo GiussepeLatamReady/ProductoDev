@@ -16,6 +16,7 @@ define(["N/record", "N/search", "N/runtime", "N/log", "N/format", "N/https", "N/
 
     const createWithholdingLines = (context) => {
         let newRecord = context.newRecord;
+        
         log.error("newRecord", newRecord);
         log.error("type", newRecord.type);
         let mode = context.type;
@@ -32,6 +33,7 @@ define(["N/record", "N/search", "N/runtime", "N/log", "N/format", "N/https", "N/
         if (approvalFeature == "T" || approvalstatus == true) {
             if (newRecord.type == "invoice" || newRecord.type == "vendorbill") {
                 if (approvalstatus != null && approvalstatus != "" && approvalstatus != "2") {
+                    log.error("flag", "approvalstatus");
                     return true;
                 }
             }
@@ -40,9 +42,11 @@ define(["N/record", "N/search", "N/runtime", "N/log", "N/format", "N/https", "N/
         let featureManager = new FeatureManager(subsidiary);
         if (mode == "edit") {
             if (featureManager.isActive(CO_FEAT.WHT_VERIFY_CM) && Validate_EIDocument(recordObj)) {
+                log.error("flag", "WHT_VERIFY_CM");
                 return true;
             }
             if (validateChange(context)) {
+                log.error("flag", "validateChange");
                 return true;
             }
         }
@@ -80,8 +84,12 @@ define(["N/record", "N/search", "N/runtime", "N/log", "N/format", "N/https", "N/
                 let reteiva = recordObj.getSublistValue({ sublistId: key, fieldId: "custcol_lmry_co_reteiva", line: i });
                 let reteica = recordObj.getSublistValue({ sublistId: key, fieldId: "custcol_lmry_co_reteica", line: i });
 
-                if (!retecree && !retefte && !reteiva && !reteica) continue;
+                if (!retecree && !retefte && !reteiva && !reteica) {
+                    log.error("flag", "validarete");
+                    continue;
+                };
 
+                
                 linesJSON[[key, i].join("|")] = {
                     value: recordObj.getSublistValue({ sublistId: key, fieldId: sublistJSON[key].line, line: i }),
                     departmentItem: recordObj.getSublistValue({ sublistId: key, fieldId: "department", line: i }),
@@ -124,6 +132,7 @@ define(["N/record", "N/search", "N/runtime", "N/log", "N/format", "N/https", "N/
         log.error("linesJSON", JSON.stringify(linesJSON));
         log.error("nationalTaxes", JSON.stringify(nationalTaxes));
         if (!nationalTaxes.length) {
+            log.error("flag", "no natinal tax");
             return true;
         }
         // Busqueda de nombres de items/accounts
@@ -457,11 +466,15 @@ define(["N/record", "N/search", "N/runtime", "N/log", "N/format", "N/https", "N/
         let idItemName = sublistJSON[sublist].line == "item" ? itemNames[dataLine.value] : accountNames[dataLine.value];
 
         let flagItem = false;
+        log.error("idItem",idItem)
+        log.error("appliesField",appliesField)
+
         if (idItem == appliesField || (!dataNationalTax.applies_item && !dataNationalTax.applies_account)) {
             flagItem = true;
         }
 
         if (!flagItem) {
+            log.error("flag"+dataNationalTax.subtype ,"salio")
             return returnData;
         }
         let departmentItem = dataLine["departmentItem"] || dataLine["departmentMain"] || "";
@@ -730,11 +743,7 @@ define(["N/record", "N/search", "N/runtime", "N/log", "N/format", "N/https", "N/
         return false;
     };
 
-    const createFieldWhtVariablerate = (context) => {
-        const form = context.form;
-
-        
-    }
+    
 
     function validateChange(context) {
         const oldRecord = context.oldRecord;
@@ -743,16 +752,18 @@ define(["N/record", "N/search", "N/runtime", "N/log", "N/format", "N/https", "N/
         const oldApprovalStatus = oldRecord.getValue("approvalstatus");
         const approvalStatus = newRecord.getValue("approvalstatus");
 
-        log.debug("oldApprovalStatus, approvalStatus", [oldApprovalStatus, approvalStatus].join(","));
+        
         if (oldApprovalStatus != approvalStatus) {
+            log.error("oldApprovalStatus, approvalStatus", [oldApprovalStatus, approvalStatus].join(","));
             return false;
         }
 
         const oldNumberItem = oldRecord.getLineCount({ sublistId: "item" }) || 0;
         const numberItem = newRecord.getLineCount({ sublistId: "item" }) || 0;
 
-        log.debug("oldNumberItem, numberItem", [oldNumberItem, numberItem].join(","));
+        
         if (oldNumberItem != numberItem) {
+            log.error("oldNumberItem, numberItem", [oldNumberItem, numberItem].join(","));
             return false;
         }
 
@@ -760,8 +771,9 @@ define(["N/record", "N/search", "N/runtime", "N/log", "N/format", "N/https", "N/
             let oldAccount = oldRecord.getSublistValue({ sublistId: "item", fieldId: "item", line: i }) || "";
             let account = newRecord.getSublistValue({ sublistId: "item", fieldId: "item", line: i }) || "";
 
-            log.debug("i, oldAccount, account", [i, oldAccount, account].join(","));
+            
             if (oldAccount != account) {
+                log.error("i, oldAccount, account", [i, oldAccount, account].join(","));
                 return false;
             }
 
@@ -771,36 +783,41 @@ define(["N/record", "N/search", "N/runtime", "N/log", "N/format", "N/https", "N/
             let grossAmt = newRecord.getSublistValue({ sublistId: "item", fieldId: "grossamt", line: i }) || 0.00;
             grossAmt = parseFloat(grossAmt);
 
-            log.debug("i, oldGrossAmt, grossAmt", [i, oldGrossAmt, grossAmt].join(","));
+            
             if (oldGrossAmt != grossAmt) {
+                log.error("i, oldGrossAmt, grossAmt", [i, oldGrossAmt, grossAmt].join(","));
                 return false;
             }
 
             let oldIVA = oldRecord.getSublistValue({ sublistId: "item", fieldId: "custcol_lmry_co_reteiva", line: i }) || "";
             let IVA = newRecord.getSublistValue({ sublistId: "item", fieldId: "custcol_lmry_co_reteiva", line: i }) || "";
-            log.debug("i, oldIVA, IVA", [i, oldIVA, IVA].join(","));
+            
             if (oldIVA != IVA) {
+                log.error("i, oldIVA, IVA", [i, oldIVA, IVA].join(","));
                 return false;
             }
 
             let oldICA = oldRecord.getSublistValue({ sublistId: "item", fieldId: "custcol_lmry_co_reteica", line: i }) || "";
             let ICA = newRecord.getSublistValue({ sublistId: "item", fieldId: "custcol_lmry_co_reteica", line: i }) || "";
-            log.debug("i, oldICA, ICA", [i, oldICA, ICA].join(","));
+            
             if (oldICA != ICA) {
+                log.error("i, oldICA, ICA", [i, oldICA, ICA].join(","));
                 return false;
             }
 
             let oldFTE = oldRecord.getSublistValue({ sublistId: "item", fieldId: "custcol_lmry_co_retefte", line: i }) || "";
             let FTE = newRecord.getSublistValue({ sublistId: "item", fieldId: "custcol_lmry_co_retefte", line: i }) || "";
-            log.debug("i, oldFTE, FTE", [i, oldFTE, FTE].join(","));
+            
             if (oldFTE != FTE) {
+                log.error("i, oldFTE, FTE", [i, oldFTE, FTE].join(","));
                 return false;
             }
 
             let oldCREE = oldRecord.getSublistValue({ sublistId: "item", fieldId: "custcol_lmry_co_autoretecree", line: i }) || "";
             let CREE = newRecord.getSublistValue({ sublistId: "item", fieldId: "custcol_lmry_co_autoretecree", line: i }) || "";
-            log.debug("i, oldCREE, CREE", [i, oldCREE, CREE].join(","));
+            
             if (oldCREE != CREE) {
+                log.error("i, oldCREE, CREE", [i, oldCREE, CREE].join(","));
                 return false;
             }
 
@@ -810,8 +827,9 @@ define(["N/record", "N/search", "N/runtime", "N/log", "N/format", "N/https", "N/
             const oldNumberExpenses = oldRecord.getLineCount({ sublistId: "expense" }) || 0;
             const numberExpenses = newRecord.getLineCount({ sublistId: "expense" }) || 0;
 
-            log.debug("oldNumberExpenses, numberExpenses", [oldNumberExpenses, numberExpenses].join(","));
+            
             if (oldNumberExpenses != numberExpenses) {
+                log.error("oldNumberExpenses, numberExpenses", [oldNumberExpenses, numberExpenses].join(","));
                 return false;
             }
 
@@ -819,8 +837,9 @@ define(["N/record", "N/search", "N/runtime", "N/log", "N/format", "N/https", "N/
                 let oldAccount = oldRecord.getSublistValue({ sublistId: "expense", fieldId: "account", line: i }) || "";
                 let account = newRecord.getSublistValue({ sublistId: "expense", fieldId: "account", line: i }) || "";
 
-                log.debug("i, oldAccount, account", [i, oldAccount, account].join(","));
+                
                 if (oldAccount != account) {
+                    log.error("i, oldAccount, account", [i, oldAccount, account].join(","));
                     return false;
                 }
 
@@ -830,48 +849,78 @@ define(["N/record", "N/search", "N/runtime", "N/log", "N/format", "N/https", "N/
                 let grossAmt = newRecord.getSublistValue({ sublistId: "expense", fieldId: "grossamt", line: i }) || 0.00;
                 grossAmt = parseFloat(grossAmt);
 
-                log.debug("i, oldGrossAmt, grossAmt", [i, oldGrossAmt, grossAmt].join(","));
+                
                 if (oldGrossAmt != grossAmt) {
+                    log.error("i, oldGrossAmt, grossAmt", [i, oldGrossAmt, grossAmt].join(","));
                     return false;
                 }
 
                 let oldIVA = oldRecord.getSublistValue({ sublistId: "expense", fieldId: "custcol_lmry_co_reteiva", line: i }) || "";
                 let IVA = newRecord.getSublistValue({ sublistId: "expense", fieldId: "custcol_lmry_co_reteiva", line: i }) || "";
-                log.debug("i, oldIVA, IVA", [i, oldIVA, IVA].join(","));
+                
                 if (oldIVA != IVA) {
+                    log.error("i, oldIVA, IVA", [i, oldIVA, IVA].join(","));
                     return false;
                 }
     
                 let oldICA = oldRecord.getSublistValue({ sublistId: "expense", fieldId: "custcol_lmry_co_reteica", line: i }) || "";
                 let ICA = newRecord.getSublistValue({ sublistId: "expense", fieldId: "custcol_lmry_co_reteica", line: i }) || "";
-                log.debug("i, oldICA, ICA", [i, oldICA, ICA].join(","));
+                
                 if (oldICA != ICA) {
+                    log.error("i, oldICA, ICA", [i, oldICA, ICA].join(","));
                     return false;
                 }
     
                 let oldFTE = oldRecord.getSublistValue({ sublistId: "expense", fieldId: "custcol_lmry_co_retefte", line: i }) || "";
                 let FTE = newRecord.getSublistValue({ sublistId: "expense", fieldId: "custcol_lmry_co_retefte", line: i }) || "";
-                log.debug("i, oldFTE, FTE", [i, oldFTE, FTE].join(","));
+                
                 if (oldFTE != FTE) {
+                    log.error("i, oldFTE, FTE", [i, oldFTE, FTE].join(","));
                     return false;
                 }
     
                 let oldCREE = oldRecord.getSublistValue({ sublistId: "expense", fieldId: "custcol_lmry_co_autoretecree", line: i }) || "";
                 let CREE = newRecord.getSublistValue({ sublistId: "expense", fieldId: "custcol_lmry_co_autoretecree", line: i }) || "";
-                log.debug("i, oldCREE, CREE", [i, oldCREE, CREE].join(","));
+                
                 if (oldCREE != CREE) {
+                    log.error("i, oldCREE, CREE", [i, oldCREE, CREE].join(","));
                     return false;
                 }
     
             }
         }
 
-        log.debug("return true", true);
+        log.error("return true", true);
         return true;
 
     }
+
+    const createFields = (context) => {
+        const form = context.form;
+        const itemSublist = form.getSublist({id: 'item'});
+        const fieldCREE = itemSublist.getField({id: 'custcol_lmry_co_autoretecree'});
+        log.error("fieldCREE",fieldCREE)
+        if (fieldCREE) {
+            log.error("flag","crea el campo")
+            itemSublist.addField({
+                id: 'custpage_co_fte_new_basis',
+                label: 'LATAM COL - CO RETEFUENTE NEW BASIS',
+                type: "text"
+            });
+            /*
+            form.insertField({
+                field : fteNewBasis ,
+                nextfield : 'custpage_lmry_co_autoretecree'
+            });
+            */
+        }else{
+            log.error("flag","no cre el campo")
+        }
+        
+    }
     
     return {
-        createWithholdingLines
+        createWithholdingLines,
+        createFields
     };
 });
