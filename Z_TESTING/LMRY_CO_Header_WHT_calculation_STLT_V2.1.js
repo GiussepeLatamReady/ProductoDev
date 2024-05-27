@@ -627,20 +627,25 @@ define([
                     });
                 }
 
-                return this.getTransactionsMain(Object.keys(jsonData), whtType);
+                return this.getTransactionsMain(Object.keys(jsonData),jsonData);
             }
 
-            getTransactionsMain(ids, whtType) {
+            getTransactionsMain(ids,jsonData) {
 
-                if (whtType != "header") {
-                    ids = this.getIdsFilterTaxResult(ids);
-                }
-                
+                let reclasificationIds = ids.filter(id => jsonData[id]);
+                let retentionIds = ids.filter(id => !jsonData[id]);
+
+                reclasificationIds = this.getReclasificationIds(reclasificationIds)
+                return [
+                    ...this.getSearch(retentionIds,false),
+                    ...this.getSearch(reclasificationIds,true)
+                ];
+            }
+
+            getSearch(ids,isReclasification){
                 if (ids.length == 0) {
                     return ids;
                 }
-
-                
                 let data = [];
                 let filters = [
                     ["internalid", "anyof", ids],
@@ -649,9 +654,8 @@ define([
 
                 ];
 
-                if (whtType == "header") {
-                    filters.push('AND');
-                    filters.push(["custrecord_lmry_br_transaction.internalid", "anyof", "@NONE@"]);
+                if (!isReclasification) {
+                    filters.push('AND',["custrecord_lmry_br_transaction.internalid", "anyof", "@NONE@"]);
                 }
 
                 let columns = [];
