@@ -382,7 +382,6 @@ define([
                 const fieldWhtType = this.fillWhtType();
                 fieldWhtType.defaultValue = "header";
                 fieldWhtType.updateDisplayType({ displayType: serverWidget.FieldDisplayType.DISABLED });
-                //this.fillPeriodType();
                 this.fillProcess();
             }
 
@@ -403,13 +402,7 @@ define([
                 whtTypeField.addSelectOption({ value: "line", text: this.translations.LMRY_WHT_LINE });
                 return whtTypeField;
             }
-            /*
-            fillPeriodType() {
-                let periodTypeField = this.form.getField({ id: 'custpage_period_type' });
-                periodTypeField.addSelectOption({ value: 0, text: '&nbsp;' });
-                periodTypeField.addSelectOption({ value: "range", text: this.translations.LMRY_DATE_RANGE });
-                periodTypeField.addSelectOption({ value: "month", text: this.translations.LMRY_PERIOD });
-            }*/
+            
             fillProcess() {
                 let typeProcessField = this.form.getField({ id: 'custpage_wht_process' });
                 typeProcessField.addSelectOption({ value: 0, text: '&nbsp;' });
@@ -445,7 +438,6 @@ define([
                 }
 
                 this.fillWhtType();
-                //this.fillPeriodType();
                 this.fillProcess();
 
                 form.updateDefaultValues({
@@ -577,7 +569,6 @@ define([
                         ]
                     );
 
-
                 } else {
                     filters.push('AND');
                     filters.push(
@@ -592,13 +583,6 @@ define([
                 }
 
 
-
-                /*
-                if (startDate != null && startDate != '' && endDate != null && endDate != '') {
-                    filters.push('AND',['trandate', 'onorafter', startDate]);
-                    filters.push('AND',['trandate', 'onorbefore', endDate]);
-                }
-                */
                 if (accoutingPeriod != null && accoutingPeriod != '') {
                     filters.push('AND');
                     const periodFourmulaids = this.getPeriods(subsidiary,accoutingPeriod);
@@ -621,7 +605,7 @@ define([
 
                 let columns = [];
                 columns.push(search.createColumn({ name: 'formulatext', formula: '{custbody_lmry_reference_transaction.internalid}', sort: search.Sort.DESC }));
-
+                columns.push(search.createColumn({ name: 'formulatext', formula: '{memomain}'}));
                 
 
                 let searchTransactionsWht = search.create({
@@ -637,7 +621,8 @@ define([
                         let page = pageData.fetch({ index: pageRange.index });
                         page.data.forEach(function (result) {
                             let id = result.getValue(result.columns[0]);
-                            jsonData[id] = true;
+                            let memo = result.getValue(result.columns[1]);
+                            jsonData[id] = memo.startsWith("Latam - WHT Reclasification");
                         });
                     });
                 }
@@ -754,6 +739,37 @@ define([
                 
                 return Object.keys(transactionIds);
                 
+            }
+
+            getReclasificationIds(ids){
+                if (ids.length == 0) {
+                    return ids;
+                }
+                let transactionIds = {}
+                let searchRecordLog = search.create({
+                    type: 'customrecord_lmry_br_transaction',
+                    filters: [
+                        ['custrecord_lmry_br_transaction', 'anyof', ids],
+                        "AND", 
+                        ["custrecord_lmry_co_wht_applied","anyof","@NONE@"]
+                    ],
+                    columns: [
+                        'custrecord_lmry_br_transaction.internalid',
+                        'custrecord_lmry_co_wht_applied.memomain'
+                    ]
+                })
+                searchRecordLog.run().each(function (result) {
+                    let id = result.getValue(result.columns[0]);
+                    let memo = result.getValue(result.columns[1]);
+                    if (memo.startsWith("Latam - WHT Reclasification")) {
+                        transactionIds[id] = true;
+                    }
+                    
+                    return true;
+                });
+                const correctIds = Object.keys(transactionIds);
+                if (correctIds.length) ids = ids.filter(id => !correctIds.includes(id));//Se retira las transacciones que han generado el tax result correctamente
+                return ids;
             }
 
             

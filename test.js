@@ -1,8 +1,5 @@
-const persona = {
-    nombre: "Ana",
-    edad: 25,
-    ciudad: "Madrid"
-};
 
+const memo = "Latam - WHT Reclasification iva123"
+const validate= memo.startsWith("Latam - WHT Reclasification")
 
-console.log(Object.entries(persona));
+console.log(validate)
