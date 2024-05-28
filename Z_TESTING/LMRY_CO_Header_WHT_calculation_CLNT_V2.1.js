@@ -152,15 +152,9 @@ define(['N/runtime',
                     'AND',
                     ["isquarter", "is", "F"],
                     'AND',
-                    ["isyear", "is", "T"]
+                    ["isyear", "is", "F"]
                 ];
 
-                if(isInit){
-                    const urlObject = new URL(window.location.href);
-                    const accoutingPeriodValue = urlObject.searchParams.get('accoutingPeriod');
-                    filters.push('AND',['internalid', 'anyof',accoutingPeriodValue]);
-
-                }
 
                 if (this.FEAT_SUBS && this.FEAT_CALENDAR) {
 
@@ -191,30 +185,64 @@ define(['N/runtime',
                 const periods = periodSearch.run().getRange({ start: 0, end: 1000 });
 
                 // Configuración del campo de periodo
-                const periodField = this.currentRecord.getField({ fieldId: 'custpage_period' });
-                if (periodField) {
+                const periodField = this.currentRecord.getField({ fieldId: 'custpage_ini_period' });
+                const periodFinalField = this.currentRecord.getField({ fieldId: 'custpage_fin_period' });
+                if (periodField || periodFinalField) {
                     periodField.removeSelectOption({ value: null });
-                    periods.forEach(period => {
-                        const periodId = period.getValue({ name: 'internalid', summary: "GROUP" });
-                        const periodName = period.getValue({ name: 'periodname', summary: "GROUP" });
-                        periodField.insertSelectOption({ value: periodId, text: periodName });
-                    });
+                    periodFinalField.removeSelectOption({ value: null });
+                if(isInit){
+
+                    const urlObject = new URL(window.location.href);
+                    const accoutingPeriodValue = urlObject.searchParams.get('accoutingPeriod');
+                    const accoutingFinalPeriodValue = urlObject.searchParams.get('accoutingFinalPeriod');
+                    
+                    console.log('accoutingPeriodValue M' + accoutingPeriodValue);
+                    console.log('accoutingFinalPeriodValue M' + accoutingFinalPeriodValue);
+
+                    const periodNameIni = search.lookupFields({
+                        type: 'accountingperiod',
+                        id: accoutingPeriodValue,
+                        columns: ['periodname']
+                    }).periodname;
+
+                    const periodNameFin = search.lookupFields({
+                        type: 'accountingperiod',
+                        id: accoutingFinalPeriodValue,
+                        columns: ['periodname']
+                    }).periodname;
+
+                    console.log('periodNameIni M---' + periodNameIni);
+                    console.log('periodNameFin M---' + periodNameFin);
+
+                    periodField.insertSelectOption({ value: accoutingPeriodValue, text: periodNameIni });
+                    periodFinalField.insertSelectOption({ value: accoutingFinalPeriodValue, text: periodNameFin });
+                }else {
+                        periods.forEach(period => {
+                            const periodId = period.getValue({ name: 'internalid', summary: "GROUP" });
+                            const periodName = period.getValue({ name: 'periodname', summary: "GROUP" });
+                            periodField.insertSelectOption({ value: periodId, text: periodName });
+                            periodFinalField.insertSelectOption({ value: periodId, text: periodName });
+                        });
+                    }
                 }
             }
 
 
             validateMandatoryFields() {
                 const recordObj = this.currentRecord;
-                //const periodTypeValue = this.currentRecord.getValue({ fieldId: 'custpage_period_type' });
+                const fieldsObj = {};
+                //const periodTypeValue = this.currentRecord.getValue({ fieldId: 'custpage_ period _type' });
                 let mandatoryFields = [
                     'custpage_wht_process',
                     'custpage_wht_type'
                 ];
                 
-                mandatoryFields.push('custpage_period');
+                mandatoryFields.push('custpage_ini_period');
+                mandatoryFields.push('custpage_fin_period');
                 const isFieldInvalid = (fieldId) => {
                     const value = recordObj.getValue({ fieldId });
                     console.log(fieldId, value)
+                    fieldsObj[fieldId] = value;
                     if (value == 0 || !value) {
                         const fieldLabel = recordObj.getField({ fieldId }).label;
                         alert(`${this.translations.LMRY_VALIDATE_VALUES} ${fieldLabel}`);
@@ -222,9 +250,39 @@ define(['N/runtime',
                     }
                     return false;
                 };
-                console.log("mandatoryFields", mandatoryFields)
+
+                const perIni = recordObj.getValue('custpage_ini_period');
+                const perfin = recordObj.getValue('custpage_fin_period');
+                console.log("perIni ", perIni);
+                console.log("perfin ", perfin);
+
+                const period1 = record.load({
+                    type: record.Type.ACCOUNTING_PERIOD,
+                    id: perIni
+                });
+                
+                const period2 = record.load({
+                    type: record.Type.ACCOUNTING_PERIOD,
+                    id: perfin
+                });
+
+                var startDateIni = period1.getValue('startdate');
+                var startDateFin = period2.getValue('startdate');
+                console.log("startDateIni ", startDateIni);
+                console.log("startDateFin ", startDateFin);
+                // Convertir las fechas a objetos Date
+                var firstDate = new Date(startDateIni);
+                var secondDate = new Date(startDateFin);
+                
+                if (firstDate > secondDate){
+                    alert(this.translations.LMRY_VALIDATE_PERIODS);
+                    return false;
+                }
+
                 return !mandatoryFields.some(isFieldInvalid);
             }
+
+            
 
             addFieldMandatory(fields, id) {
                 if (!fields.includes(id)) {
@@ -261,7 +319,8 @@ define(['N/runtime',
             setFieldPeriod(isInit) {
                 
                 this.setPeriod(isInit);
-                this.currentRecord.getField({ fieldId: 'custpage_period' }).isDisplay = true;
+                this.currentRecord.getField({ fieldId: 'custpage_ini_period' }).isDisplay = true;
+                this.currentRecord.getField({ fieldId: 'custpage_fin_period' }).isDisplay = true;
 
             }
 
@@ -319,7 +378,8 @@ define(['N/runtime',
                    
                     form.whtType = currentRecord.getValue({ fieldId: 'custpage_wht_type' });
                        
-                    form.accoutingPeriod = currentRecord.getValue({ fieldId: 'custpage_period' });
+                    form.accoutingPeriod = currentRecord.getValue({ fieldId: 'custpage_ini_period' });
+                    form.accoutingFinalPeriod = currentRecord.getValue({ fieldId: 'custpage_fin_period' });
                     form.executionType = "UI";
 
                     let numberLines = currentRecord.getLineCount({ sublistId: 'custpage_results_list' });
@@ -339,13 +399,26 @@ define(['N/runtime',
                     form = dataProcess;
                 }
 
+                console.log('form x');
+                console.log(form.accoutingPeriod);
+                console.log(form.accoutingFinalPeriod);
+                
+
                 const periodlookup = search.lookupFields({
                     type: 'accountingperiod',
                     id: form.accoutingPeriod,
                     columns: ['periodname']
                 });
 
-                form.accoutingPeriod = periodlookup.periodname;
+                let initialPeriod= periodlookup.periodname;
+
+                const periodlookupFin = search.lookupFields({
+                    type: 'accountingperiod',
+                    id: form.accoutingFinalPeriod,
+                    columns: ['periodname']
+                });
+
+                let finalPeriod = periodlookupFin.periodname;
 
                 // Creacion de Logs
                 let idlog = '';
@@ -361,7 +434,8 @@ define(['N/runtime',
                 recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_transactions', value: JSON.stringify(form.ids) });
                 recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_process', value: form.typeProcess });
                 recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_whttype', value: form.whtType });
-                recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_period', value: form.accoutingPeriod });
+                recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_period', value: initialPeriod });
+                recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_period_fin', value: finalPeriod });
                 recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_exect', value: form.executionType });
                 idlog = recordlog.save({ enableSourcing: true, ignoreMandatoryFields: true, disableTriggers: true });
 
@@ -383,6 +457,7 @@ define(['N/runtime',
                       "LMRY_FILTER_TRANSACTIONS": "No hay transacciones Filtradas",
                       "LMRY_SELECTED_TRANSACTIONS": "No hay transacciones Seleccionadas",
                       "LMRY_ALERT": "Alerta",
+                      "LMRY_VALIDATE_PERIODS": "El período inicial no puede ser mayor que el período final",
                     },
                     "en": {
                       "LMRY_VALIDATE_VALUES": "Enter a value for:",
@@ -390,6 +465,7 @@ define(['N/runtime',
                       "LMRY_FILTER_TRANSACTIONS": "No Filtered Transactions",
                       "LMRY_SELECTED_TRANSACTIONS": "No Selected Transactions",
                       "LMRY_ALERT": "Alert",
+                      "LMRY_VALIDATE_PERIODS": "Initial period can't be bigger than final period",
                     }
                   };
                 return translatedFields[country];

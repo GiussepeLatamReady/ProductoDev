@@ -43,6 +43,7 @@ define([
                 const status = Number(params.status);
                 const {form,active} = handler.createForm();
                 if (active) {
+                log.error('params - processGETRequest', params);
                     status ? handler.setFormValues() : handler.loadFormValues();
                     handler.createTransactionSublist();
                     if (status) handler.loadTransactionSublist();
@@ -65,12 +66,12 @@ define([
                         deploymentId,
                         parameters: handler.getRedirectParams()
                     });
+
                 } else {
                     const parameters = {
                         state: params.custpage_log_id,
                         user: runtime.getCurrentUser().id
                     };
-
                     handler.runMapReduce(parameters);
                     handler.toLogSuitelet();
                 }
@@ -189,10 +190,11 @@ define([
                 this.addSelectField('custpage_wht_type', this.translations.LMRY_WTH_TYPE, 'mainGroup').isMandatory();
 
                 this.addGroup('dateRangeGroup', this.translations.LMRY_PERIOD_INTERVAL);
-                //this.addSelectField('custpage_period_type', this.translations.LMRY_PERIOD_TYPE, 'dateRangeGroup').isMandatory();
+                //this.addSelectField('custpage _ period _ type', this.translations.LMRY_PERIOD_TYPE, 'dateRangeGroup').isMandatory();
                 //this.addDateField('custpage_start_date', this.translations.LMRY_START_DATE, 'dateRangeGroup');
                 //this.addDateField('custpage_end_date', this.translations.LMRY_END_DATE, 'dateRangeGroup');
-                this.addSelectField('custpage_period', this.translations.LMRY_PERIOD, 'dateRangeGroup');
+                this.addSelectField('custpage_ini_period', this.translations.LMRY_START_PERIOD, 'dateRangeGroup');
+                this.addSelectField('custpage_fin_period', this.translations.LMRY_FINAL_PERIOD, 'dateRangeGroup');
 
 
                 this.addHiddenField('custpage_status', 'Status');
@@ -265,7 +267,7 @@ define([
 
 
             disableFields() {
-                const fieldsToDisable = ['custpage_subsidiary', 'custpage_period', 'custpage_wht_type','custpage_wht_process'];
+                const fieldsToDisable = ['custpage_subsidiary', 'custpage_ini_period','custpage_fin_period', 'custpage_wht_type','custpage_wht_process'];
                 fieldsToDisable.forEach(fieldId => {
                     let field = this.form.getField({ id: fieldId });
                     if (field) {
@@ -349,7 +351,8 @@ define([
                     { id: 'reteica', label: this.translations.LMRY_RETEICA, type: serverWidget.FieldType.TEXT },
                     { id: 'reteiva', label: this.translations.LMRY_RETEIVA, type: serverWidget.FieldType.TEXT },
                     { id: 'retefte', label: this.translations.LMRY_RETEFTE, type: serverWidget.FieldType.TEXT },
-                    { id: 'retecre', label: this.translations.LMRY_RETECRE, type: serverWidget.FieldType.TEXT }
+                    { id: 'retecre', label: this.translations.LMRY_RETECRE, type: serverWidget.FieldType.TEXT },
+                    { id: 'reclasification', label: this.translations.LMRY_RECLASIFICATION, type: serverWidget.FieldType.CHECKBOX,displayType: serverWidget.FieldDisplayType.DISABLED }
                 ];
 
 
@@ -382,6 +385,7 @@ define([
                 const fieldWhtType = this.fillWhtType();
                 fieldWhtType.defaultValue = "header";
                 fieldWhtType.updateDisplayType({ displayType: serverWidget.FieldDisplayType.DISABLED });
+                //this.fillPeriodType();
                 this.fillProcess();
             }
 
@@ -402,7 +406,13 @@ define([
                 whtTypeField.addSelectOption({ value: "line", text: this.translations.LMRY_WHT_LINE });
                 return whtTypeField;
             }
-            
+            /*
+            fillPeriodType() {
+                let periodTypeField = this.form.getField({ id: 'custpage _ period _ type' });
+                periodTypeField.addSelectOption({ value: 0, text: '&nbsp;' });
+                periodTypeField.addSelectOption({ value: "range", text: this.translations.LMRY_DATE_RANGE });
+                periodTypeField.addSelectOption({ value: "month", text: this.translations.LMRY_PERIOD });
+            }*/
             fillProcess() {
                 let typeProcessField = this.form.getField({ id: 'custpage_wht_process' });
                 typeProcessField.addSelectOption({ value: 0, text: '&nbsp;' });
@@ -418,10 +428,17 @@ define([
                     endDate,
                     whtType,
                     accoutingPeriod,
+                    accoutingFinalPeriod,
                     typePeriod,
                     typeProcess
                 } = this.params;
                 let form = this.form;
+
+                log.error('params - setFormValues', {
+                    whtType:whtType,
+                    accoutingPeriod:accoutingPeriod,
+                    accoutingFinalPeriod:accoutingFinalPeriod
+                });
 
                 if (this.FEAT_SUBS == true || this.FEAT_SUBS == 'T') {
                     if (Number(subsidiary)) {
@@ -438,12 +455,14 @@ define([
                 }
 
                 this.fillWhtType();
+                //this.fillPeriodType();
                 this.fillProcess();
 
                 form.updateDefaultValues({
                     custpage_status: '1',
                     custpage_wht_type: whtType || '',
-                    custpage_period: accoutingPeriod || '',
+                    custpage_ini_period: accoutingPeriod || '',
+                    custpage_fin_period: accoutingFinalPeriod || '',
                     custpage_wht_process: typeProcess || ''
                 });
             }
@@ -456,7 +475,7 @@ define([
                 let sublist = this.form.getSublist({ id: 'custpage_results_list' });
 
                 data.forEach((transaction, i) => {
-                    const { id, tranid, legalDocument, entityName, entityValue, type, recordType, amount, currency, co_reteiva, co_reteica, co_retefte, co_retecre } = transaction;
+                    const { id, tranid, legalDocument, entityName, entityValue, type, recordType, amount, currency, co_reteiva, co_reteica, co_retefte, co_retecre,isReclasification } = transaction;
                     
                     sublist.setSublistValue({ id: 'internalidtext', line: i, value: id});
                     const tranUrl = url.resolveRecord({ recordType, recordId: id, isEditMode: false });
@@ -476,6 +495,8 @@ define([
                     setSublistValue("legal_document_type", legalDocument);
                     setSublistValue("currency", currency);
                     setSublistValue("total_amt", Number(amount).toFixed(2));
+                    setSublistValue("reclasification", isReclasification);
+                    
                 })
 
                 if (data.length) {
@@ -490,6 +511,7 @@ define([
                     subsidiary,
                     whtType,
                     accoutingPeriod,
+                    accoutingFinalPeriod,
                     typeProcess
                 } = this.params;
 
@@ -569,6 +591,7 @@ define([
                         ]
                     );
 
+
                 } else {
                     filters.push('AND');
                     filters.push(
@@ -585,7 +608,7 @@ define([
 
                 if (accoutingPeriod != null && accoutingPeriod != '') {
                     filters.push('AND');
-                    const periodFourmulaids = this.getPeriods(subsidiary,accoutingPeriod);
+                    const periodFourmulaids = this.getPeriods(subsidiary,accoutingPeriod,accoutingFinalPeriod);
                     filters.push([
                         "formulatext:" + periodFourmulaids,
                         search.Operator.IS,
@@ -606,6 +629,7 @@ define([
                 let columns = [];
                 columns.push(search.createColumn({ name: 'formulatext', formula: '{custbody_lmry_reference_transaction.internalid}', sort: search.Sort.DESC }));
                 columns.push(search.createColumn({ name: 'formulatext', formula: '{memomain}'}));
+
                 
 
                 let searchTransactionsWht = search.create({
@@ -637,8 +661,9 @@ define([
 
                 reclasificationIds = this.getReclasificationIds(reclasificationIds)
                 return [
-                    ...this.getSearch(retentionIds,false),
-                    ...this.getSearch(reclasificationIds,true)
+                    ...this.getSearch(reclasificationIds,true),
+                    ...this.getSearch(retentionIds,false)
+                    
                 ];
             }
 
@@ -710,6 +735,7 @@ define([
                             transaction.co_reteica = result.getValue(columns[10])|| " ";
                             transaction.co_retefte = result.getValue(columns[11])|| " ";
                             transaction.co_retecre = result.getValue(columns[12])|| " ";
+                            transaction.isReclasification = isReclasification ? "T" :"F";
                             data.push(transaction);
                         });
                     });
@@ -775,15 +801,20 @@ define([
                 if (correctIds.length) ids = ids.filter(id => !correctIds.includes(id));//Se retira las transacciones que han generado el tax result correctamente
                 return ids;
             }
-
             
 
-            getPeriods(subsidiaryValue,anualPeriod) {
+            getPeriods(subsidiaryValue,initialPeriod, finalPeriod) {
 
-                const periodlookup = search.lookupFields({
+                const periodlookup1 = search.lookupFields({
                     type: 'accountingperiod',
-                    id: anualPeriod,
-                    columns: ['startdate', 'enddate']
+                    id: initialPeriod,
+                    columns: ['startdate']
+                });
+
+                const periodlookup2 = search.lookupFields({
+                    type: 'accountingperiod',
+                    id: finalPeriod,
+                    columns: ['enddate']
                 });
 
                 let periodIds = new Array();
@@ -796,8 +827,8 @@ define([
 
                     searchFilters.push({ name: 'fiscalCalendar', operator: 'is', values: this.getFiscalCalendar(subsidiaryValue) });
                 }
-                searchFilters.push({ name: 'startdate', operator: 'onorafter', values: periodlookup.startdate });
-                searchFilters.push({ name: 'enddate', operator: 'onorbefore', values: periodlookup.enddate });
+                searchFilters.push({ name: 'startdate', operator: 'onorafter', values: periodlookup1.startdate });
+                searchFilters.push({ name: 'enddate', operator: 'onorbefore', values: periodlookup2.enddate });
 
                 let searchColumns = new Array();
                 searchColumns.push({ name: 'internalid', sort: search.Sort.ASC, summary: 'GROUP' });
@@ -810,6 +841,7 @@ define([
                     periodIds.push(result.getValue(result.columns[0]));
                     return true;
                 });
+
 
                 return this.generatePeriodFormula(periodIds);
             }
@@ -833,7 +865,8 @@ define([
                 return {
                     subsidiary: params.custpage_subsidiary || '',
                     whtType: params.custpage_wht_type || '',
-                    accoutingPeriod: params.custpage_period || '',
+                    accoutingPeriod: params.custpage_ini_period || '',
+                    accoutingFinalPeriod: params.custpage_fin_period || '',
                     typeProcess: params.custpage_wht_process || '',
                     status: '1'
                 };
@@ -852,6 +885,8 @@ define([
                         "LMRY_START_DATE": "Fecha de inicio",
                         "LMRY_END_DATE": "Fecha final",
                         "LMRY_PERIOD": "Periodo contable",
+                        "LMRY_START_PERIOD": "Periodo contable inicial",
+                        "LMRY_FINAL_PERIOD": "Perido contable final",
                         "LMRY_FILTER": "Filtrar",
                         "LMRY_PROCESS": "Procesar",
                         "LMRY_BACK": "Atras",
@@ -880,6 +915,7 @@ define([
                         "LMRY_RETEIVA": "ReteICA",
                         "LMRY_RETEFTE": "ReteFte",
                         "LMRY_RETECRE": "ReteCre",
+                        "LMRY_RECLASIFICATION": "Reclasificación"
                     },
                     "en": {
                         "LMRY_MESSAGE": "Message",
@@ -892,6 +928,8 @@ define([
                         "LMRY_START_DATE": "Start date",
                         "LMRY_END_DATE": "End date",
                         "LMRY_PERIOD": "Accounting period",
+                        "LMRY_START_PERIOD": "Initial Accounting period",
+                        "LMRY_FINAL_PERIOD": "Final Accounting period",
                         "LMRY_FILTER": "Filter",
                         "LMRY_PROCESS": "Process",
                         "LMRY_BACK": "Back",
@@ -920,6 +958,7 @@ define([
                         "LMRY_RETEIVA": "ReteICA",
                         "LMRY_RETEFTE": "ReteFte",
                         "LMRY_RETECRE": "ReteCre",
+                        "LMRY_RECLASIFICATION": "Reclasification"
                     }
                 }
                 return translatedFields[country];
