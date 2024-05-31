@@ -776,7 +776,7 @@ define([
                     filters: [
                         ['custrecord_lmry_br_transaction', 'anyof', ids],
                         "AND", 
-                        ["custrecord_lmry_co_wht_applied","anyof","@NONE@"]
+                        ["custrecord_lmry_co_wht_applied","noneof","@NONE@"]
                     ],
                     columns: [
                         'custrecord_lmry_br_transaction.internalid',
