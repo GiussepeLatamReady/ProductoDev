@@ -196,8 +196,6 @@ define(['N/runtime',
                     const accoutingPeriodValue = urlObject.searchParams.get('accoutingPeriod');
                     const accoutingFinalPeriodValue = urlObject.searchParams.get('accoutingFinalPeriod');
                     
-                    console.log('accoutingPeriodValue M' + accoutingPeriodValue);
-                    console.log('accoutingFinalPeriodValue M' + accoutingFinalPeriodValue);
 
                     const periodNameIni = search.lookupFields({
                         type: 'accountingperiod',
@@ -210,9 +208,6 @@ define(['N/runtime',
                         id: accoutingFinalPeriodValue,
                         columns: ['periodname']
                     }).periodname;
-
-                    console.log('periodNameIni M---' + periodNameIni);
-                    console.log('periodNameFin M---' + periodNameFin);
 
                     periodField.insertSelectOption({ value: accoutingPeriodValue, text: periodNameIni });
                     periodFinalField.insertSelectOption({ value: accoutingFinalPeriodValue, text: periodNameFin });
@@ -241,7 +236,7 @@ define(['N/runtime',
                 mandatoryFields.push('custpage_fin_period');
                 const isFieldInvalid = (fieldId) => {
                     const value = recordObj.getValue({ fieldId });
-                    console.log(fieldId, value)
+
                     fieldsObj[fieldId] = value;
                     if (value == 0 || !value) {
                         const fieldLabel = recordObj.getField({ fieldId }).label;
@@ -253,8 +248,6 @@ define(['N/runtime',
 
                 const perIni = recordObj.getValue('custpage_ini_period');
                 const perfin = recordObj.getValue('custpage_fin_period');
-                console.log("perIni ", perIni);
-                console.log("perfin ", perfin);
 
                 const period1 = record.load({
                     type: record.Type.ACCOUNTING_PERIOD,
@@ -268,8 +261,7 @@ define(['N/runtime',
 
                 var startDateIni = period1.getValue('startdate');
                 var startDateFin = period2.getValue('startdate');
-                console.log("startDateIni ", startDateIni);
-                console.log("startDateFin ", startDateFin);
+
                 // Convertir las fechas a objetos Date
                 var firstDate = new Date(startDateIni);
                 var secondDate = new Date(startDateFin);
@@ -399,9 +391,6 @@ define(['N/runtime',
                     form = dataProcess;
                 }
 
-                console.log('form x');
-                console.log(form.accoutingPeriod);
-                console.log(form.accoutingFinalPeriod);
                 
 
                 const periodlookup = search.lookupFields({
@@ -426,7 +415,7 @@ define(['N/runtime',
                 let recordlog = record.create({
                     type: 'customrecord_lmry_co_head_wht_cal_log'
                 });
-                console.log("form :", form)
+
                 recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_subsi', value: form.subsidiary });
                 
                 recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_state', value: "Cargando datos" });

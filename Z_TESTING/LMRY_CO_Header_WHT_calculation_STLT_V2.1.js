@@ -43,7 +43,7 @@ define([
                 const status = Number(params.status);
                 const {form,active} = handler.createForm();
                 if (active) {
-                log.error('params - processGETRequest', params);
+                
                     status ? handler.setFormValues() : handler.loadFormValues();
                     handler.createTransactionSublist();
                     if (status) handler.loadTransactionSublist();
@@ -434,11 +434,6 @@ define([
                 } = this.params;
                 let form = this.form;
 
-                log.error('params - setFormValues', {
-                    whtType:whtType,
-                    accoutingPeriod:accoutingPeriod,
-                    accoutingFinalPeriod:accoutingFinalPeriod
-                });
 
                 if (this.FEAT_SUBS == true || this.FEAT_SUBS == 'T') {
                     if (Number(subsidiary)) {

@@ -24,7 +24,7 @@ define([
 
 
     const getTransaction = (id) => {
-        //deleteTaxResults(id);
+        deleteTaxResults(id);
         let transaction = {
             id: id,
             wht: {
@@ -190,7 +190,7 @@ define([
                 custrecord_lmry_br_total: round(retentionAmount),
                 custrecord_lmry_br_percent: parseFloat(retention.rate), 
 
-                custrecord_lmry_total_base_currency: round(retentionAmounttLocal),
+                custrecord_lmry_total_base_currency: round(retentionAmounttLocal).toFixed(4),
                 custrecord_lmry_base_amount_local_currc: round(baseAmount * transaction.exchangeRate),
                 custrecord_lmry_amount_local_currency: round(retentionAmounttLocal),
 
@@ -206,8 +206,8 @@ define([
                 baseAmount = round(parseFloat(retention.baseamount) * item.factor);
 
 
-                commonValues.custrecord_lmry_base_amount = round(baseAmount / transaction.exchangeRate);
-                commonValues.custrecord_lmry_br_total = round(retentionAmount / transaction.exchangeRate);
+                commonValues.custrecord_lmry_base_amount = (baseAmount / transaction.exchangeRate).toFixed(4);
+                commonValues.custrecord_lmry_br_total = (retentionAmount / transaction.exchangeRate).toFixed(4);
 
                 commonValues.custrecord_lmry_total_base_currency = retentionAmount;
                 commonValues.custrecord_lmry_base_amount_local_currc = baseAmount;
@@ -221,7 +221,6 @@ define([
             }
 
             const idRecordSummary = recordSummary.save({ disableTriggers: true, ignoreMandatoryFields: true });
-            log.debug(`idRecordSummary - ${itemType}`, idRecordSummary);
         };
 
         if (transaction.items) {
@@ -389,19 +388,10 @@ define([
         });
 
         let transactionList = Object.values(transaction);
-        /*
-        if(isLine){
-            if (isReclasification(transactionList)) {
-                
-            }
-        }
-        */
         
-        if (transactionList[0].memo.startsWith("Latam - WHT") || transactionList[0].memo.startsWith("Latam - WHT Reclasification")) {
-            return filterTransactionsHeaderByMemo(transactionList);
-        } else {
-            return filterTransactionsLineByMemo(transactionList);
-        }
+        return filterTransactionsHeaderByMemo(transactionList);
+        
+       
 
 
     }
@@ -434,8 +424,49 @@ define([
      * @returns {Array} Un array de transacciones filtradas según la condición del memo.
      */
     const filterTransactionsHeaderByMemo = transactions => {
-        let filtered = transactions.filter(t => t.memo.startsWith("Latam - WHT Reclasification"));
-        return filtered.length ? filtered : transactions.filter(t => t.memo.startsWith("Latam - WHT"));
+        let filteredTransactions = [];
+        const typeRetention = {
+            iva:{withRecla:[],withOutRecla:[]},
+            ica:{withRecla:[],withOutRecla:[]},
+            fte:{withRecla:[],withOutRecla:[]},
+            cree:{withRecla:[],withOutRecla:[]}
+        };
+        transactions.forEach(transaction =>{
+            Object.keys(typeRetention).forEach(key => {
+                if (transaction.memo.startsWith("Latam - WHT Reclasification")) {
+                    if (transaction.memo.toLowerCase().includes(key)) {
+                        if (key != "ica") {
+                            typeRetention[key].withRecla.push(transaction);
+                        }else{
+                            if ((/ica(?!(tion|if))/g).test(transaction.memo.toLowerCase())) {
+                                typeRetention[key].withRecla.push(transaction);
+                            }
+                        }
+                        
+                    }
+                }else{
+                    if (transaction.memo.toLowerCase().includes(key)) {
+                        typeRetention[key].withOutRecla.push(transaction);
+                    }
+                }
+                
+            });
+        });
+        
+        Object.keys(typeRetention).forEach(key => {
+            if (typeRetention[key].withRecla.length) typeRetention[key].withRecla.sort((a,b) => Number(b.id) - Number(a.id));
+            if (typeRetention[key].withOutRecla.length) typeRetention[key].withOutRecla.sort((a,b) => Number(b.id) - Number(a.id));
+        });
+        
+        Object.keys(typeRetention).forEach(key => {
+            if (typeRetention[key].withRecla.length) {
+                filteredTransactions.push(typeRetention[key].withRecla[0])
+            }else if(typeRetention[key].withOutRecla.length){
+                filteredTransactions.push(typeRetention[key].withOutRecla[0])
+            }
+        });
+        return filteredTransactions;
+    
     };
 
     /**
@@ -647,6 +678,28 @@ define([
             accountItem = result.getValue(result.columns[0]);
         });
         return accountItem;
+    }
+
+    const deleteTaxResults = (id) => {
+        let searchRecordLog = search.create({
+            type: 'customrecord_lmry_br_transaction',
+            filters: [
+                ['custrecord_lmry_br_transaction', 'is', id]
+            ],
+            columns: [
+                'internalid'
+            ]
+        })
+        searchRecordLog.run().each(function (result) {
+            let idTax = result.getValue(result.columns[0]);
+
+            record.delete({
+                type: 'customrecord_lmry_br_transaction',
+                id: idTax,
+                isDynamic: true
+            });
+            return true;
+        });
     }
 
     return { calculateHeaderWHT};
