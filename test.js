@@ -1,79 +1,91 @@
-/**
- * @NApiVersion 2.x
- * @NScriptType UserEventScript
- */
-define(['N/record', 'N/ui/serverWidget'], function(record, serverWidget) {
+var sourceSublist = [];
 
-    function beforeLoad(context) {
-        if (context.type === context.UserEventType.VIEW || context.type === context.UserEventType.EDIT) {
-            var form = context.form;
-            var sublist = form.getSublist({ id: 'item' });
+var editableSublist = [];
+function getChanges(sourceSublist, editableSublist) {
+    var changes = [];
 
-            // Añadir un campo de columna de texto
-            sublist.addField({
-                id: 'custcol_button_column',
-                type: serverWidget.FieldType.TEXT,
-                label: 'Button'
-            });
 
-            // Añadir estilo al botón y script para reemplazar texto con HTML
-            const styleAndScript = `
-                <style>
-                    .button-variable {
-                        display: inline-block;
-                        padding: 5px 10px;
-                        background-color: #007bff;
-                        color: white;
-                        text-align: center;
-                        cursor: pointer;
-                        border-radius: 5px;
-                        user-select: none;
-                        transition: background-color 0.3s;
-                    }
-                    .button-variable:hover {
-                        background-color: #0056b3;
-                    }
-                    .button-variable:active {
-                        background-color: #004494;
-                    }
-                </style>
-                <script>
-                    document.addEventListener("DOMContentLoaded", function() {
-                        var buttonFields = document.querySelectorAll("[id^='item_custcol_button_column']");
-                        buttonFields.forEach(function(field) {
-                            if (field && field.innerText === 'Botón') {
-                                field.innerHTML = '<div class="button-variable" onclick="alert(\\'¡Botón presionado!\\')">P</div>';
-                            }
-                        });
-                    });
-                </script>
-            `;
-
-            form.addField({
-                id: 'custpage_button_style',
-                type: serverWidget.FieldType.INLINEHTML,
-                label: ' '
-            }).defaultValue = styleAndScript;
-        }
-
-        if (context.type === context.UserEventType.EDIT) {
-            var newRecord = context.newRecord;
-            var itemCount = newRecord.getLineCount({ sublistId: 'item' });
-
-            for (var i = 0; i < itemCount; i++) {
-                var buttonHtml = 'Botón';
-                newRecord.setSublistValue({
-                    sublistId: 'item',
-                    fieldId: 'custcol_button_column',
-                    line: i,
-                    value: buttonHtml
-                });
-            }
-        }
+    var sourceMap = {};
+    for (var i = 0; i < sourceSublist.length; i++) {
+        sourceMap[sourceSublist[i].line] = sourceSublist[i];
     }
 
-    return {
-        beforeLoad: beforeLoad
-    };
 
-});
+    var editableMap = {};
+    for (var i = 0; i < editableSublist.length; i++) {
+        editableMap[editableSublist[i].line] = editableSublist[i];
+    }
+
+
+
+    Object.keys(sourceMap).forEach(function (line) {
+        if (editableMap.hasOwnProperty(line)) {
+            if (sourceMap[line].name !== editableMap[line].name) {
+                changes.push({
+                    line: parseInt(line),
+                    change: 'modify',
+                    name: editableMap[line].name
+                });
+            }
+        } else {
+            changes.push({
+                line: parseInt(line),
+                change: 'delete'
+            });
+        }
+    });
+
+    Object.keys(editableMap).forEach(function (line) {
+        if (!sourceMap.hasOwnProperty(line)) {
+            changes.push({
+                line: parseInt(line),
+                change: 'create',
+                name: editableMap[line].name
+            });
+        }
+    });
+    changes.sort(function (a, b) {
+        return a.line - b.line;
+    });
+
+    return changes;
+}
+
+console.log(getChanges(sourceSublist, editableSublist))
+
+
+function getSublistTabItems(sourceSublistId, editableSublistId,recordObj){
+    var sourceSublistCount = recordObj.getLineCount({ sublistId: sourceSublistId });
+    var editableSublistCount = recordObj.getLineCount({ sublistId: editableSublistId });
+    var sourceSublist = [];
+    var editableSublist = [];
+    if (sourceSublistCount) {
+      for (var i = 0; i < sourceSublistCount; i++) {
+        recordObj.selectLine({ sublistId: sourceSublistId, line: i });
+
+        var elementsObject = {
+          name: recordObj.getCurrentSublistValue({ sublistId: sourceSublistId, fieldId: sourceSublistId }),
+          line: i
+        }
+        sourceSublist.push(elementsObject);
+      }
+    }
+    if (editableSublistCount) {
+      for (var i = 0; i < editableSublistCount; i++) {
+        recordObj.selectLine({ sublistId: editableSublistId, line: i });
+
+        var elementsObject = {
+          name: recordObj.getCurrentSublistValue({ sublistId: editableSublistId, fieldId: sourceSublistId }),
+          line: i,
+        }
+        editableSublist.push(elementsObject);
+      }
+    }
+
+    console.log("sourceSublist:",sourceSublist)
+    console.log("editableSublist:",editableSublist)
+    //var sublistModify = getChanges(sourceSublist,editableSublist);
+    
+    
+    
+  }

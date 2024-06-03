@@ -1,18 +1,8 @@
-{
-   type: "error.SuiteScriptError",
-   name: "SSS_MISSING_REQD_ARGUMENT",
-   message: "search.lookupFields: Falta um argumento necessário: id",
-   id: null,
-   stack: [
-      "createError(N/error)",
-      "getAccountingBooksString(/SuiteBundles/Bundle 35754/WTH_Library/LMRY_BR_WHT_CustPaymnt_LBRY.js:445)",
-      "reduce(/SuiteBundles/Bundle 35754/LMRY_BR_WHT_CustPaymnt_MPRD.js:254)",
-      "createError(N/error)"
-   ],
-   cause: {
-      name: "SSS_MISSING_REQD_ARGUMENT",
-      message: "search.lookupFields: Falta um argumento necessário: id"
-   },
-   notifyOff: false,
-   userFacing: true
+"type": "error.SuiteScriptModuleLoaderError": "error.SuiteScriptModuleLoaderError",
+"name": "SyntaxError: /SuiteApps/com.latamready.lmrycolocalization/co_new_withholding_lines/lib/LR_CO_New_WithholdingLines_LIB.js:1113:8 Expected an operand but found error\n /*\n ^\n/SuiteApps/com.latamready.lmrycolocalization/co_new_withholding_lines/lib/LR_CO_New_WithholdingLines_LIB.js:1113:121 Expected } but found eof\n//# sourceURL=/SuiteApps/com.latamready.lmrycolocalization/co_new_withholding_lines/lib/LR_CO_New_WithholdingLines_LIB.js\n ^\n/SuiteApps/com.latamready.lmrycolocalization/co_new_withholding_lines/lib/LR_CO_New_WithholdingLines_LIB.js:1113:121 Expected } but found eof\n//# sourceURL=/SuiteApps/com.latamready.lmrycolocalization/co_new_withholding_lines/lib/LR_CO_New_WithholdingLines_LIB.js\n ^\n",
+"message": "",
+"stack": [
+   "at Object.getImplementationByCountry (/SuiteApps/com.latamready.lmrylocalizationcore/lib/pluginHandler/LR_PluginHandler_LIB.js:25:39)",
+   "at Object.beforeLoad (/SuiteApps/com.latamready.lmrylocalizationcore/transactions/vendorbill/LR_Vendorbill_URET.js:14:39)"
+]
 }

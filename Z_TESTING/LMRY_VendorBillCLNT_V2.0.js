@@ -70,7 +70,7 @@ define(['N/log', "N/query", 'N/record', 'N/search', 'N/currentRecord', 'N/url', 
 
     function pageInit(context) {
       try {
-
+      
         // Primera encarg
         booPageIni = true;
 
@@ -522,6 +522,15 @@ define(['N/log', "N/query", 'N/record', 'N/search', 'N/currentRecord', 'N/url', 
             },
               1);
         }
+
+        if (LMRY_countr[0] == 'CO'){
+          const FEATURE_WHT_NEW_LINES_PURCHASE = library.getAuthorization(720, licenses);
+          const FEATURE_LOCALIZATION =  library.getAuthorization(26, licenses);
+          if (FEATURE_LOCALIZATION && FEATURE_WHT_NEW_LINES_PURCHASE) {
+             
+            defineAction(context);
+          }
+        }
         /**********************************************************************/
 
         /*****************************************************************************
@@ -537,16 +546,7 @@ define(['N/log', "N/query", 'N/record', 'N/search', 'N/currentRecord', 'N/url', 
           }
         }/*****************************************************************************/
 
-        if (LMRY_countr[0] == 'CO'  && (context.mode == 'create' || context.mode == 'copy' || context.mode == 'edit')) {
-          const FEATURE_WHT_NEW_LINES_PURCHASE = library.getAuthorization(720, licenses);
-          const FEATURE_LOCALIZATION =  library.getAuthorization(26, licenses);
-          console.log("FEATURE_WHT_NEW_LINES_PURCHASE", FEATURE_WHT_NEW_LINES_PURCHASE)
-          console.log("FEATURE_LOCALIZATION: ",FEATURE_LOCALIZATION)
-          if (FEATURE_LOCALIZATION && FEATURE_WHT_NEW_LINES_PURCHASE) {
-              console.log("entro a features")
-              createButtonVariableRate();
-          }
-      }
+        
       } catch (err) {
         library.sendemail2(' [ VBClnt_PageInit ] ' + err, LMRY_script, recordObj, 'transactionnumber', 'entity');
       }
@@ -1532,27 +1532,66 @@ define(['N/log', "N/query", 'N/record', 'N/search', 'N/currentRecord', 'N/url', 
          * Crea el boton para setear el valor de las tarifas variables *
          * a una transferencia gratuita                         *
          *********************************************************/
-    function createButtonVariableRate() {
-      console.log("createButtonVariableRate")
-      const tdElement = document.querySelector('td[data-ns-tooltip="LATAM COL - CO TARIFA VARIABLE"]');
+  
 
-      // Verifica si el <td> fue encontrado
-      if (tdElement) {
-          // Crea el nuevo div
-          console.log('encontrado');
-          const newDiv = document.createElement('div');
-          newDiv.textContent = 'Click Me';
-          newDiv.style.cursor = 'pointer'; // Agrega un cursor de mano para que parezca un botón
+    function defineAction(context) {
+     
+        var currentRecord = context.currentRecord;
+        var linkItems = document.getElementById('custpage_sublit_itemstxt');
+        
+        
+        linkItems.addEventListener('click', function(event) {        
+            console.log('Se hizo clic en el enlace con id ITEMS');
 
-          newDiv.addEventListener('click', function() {
-              alert('Div clicked!');
-          });
-          // Inserta el div dentro del <td>
-          tdElement.appendChild(newDiv);
-      } else {
-          console.log('No se encontró el <td> con el atributo data-ns-tooltip especificado.');
-      }
+            getSublistTabItems("item","custpage_sublit_items",currentRecord)
+        });
+
+        var linkExpense = document.getElementById('custpage_sublit_expensetxt');
+        
+       
+        linkExpense.addEventListener('click', function(event) {       
+            console.log('Se hizo clic en el enlace con id EXPENSE');
+        });
+  
     }
+
+   
+    function getSublistTabItems(sourceSublistId, editableSublistId, recordObj) {
+      var sourceSublistCount = recordObj.getLineCount({ sublistId: sourceSublistId });
+      var editableSublistCount = recordObj.getLineCount({ sublistId: editableSublistId });
+      var sourceSublist = [];
+      var editableSublist = [];
+      if (sourceSublistCount) {
+        for (var i = 0; i < sourceSublistCount; i++) {
+          recordObj.selectLine({ sublistId: sourceSublistId, line: i });
+
+          var elementsObject = {
+            name: recordObj.getCurrentSublistText({ sublistId: sourceSublistId, fieldId: sourceSublistId }),
+            line: i
+          }
+          sourceSublist.push(elementsObject);
+        }
+      }
+      if (editableSublistCount) {
+        for (var i = 0; i < editableSublistCount; i++) {
+          recordObj.selectLine({ sublistId: editableSublistId, line: i });
+
+          var elementsObject = {
+            name: recordObj.getCurrentSublistValue({ sublistId: editableSublistId, fieldId: sourceSublistId }),
+            line: i,
+          }
+          editableSublist.push(elementsObject);
+        }
+      }
+
+      console.log("sourceSublist:", sourceSublist)
+      console.log("editableSublist:", editableSublist)
+      //var sublistModify = getChanges(sourceSublist,editableSublist);
+
+
+
+    }
+   
 
     function validate_open_window(scriptContext, section) {
       if (window[section] == null) {
