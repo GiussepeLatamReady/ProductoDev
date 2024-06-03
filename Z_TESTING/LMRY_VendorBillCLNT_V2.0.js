@@ -1583,14 +1583,64 @@ define(['N/log', "N/query", 'N/record', 'N/search', 'N/currentRecord', 'N/url', 
           editableSublist.push(elementsObject);
         }
       }
-
       console.log("sourceSublist:", sourceSublist)
       console.log("editableSublist:", editableSublist)
+      var listModify = getChanges(sourceSublist, editableSublist)
+      console.log("listModify:", listModify)
       //var sublistModify = getChanges(sourceSublist,editableSublist);
 
-
-
     }
+
+    function getChanges(sourceSublist, editableSublist) {
+      var changes = [];
+  
+  
+      var sourceMap = {};
+      for (var i = 0; i < sourceSublist.length; i++) {
+          sourceMap[sourceSublist[i].line] = sourceSublist[i];
+      }
+  
+  
+      var editableMap = {};
+      for (var i = 0; i < editableSublist.length; i++) {
+          editableMap[editableSublist[i].line] = editableSublist[i];
+      }
+  
+  
+  
+      Object.keys(sourceMap).forEach(function (line) {
+          if (editableMap.hasOwnProperty(line)) {
+              if (sourceMap[line].name !== editableMap[line].name) {
+                  changes.push({
+                      line: parseInt(line),
+                      change: 'modify',
+                      name: editableMap[line].name
+                  });
+              }
+          } else {
+              changes.push({
+                  line: parseInt(line),
+                  change: 'delete'
+              });
+          }
+      });
+  
+      Object.keys(editableMap).forEach(function (line) {
+          if (!sourceMap.hasOwnProperty(line)) {
+              changes.push({
+                  line: parseInt(line),
+                  change: 'create',
+                  name: editableMap[line].name
+              });
+          }
+      });
+      changes.sort(function (a, b) {
+          return a.line - b.line;
+      });
+  
+      return changes;
+    }
+
    
 
     function validate_open_window(scriptContext, section) {
