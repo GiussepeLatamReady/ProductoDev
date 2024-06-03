@@ -4,7 +4,8 @@
  * @Name LR_CO_New_WithholdingLines_LIB.js
  * @Author joshep@latamready.com
  **/
-define(["N/record", "N/search", "N/runtime", "N/log", "N/format", "N/https", "N/suiteAppInfo", "SuiteApps/com.latamready.lmrylocalizationcore/lib/licenses/LR_Licenses_LIB", "../../constants/LR_CO_FEATURES_CONST"], function (record, search, runtime, log, format, https, suiteAppInfo, Lib_Licenses, CO_FEAT) {
+define(["N/ui/serverWidget","N/record", "N/search", "N/runtime", "N/log", "N/format", "N/https", "N/suiteAppInfo", "SuiteApps/com.latamready.lmrylocalizationcore/lib/licenses/LR_Licenses_LIB", "../../constants/LR_CO_FEATURES_CONST"], 
+function (serverWidget,record, search, runtime, log, format, https, suiteAppInfo, Lib_Licenses, CO_FEAT) {
     const { FeatureManager } = Lib_Licenses;
     const tranTypeJSON = { invoice: 1, creditmemo: 8, vendorbill: 4, vendorcredit: 7 };
     const GroupTypeItems = ["Group", "EndGroup"];
@@ -16,7 +17,7 @@ define(["N/record", "N/search", "N/runtime", "N/log", "N/format", "N/https", "N/
 
     const createWithholdingLines = (context) => {
         let newRecord = context.newRecord;
-        
+
         log.error("newRecord", newRecord);
         log.error("type", newRecord.type);
         let mode = context.type;
@@ -89,7 +90,7 @@ define(["N/record", "N/search", "N/runtime", "N/log", "N/format", "N/https", "N/
                     continue;
                 };
 
-                
+
                 linesJSON[[key, i].join("|")] = {
                     value: recordObj.getSublistValue({ sublistId: key, fieldId: sublistJSON[key].line, line: i }),
                     departmentItem: recordObj.getSublistValue({ sublistId: key, fieldId: "department", line: i }),
@@ -466,15 +467,15 @@ define(["N/record", "N/search", "N/runtime", "N/log", "N/format", "N/https", "N/
         let idItemName = sublistJSON[sublist].line == "item" ? itemNames[dataLine.value] : accountNames[dataLine.value];
 
         let flagItem = false;
-        log.error("idItem",idItem)
-        log.error("appliesField",appliesField)
+        log.error("idItem", idItem)
+        log.error("appliesField", appliesField)
 
         if (idItem == appliesField || (!dataNationalTax.applies_item && !dataNationalTax.applies_account)) {
             flagItem = true;
         }
 
         if (!flagItem) {
-            log.error("flag"+dataNationalTax.subtype ,"salio")
+            log.error("flag" + dataNationalTax.subtype, "salio")
             return returnData;
         }
         let departmentItem = dataLine["departmentItem"] || dataLine["departmentMain"] || "";
@@ -743,7 +744,7 @@ define(["N/record", "N/search", "N/runtime", "N/log", "N/format", "N/https", "N/
         return false;
     };
 
-    
+
 
     function validateChange(context) {
         const oldRecord = context.oldRecord;
@@ -752,7 +753,7 @@ define(["N/record", "N/search", "N/runtime", "N/log", "N/format", "N/https", "N/
         const oldApprovalStatus = oldRecord.getValue("approvalstatus");
         const approvalStatus = newRecord.getValue("approvalstatus");
 
-        
+
         if (oldApprovalStatus != approvalStatus) {
             log.error("oldApprovalStatus, approvalStatus", [oldApprovalStatus, approvalStatus].join(","));
             return false;
@@ -761,7 +762,7 @@ define(["N/record", "N/search", "N/runtime", "N/log", "N/format", "N/https", "N/
         const oldNumberItem = oldRecord.getLineCount({ sublistId: "item" }) || 0;
         const numberItem = newRecord.getLineCount({ sublistId: "item" }) || 0;
 
-        
+
         if (oldNumberItem != numberItem) {
             log.error("oldNumberItem, numberItem", [oldNumberItem, numberItem].join(","));
             return false;
@@ -771,7 +772,7 @@ define(["N/record", "N/search", "N/runtime", "N/log", "N/format", "N/https", "N/
             let oldAccount = oldRecord.getSublistValue({ sublistId: "item", fieldId: "item", line: i }) || "";
             let account = newRecord.getSublistValue({ sublistId: "item", fieldId: "item", line: i }) || "";
 
-            
+
             if (oldAccount != account) {
                 log.error("i, oldAccount, account", [i, oldAccount, account].join(","));
                 return false;
@@ -783,7 +784,7 @@ define(["N/record", "N/search", "N/runtime", "N/log", "N/format", "N/https", "N/
             let grossAmt = newRecord.getSublistValue({ sublistId: "item", fieldId: "grossamt", line: i }) || 0.00;
             grossAmt = parseFloat(grossAmt);
 
-            
+
             if (oldGrossAmt != grossAmt) {
                 log.error("i, oldGrossAmt, grossAmt", [i, oldGrossAmt, grossAmt].join(","));
                 return false;
@@ -791,7 +792,7 @@ define(["N/record", "N/search", "N/runtime", "N/log", "N/format", "N/https", "N/
 
             let oldIVA = oldRecord.getSublistValue({ sublistId: "item", fieldId: "custcol_lmry_co_reteiva", line: i }) || "";
             let IVA = newRecord.getSublistValue({ sublistId: "item", fieldId: "custcol_lmry_co_reteiva", line: i }) || "";
-            
+
             if (oldIVA != IVA) {
                 log.error("i, oldIVA, IVA", [i, oldIVA, IVA].join(","));
                 return false;
@@ -799,7 +800,7 @@ define(["N/record", "N/search", "N/runtime", "N/log", "N/format", "N/https", "N/
 
             let oldICA = oldRecord.getSublistValue({ sublistId: "item", fieldId: "custcol_lmry_co_reteica", line: i }) || "";
             let ICA = newRecord.getSublistValue({ sublistId: "item", fieldId: "custcol_lmry_co_reteica", line: i }) || "";
-            
+
             if (oldICA != ICA) {
                 log.error("i, oldICA, ICA", [i, oldICA, ICA].join(","));
                 return false;
@@ -807,7 +808,7 @@ define(["N/record", "N/search", "N/runtime", "N/log", "N/format", "N/https", "N/
 
             let oldFTE = oldRecord.getSublistValue({ sublistId: "item", fieldId: "custcol_lmry_co_retefte", line: i }) || "";
             let FTE = newRecord.getSublistValue({ sublistId: "item", fieldId: "custcol_lmry_co_retefte", line: i }) || "";
-            
+
             if (oldFTE != FTE) {
                 log.error("i, oldFTE, FTE", [i, oldFTE, FTE].join(","));
                 return false;
@@ -815,7 +816,7 @@ define(["N/record", "N/search", "N/runtime", "N/log", "N/format", "N/https", "N/
 
             let oldCREE = oldRecord.getSublistValue({ sublistId: "item", fieldId: "custcol_lmry_co_autoretecree", line: i }) || "";
             let CREE = newRecord.getSublistValue({ sublistId: "item", fieldId: "custcol_lmry_co_autoretecree", line: i }) || "";
-            
+
             if (oldCREE != CREE) {
                 log.error("i, oldCREE, CREE", [i, oldCREE, CREE].join(","));
                 return false;
@@ -827,7 +828,7 @@ define(["N/record", "N/search", "N/runtime", "N/log", "N/format", "N/https", "N/
             const oldNumberExpenses = oldRecord.getLineCount({ sublistId: "expense" }) || 0;
             const numberExpenses = newRecord.getLineCount({ sublistId: "expense" }) || 0;
 
-            
+
             if (oldNumberExpenses != numberExpenses) {
                 log.error("oldNumberExpenses, numberExpenses", [oldNumberExpenses, numberExpenses].join(","));
                 return false;
@@ -837,7 +838,7 @@ define(["N/record", "N/search", "N/runtime", "N/log", "N/format", "N/https", "N/
                 let oldAccount = oldRecord.getSublistValue({ sublistId: "expense", fieldId: "account", line: i }) || "";
                 let account = newRecord.getSublistValue({ sublistId: "expense", fieldId: "account", line: i }) || "";
 
-                
+
                 if (oldAccount != account) {
                     log.error("i, oldAccount, account", [i, oldAccount, account].join(","));
                     return false;
@@ -849,7 +850,7 @@ define(["N/record", "N/search", "N/runtime", "N/log", "N/format", "N/https", "N/
                 let grossAmt = newRecord.getSublistValue({ sublistId: "expense", fieldId: "grossamt", line: i }) || 0.00;
                 grossAmt = parseFloat(grossAmt);
 
-                
+
                 if (oldGrossAmt != grossAmt) {
                     log.error("i, oldGrossAmt, grossAmt", [i, oldGrossAmt, grossAmt].join(","));
                     return false;
@@ -857,36 +858,36 @@ define(["N/record", "N/search", "N/runtime", "N/log", "N/format", "N/https", "N/
 
                 let oldIVA = oldRecord.getSublistValue({ sublistId: "expense", fieldId: "custcol_lmry_co_reteiva", line: i }) || "";
                 let IVA = newRecord.getSublistValue({ sublistId: "expense", fieldId: "custcol_lmry_co_reteiva", line: i }) || "";
-                
+
                 if (oldIVA != IVA) {
                     log.error("i, oldIVA, IVA", [i, oldIVA, IVA].join(","));
                     return false;
                 }
-    
+
                 let oldICA = oldRecord.getSublistValue({ sublistId: "expense", fieldId: "custcol_lmry_co_reteica", line: i }) || "";
                 let ICA = newRecord.getSublistValue({ sublistId: "expense", fieldId: "custcol_lmry_co_reteica", line: i }) || "";
-                
+
                 if (oldICA != ICA) {
                     log.error("i, oldICA, ICA", [i, oldICA, ICA].join(","));
                     return false;
                 }
-    
+
                 let oldFTE = oldRecord.getSublistValue({ sublistId: "expense", fieldId: "custcol_lmry_co_retefte", line: i }) || "";
                 let FTE = newRecord.getSublistValue({ sublistId: "expense", fieldId: "custcol_lmry_co_retefte", line: i }) || "";
-                
+
                 if (oldFTE != FTE) {
                     log.error("i, oldFTE, FTE", [i, oldFTE, FTE].join(","));
                     return false;
                 }
-    
+
                 let oldCREE = oldRecord.getSublistValue({ sublistId: "expense", fieldId: "custcol_lmry_co_autoretecree", line: i }) || "";
                 let CREE = newRecord.getSublistValue({ sublistId: "expense", fieldId: "custcol_lmry_co_autoretecree", line: i }) || "";
-                
+
                 if (oldCREE != CREE) {
                     log.error("i, oldCREE, CREE", [i, oldCREE, CREE].join(","));
                     return false;
                 }
-    
+
             }
         }
 
@@ -895,30 +896,31 @@ define(["N/record", "N/search", "N/runtime", "N/log", "N/format", "N/https", "N/
 
     }
 
+
+           
     const createFields = (context) => {
         const form = context.form;
-        const itemSublist = form.getSublist({id: 'item'});
-        const fieldCREE = itemSublist.getField({id: 'custcol_lmry_co_autoretecree'});
-        log.error("fieldCREE",fieldCREE)
-        if (fieldCREE) {
-            log.error("flag","crea el campo")
-            itemSublist.addField({
-                id: 'custpage_co_fte_new_basis',
-                label: 'LATAM COL - CO RETEFUENTE NEW BASIS',
-                type: "text"
-            });
-            /*
-            form.insertField({
-                field : fteNewBasis ,
-                nextfield : 'custpage_lmry_co_autoretecree'
-            });
-            */
-        }else{
-            log.error("flag","no cre el campo")
-        }
-        
+        const itemSublist = form.getSublist({ id: 'item' });
+
+
+        let inlineHtmlField = form.addField({
+            id: 'custpage_co_script_and_style',
+            type: serverWidget.FieldType.INLINEHTML,
+            label: 'Custom HTML Field'
+        });
+
+        // Establecer el valor HTML del campo
+        inlineHtmlField.defaultValue = '<h1>Form creado!</h1><p>Este es un campo</p>';
+
+        log.error("flag", "crea el campo")
+        itemSublist.addField({
+            id: 'custpage_co_variable_rate',
+            label: 'LATAM COL - CO TARIFA VARIABLE',
+            type: serverWidget.FieldType.TEXT
+        });
+
     }
-    
+
     return {
         createWithholdingLines,
         createFields

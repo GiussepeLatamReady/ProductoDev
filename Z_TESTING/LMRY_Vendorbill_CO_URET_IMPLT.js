@@ -14,7 +14,15 @@ define([
     const { FeatureManager } = Lib_Licenses;
 
     const beforeLoad = (context) => {
-        Lib_WhtLines2.createFields(context);
+
+        const { type, newRecord } = context;
+        if (type == "edit") {
+            const subsidiary = newRecord.getValue("subsidiary");
+            const featureManager = new FeatureManager(subsidiary);
+            if (featureManager.isActive(CO_FEAT.LOCALIZATION) && featureManager.isActive(CO_FEAT.WHT_NEW_LINES_PURCHASE)) {
+                Lib_WhtLines2.createFields(context);
+            }
+        }
     };
 
     const beforeSubmit = (context) => {};
@@ -25,10 +33,7 @@ define([
             if (["create", "edit", "copy"].includes(type)) {
                 let subsidiary = newRecord.getValue("subsidiary");
                 let featureManager = new FeatureManager(subsidiary);
-                nLog.error("LOCALIZATION",featureManager.isActive(CO_FEAT.LOCALIZATION))
-                nLog.error("WHT_NEW_LINES_PURCHASE",featureManager.isActive(CO_FEAT.WHT_NEW_LINES_PURCHASE))
                 if (featureManager.isActive(CO_FEAT.LOCALIZATION) && featureManager.isActive(CO_FEAT.WHT_NEW_LINES_PURCHASE)) {
-                    nLog.error("after submit flag","createWithholdingLines antes")
                     Lib_WhtLines2.createWithholdingLines(context);
                 }
             }
