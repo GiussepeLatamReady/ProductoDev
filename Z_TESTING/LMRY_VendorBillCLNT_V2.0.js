@@ -1535,7 +1535,9 @@ define(['N/log', "N/query", 'N/record', 'N/search', 'N/currentRecord', 'N/url', 
   
 
     function defineAction(context) {
-     
+
+        
+        /*
         var currentRecord = context.currentRecord;
         var linkItems = document.getElementById('custpage_sublit_itemstxt');
         
@@ -1552,7 +1554,7 @@ define(['N/log', "N/query", 'N/record', 'N/search', 'N/currentRecord', 'N/url', 
         linkExpense.addEventListener('click', function(event) {       
             console.log('Se hizo clic en el enlace con id EXPENSE');
         });
-  
+        */
     }
 
    
