@@ -1536,7 +1536,17 @@ define(['N/log', "N/query", 'N/record', 'N/search', 'N/currentRecord', 'N/url', 
 
     function defineAction(context) {
 
+      var checkvariableRate = document.getElementById('item_custpage_co_variable_rate_fs');
+      checkvariableRate.addEventListener('click', function(event) {        
         
+        if (checkvariableRate.classList.contains('checkbox_unck')) {
+          console.log('CHECK DESACTIVO');
+        }
+        if (checkvariableRate.classList.contains('checkbox_ck')) {
+          console.log('CHECK ACTIVO');
+          createPopup();
+        } 
+      });
         /*
         var currentRecord = context.currentRecord;
         var linkItems = document.getElementById('custpage_sublit_itemstxt');
@@ -1557,7 +1567,220 @@ define(['N/log', "N/query", 'N/record', 'N/search', 'N/currentRecord', 'N/url', 
         */
     }
 
-   
+    function createPopup(){
+
+      Ext.onReady(function() {
+        // Crear campos de texto
+        var createTextField = function(label) {
+            return {
+                xtype: 'textfield',
+                fieldLabel: label,
+                labelAlign: 'top',
+                anchor: '100%'
+            };
+        };
+    
+        // Crear paneles para cada sección
+        var createPanel = function(title) {
+            return {
+                xtype: 'fieldset',
+                width: 200,
+                title: title,
+                flex: 1,
+                layout: 'anchor',
+                margin: '10 10',
+                defaults: {
+                    anchor: '100%'
+                },
+                items: [
+                    createTextField(' NATIONAL TAX'),
+                    createTextField(' NEW BASIS'),
+                    createTextField(' NEW RATE'),
+                    createTextField(' AMOUNT')
+                ]
+            };
+        };
+    
+        // Crear el popup
+        var popup = Ext.create('Ext.window.Window', {
+            title: 'Configuracion de tarifa variable',
+            width: 1000,
+            height: 400,
+            layout: {
+              type: 'hbox',
+              pack: 'center',
+              align: 'middle'
+            },
+            defaults: {
+                flex: 1,
+                layout: 'hbox',
+                align: 'stretch'
+            },
+            items: [
+                //createPanel('RETEFTE DETAIL'),
+                createPanel('RETEICA DETAIL'),
+                createPanel('RETEIVA DETAIL'),
+                createPanel('RETECREE DETAIL')
+            ],
+            buttons: [
+                {
+                    text: 'Aceptar',
+                    handler: function() {
+                        popup.close();
+                    }
+                },
+                {
+                    text: 'Cancelar',
+                    handler: function() {
+                        popup.close();
+                    }
+                }
+            ]
+        });
+    
+        // Mostrar el popup
+        popup.show();
+    });
+    
+    
+
+      /*
+        
+      Ext.onReady(function() {
+          // Datos para los ComboBox
+          var data1 = [
+              ['Value1', 'Display 1'],
+              ['Value2', 'Display 2']
+          ];
+          
+          var data2 = [
+              ['Value3', 'Display 3'],
+              ['Value4', 'Display 4']
+          ];
+          
+          var data3 = [
+              ['Value5', 'Display 5'],
+              ['Value6', 'Display 6']
+          ];
+          
+          var data4 = [
+              ['Value7', 'Display 7'],
+              ['Value8', 'Display 8']
+          ];
+          
+          // Stores para los ComboBox
+          var store1 = Ext.create('Ext.data.ArrayStore', {
+              fields: ['value', 'display'],
+              data: data1
+          });
+          
+          var store2 = Ext.create('Ext.data.ArrayStore', {
+              fields: ['value', 'display'],
+              data: data2
+          });
+          
+          var store3 = Ext.create('Ext.data.ArrayStore', {
+              fields: ['value', 'display'],
+              data: data3
+          });
+          
+          var store4 = Ext.create('Ext.data.ArrayStore', {
+              fields: ['value', 'display'],
+              data: data4
+          });
+          
+          // Función para manejar el evento de cambio en el ComboBox
+          var onSelectChange = function(combo, record, index) {
+              Ext.Msg.alert('Cambio', 'Has seleccionado: ' + record.get('display'));
+          };
+          
+          // Crear el Popup con los ComboBox
+          var popup = Ext.create('Ext.window.Window', {
+              title: 'Popup con Selects',
+              width: 400,
+              height: 300,
+              layout: 'form',
+              items: [
+                  {
+                      xtype: 'combobox',
+                      fieldLabel: 'Select 1',
+                      store: store1,
+                      queryMode: 'local',
+                      displayField: 'display',
+                      valueField: 'value',
+                      listeners: {
+                          select: onSelectChange
+                      }
+                  },
+                  {
+                      xtype: 'combobox',
+                      fieldLabel: 'Select 2',
+                      store: store2,
+                      queryMode: 'local',
+                      displayField: 'display',
+                      valueField: 'value',
+                      listeners: {
+                          select: onSelectChange
+                      }
+                  },
+                  {
+                      xtype: 'combobox',
+                      fieldLabel: 'Select 3',
+                      store: store3,
+                      queryMode: 'local',
+                      displayField: 'display',
+                      valueField: 'value',
+                      listeners: {
+                          select: onSelectChange
+                      }
+                  },
+                  {
+                      xtype: 'combobox',
+                      fieldLabel: 'Select 4',
+                      store: store4,
+                      queryMode: 'local',
+                      displayField: 'display',
+                      valueField: 'value',
+                      listeners: {
+                          select: onSelectChange
+                      }
+                  }
+              ],
+              buttons: [
+                  {
+                      text: 'Aceptar',
+                      handler: function() {
+                        var checkvariableRate = document.getElementById('item_custpage_co_variable_rate_fs');
+                        if(checkvariableRate.classList.contains('checkbox_ck')) {
+                          checkvariableRate.classList.remove('checkbox_ck');
+                          checkvariableRate.classList.add('checkbox_unck');
+                        }
+                        popup.close();
+                      }
+                  },
+                  {
+                      text: 'Cancelar',
+                      handler: function() {
+
+                        var checkvariableRate = document.getElementById('item_custpage_co_variable_rate_fs');
+                        if(checkvariableRate.classList.contains('checkbox_ck')) {
+                          checkvariableRate.classList.remove('checkbox_ck');
+                          checkvariableRate.classList.add('checkbox_unck');
+                        }
+                        popup.close();
+                      }
+                  }
+              ]
+          });
+          
+          // Mostrar el Popup
+          popup.show();
+      });
+      
+      */
+  }
+
+    /*
     function getSublistTabItems(sourceSublistId, editableSublistId, recordObj) {
       var sourceSublistCount = recordObj.getLineCount({ sublistId: sourceSublistId });
       var editableSublistCount = recordObj.getLineCount({ sublistId: editableSublistId });
@@ -1643,7 +1866,7 @@ define(['N/log', "N/query", 'N/record', 'N/search', 'N/currentRecord', 'N/url', 
       return changes;
     }
 
-   
+    */
 
     function validate_open_window(scriptContext, section) {
       if (window[section] == null) {
