@@ -20,8 +20,10 @@ function createPopup() {
                 labelWidth: 50,
                 //anchor: '100%',
                 with: 100,  // Altura del campo de texto
-                disabled:true,
-                labelStyle: 'font-weight:bold; color:#FF0000; font-size: 16px;'
+                readOnly: true,
+                value:"ACC00001",
+                labelStyle: 'background-color: #fff; color: #000; font-weight: bold;',
+                fieldStyle: 'background-color: #FFF; color: #000; font-weight: bold; font-size: 16px; border: none;',
             };
         };
 

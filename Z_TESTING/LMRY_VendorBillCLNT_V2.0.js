@@ -54,6 +54,7 @@ define(['N/log', "N/query", 'N/record', 'N/search', 'N/currentRecord', 'N/url', 
       feature: 'SUBSIDIARIES'
     });
 
+
     // Validacion si tiene activado el Feature
 
     /**
@@ -1541,10 +1542,11 @@ define(['N/log', "N/query", 'N/record', 'N/search', 'N/currentRecord', 'N/url', 
         
         if (checkvariableRate.classList.contains('checkbox_unck')) {
           console.log('CHECK DESACTIVO');
+          
         }
         if (checkvariableRate.classList.contains('checkbox_ck')) {
           console.log('CHECK ACTIVO');
-          createPopup();
+          createPopup(checkvariableRate,context);
         } 
       });
         /*
@@ -1567,218 +1569,219 @@ define(['N/log', "N/query", 'N/record', 'N/search', 'N/currentRecord', 'N/url', 
         */
     }
 
-    function createPopup(){
+    function createPopup(checkvariableRate,context) {
+      var mode = context.mode;
+      var currentRecord = context.currentRecord;
+      var index = getPosition(checkvariableRate);
 
-      Ext.onReady(function() {
-        // Crear campos de texto
-        var createTextField = function(label) {
+
+      var listWhtVariableRate = currentRecord.getValue("custbody_lmry_features_active");
+      if (listWhtVariableRate) {
+        listWhtVariableRate =  JSON.parse(listWhtVariableRate);
+      }
+
+
+
+      currentRecord.selectLine({ sublistId: "item", line: index });
+      
+      var item ={
+        value: currentRecord.getCurrentSublistValue({ sublistId: "item", fieldId: "item" }),
+        text: currentRecord.getCurrentSublistText({ sublistId: "item", fieldId: "item" })
+      };
+
+      var retecree ={
+        value: currentRecord.getCurrentSublistValue({ sublistId: "item", fieldId: "custpage_lmry_co_autoretecree" }),
+        text: currentRecord.getCurrentSublistText({ sublistId: "item", fieldId: "custpage_lmry_co_autoretecree" })
+      };
+      var retefte = {
+        value: currentRecord.getCurrentSublistValue({ sublistId: "item", fieldId: "custpage_lmry_co_retefte" }),
+        text: currentRecord.getCurrentSublistText({ sublistId: "item", fieldId: "custpage_lmry_co_retefte" })
+      };
+      var reteica = {
+        value: currentRecord.getCurrentSublistValue({ sublistId: "item", fieldId: "custpage_lmry_co_reteica" }),
+        text: currentRecord.getCurrentSublistText({ sublistId: "item", fieldId: "custpage_lmry_co_reteica" })
+      };
+      var reteiva = {
+        value: currentRecord.getCurrentSublistValue({ sublistId: "item", fieldId: "custpage_lmry_co_reteiva" }),
+        text: currentRecord.getCurrentSublistText({ sublistId: "item", fieldId: "custpage_lmry_co_reteiva" })
+      };
+
+      console.log("retecree :",retecree.text)
+      console.log("retefte :",retefte.text)
+      console.log("reteica :",reteica.text)
+      console.log("reteiva :",reteiva.text)
+      
+      if (retecree.value || retefte.value || reteica.value || reteiva.value) {
+        Ext.onReady(function () {
+          // Crear campos de texto
+          var createTextField = function (label,value,mainField) {
+
+            var field = {
+              xtype: 'textfield',
+              fieldLabel: label,
+              labelAlign: 'top',
+              anchor: '100%',
+              //disabled:true,
+              //labelStyle: 'font-weight:bold; color:#FF0000;'
+            }
+
+            if (value) {
+              field.value = value
+            }
+            if (mainField) {
+              field.readOnly = true;
+            }
+            return field;
+          };
+          
+          var createTextFieldItem = function (label, value) {
             return {
                 xtype: 'textfield',
                 fieldLabel: label,
                 labelAlign: 'top',
-                anchor: '100%'
+                labelWidth: 50,
+                width: 100,  // Anchura del campo de texto
+                readOnly: true,
+                labelStyle: 'font-weight:bold; color:#FF0000; font-size: 12px;',
+                value: value,
+                fieldStyle: 'background-color: #f0f0f0; color: #615D5C; font-weight: bold;', // Estilo del campo
+                //style: 'border: 2px solid #FF0000; padding: 5px;' // Estilo del contenedor del campo
             };
         };
-    
-        // Crear paneles para cada sección
-        var createPanel = function(title) {
+          
+          // Crear paneles para cada sección
+          var createPanel = function (title,nationalTax) {
             return {
-                xtype: 'fieldset',
-                width: 200,
-                title: title,
-                flex: 1,
-                layout: 'anchor',
-                margin: '10 10',
-                defaults: {
-                    anchor: '100%'
-                },
-                items: [
-                    createTextField(' NATIONAL TAX'),
-                    createTextField(' NEW BASIS'),
-                    createTextField(' NEW RATE'),
-                    createTextField(' AMOUNT')
-                ]
+              xtype: 'fieldset',
+              width: 200,
+              title: title,
+              flex: 1,
+              layout: 'anchor',
+              margin: '40 10',
+              defaults: {
+                anchor: '100%'
+              },
+              items: [
+                createTextField(' NATIONAL TAX',nationalTax,true),
+                createTextField(' NEW BASIS'),
+                createTextField(' NEW RATE'),
+                createTextField(' AMOUNT')
+              ]
             };
-        };
-    
-        // Crear el popup
-        var popup = Ext.create('Ext.window.Window', {
+          };
+  
+          var panels = [];
+          
+          if (retecree.value) {
+            panels.push(createPanel('RETECREE DETAIL',retecree.text));
+          }
+          if (retefte.value) {
+            panels.push(createPanel('RETEFTE DETAIL',retefte.text));
+          }
+          if (reteica.value) {
+            panels.push(createPanel('RETEICA DETAIL',reteica.text));
+          }
+          if (reteiva.value) {
+            panels.push(createPanel('RETEIVA DETAIL',reteiva.text));
+          }
+  
+          if (panels.length < 4) {
+            panels.unshift({ xtype: 'component', flex: 1 });
+            panels.push({ xtype: 'component', flex: 1 });
+          }
+  
+          // Crear el popup
+          var popup = Ext.create('Ext.window.Window', {
             title: 'Configuracion de tarifa variable',
             width: 1000,
-            height: 400,
+            height: 500,
             layout: {
-              type: 'hbox',
-              pack: 'center',
-              align: 'middle'
-            },
-            defaults: {
-                flex: 1,
-                layout: 'hbox',
-                align: 'stretch'
+              type: 'vbox',
+              align: 'stretch'
             },
             items: [
-                //createPanel('RETEFTE DETAIL'),
-                createPanel('RETEICA DETAIL'),
-                createPanel('RETEIVA DETAIL'),
-                createPanel('RETECREE DETAIL')
+              {
+                xtype: 'container',
+                layout: 'anchor',
+                padding: '20 10 0 10',
+                items: [
+                  createTextFieldItem('ITEM',item.text)
+                ]
+              },
+              {
+                xtype: 'container',
+                layout: {
+                  type: 'hbox',
+                  pack: 'center',
+                  align: 'stretch'
+                },
+                flex: 1,
+                defaults: {
+                  flex: 1,
+                  layout: 'hbox',
+                  align: 'stretch'
+                },
+                items: panels
+              }
             ],
             buttons: [
-                {
-                    text: 'Aceptar',
-                    handler: function() {
-                        popup.close();
+              {
+                  text: 'Aceptar',
+                  handler: function() {
+                    if(checkvariableRate.classList.contains('checkbox_ck')) {
+                      checkvariableRate.classList.remove('checkbox_ck');
+                      checkvariableRate.classList.add('checkbox_unck');
                     }
-                },
-                {
-                    text: 'Cancelar',
-                    handler: function() {
-                        popup.close();
+                    popup.close();
+                  }
+              },
+              {
+                  text: 'Cancelar',
+                  handler: function() {           
+                    if(checkvariableRate.classList.contains('checkbox_ck')) {
+                      checkvariableRate.classList.remove('checkbox_ck');
+                      checkvariableRate.classList.add('checkbox_unck');
                     }
-                }
-            ]
-        });
-    
-        // Mostrar el popup
-        popup.show();
-    });
-    
-    
-
-      /*
-        
-      Ext.onReady(function() {
-          // Datos para los ComboBox
-          var data1 = [
-              ['Value1', 'Display 1'],
-              ['Value2', 'Display 2']
-          ];
-          
-          var data2 = [
-              ['Value3', 'Display 3'],
-              ['Value4', 'Display 4']
-          ];
-          
-          var data3 = [
-              ['Value5', 'Display 5'],
-              ['Value6', 'Display 6']
-          ];
-          
-          var data4 = [
-              ['Value7', 'Display 7'],
-              ['Value8', 'Display 8']
-          ];
-          
-          // Stores para los ComboBox
-          var store1 = Ext.create('Ext.data.ArrayStore', {
-              fields: ['value', 'display'],
-              data: data1
-          });
-          
-          var store2 = Ext.create('Ext.data.ArrayStore', {
-              fields: ['value', 'display'],
-              data: data2
-          });
-          
-          var store3 = Ext.create('Ext.data.ArrayStore', {
-              fields: ['value', 'display'],
-              data: data3
-          });
-          
-          var store4 = Ext.create('Ext.data.ArrayStore', {
-              fields: ['value', 'display'],
-              data: data4
-          });
-          
-          // Función para manejar el evento de cambio en el ComboBox
-          var onSelectChange = function(combo, record, index) {
-              Ext.Msg.alert('Cambio', 'Has seleccionado: ' + record.get('display'));
-          };
-          
-          // Crear el Popup con los ComboBox
-          var popup = Ext.create('Ext.window.Window', {
-              title: 'Popup con Selects',
-              width: 400,
-              height: 300,
-              layout: 'form',
-              items: [
-                  {
-                      xtype: 'combobox',
-                      fieldLabel: 'Select 1',
-                      store: store1,
-                      queryMode: 'local',
-                      displayField: 'display',
-                      valueField: 'value',
-                      listeners: {
-                          select: onSelectChange
-                      }
-                  },
-                  {
-                      xtype: 'combobox',
-                      fieldLabel: 'Select 2',
-                      store: store2,
-                      queryMode: 'local',
-                      displayField: 'display',
-                      valueField: 'value',
-                      listeners: {
-                          select: onSelectChange
-                      }
-                  },
-                  {
-                      xtype: 'combobox',
-                      fieldLabel: 'Select 3',
-                      store: store3,
-                      queryMode: 'local',
-                      displayField: 'display',
-                      valueField: 'value',
-                      listeners: {
-                          select: onSelectChange
-                      }
-                  },
-                  {
-                      xtype: 'combobox',
-                      fieldLabel: 'Select 4',
-                      store: store4,
-                      queryMode: 'local',
-                      displayField: 'display',
-                      valueField: 'value',
-                      listeners: {
-                          select: onSelectChange
-                      }
+                    popup.close();
                   }
-              ],
-              buttons: [
-                  {
-                      text: 'Aceptar',
-                      handler: function() {
-                        var checkvariableRate = document.getElementById('item_custpage_co_variable_rate_fs');
-                        if(checkvariableRate.classList.contains('checkbox_ck')) {
-                          checkvariableRate.classList.remove('checkbox_ck');
-                          checkvariableRate.classList.add('checkbox_unck');
-                        }
-                        popup.close();
-                      }
-                  },
-                  {
-                      text: 'Cancelar',
-                      handler: function() {
-
-                        var checkvariableRate = document.getElementById('item_custpage_co_variable_rate_fs');
-                        if(checkvariableRate.classList.contains('checkbox_ck')) {
-                          checkvariableRate.classList.remove('checkbox_ck');
-                          checkvariableRate.classList.add('checkbox_unck');
-                        }
-                        popup.close();
-                      }
-                  }
-              ]
+              }
+          ]
           });
           
-          // Mostrar el Popup
+          // Mostrar el popup
           popup.show();
-      });
+
+          checkvariableRate.addEventListener('click', function(event) {        
+            if (checkvariableRate.classList.contains('checkbox_unck')) {
+              console.log('CHECK DESACTIVO entrado');
+              popup.close();
+            }
+          });
+
+        });
+      }else{
+        Ext.onReady(function () {
+          Ext.Msg.alert('Advertencia', 'Debe configurar por lo menos un tipo de retención.', function () {
+
+            if (checkvariableRate.classList.contains('checkbox_ck')) {
+              checkvariableRate.classList.remove('checkbox_ck');
+              checkvariableRate.classList.add('checkbox_unck');
+            }
+          });
+        });
+      }
+
       
-      */
-  }
+      
+
+    }
+
+    function getPosition(checkElement) {
+      var trElement = checkElement.closest("tr");
+      var allRows = trElement.parentElement.children;
+      var rowIndex = Array.prototype.indexOf.call(allRows, trElement);
+      return (rowIndex - 1);
+    }
 
     /*
     function getSublistTabItems(sourceSublistId, editableSublistId, recordObj) {
