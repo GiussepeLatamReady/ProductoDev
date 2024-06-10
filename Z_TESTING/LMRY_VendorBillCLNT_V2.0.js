@@ -1627,6 +1627,7 @@ define(['N/log', "N/query", 'N/record', 'N/search', 'N/currentRecord', 'N/url', 
       var reteiva = getFieldValue(type == "item" ? "custpage_lmry_co_reteiva":"custpage_lmry_co_reteiva_exp");
       
 
+
       //Funciones internas
       var createTextField = function(itemId,label, value, mainField) {
         return {
@@ -1832,7 +1833,9 @@ define(['N/log', "N/query", 'N/record', 'N/search', 'N/currentRecord', 'N/url', 
       });
     }
     
-    
+    function isVariableRateNT(){
+      
+    }
 
     function getPosition(checkElement) {
       var trElement = checkElement.closest("tr");

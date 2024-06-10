@@ -19,9 +19,11 @@ define([
 
         const subsidiary = newRecord.getValue("subsidiary");
         const featureManager = new FeatureManager(subsidiary);
+        const isVariableRate = Lib_WhtLines2.getFeatureVariableRate(subsidiary);
         if (
             featureManager.isActive(CO_FEAT.LOCALIZATION) && 
-            featureManager.isActive(CO_FEAT.WHT_NEW_LINES_PURCHASE)
+            featureManager.isActive(CO_FEAT.WHT_NEW_LINES_PURCHASE) &&
+            isVariableRate
         ) {
             if (["create", "edit", "copy"].includes(type)) {
                 Lib_WhtLines2.createFields(context);
@@ -37,9 +39,11 @@ define([
 
         const subsidiary = newRecord.getValue("subsidiary");
         const featureManager = new FeatureManager(subsidiary);
+        const isVariableRate = Lib_WhtLines2.getFeatureVariableRate(subsidiary);
         if (
             featureManager.isActive(CO_FEAT.LOCALIZATION) && 
-            featureManager.isActive(CO_FEAT.WHT_NEW_LINES_PURCHASE)
+            featureManager.isActive(CO_FEAT.WHT_NEW_LINES_PURCHASE) && 
+            isVariableRate
         ) {
             if (["create", "edit", "copy"].includes(type)) {
                 Lib_WhtLines2.saveWhtVariableRate(context);
