@@ -528,8 +528,8 @@ define(['N/log', "N/query", 'N/record', 'N/search', 'N/currentRecord', 'N/url', 
           const FEATURE_WHT_NEW_LINES_PURCHASE = library.getAuthorization(720, licenses);
           const FEATURE_LOCALIZATION =  library.getAuthorization(26, licenses);
           if (FEATURE_LOCALIZATION && FEATURE_WHT_NEW_LINES_PURCHASE) {
-            
-            if (["edit","copy","create"].indexOf(context.mode)) {
+            console.log("context.mode",context.mode)
+            if (["edit","copy","create"].indexOf(context.mode) != -1) {
               loadDataVariableRate(context.currentRecord)
               executePopup(context.currentRecord);
             }
@@ -1594,7 +1594,7 @@ define(['N/log', "N/query", 'N/record', 'N/search', 'N/currentRecord', 'N/url', 
 
       var index = getPosition(checkvariableRate);
       
-      currentRecord.selectLine({ sublistId: sublist, line: index });
+      currentRecord.selectLine({ sublistId: type, line: index });
       var fieldId = type == "item" ? 'custpage_co_variable_rate_data' : 'custpage_co_variable_rate_data_expense';
       var itemVariableRate = currentRecord.getCurrentSublistValue({ sublistId: type, fieldId: fieldId })
       itemVariableRate  = itemVariableRate ? JSON.parse(itemVariableRate) : {};
