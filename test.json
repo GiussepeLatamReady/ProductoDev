@@ -1,8 +1,30 @@
-"type": "error.SuiteScriptModuleLoaderError": "error.SuiteScriptModuleLoaderError",
-"name": "SyntaxError: /SuiteApps/com.latamready.lmrycolocalization/co_new_withholding_lines/lib/LR_CO_New_WithholdingLines_LIB.js:1113:8 Expected an operand but found error\n /*\n ^\n/SuiteApps/com.latamready.lmrycolocalization/co_new_withholding_lines/lib/LR_CO_New_WithholdingLines_LIB.js:1113:121 Expected } but found eof\n//# sourceURL=/SuiteApps/com.latamready.lmrycolocalization/co_new_withholding_lines/lib/LR_CO_New_WithholdingLines_LIB.js\n ^\n/SuiteApps/com.latamready.lmrycolocalization/co_new_withholding_lines/lib/LR_CO_New_WithholdingLines_LIB.js:1113:121 Expected } but found eof\n//# sourceURL=/SuiteApps/com.latamready.lmrycolocalization/co_new_withholding_lines/lib/LR_CO_New_WithholdingLines_LIB.js\n ^\n",
-"message": "",
-"stack": [
-   "at Object.getImplementationByCountry (/SuiteApps/com.latamready.lmrylocalizationcore/lib/pluginHandler/LR_PluginHandler_LIB.js:25:39)",
-   "at Object.beforeLoad (/SuiteApps/com.latamready.lmrylocalizationcore/transactions/vendorbill/LR_Vendorbill_URET.js:14:39)"
-]
+{
+   "cree": {
+      "nationalTax": "3462",
+      "newBasis": 0,
+      "newRate": 0,
+      "amount": 0,
+      "key": "cree"
+   },
+   "fte": {
+      "nationalTax": "3544",
+      "newBasis": 0,
+      "newRate": 0,
+      "amount": 0,
+      "key": "fte"
+   },
+   "ica": {
+      "nationalTax": "3458",
+      "newBasis": 213,
+      "newRate": 0,
+      "amount": 0,
+      "key": "ica"
+   },
+   "iva": {
+      "nationalTax": "3545",
+      "newBasis": 0,
+      "newRate": 0,
+      "amount": 0,
+      "key": "iva"
+   }
 }
