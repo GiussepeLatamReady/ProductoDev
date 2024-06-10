@@ -1559,34 +1559,37 @@ define(['N/log', "N/query", 'N/record', 'N/search', 'N/currentRecord', 'N/url', 
     }
 
     function loadDataVariableRate(currentRecord) {
-      var dataGeneral = currentRecord.getValue("custbody_lmry_features_active");
-      console.log("dataGeneral",dataGeneral)
-      if (!dataGeneral) return;
-      dataGeneral = JSON.parse(dataGeneral);
+      try {
+        var dataGeneral = currentRecord.getValue("custbody_lmry_features_active");
+        if (!dataGeneral) return;
+        dataGeneral = JSON.parse(dataGeneral);
 
-      var setDataLine = function (sublist,fieldId,list) {
-        currentRecord.selectLine({ sublistId: sublist, line: index });
-        var countLines = currentRecord.getLineCount({ sublistId: sublist });
-        for (var i = 0; i < countLines; i++) {
-          currentRecord.selectLine({ sublistId: sublist, line: i });
-          currentRecord.setCurrentSublistValue({
-            sublistId: sublist,
-            fieldId: fieldId,
-            value: JSON.stringify(list[i])
-          });
+        var setDataLine = function (sublist, fieldId, list) {
+          var countLines = currentRecord.getLineCount({ sublistId: sublist });
+          for (var i = 0; i < countLines; i++) {
+            currentRecord.selectLine({ sublistId: sublist, line: i });
+            currentRecord.setCurrentSublistValue({
+              sublistId: sublist,
+              fieldId: fieldId,
+              value: JSON.stringify(list[i])
+            });
+          }
         }
+
+        if (dataGeneral.item) setDataLine(
+          "item",
+          "custpage_co_variable_rate_data",
+          dataGeneral.item
+        );
+        if (dataGeneral.expense) setDataLine(
+          "expense",
+          "custpage_co_variable_rate_data_expense",
+          dataGeneral.expense
+        );
+      } catch (error) {
+        console.log("error laod",error)
       }
 
-      if (dataGeneral.item) setDataLine(
-                                            "item",
-                                            "custpage_co_variable_rate_data",
-                                            dataGeneral.item
-                                          );
-      if (dataGeneral.expense) setDataLine(
-                                            "expense",
-                                            "custpage_co_variable_rate_data_expense",
-                                            dataGeneral.expense
-                                          );
 
     }
 
