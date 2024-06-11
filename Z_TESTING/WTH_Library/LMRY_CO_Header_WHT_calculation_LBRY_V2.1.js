@@ -19,6 +19,7 @@ define([
     const calculateHeaderWHT = (id) => {
         getFeatures();
         const transaction = getTransaction(id);
+        log.error("transaction",transaction)
         createTaxResults(transaction);
     }
 
@@ -90,9 +91,7 @@ define([
         relatedRecords.forEach(retention => {
 
             let nameWht = getRetentionName(retention.memo);
-
             let whtObject = getWhtCode(nameWht);
-
             if (whtObject.id) {
                 assignToWht(transaction, whtObject.subtype, whtObject);
             }
@@ -310,9 +309,8 @@ define([
             subtype: null,
         };
         if (nameWht != "Retention name not found") {
-
             let searchFilters = [
-                ["name", "is", nameWht]
+                ["formulatext: TRIM({name})","is",nameWht]
             ];
 
             let searchColumns = new Array();
@@ -330,7 +328,6 @@ define([
                 filters: searchFilters,
                 columns: searchColumns
             }).run().each(result => {
-
                 whtCode.id = result.getValue(result.columns[0]) || null;
                 whtCode.name = result.getValue(result.columns[1]) || " ";
                 whtCode.rate = result.getValue(result.columns[2]) || 0;
@@ -452,12 +449,12 @@ define([
                 
             });
         });
-        
+
         Object.keys(typeRetention).forEach(key => {
             if (typeRetention[key].withRecla.length) typeRetention[key].withRecla.sort((a,b) => Number(b.id) - Number(a.id));
             if (typeRetention[key].withOutRecla.length) typeRetention[key].withOutRecla.sort((a,b) => Number(b.id) - Number(a.id));
         });
-        
+
         Object.keys(typeRetention).forEach(key => {
             if (typeRetention[key].withRecla.length) {
                 filteredTransactions.push(typeRetention[key].withRecla[0])
@@ -465,6 +462,7 @@ define([
                 filteredTransactions.push(typeRetention[key].withOutRecla[0])
             }
         });
+    
         return filteredTransactions;
     
     };

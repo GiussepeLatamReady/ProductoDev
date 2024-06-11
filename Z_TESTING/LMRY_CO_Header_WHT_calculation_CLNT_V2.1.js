@@ -195,7 +195,6 @@ define(['N/runtime',
                     const urlObject = new URL(window.location.href);
                     const accoutingPeriodValue = urlObject.searchParams.get('accoutingPeriod');
                     const accoutingFinalPeriodValue = urlObject.searchParams.get('accoutingFinalPeriod');
-                    
 
                     const periodNameIni = search.lookupFields({
                         type: 'accountingperiod',
@@ -236,7 +235,6 @@ define(['N/runtime',
                 mandatoryFields.push('custpage_fin_period');
                 const isFieldInvalid = (fieldId) => {
                     const value = recordObj.getValue({ fieldId });
-
                     fieldsObj[fieldId] = value;
                     if (value == 0 || !value) {
                         const fieldLabel = recordObj.getField({ fieldId }).label;
@@ -261,7 +259,6 @@ define(['N/runtime',
 
                 var startDateIni = period1.getValue('startdate');
                 var startDateFin = period2.getValue('startdate');
-
                 // Convertir las fechas a objetos Date
                 var firstDate = new Date(startDateIni);
                 var secondDate = new Date(startDateFin);
@@ -390,7 +387,6 @@ define(['N/runtime',
                 }else{
                     form = dataProcess;
                 }
-
                 
 
                 const periodlookup = search.lookupFields({
@@ -415,7 +411,6 @@ define(['N/runtime',
                 let recordlog = record.create({
                     type: 'customrecord_lmry_co_head_wht_cal_log'
                 });
-
                 recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_subsi', value: form.subsidiary });
                 
                 recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_state', value: "Cargando datos" });

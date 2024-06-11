@@ -20,7 +20,7 @@ define([
         const getInputData = (inputContext) => {
             try {
                 const parameters = getParameters();
-                log.error("parameters",parameters);
+                
                 const transactions = getTransactions(parameters);
                 updateState(parameters, 'Procesando', 'Se ha comenzado a procesar las transacciones...');
                 
