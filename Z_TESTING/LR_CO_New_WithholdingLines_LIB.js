@@ -1079,7 +1079,7 @@ define(["N/ui/serverWidget","N/record", "N/search", "N/runtime", "N/log", "N/for
                         let sublistItems = form.addSublist({
                             id: "custpage_sublit_items",
                             type: serverWidget.SublistType.LIST,
-                            label: "Tarifa variable (Items)",
+                            label: "Variable Rate (Items)",
                             tab: "items"
                         });
                         let fieldsItems = [
@@ -1225,7 +1225,7 @@ define(["N/ui/serverWidget","N/record", "N/search", "N/runtime", "N/log", "N/for
                         let sublistExpense = form.addSublist({
                             id: "custpage_sublit_expense",
                             type: serverWidget.SublistType.LIST,
-                            label: "Tarifa variable (Expense)",
+                            label: "Variable Rate (Expense)",
                             tab: "items"
                         });
                         let fieldsExpense = [
@@ -1382,16 +1382,14 @@ define(["N/ui/serverWidget","N/record", "N/search", "N/runtime", "N/log", "N/for
             itemSublist.addField({
                 id: 'custpage_co_variable_rate',
                 type: serverWidget.FieldType.CHECKBOX,
-                label: 'Latam col - co tarifa variable'
+                label: 'Latam col - co Variable rate'
             });
     
             itemSublist.addField({
                 id: 'custpage_co_variable_rate_data',
                 type: serverWidget.FieldType.TEXTAREA,
                 label: 'Latam col - co tarifa variable data'
-            });
-    
-            //.updateDisplayType({displayType: serverWidget.FieldDisplayType.HIDDEN})
+            }).updateDisplayType({displayType: serverWidget.FieldDisplayType.HIDDEN});
     
     
             let expenseSublist = form.getSublist({
@@ -1402,29 +1400,14 @@ define(["N/ui/serverWidget","N/record", "N/search", "N/runtime", "N/log", "N/for
             expenseSublist.addField({
                 id: 'custpage_co_variable_rate_expense',
                 type: serverWidget.FieldType.CHECKBOX,
-                label: 'Latam col - co tarifa variable'
+                label: 'Latam col - co Variable rate'
             });
     
             expenseSublist.addField({
                 id: 'custpage_co_variable_rate_data_expense',
                 type: serverWidget.FieldType.TEXTAREA,
                 label: 'Latam col - co tarifa variable data'
-            });
-    
-    
-            //.updateDisplayType({displayType: serverWidget.FieldDisplayType.HIDDEN})
-            /*
-            const numItems = newRecord.getLineCount({
-                sublistId: 'item'
-            });
-            for (let i = 0; i < numItems; i++) {
-                itemSublist.setSublistValue({
-                    id: 'custpage_co_variable_rate',
-                    line: i,
-                    value: `<div class="button-variable" onclick="alert(\'¡Botón presionado!\')">P</div>`
-                  });
-            }
-            */
+            }).updateDisplayType({displayType: serverWidget.FieldDisplayType.HIDDEN});
         
         }
     
