@@ -23,9 +23,51 @@ Solo aplica a Colombia
 
 
 
-## Records
+## Records Configuration
 + Create
-    
+
+    + LatamReady - Setup tax subsidiary
+        +   Field
+            name:   Latam - Co Variable Rate
+            id:     
+    + LatamReady - National Taxes
+        +   Field
+            name:   Latam - Variable Rate
+            id:     custrecord_lmry_ntax_var_rate
+
+    + LatamReady - Setup Tax Fields View
+        +   Registro (https://tstdrv1774174.app.netsuite.com/app/common/custom/custrecordentry.nl?id=6130&rectype=2519&whence=)
+                NAME
+                    custrecord_lmry_ntax_var_rate
+                ID
+                    6130
+                LATAM - COUNTRY
+                    Colombia
+                LATAM - RECORD TAX
+                    National Tax
+                LATAM - GENERATED TRANSACTION
+                    WHT by Transaction
+                LATAM - TAX TYPE
+                    Retencion
+                LATAM - WHT TYPE
+                    Retencion CO
+
+        + Registro (https://tstdrv1774174.app.netsuite.com/app/common/custom/custrecordentry.nl?id=6131&rectype=2519&whence=)
+                NAME
+                    custrecord_lmry_ntax_var_rate
+                ID
+                    6131
+                LATAM - COUNTRY
+                    Colombia
+                LATAM - RECORD TAX
+                    National Tax
+                LATAM - GENERATED TRANSACTION
+                    Journal
+                LATAM - TAX TYPE
+                    Retencion
+                LATAM - WHT TYPE
+                    Autoretencion
+
         
 + Update
     

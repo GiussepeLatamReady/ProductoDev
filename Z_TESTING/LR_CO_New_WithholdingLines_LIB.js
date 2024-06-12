@@ -280,14 +280,6 @@ define(["N/ui/serverWidget","N/record", "N/search", "N/runtime", "N/log", "N/for
             }
             return false;
         }
-
-        const getListVariableRate = (newRecord) => {
-            let dataGeneral = newRecord.getValue("custbody_lmry_features_active");
-
-            if (!dataGeneral) return {};
-            return JSON.parse(dataGeneral);
-            
-        }
     
         const getMultibook = (recordObj, featureMB) => {
             /********************************************************
@@ -856,10 +848,15 @@ define(["N/ui/serverWidget","N/record", "N/search", "N/runtime", "N/log", "N/for
     
             const oldApprovalStatus = oldRecord.getValue("approvalstatus");
             const approvalStatus = newRecord.getValue("approvalstatus");
-    
-    
+            const oldDataVariableRate = oldRecord.getValue("custbody_lmry_features_active");
+            const dataVariableRate = newRecord.getValue("custbody_lmry_features_active");
+            
             if (oldApprovalStatus != approvalStatus) {
                 log.error("oldApprovalStatus, approvalStatus", [oldApprovalStatus, approvalStatus].join(","));
+                return false;
+            }
+
+            if (oldDataVariableRate != dataVariableRate) {
                 return false;
             }
     
@@ -1066,301 +1063,310 @@ define(["N/ui/serverWidget","N/record", "N/search", "N/runtime", "N/log", "N/for
         }
     
         const createSublistVariableRate = (context) => {
-            //Creacion de La lista de items
-            const {form,newRecord} = context;
-            
-    
-            let dataGeneral = newRecord.getValue("custbody_lmry_features_active");
-    
-            if (dataGeneral) {
-                dataGeneral = JSON.parse(dataGeneral);
-                log.error("dataGeneral",dataGeneral)
-                if (dataGeneral.item) {
-                    let sublistItems = form.addSublist({
-                        id: "custpage_sublit_items",
-                        type: serverWidget.SublistType.LIST,
-                        label: "Tarifa variable (Items)",
-                        tab: "items"
-                    });
-                    let fieldsItems = [
-                        { id: 'custpage_list_i_item', label: "Item", type: serverWidget.FieldType.TEXT }
-                    ];
-                    let activeWht = {
-                        cree:false,
-                        fte:false,
-                        iva:false,
-                        ica:false
-                    }
-                    dataGeneral.item.forEach(function(item){
-                        if (item.cree && item.cree.amount) activeWht.cree = true;
-                        if (item.fte && item.fte.amount) activeWht.fte = true;
-                        if (item.ica && item.ica.amount) activeWht.ica = true;
-                        if (item.iva && item.iva.amount) activeWht.iva = true;
-                    });
-    
-                    if (activeWht.cree) {
-                        fieldsItems.push(
-                            { id: 'custpage_list_i_cree_details', label: "LATAM - CO RETECREE DETAILS", type: serverWidget.FieldType.SELECT },
-                            { id: 'custpage_list_i_cree_basis', label: "LATAM - CO RETECREE NEW BASIS", type: serverWidget.FieldType.TEXT },
-                            { id: 'custpage_list_i_cree_rate', label: "LATAM - CO RETECREE NEW RATE", type: serverWidget.FieldType.TEXT },
-                            { id: 'custpage_list_i_cree_amount', label: "LATAM - CO RETECREE AMOUNT", type: serverWidget.FieldType.TEXT }
-                        );
-                    }
-                    if (activeWht.fte) {
-                        fieldsItems.push(
-                            { id: 'custpage_list_i_fte_details', label: "LATAM - CO RETEFTE DETAILS", type: serverWidget.FieldType.SELECT },
-                            { id: 'custpage_list_i_fte_basis', label: "LATAM - CO RETEFTE NEW BASIS", type: serverWidget.FieldType.TEXT },
-                            { id: 'custpage_list_i_fte_rate', label: "LATAM - CO RETEFTE NEW RATE", type: serverWidget.FieldType.TEXT },
-                            { id: 'custpage_list_i_fte_amount', label: "LATAM - CO RETEFTE AMOUNT", type: serverWidget.FieldType.TEXT }
-                        );
-                    }
-                    if (activeWht.ica) {
-                        fieldsItems.push(
-                            { id: 'custpage_list_i_ica_details', label: "LATAM - CO RETEICA DETAILS", type: serverWidget.FieldType.SELECT },
-                            { id: 'custpage_list_i_ica_basis', label: "LATAM - CO RETEICA NEW BASIS", type: serverWidget.FieldType.TEXT },
-                            { id: 'custpage_list_i_ica_rate', label: "LATAM - CO RETEICA NEW RATE", type: serverWidget.FieldType.TEXT },
-                            { id: 'custpage_list_i_ica_amount', label: "LATAM - CO RETEICA AMOUNT", type: serverWidget.FieldType.TEXT }
-                        );
-                    }
-    
-                    if (activeWht.iva) {
-                        fieldsItems.push(
-                            { id: 'custpage_list_i_iva_details', label: "LATAM - CO RETEIVA DETAILS", type: serverWidget.FieldType.SELECT },
-                            { id: 'custpage_list_i_iva_basis', label: "LATAM - CO RETEIVA NEW BASIS", type: serverWidget.FieldType.TEXT },
-                            { id: 'custpage_list_i_iva_rate', label: "LATAM - CO RETEIVA NEW RATE", type: serverWidget.FieldType.TEXT },
-                            { id: 'custpage_list_i_iva_amount', label: "LATAM - CO RETEIVA AMOUNT", type: serverWidget.FieldType.TEXT }
-                        );
-                    }
-    
-                    fieldsItems.forEach(fieldInfo => {
-                        sublistItems.addField(fieldInfo);
-                    });
-    
-                    // cargar national taxes
-                    
-                    const nationalTaxes = getReteDetails(newRecord,"item");
-                    log.error("nationalTaxes items",nationalTaxes);
-                    
 
-                    let sublist = form.getSublist({ id: 'custpage_sublit_items' });
-                    dataGeneral.item.forEach(function(item,i){
-                    
-                        if (nationalTaxes[i].item) {
-                            sublist.setSublistValue({ id: 'custpage_list_i_item', line: i, value: nationalTaxes[i].item});
-                        }
-                        if (item.cree) {
-                            let retecree = sublist.getField({
-                                id: 'custpage_list_i_cree_details'
-                            });
-                            if (nationalTaxes[i].cree && nationalTaxes[i].cree.value) {
-                                retecree.addSelectOption({
-                                    value: nationalTaxes[i].cree.value,
-                                    text: nationalTaxes[i].cree.text
-                                });
-                                sublist.setSublistValue({ id: 'custpage_list_i_cree_details', line: i, value: item.cree.nationalTax});
-                            }
-                            
-                            
-                            sublist.setSublistValue({ id: 'custpage_list_i_cree_basis', line: i, value: item.cree.newBasis});
-                            sublist.setSublistValue({ id: 'custpage_list_i_cree_rate', line: i, value: item.cree.newRate});
-                            sublist.setSublistValue({ id: 'custpage_list_i_cree_amount', line: i, value: item.cree.amount});
-                        }
-    
-                        if (item.fte) {
-                            let retefte = sublist.getField({
-                                id: 'custpage_list_i_fte_details'
-                            });
-                            if (nationalTaxes[i].fte && nationalTaxes[i].fte.value) {
-                                retefte.addSelectOption({
-                                    value: nationalTaxes[i].fte.value,
-                                    text: nationalTaxes[i].fte.text
-                                });
-                                sublist.setSublistValue({ id: 'custpage_list_i_fte_details', line: i, value: item.fte.nationalTax});
-                            }
-                            
-                            sublist.setSublistValue({ id: 'custpage_list_i_fte_basis', line: i, value: item.fte.newBasis});
-                            sublist.setSublistValue({ id: 'custpage_list_i_fte_rate', line: i, value: item.fte.newRate});
-                            sublist.setSublistValue({ id: 'custpage_list_i_fte_amount', line: i, value: item.fte.amount});
-                        }
-    
-                        if (item.iva) {
-                            let reteiva = sublist.getField({
-                                id: 'custpage_list_i_iva_details'
-                            });
-                            if (nationalTaxes[i].fte && nationalTaxes[i].iva.value) {
-                                reteiva.addSelectOption({
-                                    value: nationalTaxes[i].iva.value,
-                                    text: nationalTaxes[i].iva.text
-                                });
-                                sublist.setSublistValue({ id: 'custpage_list_i_iva_details', line: i, value: item.iva.nationalTax});
-                            }
-                            
-                            sublist.setSublistValue({ id: 'custpage_list_i_iva_basis', line: i, value: item.iva.newBasis});
-                            sublist.setSublistValue({ id: 'custpage_list_i_iva_rate', line: i, value: item.iva.newRate});
-                            sublist.setSublistValue({ id: 'custpage_list_i_iva_amount', line: i, value: item.iva.amount});
-                        }
-    
-                        if (item.ica) {
-                            let reteica = sublist.getField({
-                                id: 'custpage_list_i_ica_details'
-                            });
-                            if (nationalTaxes[i].ica && nationalTaxes[i].ica.value) {
-                                reteica.addSelectOption({
-                                    value: nationalTaxes[i].ica.value,
-                                    text: nationalTaxes[i].ica.text
-                                });
-                                sublist.setSublistValue({ id: 'custpage_list_i_ica_details', line: i, value: item.ica.nationalTax});
-                            }
-                            
-                            sublist.setSublistValue({ id: 'custpage_list_i_ica_basis', line: i, value: item.ica.newBasis});
-                            sublist.setSublistValue({ id: 'custpage_list_i_ica_rate', line: i, value: item.ica.newRate});
-                            sublist.setSublistValue({ id: 'custpage_list_i_ica_amount', line: i, value: item.ica.amount});
-                        }
-                        
-                    });
-    
-                }
-    
-                if (dataGeneral.expense) {
-                    let sublistExpense = form.addSublist({
-                        id: "custpage_sublit_expense",
-                        type: serverWidget.SublistType.LIST,
-                        label: "Tarifa variable (Expense)",
-                        tab: "items"
-                    });
-                    let fieldsExpense = [
-                        { id: 'custpage_list_e_item', label: "Account", type: serverWidget.FieldType.TEXT }
-                    ];
-                    let activeWht = {
-                        cree:false,
-                        fte:false,
-                        iva:false,
-                        ica:false
-                    }
-                    dataGeneral.expense.forEach(function(expense){
-                        if (expense.cree) activeWht.cree = true;
-                        if (expense.fte) activeWht.fte = true;
-                        if (expense.ica) activeWht.ica = true;
-                        if (expense.iva) activeWht.iva = true;
-                    });
-    
-                    if (activeWht.cree) {
-                        fieldsExpense.push(
-                            { id: 'custpage_list_e_cree_details', label: "LATAM - CO RETECREE DETAILS", type: serverWidget.FieldType.SELECT },
-                            { id: 'custpage_list_e_cree_basis', label: "LATAM - CO RETECREE NEW BASIS", type: serverWidget.FieldType.TEXT },
-                            { id: 'custpage_list_e_cree_rate', label: "LATAM - CO RETECREE NEW RATE", type: serverWidget.FieldType.TEXT },
-                            { id: 'custpage_list_e_cree_amount', label: "LATAM - CO RETECREE AMOUNT", type: serverWidget.FieldType.TEXT }
-                        );
-                    }
-                    if (activeWht.fte) {
-                        fieldsExpense.push(
-                            { id: 'custpage_list_e_fte_details', label: "LATAM - CO RETEFTE DETAILS", type: serverWidget.FieldType.SELECT },
-                            { id: 'custpage_list_e_fte_basis', label: "LATAM - CO RETEFTE NEW BASIS", type: serverWidget.FieldType.TEXT },
-                            { id: 'custpage_list_e_fte_rate', label: "LATAM - CO RETEFTE NEW RATE", type: serverWidget.FieldType.TEXT },
-                            { id: 'custpage_list_e_fte_amount', label: "LATAM - CO RETEFTE AMOUNT", type: serverWidget.FieldType.TEXT }
-                        );
-                    }
-                    if (activeWht.ica) {
-                        fieldsExpense.push(
-                            { id: 'custpage_list_e_ica_details', label: "LATAM - CO RETEICA DETAILS", type: serverWidget.FieldType.SELECT },
-                            { id: 'custpage_list_e_ica_basis', label: "LATAM - CO RETEICA NEW BASIS", type: serverWidget.FieldType.TEXT },
-                            { id: 'custpage_list_e_ica_rate', label: "LATAM - CO RETEICA NEW RATE", type: serverWidget.FieldType.TEXT },
-                            { id: 'custpage_list_e_ica_amount', label: "LATAM - CO RETEICA AMOUNT", type: serverWidget.FieldType.TEXT }
-                        );
-                    }
-    
-                    if (activeWht.iva) {
-                        fieldsExpense.push(
-                            { id: 'custpage_list_e_iva_details', label: "LATAM - CO RETEIVA DETAILS", type: serverWidget.FieldType.SELECT },
-                            { id: 'custpage_list_e_iva_basis', label: "LATAM - CO RETEIVA NEW BASIS", type: serverWidget.FieldType.TEXT },
-                            { id: 'custpage_list_e_iva_rate', label: "LATAM - CO RETEIVA NEW RATE", type: serverWidget.FieldType.TEXT },
-                            { id: 'custpage_list_e_iva_amount', label: "LATAM - CO RETEIVA AMOUNT", type: serverWidget.FieldType.TEXT }
-                        );
-                    }
-    
-    
-                    fieldsExpense.forEach(fieldInfo => {
-                        sublistExpense.addField(fieldInfo);
-                    });
 
-                    const nationalTaxes = getReteDetails(newRecord,"expense");
+            try {
+                //Creacion de La lista de items
+                const { form, newRecord } = context;
 
-                    let sublist = form.getSublist({ id: 'custpage_sublit_expense' });
-                    dataGeneral.expense.forEach(function(expense,i){
-                        if (nationalTaxes[i].item) {
-                            sublist.setSublistValue({ id: 'ccustpage_list_e_item', line: i, value: nationalTaxes[i].item});
+
+                let dataGeneral = newRecord.getValue("custbody_lmry_features_active");
+
+                if (dataGeneral) {
+                    dataGeneral = JSON.parse(dataGeneral);
+                    log.error("dataGeneral", dataGeneral)
+                    if (dataGeneral.item) {
+                        let sublistItems = form.addSublist({
+                            id: "custpage_sublit_items",
+                            type: serverWidget.SublistType.LIST,
+                            label: "Tarifa variable (Items)",
+                            tab: "items"
+                        });
+                        let fieldsItems = [
+                            { id: 'custpage_list_i_item', label: "Item", type: serverWidget.FieldType.TEXT }
+                        ];
+                        let activeWht = {
+                            cree: false,
+                            fte: false,
+                            iva: false,
+                            ica: false
                         }
-                        if (expense.cree) {
-                            let retecree = sublist.getField({
-                                id: 'custpage_list_e_cree_details'
-                            });
-                            if (nationalTaxes[i].cree && nationalTaxes[i].cree.value) {
-                                retecree.addSelectOption({
-                                    value: nationalTaxes[i].cree.value,
-                                    text: nationalTaxes[i].cree.text
-                                });
-                                sublist.setSublistValue({ id: 'custpage_list_e_cree_details', line: i, value: expense.cree.nationalTax});
-                            }
-                            
-                            sublist.setSublistValue({ id: 'custpage_list_e_cree_basis', line: i, value: expense.cree.newBasis});
-                            sublist.setSublistValue({ id: 'custpage_list_e_cree_rate', line: i, value: expense.cree.newRate});
-                            sublist.setSublistValue({ id: 'custpage_list_e_cree_amount', line: i, value: expense.cree.amount});
+                        dataGeneral.item.forEach(function (item) {
+                            if (item.cree && item.cree.amount) activeWht.cree = true;
+                            if (item.fte && item.fte.amount) activeWht.fte = true;
+                            if (item.ica && item.ica.amount) activeWht.ica = true;
+                            if (item.iva && item.iva.amount) activeWht.iva = true;
+                        });
+
+                        if (activeWht.cree) {
+                            fieldsItems.push(
+                                { id: 'custpage_list_i_cree_details', label: "LATAM - CO RETECREE DETAILS", type: serverWidget.FieldType.SELECT },
+                                { id: 'custpage_list_i_cree_basis', label: "LATAM - CO RETECREE NEW BASIS", type: serverWidget.FieldType.TEXT },
+                                { id: 'custpage_list_i_cree_rate', label: "LATAM - CO RETECREE NEW RATE", type: serverWidget.FieldType.TEXT },
+                                { id: 'custpage_list_i_cree_amount', label: "LATAM - CO RETECREE AMOUNT", type: serverWidget.FieldType.TEXT }
+                            );
                         }
-    
-                        if (expense.fte) {
-                            let retefte = sublist.getField({
-                                id: 'custpage_list_e_fte_details'
-                            });
-                            if (nationalTaxes[i].fte && nationalTaxes[i].fte.value) {
-                                retefte.addSelectOption({
-                                    value: nationalTaxes[i].fte.value,
-                                    text: nationalTaxes[i].fte.text
-                                });
-                                sublist.setSublistValue({ id: 'custpage_list_e_fte_details', line: i, value: expense.fte.nationalTax});
-                            }
-                            
-                            sublist.setSublistValue({ id: 'custpage_list_e_fte_basis', line: i, value: expense.fte.newBasis});
-                            sublist.setSublistValue({ id: 'custpage_list_e_fte_rate', line: i, value: expense.fte.newRate});
-                            sublist.setSublistValue({ id: 'custpage_list_e_fte_amount', line: i, value: expense.fte.amount});
+                        if (activeWht.fte) {
+                            fieldsItems.push(
+                                { id: 'custpage_list_i_fte_details', label: "LATAM - CO RETEFTE DETAILS", type: serverWidget.FieldType.SELECT },
+                                { id: 'custpage_list_i_fte_basis', label: "LATAM - CO RETEFTE NEW BASIS", type: serverWidget.FieldType.TEXT },
+                                { id: 'custpage_list_i_fte_rate', label: "LATAM - CO RETEFTE NEW RATE", type: serverWidget.FieldType.TEXT },
+                                { id: 'custpage_list_i_fte_amount', label: "LATAM - CO RETEFTE AMOUNT", type: serverWidget.FieldType.TEXT }
+                            );
                         }
-    
-                        if (expense.iva) {
-                            let reteiva = sublist.getField({
-                                id: 'custpage_list_e_iva_details'
-                            });
-                            if (nationalTaxes[i].fte && nationalTaxes[i].iva.value) {
-                                reteiva.addSelectOption({
-                                    value: nationalTaxes[i].iva.value,
-                                    text: nationalTaxes[i].iva.text
-                                });
-                                sublist.setSublistValue({ id: 'custpage_list_e_iva_details', line: i, value: expense.iva.nationalTax});
-                            }
-                            
-                            sublist.setSublistValue({ id: 'custpage_list_e_iva_basis', line: i, value: expense.iva.newBasis});
-                            sublist.setSublistValue({ id: 'custpage_list_e_iva_rate', line: i, value: expense.iva.newRate});
-                            sublist.setSublistValue({ id: 'custpage_list_e_iva_amount', line: i, value: expense.iva.amount});
+                        if (activeWht.ica) {
+                            fieldsItems.push(
+                                { id: 'custpage_list_i_ica_details', label: "LATAM - CO RETEICA DETAILS", type: serverWidget.FieldType.SELECT },
+                                { id: 'custpage_list_i_ica_basis', label: "LATAM - CO RETEICA NEW BASIS", type: serverWidget.FieldType.TEXT },
+                                { id: 'custpage_list_i_ica_rate', label: "LATAM - CO RETEICA NEW RATE", type: serverWidget.FieldType.TEXT },
+                                { id: 'custpage_list_i_ica_amount', label: "LATAM - CO RETEICA AMOUNT", type: serverWidget.FieldType.TEXT }
+                            );
                         }
-    
-                        if (expense.ica) {
-                            let reteica = sublist.getField({
-                                id: 'custpage_list_e_ica_details'
-                            });
-                            if (nationalTaxes[i].ica && nationalTaxes[i].ica.value) {
-                                reteica.addSelectOption({
-                                    value: nationalTaxes[i].ica.value,
-                                    text: nationalTaxes[i].ica.text
-                                });
-                                sublist.setSublistValue({ id: 'custpage_list_e_ica_details', line: i, value: expense.ica.nationalTax});
+
+                        if (activeWht.iva) {
+                            fieldsItems.push(
+                                { id: 'custpage_list_i_iva_details', label: "LATAM - CO RETEIVA DETAILS", type: serverWidget.FieldType.SELECT },
+                                { id: 'custpage_list_i_iva_basis', label: "LATAM - CO RETEIVA NEW BASIS", type: serverWidget.FieldType.TEXT },
+                                { id: 'custpage_list_i_iva_rate', label: "LATAM - CO RETEIVA NEW RATE", type: serverWidget.FieldType.TEXT },
+                                { id: 'custpage_list_i_iva_amount', label: "LATAM - CO RETEIVA AMOUNT", type: serverWidget.FieldType.TEXT }
+                            );
+                        }
+
+                        fieldsItems.forEach(fieldInfo => {
+                            sublistItems.addField(fieldInfo);
+                        });
+
+                        // cargar national taxes
+
+                        const nationalTaxes = getReteDetails(newRecord, "item");
+                        log.error("nationalTaxes items", nationalTaxes);
+
+
+                        let sublist = form.getSublist({ id: 'custpage_sublit_items' });
+                        dataGeneral.item.forEach(function (item, i) {
+
+                            if (nationalTaxes[i].item) {
+                                sublist.setSublistValue({ id: 'custpage_list_i_item', line: i, value: nationalTaxes[i].item });
                             }
-                            
-                            sublist.setSublistValue({ id: 'custpage_list_e_ica_basis', line: i, value: expense.ica.newBasis});
-                            sublist.setSublistValue({ id: 'custpage_list_e_ica_rate', line: i, value: expense.ica.newRate});
-                            sublist.setSublistValue({ id: 'custpage_list_e_ica_amount', line: i, value: expense.ica.amount});
-                        }  
-                    });
-                }
-            };   
-    
+                            if (item.cree && activeWht.cree) {
+                                let retecree = sublist.getField({
+                                    id: 'custpage_list_i_cree_details'
+                                });
+                                if (nationalTaxes[i].cree && nationalTaxes[i].cree.value) {
+                                    retecree.addSelectOption({
+                                        value: nationalTaxes[i].cree.value,
+                                        text: nationalTaxes[i].cree.text
+                                    });
+                                    sublist.setSublistValue({ id: 'custpage_list_i_cree_details', line: i, value: item.cree.nationalTax });
+                                }
+
+
+                                sublist.setSublistValue({ id: 'custpage_list_i_cree_basis', line: i, value: item.cree.newBasis });
+                                sublist.setSublistValue({ id: 'custpage_list_i_cree_rate', line: i, value: item.cree.newRate });
+                                sublist.setSublistValue({ id: 'custpage_list_i_cree_amount', line: i, value: item.cree.amount });
+                            }
+
+                            if (item.fte&& activeWht.fte) {
+                                let retefte = sublist.getField({
+                                    id: 'custpage_list_i_fte_details'
+                                });
+                                if (nationalTaxes[i].fte && nationalTaxes[i].fte.value) {
+                                    retefte.addSelectOption({
+                                        value: nationalTaxes[i].fte.value,
+                                        text: nationalTaxes[i].fte.text
+                                    });
+                                    sublist.setSublistValue({ id: 'custpage_list_i_fte_details', line: i, value: item.fte.nationalTax });
+                                }
+
+                                sublist.setSublistValue({ id: 'custpage_list_i_fte_basis', line: i, value: item.fte.newBasis });
+                                sublist.setSublistValue({ id: 'custpage_list_i_fte_rate', line: i, value: item.fte.newRate });
+                                sublist.setSublistValue({ id: 'custpage_list_i_fte_amount', line: i, value: item.fte.amount });
+                            }
+
+                            if (item.iva && activeWht.iva) {
+                                let reteiva = sublist.getField({
+                                    id: 'custpage_list_i_iva_details'
+                                });
+                                if (nationalTaxes[i].fte && nationalTaxes[i].iva.value) {
+                                    reteiva.addSelectOption({
+                                        value: nationalTaxes[i].iva.value,
+                                        text: nationalTaxes[i].iva.text
+                                    });
+                                    sublist.setSublistValue({ id: 'custpage_list_i_iva_details', line: i, value: item.iva.nationalTax });
+                                }
+
+                                sublist.setSublistValue({ id: 'custpage_list_i_iva_basis', line: i, value: item.iva.newBasis });
+                                sublist.setSublistValue({ id: 'custpage_list_i_iva_rate', line: i, value: item.iva.newRate });
+                                sublist.setSublistValue({ id: 'custpage_list_i_iva_amount', line: i, value: item.iva.amount });
+                            }
+
+                            if (item.ica && activeWht.ica) {
+                                let reteica = sublist.getField({
+                                    id: 'custpage_list_i_ica_details'
+                                });
+                                if (nationalTaxes[i].ica && nationalTaxes[i].ica.value) {
+                                    reteica.addSelectOption({
+                                        value: nationalTaxes[i].ica.value,
+                                        text: nationalTaxes[i].ica.text
+                                    });
+                                    sublist.setSublistValue({ id: 'custpage_list_i_ica_details', line: i, value: item.ica.nationalTax });
+                                }
+
+                                sublist.setSublistValue({ id: 'custpage_list_i_ica_basis', line: i, value: item.ica.newBasis });
+                                sublist.setSublistValue({ id: 'custpage_list_i_ica_rate', line: i, value: item.ica.newRate });
+                                sublist.setSublistValue({ id: 'custpage_list_i_ica_amount', line: i, value: item.ica.amount });
+                            }
+
+                        });
+
+                    }
+
+                    if (dataGeneral.expense) {
+                        let sublistExpense = form.addSublist({
+                            id: "custpage_sublit_expense",
+                            type: serverWidget.SublistType.LIST,
+                            label: "Tarifa variable (Expense)",
+                            tab: "items"
+                        });
+                        let fieldsExpense = [
+                            { id: 'custpage_list_e_item', label: "Account", type: serverWidget.FieldType.TEXT }
+                        ];
+                        let activeWht = {
+                            cree: false,
+                            fte: false,
+                            iva: false,
+                            ica: false
+                        }
+                        dataGeneral.expense.forEach(function (expense) {
+                            if (expense.cree) activeWht.cree = true;
+                            if (expense.fte) activeWht.fte = true;
+                            if (expense.ica) activeWht.ica = true;
+                            if (expense.iva) activeWht.iva = true;
+                        });
+
+                        if (activeWht.cree) {
+                            fieldsExpense.push(
+                                { id: 'custpage_list_e_cree_details', label: "LATAM - CO RETECREE DETAILS", type: serverWidget.FieldType.SELECT },
+                                { id: 'custpage_list_e_cree_basis', label: "LATAM - CO RETECREE NEW BASIS", type: serverWidget.FieldType.TEXT },
+                                { id: 'custpage_list_e_cree_rate', label: "LATAM - CO RETECREE NEW RATE", type: serverWidget.FieldType.TEXT },
+                                { id: 'custpage_list_e_cree_amount', label: "LATAM - CO RETECREE AMOUNT", type: serverWidget.FieldType.TEXT }
+                            );
+                        }
+                        if (activeWht.fte) {
+                            fieldsExpense.push(
+                                { id: 'custpage_list_e_fte_details', label: "LATAM - CO RETEFTE DETAILS", type: serverWidget.FieldType.SELECT },
+                                { id: 'custpage_list_e_fte_basis', label: "LATAM - CO RETEFTE NEW BASIS", type: serverWidget.FieldType.TEXT },
+                                { id: 'custpage_list_e_fte_rate', label: "LATAM - CO RETEFTE NEW RATE", type: serverWidget.FieldType.TEXT },
+                                { id: 'custpage_list_e_fte_amount', label: "LATAM - CO RETEFTE AMOUNT", type: serverWidget.FieldType.TEXT }
+                            );
+                        }
+                        if (activeWht.ica) {
+                            fieldsExpense.push(
+                                { id: 'custpage_list_e_ica_details', label: "LATAM - CO RETEICA DETAILS", type: serverWidget.FieldType.SELECT },
+                                { id: 'custpage_list_e_ica_basis', label: "LATAM - CO RETEICA NEW BASIS", type: serverWidget.FieldType.TEXT },
+                                { id: 'custpage_list_e_ica_rate', label: "LATAM - CO RETEICA NEW RATE", type: serverWidget.FieldType.TEXT },
+                                { id: 'custpage_list_e_ica_amount', label: "LATAM - CO RETEICA AMOUNT", type: serverWidget.FieldType.TEXT }
+                            );
+                        }
+
+                        if (activeWht.iva) {
+                            fieldsExpense.push(
+                                { id: 'custpage_list_e_iva_details', label: "LATAM - CO RETEIVA DETAILS", type: serverWidget.FieldType.SELECT },
+                                { id: 'custpage_list_e_iva_basis', label: "LATAM - CO RETEIVA NEW BASIS", type: serverWidget.FieldType.TEXT },
+                                { id: 'custpage_list_e_iva_rate', label: "LATAM - CO RETEIVA NEW RATE", type: serverWidget.FieldType.TEXT },
+                                { id: 'custpage_list_e_iva_amount', label: "LATAM - CO RETEIVA AMOUNT", type: serverWidget.FieldType.TEXT }
+                            );
+                        }
+
+
+                        fieldsExpense.forEach(fieldInfo => {
+                            sublistExpense.addField(fieldInfo);
+                        });
+
+                        const nationalTaxes = getReteDetails(newRecord, "expense");
+
+                        let sublist = form.getSublist({ id: 'custpage_sublit_expense' });
+                        dataGeneral.expense.forEach(function (expense, i) {
+                            if (nationalTaxes[i].item) {
+                                sublist.setSublistValue({ id: 'ccustpage_list_e_item', line: i, value: nationalTaxes[i].item });
+                            }
+                            if (expense.cree && activeWht.cree) {
+                                let retecree = sublist.getField({
+                                    id: 'custpage_list_e_cree_details'
+                                });
+                                if (nationalTaxes[i].cree && nationalTaxes[i].cree.value) {
+                                    retecree.addSelectOption({
+                                        value: nationalTaxes[i].cree.value,
+                                        text: nationalTaxes[i].cree.text
+                                    });
+                                    sublist.setSublistValue({ id: 'custpage_list_e_cree_details', line: i, value: expense.cree.nationalTax });
+                                }
+
+                                sublist.setSublistValue({ id: 'custpage_list_e_cree_basis', line: i, value: expense.cree.newBasis });
+                                sublist.setSublistValue({ id: 'custpage_list_e_cree_rate', line: i, value: expense.cree.newRate });
+                                sublist.setSublistValue({ id: 'custpage_list_e_cree_amount', line: i, value: expense.cree.amount });
+                            }
+
+                            if (expense.fte && activeWht.fte) {
+                                let retefte = sublist.getField({
+                                    id: 'custpage_list_e_fte_details'
+                                });
+                                if (nationalTaxes[i].fte && nationalTaxes[i].fte.value) {
+                                    retefte.addSelectOption({
+                                        value: nationalTaxes[i].fte.value,
+                                        text: nationalTaxes[i].fte.text
+                                    });
+                                    sublist.setSublistValue({ id: 'custpage_list_e_fte_details', line: i, value: expense.fte.nationalTax });
+                                }
+
+                                sublist.setSublistValue({ id: 'custpage_list_e_fte_basis', line: i, value: expense.fte.newBasis });
+                                sublist.setSublistValue({ id: 'custpage_list_e_fte_rate', line: i, value: expense.fte.newRate });
+                                sublist.setSublistValue({ id: 'custpage_list_e_fte_amount', line: i, value: expense.fte.amount });
+                            }
+
+                            if (expense.iva && activeWht.iva) {
+                                let reteiva = sublist.getField({
+                                    id: 'custpage_list_e_iva_details'
+                                });
+                                if (nationalTaxes[i].fte && nationalTaxes[i].iva.value) {
+                                    reteiva.addSelectOption({
+                                        value: nationalTaxes[i].iva.value,
+                                        text: nationalTaxes[i].iva.text
+                                    });
+                                    sublist.setSublistValue({ id: 'custpage_list_e_iva_details', line: i, value: expense.iva.nationalTax });
+                                }
+
+                                sublist.setSublistValue({ id: 'custpage_list_e_iva_basis', line: i, value: expense.iva.newBasis });
+                                sublist.setSublistValue({ id: 'custpage_list_e_iva_rate', line: i, value: expense.iva.newRate });
+                                sublist.setSublistValue({ id: 'custpage_list_e_iva_amount', line: i, value: expense.iva.amount });
+                            }
+
+                            if (expense.ica && activeWht.ica) {
+                                let reteica = sublist.getField({
+                                    id: 'custpage_list_e_ica_details'
+                                });
+                                if (nationalTaxes[i].ica && nationalTaxes[i].ica.value) {
+                                    reteica.addSelectOption({
+                                        value: nationalTaxes[i].ica.value,
+                                        text: nationalTaxes[i].ica.text
+                                    });
+                                    sublist.setSublistValue({ id: 'custpage_list_e_ica_details', line: i, value: expense.ica.nationalTax });
+                                }
+
+                                sublist.setSublistValue({ id: 'custpage_list_e_ica_basis', line: i, value: expense.ica.newBasis });
+                                sublist.setSublistValue({ id: 'custpage_list_e_ica_rate', line: i, value: expense.ica.newRate });
+                                sublist.setSublistValue({ id: 'custpage_list_e_ica_amount', line: i, value: expense.ica.amount });
+                            }
+                        });
+                    }
+                };
+            } catch (error) {
+                log.error('Error [createSublistVariableRate]', error)
+                log.error('Error [createSublistVariableRate] message', error.message)
+                log.error('Error [createSublistVariableRate] stack', error.stack)
+            }
+
+
         }
                
         const createFields = (context) => {
@@ -1423,35 +1429,82 @@ define(["N/ui/serverWidget","N/record", "N/search", "N/runtime", "N/log", "N/for
         }
     
         const saveWhtVariableRate = (context) => {
-            const {newRecord} = context;
-            let resultWht = {};
+            try {
+                const {newRecord} = context;
+                let resultWht = {};
+                
+                const saveWhtVariableRate = (resultWht,sublist) => {
     
-            const saveWhtVariableRate = (resultWht,sublist) => {
-                const countItems = newRecord.getLineCount({
-                    sublistId: sublist
-                });
-                let elements = [];
-                let fieldId = sublist == "item" ? 'custpage_co_variable_rate_data' : 'custpage_co_variable_rate_data_expense';
-                for (let i = 0; i < countItems; i++) {
-                    let dataLine = newRecord.getSublistValue({
-                        sublistId: sublist,
-                        fieldId: fieldId,
-                        line: i
+                    const countItems = newRecord.getLineCount({
+                        sublistId: sublist
                     });
-                    elements.push(JSON.parse(dataLine));
+                    let elements = [];
+                    let fieldId = sublist == "item" ? 'custpage_co_variable_rate_data' : 'custpage_co_variable_rate_data_expense';
+                    for (let i = 0; i < countItems; i++) {
+                        let dataLine = newRecord.getSublistValue({
+                            sublistId: sublist,
+                            fieldId: fieldId,
+                            line: i
+                        });
+                        let existRetention = {
+                            cree:newRecord.getSublistValue({
+                                sublistId: sublist,
+                                fieldId: sublist == "item" ? 'custpage_lmry_co_autoretecree' : 'custpage_lmry_co_retecree_exp',
+                                line: i
+                            }),
+                            fte:newRecord.getSublistValue({
+                                sublistId: sublist,
+                                fieldId: sublist == "item" ? 'custpage_lmry_co_retefte' : 'custpage_lmry_co_retefte_exp',
+                                line: i
+                            }),
+                            iva:newRecord.getSublistValue({
+                                sublistId: sublist,
+                                fieldId: sublist == "item" ? 'custpage_lmry_co_reteiva' : 'custpage_lmry_co_reteiva_exp',
+                                line: i
+                            }),
+                            ica:newRecord.getSublistValue({
+                                sublistId: sublist,
+                                fieldId: sublist == "item" ? 'custpage_lmry_co_reteica' : 'custpage_lmry_co_reteica_exp',
+                                line: i
+                            })
+                        }
+                        log.error("dataLine 1",dataLine)
+                        //elimina las retenciones que se han dejado de escoger despues de guardar el popup
+                        if (dataLine) {
+                            
+                            dataLine = JSON.parse(dataLine);
+                            log.error("existRetention",existRetention)
+                            log.error("dataLine jsonparse",dataLine)
+                            for (const retention in dataLine) {
+                                if (existRetention[retention] != dataLine[retention].nationalTax) {
+                                    delete dataLine[retention];
+                                }
+                            }
+                            log.error("dataLine 3",dataLine)
+                            if (Object.keys(dataLine).length) {
+                                elements.push(dataLine);
+                            }
+                            
+                        }
+                        
+                    }
+            
+                    if (elements.length) {
+                        resultWht[sublist] = elements;
+                    }
                 }
         
-                if (elements.length) {
-                    resultWht[sublist] = elements;
-                }
+                saveWhtVariableRate(resultWht,"item");
+                saveWhtVariableRate(resultWht,"expense");
+        
+                if (Object.keys(resultWht).length) {
+                    newRecord.setValue("custbody_lmry_features_active",JSON.stringify(resultWht));
+                } 
+            } catch (error) {
+               log.error('Error [saveWhtVariableRate]', error)
+               log.error('Error [saveWhtVariableRate] stack', error.stack)
             }
-    
-            saveWhtVariableRate(resultWht,"item");
-            saveWhtVariableRate(resultWht,"expense");
-    
-            if (Object.keys(resultWht).length) {
-                newRecord.setValue("custbody_lmry_features_active",JSON.stringify(resultWht));
-            } 
+            
     
         }
     

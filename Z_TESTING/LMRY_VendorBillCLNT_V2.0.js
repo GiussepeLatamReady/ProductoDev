@@ -1701,19 +1701,22 @@ define(['N/log', "N/query", 'N/record', 'N/search', 'N/currentRecord', 'N/url', 
         return Number(itemValue);
       };
 
+
+
+
       //Cracion de paneles por existencia de retenciones
       var panels = [];
     
-      if (retecree.value) {
+      if (retecree.value && isActiveFeatNationalTax(retecree.value)) {
         panels.push(createPanel('RETECREE DETAIL', buildItemsPopup(retecree, itemVariableRate ? itemVariableRate.cree : null,"cree")));
       }
-      if (retefte.value) {
+      if (retefte.value && isActiveFeatNationalTax(retefte.value)) {
         panels.push(createPanel('RETEFTE DETAIL', buildItemsPopup(retefte, itemVariableRate ? itemVariableRate.fte : null,"fte")));
       }
-      if (reteica.value) {
+      if (reteica.value && isActiveFeatNationalTax(reteica.value)) {
         panels.push(createPanel('RETEICA DETAIL', buildItemsPopup(reteica, itemVariableRate ? itemVariableRate.ica : null,"ica")));
       }
-      if (reteiva.value) {
+      if (reteiva.value && isActiveFeatNationalTax(reteiva.value)) {
         panels.push(createPanel('RETEIVA DETAIL', buildItemsPopup(reteiva, itemVariableRate ? itemVariableRate.iva : null,"iva")));
       }
     
@@ -1833,8 +1836,13 @@ define(['N/log', "N/query", 'N/record', 'N/search', 'N/currentRecord', 'N/url', 
       });
     }
     
-    function isVariableRateNT(){
-      
+    function isActiveFeatNationalTax(id) {
+      var isActive = search.lookupFields(
+        { type: "customrecord_lmry_national_taxes", 
+          id: id, 
+          columns: ["custrecord_lmry_ntax_var_rate"] 
+        }).custrecord_lmry_ntax_var_rate;
+      return isActive === true || isActive === "T";
     }
 
     function getPosition(checkElement) {
@@ -1844,93 +1852,6 @@ define(['N/log', "N/query", 'N/record', 'N/search', 'N/currentRecord', 'N/url', 
       return (rowIndex - 1);
     }
 
-    /*
-    function getSublistTabItems(sourceSublistId, editableSublistId, recordObj) {
-      var sourceSublistCount = recordObj.getLineCount({ sublistId: sourceSublistId });
-      var editableSublistCount = recordObj.getLineCount({ sublistId: editableSublistId });
-      var sourceSublist = [];
-      var editableSublist = [];
-      if (sourceSublistCount) {
-        for (var i = 0; i < sourceSublistCount; i++) {
-          recordObj.selectLine({ sublistId: sourceSublistId, line: i });
-
-          var elementsObject = {
-            name: recordObj.getCurrentSublistText({ sublistId: sourceSublistId, fieldId: sourceSublistId }),
-            line: i
-          }
-          sourceSublist.push(elementsObject);
-        }
-      }
-      if (editableSublistCount) {
-        for (var i = 0; i < editableSublistCount; i++) {
-          recordObj.selectLine({ sublistId: editableSublistId, line: i });
-
-          var elementsObject = {
-            name: recordObj.getCurrentSublistValue({ sublistId: editableSublistId, fieldId: sourceSublistId }),
-            line: i,
-          }
-          editableSublist.push(elementsObject);
-        }
-      }
-      console.log("sourceSublist:", sourceSublist)
-      console.log("editableSublist:", editableSublist)
-      var listModify = getChanges(sourceSublist, editableSublist)
-      console.log("listModify:", listModify)
-      //var sublistModify = getChanges(sourceSublist,editableSublist);
-
-    }
-
-    function getChanges(sourceSublist, editableSublist) {
-      var changes = [];
-  
-  
-      var sourceMap = {};
-      for (var i = 0; i < sourceSublist.length; i++) {
-          sourceMap[sourceSublist[i].line] = sourceSublist[i];
-      }
-  
-  
-      var editableMap = {};
-      for (var i = 0; i < editableSublist.length; i++) {
-          editableMap[editableSublist[i].line] = editableSublist[i];
-      }
-  
-  
-  
-      Object.keys(sourceMap).forEach(function (line) {
-          if (editableMap.hasOwnProperty(line)) {
-              if (sourceMap[line].name !== editableMap[line].name) {
-                  changes.push({
-                      line: parseInt(line),
-                      change: 'modify',
-                      name: editableMap[line].name
-                  });
-              }
-          } else {
-              changes.push({
-                  line: parseInt(line),
-                  change: 'delete'
-              });
-          }
-      });
-  
-      Object.keys(editableMap).forEach(function (line) {
-          if (!sourceMap.hasOwnProperty(line)) {
-              changes.push({
-                  line: parseInt(line),
-                  change: 'create',
-                  name: editableMap[line].name
-              });
-          }
-      });
-      changes.sort(function (a, b) {
-          return a.line - b.line;
-      });
-  
-      return changes;
-    }
-
-    */
 
     function validate_open_window(scriptContext, section) {
       if (window[section] == null) {

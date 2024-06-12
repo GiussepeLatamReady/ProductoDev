@@ -1,23 +1,30 @@
 {
    "cree": {
       "nationalTax": "3462",
-      "newBasis": 1000,
-      "newRate": 10,
-      "amount": 100,
+      "newBasis": 200,
+      "newRate": 20,
+      "amount": 40,
       "key": "cree"
    },
    "fte": {
       "nationalTax": "3544",
-      "newBasis": 2000,
-      "newRate": 5,
-      "amount": 100,
+      "newBasis": 0,
+      "newRate": 0,
+      "amount": 0,
       "key": "fte"
    },
    "ica": {
-      "nationalTax": "3458",
-      "newBasis": 4000,
-      "newRate": 2.5,
-      "amount": 100,
+      "nationalTax": "3260",
+      "newBasis": 0,
+      "newRate": 0,
+      "amount": 0,
       "key": "ica"
+   },
+   "iva": {
+      "nationalTax": "3545",
+      "newBasis": 0,
+      "newRate": 0,
+      "amount": 0,
+      "key": "iva"
    }
 }
