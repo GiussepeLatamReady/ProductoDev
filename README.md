@@ -13,8 +13,13 @@ Solo aplica a Colombia
 
 ## Scripts
 + Create
-
+    LMRY_WHT_Variable_Rate_popup_LBRY_V2.0.js
 + Update
+    LMRY_VendorCredit_CO_URET_IMPLT.js
+    LMRY_VendorCreditCLNT_V2.0.js
+    LMRY_Vendorbill_CO_URET_IMPLT.js
+    LMRY_VendorBillCLNT_V2.0.js
+    LR_CO_New_WithholdingLines_LIB.js
 
     
 
