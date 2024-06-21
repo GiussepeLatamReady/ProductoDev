@@ -1,4 +1,4 @@
-# [C1115: CO Anthesis Colombia: Retenciones con Tarifa Variable por línea](https://docs.google.com/document/d/1gocg46QPqHF5Wx9ezZkpLqRAUc6ffKPTL6ICQu5C5Fk/edit)
+# [C1107 :WSP BR  / Procesar Pagos de cliente en Dólares dirigidos a cuentas bancarias en Reales](https://docs.google.com/document/d/1_RuvzoCiXF_wKNivSAMn_rzyKUq2fCKlpAYeM4_ho4A/edit)
 
 
 ## Description of the Requirement
