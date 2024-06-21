@@ -604,7 +604,6 @@ define(['N/log', "N/query", 'N/record', 'N/search', 'N/currentRecord', 'N/url', 
 
         /* Validacion 04/02/22 */
         var lockedPeriod = recordObj.getValue("custpage_lockedperiod");
-        log.error('lockedPeriod', lockedPeriod);
         if (lockedPeriod == true || lockedPeriod == 'T') {
           return true;
         }
@@ -1268,7 +1267,7 @@ define(['N/log', "N/query", 'N/record', 'N/search', 'N/currentRecord', 'N/url', 
         }
 
       } catch (err) {
-        log.error('SaveRecord', err);
+        console.error('SaveRecord', err);
         library.sendemail2(' [ SaveRecord - lblname ] ' + err, LMRY_script, recordObj, 'transactionnumber', 'entity');
         //alert('Save Record: ' + err);
       }
@@ -1530,7 +1529,7 @@ define(['N/log', "N/query", 'N/record', 'N/search', 'N/currentRecord', 'N/url', 
         /**********************************************************************/
 
       } catch (err) {
-        log.error('[fieldChanged]', err);
+        console.error('[fieldChanged]', err);
       }
 
       return true;
@@ -1694,8 +1693,6 @@ define(['N/log', "N/query", 'N/record', 'N/search', 'N/currentRecord', 'N/url', 
 
           // Retorna el cuero del SuiteLet
           var closedPeriod = getStlt.body;
-
-          log.error('closedPeriod', closedPeriod);
           if (closedPeriod == 'T') {
             recordObj.setValue('custpage_lockedperiod', true);
           } else {
@@ -3149,7 +3146,6 @@ define(['N/log', "N/query", 'N/record', 'N/search', 'N/currentRecord', 'N/url', 
 
         // Verifica que no este vacio el numero de serie
         var lmry_DocSer = currentRCD.getValue('custbody_lmry_serie_doc_cxc');
-        log.error('lmry_DocSer', lmry_DocSer);
         if (lmry_DocSer != '' && lmry_DocSer != null && lmry_DocSer != -1) {
 
           // Verifica que no este vacio el numero preimpreso
@@ -3309,7 +3305,7 @@ define(['N/log', "N/query", 'N/record', 'N/search', 'N/currentRecord', 'N/url', 
         }
         return boolean;
       } catch (error) {
-        log.error(" [ validateMedioMagnetico ] ", error);
+        console.error(" [ validateMedioMagnetico ] ", error);
       }
     }
 
@@ -3326,7 +3322,7 @@ define(['N/log', "N/query", 'N/record', 'N/search', 'N/currentRecord', 'N/url', 
         }
         return bool;
       } catch (error) {
-        log.error(" [ validateAccountTaxCode ] ", error);
+        console.error(" [ validateAccountTaxCode ] ", error);
       }
     }
 

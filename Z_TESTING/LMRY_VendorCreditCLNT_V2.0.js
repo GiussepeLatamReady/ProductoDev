@@ -429,7 +429,6 @@ define(['N/log', 'N/record', 'N/runtime', 'N/search', 'N/https', 'N/translation'
         }
         /* Validacion 04/02/22 */
         var lockedPeriod = recordObj.getValue("custpage_lockedperiod");
-        log.error('lockedPeriod', lockedPeriod);
         if (lockedPeriod == true || lockedPeriod == 'T') {
           return true;
         }
@@ -904,8 +903,6 @@ define(['N/log', 'N/record', 'N/runtime', 'N/search', 'N/https', 'N/translation'
 
           // Retorna el cuero del SuiteLet
           var closedPeriod = getStlt.body;
-
-          log.error('closedPeriod', closedPeriod);
           if (closedPeriod == 'T') {
             recordObj.setValue('custpage_lockedperiod', true);
           } else {

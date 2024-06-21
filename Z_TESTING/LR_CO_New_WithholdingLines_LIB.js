@@ -19,9 +19,7 @@ define(["N/ui/serverWidget","N/record", "N/search", "N/runtime", "N/log", "N/for
             let newRecord = context.newRecord;
     
             //log.error("newRecord", newRecord);
-            log.error("type", newRecord.type);
             let mode = context.type;
-            log.error("mode", mode);
             //Features
             let featureOW = runtime.isFeatureInEffect({ feature: "SUBSIDIARIES" });
             let featureMB = runtime.isFeatureInEffect({ feature: "MULTIBOOK" });
@@ -34,7 +32,6 @@ define(["N/ui/serverWidget","N/record", "N/search", "N/runtime", "N/log", "N/for
             if (approvalFeature == "T" || approvalstatus == true) {
                 if (newRecord.type == "invoice" || newRecord.type == "vendorbill") {
                     if (approvalstatus != null && approvalstatus != "" && approvalstatus != "2") {
-                        log.error("flag", "approvalstatus");
                         return true;
                     }
                 }
@@ -43,11 +40,9 @@ define(["N/ui/serverWidget","N/record", "N/search", "N/runtime", "N/log", "N/for
             let featureManager = new FeatureManager(subsidiary);
             if (mode == "edit") {
                 if (featureManager.isActive(CO_FEAT.WHT_VERIFY_CM) && Validate_EIDocument(recordObj)) {
-                    log.error("flag", "WHT_VERIFY_CM");
                     return true;
                 }
                 if (validateChange(context)) {
-                    log.error("flag", "validateChange");
                     return true;
                 }
             }
@@ -86,7 +81,6 @@ define(["N/ui/serverWidget","N/record", "N/search", "N/runtime", "N/log", "N/for
                     let reteica = recordObj.getSublistValue({ sublistId: key, fieldId: "custcol_lmry_co_reteica", line: i });
     
                     if (!retecree && !retefte && !reteiva && !reteica) {
-                        log.error("flag", "validarete");
                         continue;
                     };
     
@@ -130,10 +124,7 @@ define(["N/ui/serverWidget","N/record", "N/search", "N/runtime", "N/log", "N/for
                     }
                 }
             }
-            log.error("linesJSON", linesJSON);
-            log.error("nationalTaxes", nationalTaxes);
             if (!nationalTaxes.length) {
-                log.error("flag", "no natinal tax");
                 return true;
             }
             // Busqueda de nombres de items/accounts
@@ -151,7 +142,6 @@ define(["N/ui/serverWidget","N/record", "N/search", "N/runtime", "N/log", "N/for
                     }
                 }
             }
-            log.error("itemNames", JSON.stringify(itemNames));
             // Busqueda de nombres de items/accounts
             if (accounts.length) {
                 let accountSearch = search.create({
@@ -167,7 +157,6 @@ define(["N/ui/serverWidget","N/record", "N/search", "N/runtime", "N/log", "N/for
                     }
                 }
             }
-            log.error("accountNames", JSON.stringify(accountNames));
             // JSON de National Taxes
             let nationalTaxJSON = getNationalTaxes(recordObj, nationalTaxes, featureOW);
             //JSON result
@@ -225,11 +214,8 @@ define(["N/ui/serverWidget","N/record", "N/search", "N/runtime", "N/log", "N/for
                     }
                 }
             }
-            log.error("JSONresult", JSON.stringify(JSONresult));
-            log.error("JSONamounts", JSON.stringify(JSONamounts));
     
             let idJsonResult = createJSONResult(JSONresult, recordObj);
-            log.error("idJsonResult", idJsonResult);
             record.submitFields({
                 type: recordObj.type,
                 id: recordObj.id,
@@ -256,7 +242,6 @@ define(["N/ui/serverWidget","N/record", "N/search", "N/runtime", "N/log", "N/for
                     "User-Agent": "Mozilla/5.0"
                 }
             });
-            log.error("myRestletResponse", myRestletResponse);
         };
 
 
@@ -457,7 +442,6 @@ define(["N/ui/serverWidget","N/record", "N/search", "N/runtime", "N/log", "N/for
                     debitaccount: debitaccount
                 };
             }
-            log.error("nationalTaxJSON", JSON.stringify(jsonNT));
             return jsonNT;
         };
     
@@ -502,15 +486,12 @@ define(["N/ui/serverWidget","N/record", "N/search", "N/runtime", "N/log", "N/for
             let idItemName = sublistJSON[sublist].line == "item" ? itemNames[dataLine.value] : accountNames[dataLine.value];
     
             let flagItem = false;
-            log.error("idItem", idItem)
-            log.error("appliesField", appliesField)
     
             if (idItem == appliesField || (!dataNationalTax.applies_item && !dataNationalTax.applies_account)) {
                 flagItem = true;
             }
     
             if (!flagItem) {
-                log.error("flag" + dataNationalTax.subtype, "salio")
                 return returnData;
             }
             let departmentItem = dataLine["departmentItem"] || dataLine["departmentMain"] || "";
@@ -852,7 +833,6 @@ define(["N/ui/serverWidget","N/record", "N/search", "N/runtime", "N/log", "N/for
             const dataVariableRate = newRecord.getValue("custbody_lmry_features_active");
             
             if (oldApprovalStatus != approvalStatus) {
-                log.error("oldApprovalStatus, approvalStatus", [oldApprovalStatus, approvalStatus].join(","));
                 return false;
             }
 
@@ -865,7 +845,6 @@ define(["N/ui/serverWidget","N/record", "N/search", "N/runtime", "N/log", "N/for
     
     
             if (oldNumberItem != numberItem) {
-                log.error("oldNumberItem, numberItem", [oldNumberItem, numberItem].join(","));
                 return false;
             }
     
@@ -875,7 +854,6 @@ define(["N/ui/serverWidget","N/record", "N/search", "N/runtime", "N/log", "N/for
     
     
                 if (oldAccount != account) {
-                    log.error("i, oldAccount, account", [i, oldAccount, account].join(","));
                     return false;
                 }
     
@@ -887,7 +865,6 @@ define(["N/ui/serverWidget","N/record", "N/search", "N/runtime", "N/log", "N/for
     
     
                 if (oldGrossAmt != grossAmt) {
-                    log.error("i, oldGrossAmt, grossAmt", [i, oldGrossAmt, grossAmt].join(","));
                     return false;
                 }
     
@@ -895,7 +872,6 @@ define(["N/ui/serverWidget","N/record", "N/search", "N/runtime", "N/log", "N/for
                 let IVA = newRecord.getSublistValue({ sublistId: "item", fieldId: "custcol_lmry_co_reteiva", line: i }) || "";
     
                 if (oldIVA != IVA) {
-                    log.error("i, oldIVA, IVA", [i, oldIVA, IVA].join(","));
                     return false;
                 }
     
@@ -903,7 +879,6 @@ define(["N/ui/serverWidget","N/record", "N/search", "N/runtime", "N/log", "N/for
                 let ICA = newRecord.getSublistValue({ sublistId: "item", fieldId: "custcol_lmry_co_reteica", line: i }) || "";
     
                 if (oldICA != ICA) {
-                    log.error("i, oldICA, ICA", [i, oldICA, ICA].join(","));
                     return false;
                 }
     
@@ -911,7 +886,6 @@ define(["N/ui/serverWidget","N/record", "N/search", "N/runtime", "N/log", "N/for
                 let FTE = newRecord.getSublistValue({ sublistId: "item", fieldId: "custcol_lmry_co_retefte", line: i }) || "";
     
                 if (oldFTE != FTE) {
-                    log.error("i, oldFTE, FTE", [i, oldFTE, FTE].join(","));
                     return false;
                 }
     
@@ -919,7 +893,6 @@ define(["N/ui/serverWidget","N/record", "N/search", "N/runtime", "N/log", "N/for
                 let CREE = newRecord.getSublistValue({ sublistId: "item", fieldId: "custcol_lmry_co_autoretecree", line: i }) || "";
     
                 if (oldCREE != CREE) {
-                    log.error("i, oldCREE, CREE", [i, oldCREE, CREE].join(","));
                     return false;
                 }
     
@@ -931,7 +904,6 @@ define(["N/ui/serverWidget","N/record", "N/search", "N/runtime", "N/log", "N/for
     
     
                 if (oldNumberExpenses != numberExpenses) {
-                    log.error("oldNumberExpenses, numberExpenses", [oldNumberExpenses, numberExpenses].join(","));
                     return false;
                 }
     
@@ -941,7 +913,6 @@ define(["N/ui/serverWidget","N/record", "N/search", "N/runtime", "N/log", "N/for
     
     
                     if (oldAccount != account) {
-                        log.error("i, oldAccount, account", [i, oldAccount, account].join(","));
                         return false;
                     }
     
@@ -953,7 +924,6 @@ define(["N/ui/serverWidget","N/record", "N/search", "N/runtime", "N/log", "N/for
     
     
                     if (oldGrossAmt != grossAmt) {
-                        log.error("i, oldGrossAmt, grossAmt", [i, oldGrossAmt, grossAmt].join(","));
                         return false;
                     }
     
@@ -961,7 +931,6 @@ define(["N/ui/serverWidget","N/record", "N/search", "N/runtime", "N/log", "N/for
                     let IVA = newRecord.getSublistValue({ sublistId: "expense", fieldId: "custcol_lmry_co_reteiva", line: i }) || "";
     
                     if (oldIVA != IVA) {
-                        log.error("i, oldIVA, IVA", [i, oldIVA, IVA].join(","));
                         return false;
                     }
     
@@ -969,7 +938,6 @@ define(["N/ui/serverWidget","N/record", "N/search", "N/runtime", "N/log", "N/for
                     let ICA = newRecord.getSublistValue({ sublistId: "expense", fieldId: "custcol_lmry_co_reteica", line: i }) || "";
     
                     if (oldICA != ICA) {
-                        log.error("i, oldICA, ICA", [i, oldICA, ICA].join(","));
                         return false;
                     }
     
@@ -977,7 +945,6 @@ define(["N/ui/serverWidget","N/record", "N/search", "N/runtime", "N/log", "N/for
                     let FTE = newRecord.getSublistValue({ sublistId: "expense", fieldId: "custcol_lmry_co_retefte", line: i }) || "";
     
                     if (oldFTE != FTE) {
-                        log.error("i, oldFTE, FTE", [i, oldFTE, FTE].join(","));
                         return false;
                     }
     
@@ -985,14 +952,11 @@ define(["N/ui/serverWidget","N/record", "N/search", "N/runtime", "N/log", "N/for
                     let CREE = newRecord.getSublistValue({ sublistId: "expense", fieldId: "custcol_lmry_co_autoretecree", line: i }) || "";
     
                     if (oldCREE != CREE) {
-                        log.error("i, oldCREE, CREE", [i, oldCREE, CREE].join(","));
                         return false;
                     }
     
                 }
             }
-    
-            log.error("return true", true);
             return true;
     
         }
@@ -1074,7 +1038,6 @@ define(["N/ui/serverWidget","N/record", "N/search", "N/runtime", "N/log", "N/for
 
                 if (dataGeneral) {
                     dataGeneral = JSON.parse(dataGeneral);
-                    log.error("dataGeneral", dataGeneral)
                     if (dataGeneral.item) {
                         let sublistItems = form.addSublist({
                             id: "custpage_sublit_items",
@@ -1139,7 +1102,6 @@ define(["N/ui/serverWidget","N/record", "N/search", "N/runtime", "N/log", "N/for
                         // cargar national taxes
 
                         const nationalTaxes = getReteDetails(newRecord, "item");
-                        log.error("nationalTaxes items", nationalTaxes);
 
 
                         let sublist = form.getSublist({ id: 'custpage_sublit_items' });
@@ -1451,19 +1413,15 @@ define(["N/ui/serverWidget","N/record", "N/search", "N/runtime", "N/log", "N/for
                                 line: i
                             })
                         }
-                        log.error("dataLine 1",dataLine)
                         //elimina las retenciones que se han dejado de escoger despues de guardar el popup
                         if (dataLine) {
                             
                             dataLine = JSON.parse(dataLine);
-                            log.error("existRetention",existRetention)
-                            log.error("dataLine jsonparse",dataLine)
                             for (const retention in dataLine) {
                                 if (existRetention[retention] != dataLine[retention].nationalTax) {
                                     delete dataLine[retention];
                                 }
                             }
-                            log.error("dataLine 3",dataLine)
                             if (Object.keys(dataLine).length) {
                                 elements.push(dataLine);
                             }
