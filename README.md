@@ -9,70 +9,21 @@ Solo aplica a Colombia
 
 ## Description of the solution
 
-    
+Se cambio el filtro del proceso para que se habiliten las cuentas de bancos diferentes a la moneda del modulo bajo el campo LATAM - BR MULTICURRENCY BANK ACCOUNT  del subtab de brazil en el record Setup Tax Subsidiary.
 
 ## Scripts
 + Create
-    LMRY_WHT_Variable_Rate_popup_LBRY_V2.0.js
+
 + Update
-    LMRY_VendorCredit_CO_URET_IMPLT.js
-    LMRY_VendorCreditCLNT_V2.0.js
-    LMRY_Vendorbill_CO_URET_IMPLT.js
-    LMRY_VendorBillCLNT_V2.0.js
-    LR_CO_New_WithholdingLines_LIB.js
+    LMRY_BR_WHT_CustPaymnt_CLNT.js
+    LMRY_BR_WHT_CustPaymnt_Massive_CLNT.js
 
-    
-
-    
 + Delete
 
 
 
 ## Records Configuration
 + Create
-
-    + LatamReady - Setup tax subsidiary
-        +   Field
-            name:   Latam - Co Variable Rate
-            id:     
-    + LatamReady - National Taxes
-        +   Field
-            name:   Latam - Variable Rate
-            id:     custrecord_lmry_ntax_var_rate
-
-    + LatamReady - Setup Tax Fields View
-        +   Registro (https://tstdrv1774174.app.netsuite.com/app/common/custom/custrecordentry.nl?id=6130&rectype=2519&whence=)
-                NAME
-                    custrecord_lmry_ntax_var_rate
-                ID
-                    6130
-                LATAM - COUNTRY
-                    Colombia
-                LATAM - RECORD TAX
-                    National Tax
-                LATAM - GENERATED TRANSACTION
-                    WHT by Transaction
-                LATAM - TAX TYPE
-                    Retencion
-                LATAM - WHT TYPE
-                    Retencion CO
-
-        + Registro (https://tstdrv1774174.app.netsuite.com/app/common/custom/custrecordentry.nl?id=6131&rectype=2519&whence=)
-                NAME
-                    custrecord_lmry_ntax_var_rate
-                ID
-                    6131
-                LATAM - COUNTRY
-                    Colombia
-                LATAM - RECORD TAX
-                    National Tax
-                LATAM - GENERATED TRANSACTION
-                    Journal
-                LATAM - TAX TYPE
-                    Retencion
-                LATAM - WHT TYPE
-                    Autoretencion
-
         
 + Update
     
@@ -93,7 +44,28 @@ Solo aplica a Colombia
 ## Observations
  
 
-## Error
+## SmartReady
+
++ Descripcion:
+
+    + Se cambio el filtro del proceso para que se habiliten las cuentas de bancos diferentes a la moneda del modulo bajo el campo LATAM - BR        MULTICURRENCY BANK ACCOUNT del subtab de brazil en el record Setup Tax Subsidiary.
+
++ Scripts modificados:
+
+    + LMRY_BR_WHT_CustPaymnt_CLNT.js
+    + LMRY_BR_WHT_CustPaymnt_Massive_CLNT.js
+
++ Documento funcional ( LatamReady - BR WHT Reclass Customer Payment)
+
+    + [LatamReady - BR WHT Reclass  Customer Payment](https://docs.google.com/presentation/d/1r9W9agiJSgQsZ_jfhN7CcgqAn6mM1ORV6haLVLDJ7uE/edit#slide=id.g2e7b5d9cde0_0_8)
+
++ Pruebas Internas:
+
+    + [C1107 PRUEBAS BASICAS DESARROLLO - QA](https://docs.google.com/spreadsheets/d/1bunbNINcbDdJJXmOaRak-ElvmUWKnODcgrQjJiDEbmQ/edit?gid=0#gid=0)
++ Bundles:
+
+    + 35754 (Development)
+    + 37714 (Production)
 
 
 
