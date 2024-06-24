@@ -15,16 +15,19 @@ Se cambio el filtro del proceso para que se habiliten las cuentas de bancos dife
 + Create
 
 + Update
-    LMRY_BR_WHT_CustPaymnt_CLNT.js
-    LMRY_BR_WHT_CustPaymnt_Massive_CLNT.js
+    + LMRY_BR_WHT_CustPaymnt_CLNT.js
+    + LMRY_BR_WHT_CustPaymnt_Massive_CLNT.js
 
 + Delete
 
 
-
 ## Records Configuration
 + Create
-        
+    + LatamReady - Setup Tax Subsidiary
+        + Descripcion: Seagrego un campo (Created Field)
+        + [Latam - BR Multicurrency bank account](https://tstdrv1774174.app.netsuite.com/app/common/custom/custreccustfield.nl?rectype=1337&e=T&id=45140)
+        + Type: Checkbox
+        + Subtab: Brazil
 + Update
     
 
