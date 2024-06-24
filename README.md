@@ -31,19 +31,25 @@ Solo aplica a Colombia
 ## Records Configuration
 + Create
 
-    + LatamReady - Setup tax subsidiary
+    + (LatamReady - Setup tax subsidiary)[https://tstdrv1774174.app.netsuite.com/app/common/custom/custreccustfield.nl?rectype=1337&e=T&id=45029]
         +   Field
             name:   Latam - Co Variable Rate
-            id:     
-    + LatamReady - National Taxes
+            id: custrecord_lmry_co_variable_rate  sbx: custrecord_smc_co_variable_rate  
+
+            scripts: 
+                    LR_CO_New_WithholdingLines_LIB.js
+                    LMRY_WHT_Variable_Rate_popup_LBRY_V2.0.js
+    + (LatamReady - National Taxes)[https://tstdrv1774174.app.netsuite.com/app/common/custom/custreccustfield.nl?rectype=1332&e=T&id=45034]
         +   Field
             name:   Latam - Variable Rate
-            id:     custrecord_lmry_ntax_var_rate
+            id:     custrecord_lmry_ntax_var_rate   sbx: custrecord_smc_ntax_var_rate
 
-    + LatamReady - Setup Tax Fields View
-        +   Registro (https://tstdrv1774174.app.netsuite.com/app/common/custom/custrecordentry.nl?id=6130&rectype=2519&whence=)
+            scripts: 
+                    LMRY_WHT_Variable_Rate_popup_LBRY_V2.0.js
+
+    + (LatamReady - Setup Tax Fields View)[https://tstdrv1774174.app.netsuite.com/app/common/custom/custrecordentry.nl?id=6130&rectype=2519&whence=]
                 NAME
-                    custrecord_lmry_ntax_var_rate
+                    custrecord_lmry_ntax_var_rate 
                 ID
                     6130
                 LATAM - COUNTRY

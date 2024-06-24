@@ -333,8 +333,8 @@ define(['N/search','N/runtime'],
                 {
                     type: "customrecord_lmry_national_taxes",
                     id: id,
-                    columns: ["custrecord_lmry_ntax_var_rate"]
-                }).custrecord_lmry_ntax_var_rate;
+                    columns: ["custrecord_smc_ntax_var_rate"]
+                }).custrecord_smc_ntax_var_rate;
             return isActive === true || isActive === "T";
         }
 
@@ -357,10 +357,10 @@ define(['N/search','N/runtime'],
             var results = search.create({
                 type: "customrecord_lmry_setup_tax_subsidiary",
                 filters: filters,
-                columns: ["custrecord_lmry_co_variable_rate"]
+                columns: ["custrecord_smc_co_variable_rate"]
             }).run().getRange(0, 1);
             if (results && results.length) {
-                var isVariableRate = results[0].getValue("custrecord_lmry_co_variable_rate");
+                var isVariableRate = results[0].getValue("custrecord_smc_co_variable_rate");
                 return isVariableRate === true || isVariableRate === "T"
             }
             return false;
