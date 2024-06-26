@@ -1,33 +1,27 @@
-# [C1107 :WSP BR  / Procesar Pagos de cliente en Dólares dirigidos a cuentas bancarias en Reales](https://docs.google.com/document/d/1_RuvzoCiXF_wKNivSAMn_rzyKUq2fCKlpAYeM4_ho4A/edit)
+# [ACCES /CL-  Change currency UF CSV](https://docs.google.com/document/d/1CMGQxfk_lk7Q7p5gNY0_5bHEaCxUI3JtsoOpovF0Q3o/edit)
 
 
 ## Description of the Requirement
 
-Se requiere implementar tarifa variable para retenciones de linea v2
+Se requeire que el proceso tambien funcione en csv
 
-Solo aplica a Colombia
+Chile
 
 ## Description of the solution
 
-Se cambio el filtro del proceso para que se habiliten las cuentas de bancos diferentes a la moneda del modulo bajo el campo LATAM - BR MULTICURRENCY BANK ACCOUNT  del subtab de brazil en el record Setup Tax Subsidiary.
 
 ## Scripts
 + Create
 
 + Update
-    + LMRY_BR_WHT_CustPaymnt_CLNT.js
-    + LMRY_BR_WHT_CustPaymnt_Massive_CLNT.js
+ s
 
 + Delete
 
 
 ## Records Configuration
 + Create
-    + LatamReady - Setup Tax Subsidiary
-        + Descripcion: Seagrego un campo (Created Field)
-        + [Latam - BR Multicurrency bank account](https://tstdrv1774174.app.netsuite.com/app/common/custom/custreccustfield.nl?rectype=1337&e=T&id=45140)
-        + Type: Checkbox
-        + Subtab: Brazil
+    
 + Update
     
 
@@ -51,20 +45,19 @@ Se cambio el filtro del proceso para que se habiliten las cuentas de bancos dife
 
 + Descripcion:
 
-    + Se cambio el filtro del proceso para que se habiliten las cuentas de bancos diferentes a la moneda del modulo bajo el campo LATAM - BR        MULTICURRENCY BANK ACCOUNT del subtab de brazil en el record Setup Tax Subsidiary.
+    
 
 + Scripts modificados:
 
-    + LMRY_BR_WHT_CustPaymnt_CLNT.js
-    + LMRY_BR_WHT_CustPaymnt_Massive_CLNT.js
+   
 
 + Documento funcional ( LatamReady - BR WHT Reclass Customer Payment)
 
-    + [LatamReady - BR WHT Reclass  Customer Payment](https://docs.google.com/presentation/d/1r9W9agiJSgQsZ_jfhN7CcgqAn6mM1ORV6haLVLDJ7uE/edit#slide=id.g2e7b5d9cde0_0_8)
+    + []()
 
 + Pruebas Internas:
 
-    + [C1107 PRUEBAS BASICAS DESARROLLO - QA](https://docs.google.com/spreadsheets/d/1bunbNINcbDdJJXmOaRak-ElvmUWKnODcgrQjJiDEbmQ/edit?gid=0#gid=0)
+    + []()
 + Bundles:
 
     + 35754 (Development)
