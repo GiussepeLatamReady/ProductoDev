@@ -15,8 +15,9 @@ define([
 
     const beforeLoad = (context) => {
         const { type, newRecord } = context;
-
+        const FEAT_SUBS = runtime.isFeatureInEffect({ feature: 'SUBSIDIARIES' });
         const subsidiary = newRecord.getValue("subsidiary");
+        if(FEAT_SUBS && !subsidiary) return 0;
         const featureManager = new FeatureManager(subsidiary);
         const isVariableRate = Lib_WhtLines2.getFeatureVariableRate(subsidiary);
         if (
