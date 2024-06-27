@@ -482,7 +482,15 @@ define(['N/config', 'N/currency', 'N/record', 'N/runtime', 'N/search', 'N/ui/ser
           }
 
           //CL CHANGE CURRENCY UF: SOLO TRANSFORM Y MAKE COPY
-          if (LMRY_countr[0] == 'CL' && Library_Mail.getAuthorization(604, licenses) && ((isURET == 'create' && createdFrom) || isURET == 'copy')) {
+          if (
+              LMRY_countr[0] == 'CL' && 
+              Library_Mail.getAuthorization(604, licenses) && 
+              (
+                (isURET == 'create' && createdFrom) || 
+                isURET == 'copy'|| 
+                runtime.executionContext == 'CSVIMPORT'
+              )
+            ) {
 
             var searchCurrencies = search.create({
               type: 'currency',
@@ -720,8 +728,8 @@ define(['N/config', 'N/currency', 'N/record', 'N/runtime', 'N/search', 'N/ui/ser
           LMRY_countr[0] == 'CL' &&
           Library_Mail.getAuthorization(604, licenses) &&
           scriptContext.type == "create" &&
-          runtime.executionContext == "CSV"
-        ) setUnitPriceUF(recordObj);
+          runtime.executionContext == "CSVIMPORT"
+        ) setUnitPriceUF(RCD_OBJ);
 
       } catch (err) {
         Library_Mail.sendemail(' [ beforeSubmit ] ' + err, LMRY_script);

@@ -733,7 +733,20 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
 
           //CL CHANGE CURRENCY UF: SOLO TRANSFORM Y MAKE COPY
           log.error("UF scriptContext.type", scriptContext.type);
-          if (LMRY_Result[0] == 'CL' && Library_Mail.getAuthorization(604, licenses) && ((scriptContext.type == 'create' && createdFrom) || scriptContext.type == 'copy')) {
+          log.error("Country",LMRY_Result[0])
+          log.error("feature",Library_Mail.getAuthorization(604, licenses))
+          log.error("type context",scriptContext.type)
+          log.error("execution",runtime.executionContext)
+          log.error("createdFrom",createdFrom)
+          if (
+              LMRY_Result[0] == 'CL' && 
+              Library_Mail.getAuthorization(604, licenses) && 
+              (
+                (scriptContext.type == 'create' && createdFrom) || 
+                scriptContext.type == 'copy'|| 
+                runtime.executionContext == 'CSVIMPORT'
+              )
+            ) {
             log.error("UF", "ENTRO");
             var searchCurrencies = search.create({
               type: 'currency',
@@ -1394,7 +1407,7 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
             LMRY_Result[0] == 'CL' && 
             Library_Mail.getAuthorization(604, licenses) && 
             scriptContext.type == "create" &&
-            runtime.executionContext == "CSV"
+            runtime.executionContext == "CSVIMPORT"
         ) setUnitPriceUF(RCD);
         
       } catch (err) {
