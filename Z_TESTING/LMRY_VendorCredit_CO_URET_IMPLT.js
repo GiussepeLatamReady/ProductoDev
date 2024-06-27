@@ -9,8 +9,9 @@ define([
     "SuiteApps/com.latamready.lmrylocalizationcore/lib/error/LR_Error_LIB",
     "SuiteApps/com.latamready.lmrylocalizationcore/lib/licenses/LR_Licenses_LIB",
     "../../constants/LR_CO_FEATURES_CONST",
-    "../../co_new_withholding_lines/lib/LR_CO_New_WithholdingLines_LIB"
-], function (nLog, Lib_Error, Lib_Licenses, CO_FEAT, Lib_WhtLines2) {
+    "../../co_new_withholding_lines/lib/LR_CO_New_WithholdingLines_LIB",
+    "N/runtime"
+], function (nLog, Lib_Error, Lib_Licenses, CO_FEAT, Lib_WhtLines2, runtime) {
     const { FeatureManager } = Lib_Licenses;
 
     const beforeLoad = (context) => {
