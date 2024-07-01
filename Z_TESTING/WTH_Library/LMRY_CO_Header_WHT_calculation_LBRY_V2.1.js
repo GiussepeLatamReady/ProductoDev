@@ -17,10 +17,12 @@ define([
 
     let features = {};
     const calculateHeaderWHT = (id) => {
+        
         getFeatures();
         const transaction = getTransaction(id);
-        log.error("transaction",transaction)
         createTaxResults(transaction);
+        
+        
     }
 
 
@@ -247,9 +249,8 @@ define([
 
     const setTransactionWht = transaction => {
         transaction.relatedRecords.forEach(record => {
-            let subtypeKey = record.subtypeKey;
-            if (transaction.wht[subtypeKey]) {
-                transaction.wht[subtypeKey].relatedTransaction = {
+            if (transaction.wht[record.key]) {
+                transaction.wht[record.key].relatedTransaction = {
                     id: record.id,
                     trandate: record.trandate
                 };
@@ -378,19 +379,40 @@ define([
                 trandate: formatDate(result.getValue(result.columns[2])),
                 memo: result.getValue(result.columns[3]),
                 amount: result.getValue(result.columns[4]),
-                subtypeKey: subtypeToKey(getRetentionName(result.getValue(result.columns[3]))),
+                key: getKey(result.getValue(result.columns[3])),
                 recordType: result.getValue(result.columns[5]),
             }
             return true
         });
 
         let transactionList = Object.values(transaction);
-        
         return filterTransactionsHeaderByMemo(transactionList);
         
        
 
 
+    }
+
+    const getKey = (memo) => {
+        const nameWht = getRetentionName(memo);
+        let subTypeKey;
+        if (nameWht != "Retention name not found") {
+            let searchFilters = [
+                ["formulatext: TRIM({name})","is",nameWht]
+            ];
+
+            let searchColumns = new Array();
+            searchColumns.push(search.createColumn({ name: 'formulatext', formula: '{custrecord_lmry_wht_types.custrecord_lmry_wht_subtype}' }));
+
+            search.create({
+                type: 'customrecord_lmry_wht_code',
+                filters: searchFilters,
+                columns: searchColumns
+            }).run().each(result => {
+                subTypeKey = result.getValue(result.columns[0]) || "";
+            });
+        }
+        return subTypeKey ? subtypeToKey(subTypeKey): "";
     }
 
     const setLinesItems = (transaction) => {
@@ -431,19 +453,12 @@ define([
         transactions.forEach(transaction =>{
             Object.keys(typeRetention).forEach(key => {
                 if (transaction.memo.startsWith("Latam - WHT Reclasification")) {
-                    if (transaction.memo.toLowerCase().includes(key)) {
-                        if (key != "ica") {
-                            typeRetention[key].withRecla.push(transaction);
-                        }else{
-                            if ((/ica(?!(tion|if))/g).test(transaction.memo.toLowerCase())) {
-                                typeRetention[key].withRecla.push(transaction);
-                            }
-                        }
-                        
-                    }
+                    if (transaction.key) {
+                        typeRetention[transaction.key].withRecla.push(transaction);
+                    } 
                 }else{
-                    if (transaction.memo.toLowerCase().includes(key)) {
-                        typeRetention[key].withOutRecla.push(transaction);
+                    if (transaction.key) {
+                        typeRetention[transaction.key].withOutRecla.push(transaction);
                     }
                 }
                 
