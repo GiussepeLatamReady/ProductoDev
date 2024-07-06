@@ -24,7 +24,10 @@ Lo anterior se debe a que por norma, las percepciones sólo se aplican si la not
 
 ## Records
 + Create
-  
+    LatamReady - Setup WHT Type 
+    Crear campo https://tstdrv1774174.app.netsuite.com/app/common/custom/custrecord.nl?id=1096&e=T&whence=&cmid=1720199657991_2618
+    Name: Latam - Percepcion 
+    id: custrecord__lmry_setup_wht_perception
         
 + Update
     
