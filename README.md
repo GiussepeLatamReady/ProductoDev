@@ -98,7 +98,7 @@ Solo aplica a Colombia
 
 ## Observations
  
-
+A partir de este commit haremos el apse por completoa sdf para retenciones de linea y tarifa variable 
 ## Error
 
 
