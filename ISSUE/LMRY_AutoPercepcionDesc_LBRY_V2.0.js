@@ -177,16 +177,19 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
          * es diferente en la base de calculo no se 
          * debe considerar la lienas de percepcion
          ********************************************/
-
-        transaction.subtotal = getSubtotal(transaction) * parseFloat(transaction.exchangerate) - discountGlobal * parseFloat(transaction.exchangerate);
-        transaction.total    = getTotal(transaction)    * parseFloat(transaction.exchangerate) - parseFloat(discountGlobal) * parseFloat(transaction.exchangerate);
+        transaction.subtotalCurrency = getSubtotal(transaction);
+        transaction.totalCurrency    = getTotal(transaction);
+        transaction.subtotal = transaction.subtotalCurrency * parseFloat(transaction.exchangerate) - discountGlobal * parseFloat(transaction.exchangerate);
+        transaction.total    = transaction.totalCurrency    * parseFloat(transaction.exchangerate) - parseFloat(discountGlobal) * parseFloat(transaction.exchangerate);
         transaction.taxtotal = parseFloat(invoiceRecord.getValue("taxtotal")) * parseFloat(transaction.exchangerate) - parseFloat(discountGlobal) * parseFloat(transaction.exchangerate);  
 
+        log.error("transaction",transaction);
         //Busqueda de National Taxes
         const nationalTaxs = getNationaltaxs(transaction);
-
+        log.error("nationalTaxs",nationalTaxs)
         //Busqueda de las Clases Contributiva
         const contributoryClass = getContributoryClass(transaction);
+        log.error("contributoryClass",contributoryClass)
         transaction.currentRecord = invoiceRecord;
 
         /********************************************
@@ -196,7 +199,9 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
          ********************************************/
         if (transaction.type.text == 'creditmemo' && setupTaxSubsidiary.totalPerception) {
           transaction.validateTotalCreditMemo = validateCreditMemoTotal(transaction,event);
+
         }
+        log.error("transaction.validateTotalCreditMemo",transaction.validateTotalCreditMemo)
         if (transaction.validateTotalCreditMemo && transaction.applyWhtCode && validateDocumentType(transaction) && transaction.notSend) {
           setLinePerception("1", nationalTaxs, transaction, setupTaxSubsidiary, {});
           setLinePerception("1", contributoryClass, transaction, setupTaxSubsidiary, {});
@@ -208,7 +213,7 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
               setLinePerception("2", contributoryClass, transaction, setupTaxSubsidiary, item);
             })
           }
-            */
+          */
         } 
         
         
@@ -459,10 +464,12 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
     }
 
     function setLinePerception(appliesTo, recordTaxs, transaction, setupTaxSubsidiary, item) {
-
+      
       if (recordTaxs.length) {
+        var countValidation = 0;
         for (var i = 0; i < recordTaxs.length; i++) {         
           var recordTax = recordTaxs[i];
+
           // Valida si es articulo para las ventas
 
           if (['Para la venta', 'For Sale', 'Para reventa', 'For Resale'].indexOf(recordTax.taxItemSubtype) == -1) continue;
@@ -480,9 +487,11 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
             }
           }
 
+          // (C1064) 2024.07.07 : Solo Aplica a Credit Memo
           if (transaction.type.text === 'creditmemo' && setupTaxSubsidiary.totalPerception) {
             // validacion de Juridiccion y tipo de percepcion
-            if (!recordTax.applyCreditMemo && !validatePerceptionType(recordTax.idPerceptionTypeItem)) {     
+            if (!recordTax.applyCreditMemo || !validatePerceptionType(recordTax.idPerceptionTypeItem)) {
+              countValidation++;
               continue;
             }
           }
@@ -527,6 +536,7 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
             }
             if (recordTax.amount == 3) { baseAmount = parseFloat(item.amount) * parseFloat(transaction.exchangerate); } //NET
           }
+
           baseAmount = parseFloat(baseAmount) - parseFloat(recordTax.notTaxableMinimum);
 
           if (baseAmount <= 0) continue;
@@ -574,7 +584,7 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
           var aux_cadena = retention + ";";
           retention = parseFloat(retention) / parseFloat(transaction.exchangerate);
           baseAmount = parseFloat(baseAmount) / parseFloat(transaction.exchangerate);
-
+          
 
           if (setupTaxSubsidiary.typeRounding == '1') {
             if (parseFloat(retention) - parseInt(retention) < 0.5) {
@@ -616,9 +626,9 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
           }
           if (index != -1) {
             // Busca la linea de percepcion a actualizar
-
+           
             try {
-      
+
               transaction.currentRecord.setSublistValue('item', 'rate', index, parseFloat(retention));
               transaction.currentRecord.setSublistValue('item', 'custcol_lmry_br_taxc_rsp', index, memo);
               if (recordTax.memo) {
@@ -688,7 +698,7 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
               log.error("setLinePerception : Set rate", error);
             }
           } else {
-      
+
             // Agrega una linea en blanco
             transaction.currentRecord.insertLine('item', numLines);
             index = numLines
@@ -761,6 +771,10 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
           }
         };
 
+        // (C1064) 2024.07.07 : Solo Aplica a Credit Memo
+        if (countValidation) {
+          transaction.currentRecord.setValue("custbody_lmry_apply_wht_code", false);
+        }
       }
     }
 
@@ -931,14 +945,9 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
 
           transactionRelated.total = parseFloat(transactionRelated.load.getValue("total"));
 
-          isTotal = transaction.total == transactionRelated.total;
+          isTotal = transaction.totalCurrency == transactionRelated.total;
 
         } else {
-          
-          
-          if (event=="create") {
-            isTotal = transactionOrigin.amountremaining == 0;
-          }else{
             transactionOrigin.subtotal = 0;
             var lines = transactionOrigin.load.getLineCount({ sublistId: "item" });
             for (var i = 0; i < lines; i++) {
@@ -952,9 +961,9 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
               }
 
             }
-            isTotal = transactionOrigin.subtotal == transaction.subtotal;
-          }
-          
+            log.error("transactionOrigin.subtotal",transactionOrigin.subtotal)
+            log.error("transaction.subtotalCurrency",transaction.subtotalCurrency)
+            isTotal = transactionOrigin.subtotal == transaction.subtotalCurrency;
         }
 
 
@@ -1004,7 +1013,7 @@ define(['N/record', 'N/runtime', 'N/search', 'N/log', 'N/email', 'N/format',
 
           }
 
-          isTotal = transactionOrigin.subtotal == transaction.subtotal;
+          isTotal = transactionOrigin.subtotal == transaction.subtotalCurrency;
 
           if (isTotal) {
             transactionOrigin.total = currentRecordOrigin.getValue("total");

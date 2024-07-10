@@ -1,7 +1,3 @@
-var numlines = 1;
+var ratio = parseFloat(".2")
 
-var soloitems = numlines;
-
-numlines = 7;
-
-console.log(soloitems)
+console.log(ratio)
