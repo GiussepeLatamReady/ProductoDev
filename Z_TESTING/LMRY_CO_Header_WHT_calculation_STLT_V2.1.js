@@ -917,8 +917,8 @@ define([
                         "LMRY_ENTITY": "Entidad",
                         "LMRY_CURRENCY": "Moneda",
                         "LMRY_VIEW_LOG": "Ver registro",
-                        "LMRY_RETEICA": "ReteIVA",
-                        "LMRY_RETEIVA": "ReteICA",
+                        "LMRY_RETEICA": "ReteICA",
+                        "LMRY_RETEIVA": "ReteIVA",
                         "LMRY_RETEFTE": "ReteFte",
                         "LMRY_RETECRE": "ReteCre",
                         "LMRY_RECLASIFICATION": "Reclasificación"
@@ -960,8 +960,8 @@ define([
                         "LMRY_ENTITY": "Entity",
                         "LMRY_CURRENCY": "Currency",
                         "LMRY_VIEW_LOG": "View Log",
-                        "LMRY_RETEICA": "ReteIVA",
-                        "LMRY_RETEIVA": "ReteICA",
+                        "LMRY_RETEICA": "ReteICA",
+                        "LMRY_RETEIVA": "ReteIVA",
                         "LMRY_RETEFTE": "ReteFte",
                         "LMRY_RETECRE": "ReteCre",
                         "LMRY_RECLASIFICATION": "Reclasification"

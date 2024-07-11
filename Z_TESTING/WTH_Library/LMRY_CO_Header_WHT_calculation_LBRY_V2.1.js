@@ -36,7 +36,10 @@ define([
                 fte: {},
                 cree: {}
             },
-            sumSubtotal: 0
+            sumSubtotal: 0,
+            sumTotal: 0,
+            sumTaxtotal: 0
+
         };
         
         let searchFilters = [
@@ -66,7 +69,7 @@ define([
         transaction.taxtotal = parseFloat(recordObj.getValue({ fieldId: 'taxtotal' }));
         transaction.subtotal = transaction.total - transaction.taxtotal;
         transaction.discountTotal = parseFloat(recordObj.getValue("discounttotal"));
-        transaction.exchangeRate = parseFloat(getExchangeRate(recordObj,"9"));
+        transaction.exchangeRate = parseFloat(getExchangeRate(recordObj));
         transaction.items = getItemsData(recordObj);
 
         if (transaction.recordtype == "vendorbill" || transaction.recordtype == "vendorcredit") {
@@ -74,19 +77,23 @@ define([
             if (Object.keys(expense).length) {
                 transaction.expense = expense;
             }
-             
         }
 
         if (transaction.items) {
-            transaction.sumSubtotal = transaction.items.sumSubtotal
+            transaction.sumSubtotal = transaction.items.sumSubtotal;
+            transaction.sumTotal = transaction.items.sumTotal;
+            transaction.sumTaxtotal = transaction.items.sumTaxtotal;
+
         }
         
         if(transaction.expense) {
             transaction.sumSubtotal += transaction.expense.sumSubtotal;
+            transaction.sumTotal = transaction.expense.sumTotal;
+            transaction.sumTaxtotal = transaction.expense.sumTaxtotal;
         }
         transaction.discountRate = transaction.subtotal/transaction.sumSubtotal;
+        deleteProperty(transaction);
         
-        setLineFactor(transaction);
         applyGlobalDiscount(transaction);
 
         const relatedRecords = getRelatedRecord(id);
@@ -99,12 +106,12 @@ define([
             }
 
         });
-
+        setLineFactor(transaction);
         setAmountsRetention(transaction,recordObj);
 
         transaction.relatedRecords = [...relatedRecords];
         setTransactionWht(transaction);
-        deleteProperty(transaction);
+        
 
 
         return transaction;
@@ -155,15 +162,45 @@ define([
          
     };
 
+
+    //Calcula el factor de cada item para su posterior prorrateo
     const setLineFactor = transaction => {
-        if (transaction.items) {
+
+        const whtBaseKey = {
+            "total":"sumTotal",
+            "subtotal": "sumSubtotal",
+            "taxtotal": "sumTaxtotal"
+        }
+        const typeBase = transaction.recordtype == "vendorbill" ||transaction.recordtype == "vendorcredit" ? "puchasebase":"salesbase";
+        if (Object.keys(transaction.items).length) {
             for (let itemKey in transaction.items) {
-                transaction.items[itemKey].factor =transaction.items[itemKey].subtotal/transaction.sumSubtotal;
+                transaction.items[itemKey].factor = {};
+                for (let wht of Object.values(transaction.wht)) {
+                    if (Object.keys(wht).length) {
+                        const whtBaseType = wht[typeBase];
+                        if (transaction[whtBaseKey[whtBaseType]]) {
+                            transaction.items[itemKey].factor[wht.key] = transaction.items[itemKey][whtBaseType]/transaction[whtBaseKey[whtBaseType]];
+                        }else{
+                            transaction.items[itemKey].factor[wht.key] = 0;
+                        }
+                    }
+                }
             }
         }
-        if (transaction.expense) {
+        if (Object.keys(transaction.expense).length) {
             for (let expenseKey in transaction.expense) {
-                transaction.expense[expenseKey].factor = transaction.expense[expenseKey].subtotal/transaction.sumSubtotal;
+                transaction.expense[expenseKey].factor = {}
+                for (let wht of Object.values(transaction.wht)) {
+                    if (Object.keys(wht).length) {
+                        const whtBaseType = wht[typeBase];
+                        if (transaction[whtBaseKey[whtBaseType]]) {
+                            transaction.expense[expenseKey].factor[wht.key] = transaction.expense[expenseKey][whtBaseType] / transaction[whtBaseKey[whtBaseType]];
+                        } else {
+                            transaction.expense[expenseKey].factor[wht.key] = 0;
+                        }
+                    }
+                    
+                }
             }
         }
     };
@@ -176,7 +213,7 @@ define([
 
             let baseAmount = parseFloat(amount);
             let retentionAmount = parseFloat(amount * retention.rate);
-            let retentionAmounttLocal = parseFloat(item.factor*retention.amount);
+            let retentionAmounttLocal = parseFloat(item.factor[retention.key]*retention.amount);
             
             const commonValues = {
                 custrecord_lmry_br_related_id: String(transaction.id),
@@ -192,6 +229,7 @@ define([
                 custrecord_lmry_br_percent: parseFloat(retention.rate), 
 
                 custrecord_lmry_total_base_currency: round(retentionAmounttLocal).toFixed(4),
+
                 custrecord_lmry_base_amount_local_currc: round(baseAmount * transaction.exchangeRate),
                 custrecord_lmry_amount_local_currency: round(retentionAmounttLocal),
 
@@ -203,8 +241,8 @@ define([
             };
 
             if (retention.variable && retention.amount && transaction.variable) {
-                retentionAmount = round(parseFloat(retention.amount) * item.factor);
-                baseAmount = round(parseFloat(retention.baseamount) * item.factor);
+                retentionAmount = round(parseFloat(retention.amount) * item.factor[retention.key]);
+                baseAmount = round(parseFloat(retention.baseamount) * item.factor[retention.key]);
 
 
                 commonValues.custrecord_lmry_base_amount = (baseAmount / transaction.exchangeRate).toFixed(4);
@@ -227,9 +265,11 @@ define([
         if (transaction.items) {
             for (let item of Object.values(transaction.items)) {
                 for (let retention of Object.values(transaction.wht)) {
-                    const typeBase=transaction.recordtype == "vendorbill" ||transaction.recordtype == "vendorcredit" ? "puchasebase":"salesbase";
+                    const typeBase = transaction.recordtype == "vendorbill" ||transaction.recordtype == "vendorcredit" ? "puchasebase":"salesbase";
                     const whtBase = retention[typeBase];
-                    createAndSaveRecord(item[whtBase], 'Item', retention, item);
+                    if (item[whtBase]) {
+                        createAndSaveRecord(item[whtBase], 'Item', retention, item);
+                    }
                 }
             }
         }
@@ -240,7 +280,10 @@ define([
                 for (let retention of Object.values(transaction.wht)) {
                     const typeBase=transaction.recordtype == "vendorbill" ||transaction.recordtype == "vendorcredit" ? "puchasebase":"salesbase";
                     const whtBase = retention[typeBase];
-                    createAndSaveRecord(expense[whtBase], 'Expense', retention, expense);
+                    if (expense[whtBase]) {
+                        createAndSaveRecord(expense[whtBase], 'Expense', retention, expense);
+                    }
+                    
                 }
             }
         }
@@ -265,7 +308,9 @@ define([
     };
 
     const assignToWht = (transaction, subtype, objeto) => {
-        transaction.wht[subtypeToKey(subtype)] = objeto;
+        const whtKey = subtypeToKey(subtype);
+        objeto.key = whtKey;
+        transaction.wht[whtKey] = objeto;
     };
 
     const subtypeToKey = (subtype) => {
@@ -509,7 +554,7 @@ define([
     };
 
 
-    const getExchangeRate = (recordObj, currencyLocal) => {
+    const getExchangeRate = (recordObj) => {
         const exchangerateTran = recordObj.getValue({ fieldId: 'exchangerate' });
         const transactionCurrency = recordObj.getValue({ fieldId: 'currency' });
         const transactionDate = recordObj.getValue({ fieldId: 'trandate' });
@@ -544,14 +589,14 @@ define([
             currencySetup = searchSetupSubsidiary.length ? searchSetupSubsidiary[0].getValue('custrecord_lmry_setuptax_currency') : 0;
         }
 
-        currencySetup = currencySetup === 0 ? currencyLocal : currencySetup;
+        //currencySetup = currencySetup === 0 ? currencyLocal : currencySetup;
 
         //if (!features.multibook || currencySetup === 0) return exchangerateTran;
 
+        if (transactionCurrency === currencySetup) return 1;
 
         if (features.multibook) {
             const lineasBook = recordObj.getLineCount({ sublistId: 'accountingbookdetail' });
-
             for (let i = 0; i < lineasBook; i++) {
                 const lineaCurrencyMB = recordObj.getSublistValue({
                     sublistId: 'accountingbookdetail',
@@ -576,7 +621,7 @@ define([
             });
 
 
-            if (transactionCurrency === currencySetup) return 1;
+            
             if (currencySubs === currencySetup) {
                 return exchangerateTran
             } else {
