@@ -99,6 +99,20 @@ Solo aplica a Colombia
 ## Observations
  
 A partir de este commit haremos el apse por completoa sdf para retenciones de linea y tarifa variable 
+
+
+Before load
+	Ocultar campos de cabecera que contiene las retenciones - solo se deja los campos que tienen los montos de la 		retencion (main)
+	
+	Ocultar los campos de linea (custcol), luego crear y llenar los campos custpage	
+
+	Si el feature esta desactivado ocultas los campos de columna (items y expense)}
+
+	boton que establece el valor de las retenciones por defecto desde la entidad
+
+items.sumSubtotal += items[lineuniquekey].subtotal;
+            items.sumTaxtotal += items[lineuniquekey].taxtotal;
+            items.sumTotal += items[lineuniquekey].total;
 ## Error
 
 
