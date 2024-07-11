@@ -1448,6 +1448,106 @@ define(["N/ui/serverWidget","N/record", "N/search", "N/runtime", "N/log", "N/for
             
     
         }
+
+
+        const hiddenField = (form,fieldId) => {
+            const fieldMain = form.getField(fieldId);
+            if (fieldMain) fieldMain.updateDisplayType({displayType:'hidden'});
+        }
+
+        const hiddenFieldsMain = (form) =>{
+            const mainRetentionFields = [
+                'custbody_lmry_co_reteica',
+                'custbody_lmry_co_reteiva',
+                'custbody_lmry_co_retefte',
+                'custbody_lmry_co_autoretecree'
+            ]
+            mainRetentionFields.forEach(fieldId => hiddenField(form,fieldId));
+        }
+
+        const getNationalTaxForRetention = (context) => {
+            const {form,newRecord} = context;
+            const jsonTransaction = { invoice: '1', creditmemo: '8', vendorbill: '4', vendorcredit: '7' };
+            const FEATURE_SUBSIDIARY = runtime.isFeatureInEffect({ feature: "SUBSIDIARIES" });
+            let nationalTaxes = {
+                iva:{
+                    ids:[82,18],
+                    list:[]
+                },
+                ica:{
+                    ids:[83,19],
+                    list:[]
+                },
+                fte:{
+                    ids:[85,21],
+                    list:[]
+                },
+                cree:{
+                    ids:[84,20],
+                    list:[]
+                }
+            }
+            let transaction = {
+                type:newRecord.type,
+                subsidiary: newRecord.getValue("subsidiary")
+            };
+            
+            let filters = [
+                ["isinactive", "is", "F"],
+                "AND",
+                ["custrecord_lmry_ntax_subsidiary_country", "anyof", "48"],
+                "AND",
+                ["custrecord_lmry_ntax_sub_type", "anyof", ["20", "84", "85", "21", "83", "19", "82", "18"]],//ReteCree,ReteFte,ReteICA,ReteIVA
+                "AND",
+                ["custrecord_lmry_ntax_gen_transaction", "anyof", "5"],
+                "AND",
+                ["custrecord_lmry_ntax_taxtype", "anyof", "1"],
+                "AND",
+                ["custrecord_lmry_ntax_transactiontypes", "anyof", jsonTransaction[transaction.type]]
+            ];
+
+            if (FEATURE_SUBSIDIARY == true || FEATURE_SUBSIDIARY == 'T') {
+                filters.push("AND", ["custrecord_lmry_ntax_subsidiary", "anyof", subsidiary]);
+            }
+
+            const columns = [
+                "internalid", 
+                "custrecord_lmry_ntax_sub_type", 
+                search.createColumn({
+                    name: "name",
+                    sort: search.Sort.ASC,
+                    label: "Name"
+                })
+            ];
+
+            search.create({
+                type: 'customrecord_lmry_national_taxes',
+                filters: filters,
+                columns: columns
+            }).run().each(result => {
+                periodIds.push(result.getValue(result.columns[0]));
+                const id = result.getValue("internalid");
+                const name = result.getValue("name");
+                const subType = result.getValue("custrecord_lmry_ntax_sub_type");
+                if (id && name && subType) {
+                    for (let retention of Object.values(nationalTaxes)) {
+                        if (retention.ids.includes(subType)) {
+                            retention.list.push({id,name})
+                        }
+                    }
+                }
+                return true;
+            });
+
+            return nationalTaxes;
+        }
+
+
+        const manageRetentionFields = (context) => {
+            const {form,newRecord} = context
+            hiddenFieldsMain(form);
+
+        }
     
         return {
             createWithholdingLines,
