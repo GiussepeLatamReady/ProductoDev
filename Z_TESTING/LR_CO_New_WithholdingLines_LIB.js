@@ -1451,11 +1451,14 @@ define(["N/ui/serverWidget","N/record", "N/search", "N/runtime", "N/log", "N/for
 
 
         const hiddenField = (form,fieldId) => {
-            const fieldMain = form.getField(fieldId);
-            if (fieldMain) fieldMain.updateDisplayType({displayType:'hidden'});
+            const field = form.getField(fieldId);
+            if (field && JSON.stringify(field) != '{}') {
+                field.updateDisplayType({displayType:'hidden'});
+                return field;
+            } 
         }
 
-        const hiddenFieldsMain = (form) =>{
+        const hiddenMainFields = (form) =>{
             const mainRetentionFields = [
                 'custbody_lmry_co_reteica',
                 'custbody_lmry_co_reteiva',
@@ -1463,6 +1466,7 @@ define(["N/ui/serverWidget","N/record", "N/search", "N/runtime", "N/log", "N/for
                 'custbody_lmry_co_autoretecree'
             ]
             mainRetentionFields.forEach(fieldId => hiddenField(form,fieldId));
+
         }
 
         const getNationalTaxForRetention = (context) => {
@@ -1507,7 +1511,7 @@ define(["N/ui/serverWidget","N/record", "N/search", "N/runtime", "N/log", "N/for
             ];
 
             if (FEATURE_SUBSIDIARY == true || FEATURE_SUBSIDIARY == 'T') {
-                filters.push("AND", ["custrecord_lmry_ntax_subsidiary", "anyof", subsidiary]);
+                filters.push("AND", ["custrecord_lmry_ntax_subsidiary", "anyof", transaction.subsidiary]);
             }
 
             const columns = [
@@ -1544,8 +1548,168 @@ define(["N/ui/serverWidget","N/record", "N/search", "N/runtime", "N/log", "N/for
 
 
         const manageRetentionFields = (context) => {
-            const {form,newRecord} = context
-            hiddenFieldsMain(form);
+            const {form,newRecord, type} = context
+            const {executionContext} = runtime;
+            const {type:transaccionType} = newRecord;
+            hiddenMainFields(form);
+            if (executionContext == 'USERINTERFACE' && ['create','edit','copy'].includes(type)) {
+                const nationalTaxes = getNationalTaxForRetention(context);
+                setLineFields(context,nationalTaxes,transaccionType);
+            }
+        }
+
+
+        const hiddenLineFields = (form) =>{
+            const lineFields = [
+                'custcol_lmry_co_autoretecree',
+                'custcol_lmry_co_reteiva',
+                'custcol_lmry_co_reteica',
+                'custcol_lmry_co_retefte'
+            ]
+            const sublistItem = form.getSublist({id:'item'});
+            if (sublistItem && JSON.stringify(sublistItem) != '{}') {
+                lineFields.forEach(fieldId => hiddenField(sublistItem,fieldId));
+            }
+
+            const sublistExpense = form.getSublist({id:'expense'});
+            if (sublistExpense && JSON.stringify(sublistExpense) != '{}') {
+                lineFields.forEach(fieldId => hiddenField(sublistExpense,fieldId));
+            }
+        }
+
+        const setLineFields = (context,nationalTaxes,transaccionType) => {
+            const {form,newRecord} = context;
+            const fillFieldCustpage = (sublist,retentionField,retentionKey) => {
+                const {custcol,cuspage} = retentionField;
+                const fieldCustCol = hiddenField(sublist,custcol);
+
+                if (fieldCustCol) {
+                    let fieldCustPage = itemSublist.addField({
+                        id: cuspage.id,
+                        type: serverWidget.FieldType.SELECT,
+                        label: cuspage.name
+                    });
+
+                    const retentionList = nationalTaxes[retentionKey].list;
+                    fieldCustPage.addSelectOption({value: '', text: '&nbsp;'});
+                    retentionList.forEach(({id,name}) => {
+                        fieldCustPage.addSelectOption({
+                            value: id,
+                            text: name
+                        });
+                    });
+                }
+            }
+
+            const setFieldCustpage = (sublistId, lineRetentionFields) => {
+                const lines = newRecord.getLineCount({ sublistId });
+                for (let i = 0; i < lines; i++) {
+                    for (let retentionField of Object.values(lineRetentionFields)) {
+                        const custcolValue = newRecord.getSublistValue({
+                            sublistId: sublistId,
+                            fieldId: retentionField.custcol,
+                            line: i
+                        });
+
+                        if (custcolValue) {
+                            expenseSublist.setSublistValue({
+                                id: retentionField.cuspage.id,
+                                line: i,
+                                value: custcolValue
+                            });
+                        }
+                    }
+                }
+            }
+
+            //Items
+            const lineRetentionFieldsItems = {
+                cree: {
+                    custcol:"custcol_lmry_co_autoretecree",
+                    cuspage:{
+                        id:"custpage_lmry_co_autoretecree",
+                        name:"Latam - CO ReteCREE detail"
+                    }
+                },
+                fte: {
+                    custcol:"custcol_lmry_co_retefte",
+                    cuspage:{
+                        id:"custpage_lmry_co_retefte",
+                        name:"Latam - CO ReteFte detail"
+                    }
+                },
+                ica: {
+                    custcol:"custcol_lmry_co_reteica",
+                    cuspage:{
+                        id:"custpage_lmry_co_reteica",
+                        name:"Latam - CO ReteICA detail"
+                    }
+                },
+                iva: {
+                    custcol:"custcol_lmry_co_reteiva",
+                    cuspage:{
+                        id:"custpage_lmry_co_reteiva",
+                        name:"Latam - CO ReteIVA detail"
+                    }
+                }
+                
+            }
+            
+            const itemSublist = form.getSublist({id:'item'});
+            
+
+            for (let retentionKey in lineRetentionFieldsItems) {
+                const retentionField = lineRetentionFieldsItems[retentionKey];
+                fillFieldCustpage(itemSublist,retentionField,retentionKey);
+            }
+
+
+            setFieldCustpage("item",lineRetentionFieldsItems)
+
+            if (['vendorbill','vendorcredit'].includes(transaccionType)) {
+                //expense
+                const lineRetentionFieldsExpense = {
+                    cree: {
+                        custcol: "custcol_lmry_co_autoretecree",
+                        cuspage: {
+                            id: "custpage_lmry_co_retecree_exp",
+                            name: "Latam - CO ReteCREE detail"
+                        }
+                    },
+                    fte: {
+                        custcol: "custcol_lmry_co_retefte",
+                        cuspage: {
+                            id: "custpage_lmry_co_retefte_exp",
+                            name: "Latam - CO ReteFte detail"
+                        }
+                    },
+                    ica: {
+                        custcol: "custcol_lmry_co_reteica",
+                        cuspage: {
+                            id: "custpage_lmry_co_reteica_exp",
+                            name: "Latam - CO ReteICA detail"
+                        }
+                    },
+                    iva: {
+                        custcol: "custcol_lmry_co_reteiva",
+                        cuspage: {
+                            id: "custpage_lmry_co_reteiva_exp",
+                            name: "Latam - CO ReteIVA detail"
+                        }
+                    }
+                    
+                }
+
+                const expenseSublist = form.getSublist({ id: 'expense' });
+                
+                for (let retentionKey in lineRetentionFieldsExpense) {
+                    const retentionField = lineRetentionFieldsExpense[retentionKey];
+                    fillFieldCustpage(expenseSublist, retentionField, retentionKey);
+                }
+
+                setFieldCustpage("expense",lineRetentionFieldsExpense)
+            }
+            
 
         }
     
