@@ -113,6 +113,9 @@ Before load
 items.sumSubtotal += items[lineuniquekey].subtotal;
             items.sumTaxtotal += items[lineuniquekey].taxtotal;
             items.sumTotal += items[lineuniquekey].total;
+
+
+            me quede antes de setCOLineValueWTH
 ## Error
 
 
