@@ -1,5 +1,5 @@
 /**
- * @NApiVersion 2.0
+ * @NApiVersion 2.1
  * @NModuleScope Public
  * @Name LMRY_WHT_Variable_Rate_popup_LBRY_V2.0.js
  * @Author LatamReady - Giussepe Delgado
@@ -10,15 +10,15 @@ define(['N/search','N/runtime'],
 
     function (search,runtime) {
 
-        function loadDataVariableRate(currentRecord) {
+        const loadDataVariableRate = (currentRecord) => {
             try {
-                var dataGeneral = currentRecord.getValue("custbody_lmry_features_active");
+                const dataGeneral = currentRecord.getValue("custbody_lmry_features_active");
                 if (!dataGeneral) return;
                 dataGeneral = JSON.parse(dataGeneral);
 
-                var setDataLine = function (sublist, fieldId, list) {
-                    var countLines = currentRecord.getLineCount({ sublistId: sublist });
-                    for (var i = 0; i < countLines; i++) {
+                const setDataLine = (sublist, fieldId, list) => {
+                    let countLines = currentRecord.getLineCount({ sublistId: sublist });
+                    for (let i = 0; i < countLines; i++) {
                         currentRecord.selectLine({ sublistId: sublist, line: i });
                         currentRecord.setCurrentSublistValue({
                             sublistId: sublist,
@@ -41,15 +41,13 @@ define(['N/search','N/runtime'],
             } catch (error) {
                 console.log("error laod", error)
             }
-
-
         }
 
-        function executePopup(currentRecord) {
+        const executePopup = (currentRecord) => {
 
             console.log("executePopup")
-            var onClickVariableRate = function (id,type) {
-              var checkvariableRate = document.getElementById(id);
+            const onClickVariableRate = (id,type) => {
+              let checkvariableRate = document.getElementById(id);
               checkvariableRate.addEventListener('click', function (event) {
                 if (checkvariableRate.classList.contains('checkbox_ck')) {
                     console.log("check")
@@ -65,23 +63,23 @@ define(['N/search','N/runtime'],
         }
 
         function createPopup(checkvariableRate, currentRecord, type) {
-            var translation = getTranslations();
-            var index = getPosition(checkvariableRate);
+            const translation = getTranslations();
+            const index = getPosition(checkvariableRate);
 
             currentRecord.selectLine({ sublistId: type, line: index });
-            var fieldId = type == "item" ? 'custpage_co_variable_rate_data' : 'custpage_co_variable_rate_data_expense';
-            var itemVariableRate = currentRecord.getCurrentSublistValue({ sublistId: type, fieldId: fieldId })
+            const fieldId = type == "item" ? 'custpage_co_variable_rate_data' : 'custpage_co_variable_rate_data_expense';
+            let itemVariableRate = currentRecord.getCurrentSublistValue({ sublistId: type, fieldId: fieldId })
             itemVariableRate = itemVariableRate ? JSON.parse(itemVariableRate) : {};
 
 
-            var getFieldValue = function (fieldId) {
+            const getFieldValue = (fieldId) => {
                 return {
                     value: currentRecord.getCurrentSublistValue({ sublistId: type, fieldId: fieldId }),
                     text: currentRecord.getCurrentSublistText({ sublistId: type, fieldId: fieldId })
                 };
             };
 
-            var item = getFieldValue(type == "item" ? type : "account");
+            const item = getFieldValue(type == "item" ? type : "account");
 
             if (!item.value) {
                 Ext.onReady(function () {
@@ -91,15 +89,15 @@ define(['N/search','N/runtime'],
                 });
                 return;
             }
-            var retecree = getFieldValue(type == "item" ? "custpage_lmry_co_autoretecree" : "custpage_lmry_co_retecree_exp");
-            var retefte = getFieldValue(type == "item" ? "custpage_lmry_co_retefte" : "custpage_lmry_co_retefte_exp");
-            var reteica = getFieldValue(type == "item" ? "custpage_lmry_co_reteica" : "custpage_lmry_co_reteica_exp");
-            var reteiva = getFieldValue(type == "item" ? "custpage_lmry_co_reteiva" : "custpage_lmry_co_reteiva_exp");
+            const retecree = getFieldValue(type == "item" ? "custpage_lmry_co_autoretecree" : "custpage_lmry_co_retecree_exp");
+            const retefte = getFieldValue(type == "item" ? "custpage_lmry_co_retefte" : "custpage_lmry_co_retefte_exp");
+            const reteica = getFieldValue(type == "item" ? "custpage_lmry_co_reteica" : "custpage_lmry_co_reteica_exp");
+            const reteiva = getFieldValue(type == "item" ? "custpage_lmry_co_reteiva" : "custpage_lmry_co_reteiva_exp");
 
 
 
             //Funciones internas
-            var createTextField = function (itemId, label, value, mainField) {
+            const createTextField = (itemId, label, value, mainField) => {
                 return {
                     xtype: 'textfield',
                     fieldLabel: label,
@@ -111,7 +109,7 @@ define(['N/search','N/runtime'],
                 };
             };
 
-            var createNumberField = function (itemId, label, value, mainField) {
+            const createNumberField = (itemId, label, value, mainField) => {
                 return {
                     xtype: 'textfield',
                     fieldLabel: label,
@@ -126,7 +124,7 @@ define(['N/search','N/runtime'],
                 };
             };
 
-            var createPanel = function (title, items) {
+            const createPanel = (title, items) => {
                 return {
                     xtype: 'fieldset',
                     width: 200,
@@ -139,8 +137,8 @@ define(['N/search','N/runtime'],
                 };
             };
 
-            var buildItemsPopup = function (tax, rates, typeWht) {
-                var itemsPopup = [createTextField("nt_" + typeWht, 'NATIONAL TAX', tax.text, true)];
+            const buildItemsPopup = (tax, rates, typeWht) => {
+                let itemsPopup = [createTextField("nt_" + typeWht, 'NATIONAL TAX', tax.text, true)];
                 if (rates) {
                     itemsPopup.push(createNumberField("new_basis_" + typeWht, translation.LMRY_NEW_BASIS, rates.newBasis));
                     itemsPopup.push(createNumberField("new_rate_" + typeWht, translation.LMRY_NEW_RATE, rates.newRate));
@@ -153,14 +151,14 @@ define(['N/search','N/runtime'],
                 return itemsPopup;
             };
 
-            var getFieldColValue = function (popup, idField) {
-                var itemField = popup.down("#" + idField + type);
+            const getFieldColValue = (popup, idField) => {
+                let itemField = popup.down("#" + idField + type);
                 if (!itemField) return null;
 
-                var itemValue = itemField.getValue();
+                let itemValue = itemField.getValue();
                 if (idField.startsWith("nt_")) {
-                    var mappings = { "_cree": retecree, "_fte": retefte, "_ica": reteica, "_iva": reteiva };
-                    var suffix = Object.keys(mappings).find(function (suffix) {
+                    let mappings = { "_cree": retecree, "_fte": retefte, "_ica": reteica, "_iva": reteiva };
+                    let suffix = Object.keys(mappings).find(function (suffix) {
                         return idField.endsWith(suffix) && itemValue === mappings[suffix].text;
                     });
 
@@ -175,9 +173,9 @@ define(['N/search','N/runtime'],
 
 
             //Cracion de paneles por existencia de retenciones
-            var panels = [];
+            let panels = [];
 
-            var featureByRetention = {
+            let featureByRetention = {
                 cree: retecree.value ? isActiveFeatNationalTax(retecree.value):false,
                 fte: retefte.value ? isActiveFeatNationalTax(retefte.value):false,
                 ica: reteica.value ? isActiveFeatNationalTax(reteica.value):false,
@@ -229,7 +227,7 @@ define(['N/search','N/runtime'],
             //Creacion de la ventana emergente
 
             Ext.onReady(function () {
-                var popup = Ext.create('Ext.window.Window', {
+                let popup = Ext.create('Ext.window.Window', {
                     title: translation.LMRY_TITLE_PANEL,
                     width: 1000,
                     height: 500,
@@ -255,7 +253,7 @@ define(['N/search','N/runtime'],
                             handler: function () {
                                 checkvariableRate.classList.replace('checkbox_ck', 'checkbox_unck');
 
-                                var whtObject = {};
+                                let whtObject = {};
 
 
                                 if (retecree.value) {
@@ -329,7 +327,7 @@ define(['N/search','N/runtime'],
         }
 
         function isActiveFeatNationalTax(id) {
-            var isActive = search.lookupFields(
+            let isActive = search.lookupFields(
                 {
                     type: "customrecord_lmry_national_taxes",
                     id: id,
@@ -339,28 +337,28 @@ define(['N/search','N/runtime'],
         }
 
         function getPosition(checkElement) {
-            var trElement = checkElement.closest("tr");
-            var allRows = trElement.parentElement.children;
-            var rowIndex = Array.prototype.indexOf.call(allRows, trElement);
+            let trElement = checkElement.closest("tr");
+            let allRows = trElement.parentElement.children;
+            let rowIndex = Array.prototype.indexOf.call(allRows, trElement);
             return (rowIndex - 1);
         }
 
         function getFeatureVariableRate (subsidiary){
-            var FEAT_SUBS = runtime.isFeatureInEffect({ feature: 'SUBSIDIARIES' })
-            var filters = [
+            let FEAT_SUBS = runtime.isFeatureInEffect({ feature: 'SUBSIDIARIES' })
+            let filters = [
                 ["isinactive", "is", "F"]
             ];
             if (FEAT_SUBS === true || FEAT_SUBS === "T") {
                 filters.push("AND", ["custrecord_lmry_setuptax_subsidiary", "anyof", subsidiary]);
             }
 
-            var results = search.create({
+            let results = search.create({
                 type: "customrecord_lmry_setup_tax_subsidiary",
                 filters: filters,
                 columns: ["custrecord_lmry_co_variable_rate"]
             }).run().getRange(0, 1);
             if (results && results.length) {
-                var isVariableRate = results[0].getValue("custrecord_lmry_co_variable_rate");
+                let isVariableRate = results[0].getValue("custrecord_lmry_co_variable_rate");
                 return isVariableRate === true || isVariableRate === "T"
             }
             return false;
@@ -368,9 +366,9 @@ define(['N/search','N/runtime'],
 
 
         function getTranslations() {
-            var language = runtime.getCurrentScript().getParameter({ name: "LANGUAGE" }).substring(0, 2);
+            let language = runtime.getCurrentScript().getParameter({ name: "LANGUAGE" }).substring(0, 2);
                 language = language === "es" ? language : "en";
-            var translatedFields = {
+            let translatedFields = {
                 "en": {
                     "LMRY_SELECT_ITEM": "Select an account or item",
                     "LMRY_DETAIL": "DETAIL",
