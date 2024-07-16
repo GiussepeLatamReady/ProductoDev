@@ -172,7 +172,7 @@ define([
             "taxtotal": "sumTaxtotal"
         }
         const typeBase = transaction.recordtype == "vendorbill" ||transaction.recordtype == "vendorcredit" ? "puchasebase":"salesbase";
-        if (Object.keys(transaction.items).length) {
+        if (Object.keys(transaction.items ?? {}).length) {
             for (let itemKey in transaction.items) {
                 transaction.items[itemKey].factor = {};
                 for (let wht of Object.values(transaction.wht)) {
@@ -187,7 +187,7 @@ define([
                 }
             }
         }
-        if (Object.keys(transaction.expense).length) {
+        if (Object.keys(transaction.expense ?? {}).length) {
             for (let expenseKey in transaction.expense) {
                 transaction.expense[expenseKey].factor = {}
                 for (let wht of Object.values(transaction.wht)) {
