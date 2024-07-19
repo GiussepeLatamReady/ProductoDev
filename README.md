@@ -12,11 +12,28 @@ Chile
 
 ## Scripts
 + Create
+    + Name:     LR AR Wht Send Email
+    + File:     LMRY_AR_Wht_Send_Email_STLT_V2.1.js
+    + idScript: custscript_lmry_ste_ar_wht_send_email_stlt
+    + idDeploy: customdeploy_lmry_ste_ar_wht_send_email_stlt
+
+    + Name:     LR AR Wht Send Email
+    + file:     LMRY_AR_Wht_Send_Email_MPRD_V2.1.js
+    + idScript: custscript_lmry_ste_ar_wht_send_email_mprd
+    + idDeploy: customdeploy_lmry_ste_ar_wht_send_email_mprd
+
+    + Name:     LR AR Wht Send Email
+    + file:     LMRY_AR_Wht_Send_Email_URET_V2.1.js
+    + idScript: custscript_lmry_ste_ar_wht_send_email_uret
+    + idDeploy: customdeploy_lmry_ste_ar_wht_send_email_uret
+
+    + Name:
+    + file: LMRY_AR_Wht_Send_Email_CLNT_V2.1.js 
+    + idScript: --
+    + idDeploy: --
+
 
 + Update
-    + LMRY_CreditMemoURET_V2.0.js
-    + LMRY_InvoiceURET_V2.0.js
-    + LMRY_RecordSalesURET_V2.0.js
 
 + Delete
 
