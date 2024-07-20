@@ -4,7 +4,7 @@
  * @NModuleScope Public
  * @Name LMRY_AR_Wht_Send_Email_STLT_V2.1.js
  * @Author LatamReady - Giussepe Delgado
- * @Date 18/07/2024
+ * @Date 29/01/2024
  */
 define([
     'N/log',
@@ -17,7 +17,17 @@ define([
     "../../Latam Tools/Router/LMRY_AR_Library_ROUT",
     "../../Constants/LMRY_AR_Features_CONST"
 ],
-    (log, search, redirect, runtime, serverWidget, url, task,Router_LBRY,Features) => {
+    (
+        log,
+        search,
+        redirect,
+        runtime,
+        serverWidget,
+        url,
+        task,
+        Router_LBRY,
+        Features
+    ) => {
         const CLIENT_SCRIPT_PATH = "./LMRY_AR_Wht_Send_Email_CLNT_V2.1.js";
         const { Error_LBRY, Licenses_LBRY } = Router_LBRY;
         const onRequest = (context) => {
@@ -40,17 +50,17 @@ define([
         const processGETRequest = (handler, { params, response }) => {
             try {
 
-                
-                //const status = Number(params.status);
-                const {form,active} = handler.createForm();
-                if (active) {
-                    handler.loadFormValues();
-                    handler.createTransactionSublist();
-                    handler.loadProcessRecord();
 
+                const status = Number(params.status);
+                const { form, active } = handler.createForm();
+                if (active) {
+
+                    status ? handler.setFormValues() : handler.loadFormValues();
+                    handler.createTransactionSublist();
+                    if (status) handler.loadTransactionSublist();
                     form.clientScriptModulePath = CLIENT_SCRIPT_PATH;
                 }
-                
+
                 response.writePage(form);
 
             } catch (err) {
@@ -60,14 +70,22 @@ define([
 
         const processPOSTRequest = (handler, { params, scriptId, deploymentId }) => {
             try {
-                const parameters = {
-                    state: params.custpage_log_id,
-                    user: runtime.getCurrentUser().id
-                };
-                
-                handler.runMapReduce(parameters);
-                handler.toLogSuitelet();
+                const status = Number(params.custpage_status);
+                if (!status) {
+                    redirect.toSuitelet({
+                        scriptId,
+                        deploymentId,
+                        parameters: handler.getRedirectParams()
+                    });
 
+                } else {
+                    const parameters = {
+                        state: params.custpage_log_id,
+                        user: runtime.getCurrentUser().id
+                    };
+                    handler.runMapReduce(parameters);
+                    handler.toLogSuitelet();
+                }
             } catch (err) {
                 log.error("[ onRequest - POST ]", err);
             }
@@ -79,28 +97,42 @@ define([
                 this.method = options.method;
                 this.FEAT_SUBS = this.isValid(runtime.isFeatureInEffect({ feature: 'SUBSIDIARIES' }));
                 this.FEAT_CALENDAR = this.isValid(runtime.isFeatureInEffect({ feature: 'MULTIPLECALENDARS' }));
-                this.FEAT_LOCALIZATION = 100;
                 let language = runtime.getCurrentScript().getParameter({ name: "LANGUAGE" }).substring(0, 2);
                 language = language === "es" ? language : "en";
                 this.translations = this.getTranslations(language);
                 this.subsidiaries = [];
+                this.deploy = runtime.getCurrentScript().deploymentId;
+                this.names = this.getNames(this.deploy);
             }
 
+            getNames(deploy) {
+                let nameList = {
+                    customdeploy_lmry_co_head_wht_calc_stlt: {
+                        scriptid: 'customscript_lmry_co_head_calc_stlt_log',
+                        deployid: 'customdeploy_lmry_co_head_calc_stlt_log',
+                        scriptMapReduce: 'customscript_lmry_co_head_wht_calc_mprd',
+                        deployMapReduce: 'customdeploy_lmry_co_head_wht_calc_mprd',
+                        paramuser: 'custscript_lmry_co_head_wht_calc_user',
+                        paramstate: 'custscript_lmry_co_head_wht_calc_state'
+                    }
+                };
+                return nameList[deploy];
+            }
 
             createForm() {
 
                 this.form = serverWidget.createForm({
-                    title: this.translations.LMRY_TITLE_FORM
+                    title: 'LatamReady - CO Header WHT calculation'
                 });
 
                 if (!this.areThereSubsidiaries()) {
                     this.addNoSubsidiaryMessage();
-                    return {form: this.form , active:false};
+                    return { form: this.form, active: false };
                 }
 
-                this.setupForm();
+                this.setupFormWithSubsidiaries();
 
-                return {form: this.form , active:true};
+                return { form: this.form, active: true };
             }
 
             addNoSubsidiaryMessage() {
@@ -154,7 +186,7 @@ define([
                 myInlineHtml.defaultValue = messageHtml;
             }
 
-            setupForm() {
+            setupFormWithSubsidiaries() {
                 this.form.addButton({
                     label: this.translations.LMRY_VIEW_LOG,
                     id: "custpage_btn_log",
@@ -167,7 +199,8 @@ define([
                 this.addDateField('custpage_period_start', this.translations.LMRY_PERIOD_START, 'mainGroup').isMandatory();
                 this.addDateField('custpage_period_end', this.translations.LMRY_PERIOD_END, 'mainGroup').isMandatory();
                 this.addCheckField('custpage_view_sent', this.translations.LMRY_PERIOD_END, 'mainGroup').isMandatory();
-                this.addSimpleField('custpage_log_id', 'Log ID','mainGroup').isHidden();
+                this.addSimpleField('custpage_status', 'Status', 'mainGroup').isHidden();
+                this.addSimpleField('custpage_log_id', 'Log ID', 'mainGroup').isHidden();
                 this.addSimpleField('custpage_deploy_id', 'Deploy ID', 'mainGroup').setDefautValue(runtime.getCurrentScript().deploymentId).isHidden();
 
                 this.addFormButtons();
@@ -223,10 +256,6 @@ define([
                 return this.addCustomField(id, serverWidget.FieldType.CHECKBOX, label, container).setHelpText({ help: id });
             }
 
-            addHtmlField(id, label, container) {
-                return this.addCustomField(id, serverWidget.FieldType.INLINEHTML, label, container).setHelpText({ help: id });
-            }
-
             addSimpleField(id, label, container) {
                 return this.addCustomField(id, serverWidget.FieldType.TEXT, label, container).setHelpText({ help: id });
             }
@@ -236,22 +265,49 @@ define([
                 this.form.addResetButton({ label: this.translations.LMRY_RESTART });
             }
 
+            addFormButtons() {
+                if (!Number(this.params.status)) {
+                    this.form.addSubmitButton({ label: this.translations.LMRY_FILTER });
+                } else {
+                    this.form.addSubmitButton({ label: this.translations.LMRY_PROCESS });
+                    this.form.addButton({
+                        id: 'btn_back',
+                        label: this.translations.LMRY_BACK,
+                        functionName: 'back'
+                    });
+                    // Deshabilitar campos si es necesario
+
+                    this.disableFields();
+                }
+                this.form.addResetButton({ label: this.translations.LMRY_RESTART });
+            }
+
+
+            disableFields() {
+                const fieldsToDisable = ['custpage_subsidiary', 'custpage_ini_period', 'custpage_fin_period', 'custpage_wht_type', 'custpage_wht_process'];
+                fieldsToDisable.forEach(fieldId => {
+                    let field = this.form.getField({ id: fieldId });
+                    if (field) {
+                        field.updateDisplayType({ displayType: serverWidget.FieldDisplayType.DISABLED });
+                    }
+                });
+            }
+
 
             areThereSubsidiaries() {
-                let anySubsidiaryActive = false; 
-                
-               
+                let anySubsidiaryActive = false;
+
                 if (this.FEAT_SUBS) {
                     this.subsidiaries = this.getSubsidiaries();
                     this.subsidiaries.forEach(subsidiary => {
-                        
-                        subsidiary.active = this.isFeatureActive(Features.AR_BASIC_LOCALIZATION,subsidiary.value);
+
+                        subsidiary.active = this.isFeatureActive(Features.AR_BASIC_LOCALIZATION, subsidiary.value);
                         if (subsidiary.active) {
                             anySubsidiaryActive = true;
                         }
                     });
                 } else { // COMPROBAR
-                    const isAuthorized = this.isFeatureActive(Features.AR_BASIC_LOCALIZATION,"1");;
+                    const isAuthorized = this.isFeatureActive(Features.AR_BASIC_LOCALIZATION, "1");;
                     this.subsidiaries = [{
                         value: 1,
                         text: 'Company',
@@ -259,17 +315,17 @@ define([
                     }];
                     anySubsidiaryActive = isAuthorized;
                 }
-            
+
                 return anySubsidiaryActive;
             }
-            
+
 
 
             getSubsidiaries() {
 
                 let searchSubs = search.create({
                     type: search.Type.SUBSIDIARY,
-                    filters: [['isinactive', 'is', 'F'], 'AND', ['country', 'is', 'AR']],
+                    filters: [['isinactive', 'is', 'F'], 'AND', ['country', 'is', 'CO']],
                     columns: ['internalid', 'name']
                 });
 
@@ -282,30 +338,25 @@ define([
 
             createTransactionSublist() {
                 this.form.addTab({
-                    id: 'tab_results',
-                    label: this.translations.LMRY_RESULTS
+                    id: 'transactions_tab',
+                    label: this.translations.LMRY_TRANSACTIONS
                 });
 
                 this.sublist = this.form.addSublist({
                     id: 'custpage_results_list',
                     label: this.translations.LMRY_RESULTS,
-                    tab: 'tab_results',
+                    tab: 'transactions_tab',
                     type: serverWidget.SublistType.LIST
                 });
 
-                
-                const fields = [
-                    { id: "apply", label: this.translations.LMRY_NUMBER, type: serverWidget.FieldType.TEXT },
-                    { id: "subsidiary", label: this.translations.LMRY_SUBSIDIARY, type: serverWidget.FieldType.TEXT },
-                    { id: "datecreated", label: this.translations.LMRY_CREATION_DATE_LABEL, type: serverWidget.FieldType.TEXT },
-                    { id: "created_by", label: this.translations.LMRY_CREATED_BY_LABEL, type: serverWidget.FieldType.TEXT },
-                    { id: "period", label: this.translations.LMRY_PERIOD, type: serverWidget.FieldType.TEXT },
-                    { id: "summary", label: this.translations.LMRY_SUMMARY, type: serverWidget.FieldType.TEXTAREA },
-                    { id: "details", label: this.translations.LMRY_DETAILS, type: serverWidget.FieldType.TEXTAREA },
-                    { id: "result", label: this.translations.LMRY_RESULTS, type: serverWidget.FieldType.TEXTAREA},
-                    { id: "status", label: this.translations.LMRY_STATUS, type: serverWidget.FieldType.TEXT }
-                ];
 
+                const fields = [
+                    { id: 'apply', label: this.translations.LMRY_APPLY, type: serverWidget.FieldType.CHECKBOX },
+                    { id: 'tranid', label: this.translations.LMRY_DOCUMENT_NUMBER, type: serverWidget.FieldType.TEXT },
+                    { id: 'entity', label: this.translations.LMRY_ENTITY, type: serverWidget.FieldType.TEXT },
+                    { id: 'email', label: this.translations.LMRY_EMAIL, type: serverWidget.FieldType.TEXT },
+                    { id: 'internalidtext', label: 'internal_id', type: serverWidget.FieldType.TEXT, displayType: serverWidget.FieldDisplayType.HIDDEN }
+                ];
 
                 fields.forEach(fieldInfo => {
                     let field = this.sublist.addField(fieldInfo);
@@ -314,8 +365,17 @@ define([
                     }
                 });
 
-                this.sublist.addRefreshButton();
-
+                this.sublist.addButton({
+                    id: 'markAll',
+                    label: this.translations.LMRY_SELECT_ALL,
+                    functionName: 'toggleCheckBoxes(true)'
+                });
+                this.sublist.addButton({
+                    id: 'desmarkAll',
+                    label: this.translations.LMRY_DESELECT_ALL,
+                    functionName: 'toggleCheckBoxes(false)'
+                });
+                
                 return this.sublist;
             }
 
@@ -335,163 +395,261 @@ define([
                     });
                 }
             }
-
             fillPeriods() {
-
-                const nowDate = new Date();
-                let startPeriod = this.form.getField({ id: 'custpage_period_start' });
-                let endPeriod = this.form.getField({ id: 'custpage_period_end' });
-                
-                startPeriod.defaultValue = nowDate;
-                endPeriod.defaultValue = nowDate;
-            } 
-
-            loadProcessRecord() {
+                const startPeriod = this.form.getField({ id: 'custpage_period_start' });
+                const endPeriod = this.form.getField({ id: 'custpage_period_end' });
+                startPeriod.defaultValue = new Date();
+                endPeriod.defaultValue = new Date();
+            }
 
 
-                let data = this.getRecords();
+            setFormValues() {
+                const {
+                    subsidiary,
+                    startDate,
+                    endDate,
+                    viewSent
+                } = this.params;
+                let form = this.form;
+
+
+                if (this.FEAT_SUBS == true || this.FEAT_SUBS == 'T') {
+                    if (Number(subsidiary)) {
+                        let subsidiaryField = form.getField({ id: 'custpage_subsidiary' });
+                        let name = search.lookupFields({
+                            type: 'subsidiary',
+                            id: subsidiary,
+                            columns: ['name']
+                        }).name;
+                        subsidiaryField.addSelectOption({ value: subsidiary, text: name });
+                        subsidiaryField.defaultValue = subsidiary;
+                    }
+
+                }
+
+                form.updateDefaultValues({
+                    custpage_status: '1',
+                    custpage_period_start: startDate || '',
+                    custpage_period_end: endDate || '',
+                    custpage_view_sent: viewSent
+                });
+            }
+
+            loadTransactionSublist() {
+                let data = this.getVendorPaymentDetails();
 
                 let sublist = this.form.getSublist({ id: 'custpage_results_list' });
-                const count = data.length;
-                data.forEach((form, i) => {
-                    const { id, subsidiary, created, employee, period, summary, status, urlFile } = form;
+
+                data.forEach((billPayment, i) => {
+                    const {
+                        paymentID,
+                        tranID,
+                        recordType,
+                        vendorID,
+                        vendorName,
+                        email,
+                    } = billPayment;
+
                     const setSublistValue = (colId, value) => sublist.setSublistValue({ id: colId, line: i, value });
-                    const recordUrl = url.resolveRecord({ recordType: "customrecord_lmry_ar_massive_gener_agip", recordId: id, isEditMode: false });
-                    const urlID = `
-                    <a href="${recordUrl}" target="_blank" style="text-decoration: none; color: inherit;">
-                        <div style="display: grid; place-items: center; background: white; border-radius: 6px; transition: background-color 0.3s; border: 0.5px solid #bbd1e9;" onmouseover="this.style.backgroundColor='#bbd1e9'" onmouseout="this.style.backgroundColor='white';">
-                            <div style="color: color:#424950; font-size: 14px;">${this.translations.LMRY_DETAILS}</div>
-                        </div>
-                    </a>`;
+                    setSublistValue("internalidtext", paymentID);
 
+                    const tranUrl = url.resolveRecord({ recordType, recordId: id, isEditMode: false });
+                    setSublistValue("tranid", `<a class="dottedlink" href="${tranUrl}" target="_blank">${tranID}</a>`);
 
-
-                    setSublistValue("number",id)
-                    setSublistValue("subsidiary",subsidiary)
-                    setSublistValue("datecreated",created)
-                    setSublistValue("created_by",employee)
-                    setSublistValue("period",period)
-                    setSublistValue("details",urlID)
-                    setSublistValue("summary",this.getSummary(summary));
-                    let statusResult = "Loading data";
-                    switch (status) {
-                        case "Finish":
-                            statusResult = this.translations.LMRY_FINISH;
-                            break;
-                        case "Loading data":
-                            statusResult = this.translations.LMRY_LOADING_DATA;
-                            break;
-                        case "An error occurred":
-                            statusResult = this.translations.LMRY_ERROR;
-                            break;
-                        case "Processing":
-                            statusResult = this.translations.LMRY_PROCESING;
-                            break;
-                        default:
-                            statusResult = this.translations.LMRY_LOADING_DATA;
-                    }
-
-                    if (urlFile) {
-                            const htmlUrlFile = `
-                            <a href="${urlFile}" target="_blank" style="text-decoration: none; color: inherit;">
-                                <div style="display: grid; place-items: center; background: white; border-radius: 6px; transition: background-color 0.3s; border: 0.5px solid #b3ecae;" onmouseover="this.style.backgroundColor='#b3ecae'" onmouseout="this.style.backgroundColor='white';">
-                                    <div style="color: color:#424950; font-size: 14px;">${"Response"}</div>
-                                </div>
-                            </a>
-                            `;
-                        setSublistValue("result", htmlUrlFile)
-                    }
-                    statusResult= `
-                        <div style ="display: flex; align-items: center; height:80%">
-                            <h3>${statusResult}</h3>
-                        </div>
-                        
-                    `;
-                    setSublistValue("status",statusResult)
-
-                    // Falata detalles y resultados
+                    const tranUrlEntity = url.resolveRecord({ recordType:"vendor", recordId: vendorID, isEditMode: false });
+                    setSublistValue("entity", `<a class="dottedlink" href="${tranUrlEntity}" target="_blank">${vendorName}</a>`);
+                    setSublistValue("email", email);
+                    setSublistValue("internalidtext", paymentID);
                 })
 
                 if (data.length) {
                     sublist.label = `${sublist.label} (${data.length})`;
                 }
-
             }
- 
-            getRecords() {
 
-                
+            getVendorPaymentDetails() {
+                try {
+                    let jsonData = {};
+                    let filters = [];
+                    if (this.FEAT_SUBS) {
+                        const { subsidiary } = this.params;
+                        filters = [
+                            ['custrecord_lmry_ste_ar_whtvpd_payment.subsidiary', 'is', subsidiary]
+                        ];
+                    }
+            
+                    let columns = [
+                        search.createColumn({ name: 'formulatext', formula: '{custrecord_lmry_ste_ar_whtvpd_payment.id}' }),         //.0
+                        search.createColumn({ name: 'formulatext', formula: '{custrecord_lmry_ste_ar_whtvpd_payment}' }),   //.1
+                        search.createColumn({ name: 'formulatext', formula: '{custrecord_lmry_ste_ar_whtvpd_payment.recordType}' }), //.2
+                        search.createColumn({ name: 'formulatext', formula: '{custrecord_lmry_ste_ar_whtvpd_vendor}' }),           //.3
+                        search.createColumn({ name: 'formulatext', formula: '{custrecord_lmry_ste_ar_whtvpd_vendor.email}' }),       //.4
+                        search.createColumn({ name: 'formulatext', formula: '{custrecord_lmry_ste_ar_whtvpd_vendor.id}' }),
+                        search.createColumn({ name: 'formulatext', formula: '{custrecord_lmry_ste_ar_whtvpd_status.custrecord_lmry_ste_procstatus_code}' }),
+                    ];
+
+                    const searchBillPayments = search.create({
+                        type: "customrecord_lmry_ste_ar_wht_vp_details",
+                        filters: filters,
+                        columns: columns
+                    });
+            
+                    let pageData = searchBillPayments.runPaged({ pageSize: 1000 });
+                    if (pageData) {
+                        pageData.pageRanges.forEach(function (pageRange) {
+                            let page = pageData.fetch({ index: pageRange.index });
+                            page.data.forEach(function (result) {
+            
+                                const columns = result.columns;
+                                const statusCode = result.getValue(columns[6]);
+                                if (statusCode === "DONE") {
+                                    const vendorID = result.getValue(columns[5]);
+                                    const paymentID = result.getValue(columns[0]);
+                                    if (!jsonData[vendorID]) {
+                                        jsonData[vendorID] = { payments: [], paymentIDs: new Set() };
+                                    }
+            
+                                    // Añadir solo si el paymentID no está ya en el Set
+                                    if (!jsonData[vendorID].paymentIDs.has(paymentID)) {
+                                        jsonData[vendorID].paymentIDs.add(paymentID);
+                                        jsonData[vendorID].payments.push({
+                                            paymentID: paymentID,
+                                            tranID: result.getValue(columns[1]) || " - ",
+                                            recordType: result.getValue(columns[2]),
+                                            vendorID,
+                                            vendorName: result.getValue(columns[3]),
+                                            email: result.getValue(columns[4]),
+                                        });
+                                    }
+                                }
+                            });
+                        });
+                    }
+            
+                    let payments = [];
+                    for (let vendorID in jsonData) {
+                        payments = payments.concat(jsonData[vendorID].payments);
+                    }
+                    return payments;
+                } catch (error) {
+                    log.error('Error', error)
+                }
+            }
+
+            getTransactionsMain(ids, jsonData) {
+
+                let reclasificationIds = ids.filter(id => jsonData[id]);
+                let retentionIds = ids.filter(id => !jsonData[id]);
+
+                reclasificationIds = this.getReclasificationIds(reclasificationIds)
+                return [
+                    ...this.getSearch(reclasificationIds, true),
+                    ...this.getSearch(retentionIds, false)
+
+                ];
+            }
+
+            getSearch(ids, isReclasification) {
+                if (ids.length == 0) {
+                    return ids;
+                }
                 let data = [];
-                const jsonPeriods = this.getPeriod();
-                let search_log = search.create({
-                    type: "customrecord_lmry_ar_massive_gener_agip",
-                    filters:
-                        [
-                            ["isinactive", "is", "F"]
-                        ],
-                    columns:
-                        [
-                            search.createColumn({ name: "internalid", sort: search.Sort.DESC }),
-                            "custrecord_lmry_ar_gen_agip_subsidiary.legalname",
-                            "created",
-                            "custrecord_lmry_ar_gen_agip_user",
-                            "custrecord_lmry_ar_gen_agip_period",
-                            "custrecord_lmry_ar_gen_agip_summary",
-                            "custrecord_lmry_ar_gen_agip_status",
-                            "custrecord_lmry_ar_gen_agip_url",
-                            
-                        ]
+                let filters = [
+                    ["internalid", "anyof", ids],
+                    "AND",
+                    ["mainline", "is", "T"]
+
+                ];
+
+                if (!isReclasification) {
+                    filters.push('AND', ["custrecord_lmry_br_transaction.internalid", "anyof", "@NONE@"]);
+                }
+
+                let columns = [];
+                columns.push(search.createColumn({ name: 'formulatext', formula: '{internalid}', sort: search.Sort.DESC }));
+                columns.push(search.createColumn({ name: 'formulatext', formula: '{type}' }));
+                columns.push(search.createColumn({ name: 'formulatext', formula: '{entity}' }));
+                columns.push(search.createColumn({ name: 'formulatext', formula: '{recordType}' }));
+                columns.push(search.createColumn({ name: 'formulatext', formula: '{custbody_lmry_document_type}' }));
+                columns.push(search.createColumn({ name: 'formulatext', formula: '{tranid}' }));
+                columns.push(search.createColumn({ name: 'formulatext', formula: '{fxamount}' }));
+                columns.push(search.createColumn({ name: 'formulatext', formula: '{currency}' }));
+                columns.push(search.createColumn({ name: 'formulatext', formula: '{entity.id}' }));
+
+                // Se agrego las columnas de retenciones
+                columns.push(search.createColumn({ name: 'formulatext', formula: '{custbody_lmry_co_reteiva}' }));
+                columns.push(search.createColumn({ name: 'formulatext', formula: '{custbody_lmry_co_reteica}' }));
+                columns.push(search.createColumn({ name: 'formulatext', formula: '{custbody_lmry_co_retefte}' }));
+                columns.push(search.createColumn({ name: 'formulatext', formula: '{custbody_lmry_co_autoretecree}' }));
+
+
+                let settings = [];
+                if (this.FEAT_SUBS) {
+                    settings = [search.createSetting({ name: 'consolidationtype', value: 'NONE' })];
+                }
+                let searchTransactions = search.create({
+                    type: "transaction",
+                    filters: filters,
+                    columns: columns,
+                    settings: settings
                 });
-                let pageData = search_log.runPaged({ pageSize: 1000 });
+
+
+                let pageData = searchTransactions.runPaged({ pageSize: 1000 });
                 if (pageData) {
                     pageData.pageRanges.forEach(function (pageRange) {
                         let page = pageData.fetch({ index: pageRange.index });
                         page.data.forEach(function (result) {
-                            let columns = result.columns;
-                           
-                            let formublist = {};
-                            formublist.id = result.getValue(columns[0]) || ' ';
-                            formublist.subsidiary = result.getValue(columns[1]) || ' ';
-                            formublist.created = result.getValue(columns[2]) || ' ';
-                            formublist.employee = result.getText(columns[3]) || ' ';
-                            formublist.period = jsonPeriods[result.getValue(columns[4])] || ' ';
-                            formublist.summary = result.getValue(columns[5]);
-                            formublist.status = result.getValue(columns[6]) || ' ';
-                            formublist.urlFile = result.getValue(columns[7]);
-                            data.push(formublist);
+                            const columns = result.columns;
+                            let transaction = {};
+                            transaction.id = result.getValue(columns[0]) || " ";
+                            transaction.legalDocument = result.getValue(columns[4]) || " ";
+                            transaction.entityName = result.getValue(columns[2]) || " ";
+                            transaction.entityValue = result.getValue(columns[8]) || " ";
+                            transaction.tranid = result.getValue(columns[5]) || " - ";
+                            transaction.type = result.getValue(columns[1]) || " ";
+                            transaction.recordType = result.getValue(columns[3]) || " ";
+                            transaction.amount = Math.abs(result.getValue(columns[6])) || 0;
+                            transaction.currency = result.getValue(columns[7]) || " ";
+
+                            // Se agrego las columnas de retenciones
+                            transaction.co_reteiva = result.getValue(columns[9]) || " ";
+                            transaction.co_reteica = result.getValue(columns[10]) || " ";
+                            transaction.co_retefte = result.getValue(columns[11]) || " ";
+                            transaction.co_retecre = result.getValue(columns[12]) || " ";
+                            transaction.isReclasification = isReclasification ? "T" : "F";
+                            data.push(transaction);
                         });
                     });
                 }
 
+
                 return data;
             }
 
-            getSummary(summary) {
-                if (!summary) return " ";
-
-                const jsonSummary = JSON.parse(summary);
-                const { s, p, n, e } = jsonSummary;
-                const total = s + p + n + e;
-
-                const getLi = (count, text, color) => count === 0 ? '' : `<li style="color: ${color};" margin: 5px 0>${count} ${text}</li>`;
-
-                const html = `
-                  <div style="display:flex; flex-direction: column; justify-content: center;  height: 80%; font-family: Arial, sans-serif;">
-                    <h3 style="margin-top: 20px;">${total} ${this.translations.LMRY_ENTITIES_FOUND}</h3>
-                    <ul style="margin-top: 10px; padding-left: 0px;">
-                      ${getLi(s, this.translations.LMRY_SUCESS, 'rgb(18, 179, 18)') }
-                      ${getLi(p, this.translations.LMRY_PROCESING, 'blue')}
-                      ${getLi(n, this.translations.LMRY_RAW, 'orange')}
-                      ${getLi(e, this.translations.LMRY_WITH_ERROR, 'red')}
-                    </ul>
-                  </div>
-                `.trim().replace(/\s+/g, ' ');
-
-                return html;
+            generatePeriodFormula(idsPeriod) {
+                const periodsString = idsPeriod.map(id => `'${id}'`).join(', ');
+                return `CASE WHEN {custbody_lmry_reference_transaction.postingperiod.id} IN (${periodsString}) THEN 1 ELSE 0 END`;
             }
 
+            getRedirectParams() {
+                const {
+                    custpage_subsidiary,
+                    custpage_period_start,
+                    custpage_period_end,
+                    custpage_view_sent
+                } = this.params;
 
-            getTranslations(language) {
+                return {
+                    subsidiary: custpage_subsidiary || '',
+                    startDate:  custpage_period_start || '',
+                    endDate:    custpage_period_end || '',
+                    viewSent:   custpage_view_sent || '',
+                    status: '1'
+                };
+            }
+
+            getTranslations(country) {
                 const translatedFields = {
                     "es": {
                         "LMRY_MESSAGE": "Mensaje",
@@ -499,37 +657,42 @@ define([
                         "LMRY_MESSAGE_CONTACT": "También puedes contactar con nosotros a",
                         "LMRY_PRIMARY_INFO": "Informacion primaria",
                         "LMRY_SUBSIDIARY": "Subsidiaria",
-                        "LMRY_VIEW_LOG": "Ver registro",
-                        "LMRY_ENTITY_TYPE": "Tipo de entidad",
-                        "LMRY_VENDOR": "Proveedor",
-                        "LMRY_CUSTOMER": "Cliente",
-                        "LMRY_TITLE_FORM": "LatamReady - Generación masiva AGIP",
+                        "LMRY_WTH_TYPE": "Tipo de retención",
+                        "LMRY_PERIOD_INTERVAL": "Intervalo de periodos",
+                        "LMRY_START_DATE": "Fecha de inicio",
+                        "LMRY_END_DATE": "Fecha final",
+                        "LMRY_PERIOD": "Periodo contable",
+                        "LMRY_START_PERIOD": "Periodo contable inicial",
+                        "LMRY_FINAL_PERIOD": "Perido contable final",
+                        "LMRY_FILTER": "Filtrar",
+                        "LMRY_PROCESS": "Procesar",
+                        "LMRY_BACK": "Atras",
                         "LMRY_RESTART": "Reiniciar",
-                        "LMRY_GENERATE": "Generar",
+                        "LMRY_PERIOD_TYPE": "Tipo de período",
+                        "LMRY_TRANSACTIONS": "Transacciones",
                         "LMRY_RESULTS": "Resultados",
-                        "LMRY_RESULT": "Resultado",
+                        "LMRY_APPLY": "Aplicar",
+                        "LMRY_DOCUMENT_NUMBER": "Nùmero de Documento",
                         "LMRY_INTERNALID": "ID Interno",
-                        "LMRY_CREATION_DATE_LABEL": "Fecha de Creación",
-                        "LMRY_CREATED_BY_LABEL": "Creado por",
-                        "LMRY_PERIOD": "Periodo",
-                        "LMRY_STATUS": "Estado",
-                        "LMRY_REFRESH": "Actualizar",
-                        "LMRY_FINISH": "Finalizado",
-                        "LMRY_LOADING_DATA": "Cargando datos",
-                        "LMRY_ERROR": "Ocurrió un error",
-                        "LMRY_PROCESING": "Procesando",
-                        "LMRY_SUMMARY": "Resumen",
-                        "LMRY_DETAILS": "Detalles",
-                        "LMRY_NUMBER":"Posicion",
-                        "LMRY_RECORD":"Registro",
-                        "LMRY_VIEW":"Ver",
-                        "LMRY_SUCESS":"con éxito",
-                        "LMRY_RAW":"sin procesar",
-                        "LMRY_WITH_ERROR":"con error",
-                        "LMRY_ENTITIES_FOUND":"entidades encontradas",
-
-                        "LMRY_PERIOD_START": "Fecha de inicio",
-                        "LMRY_PERIOD_END": "Fecha hasta",
+                        "LMRY_TRANSACTION_TYPE": "Tipo de transaccion",
+                        "LMRY_FISCAL_DOCUMENT": "Numero de documento fiscal",
+                        "LMRY_AMOUNT": "Importe",
+                        "LMRY_SELECT_ALL": "Seleccionar todo",
+                        "LMRY_DESELECT_ALL": "Deseleccionar todo",
+                        "LMRY_WHT_HEADER": "Cabecera",
+                        "LMRY_WHT_LINE": "Linea",
+                        "LMRY_DATE_RANGE": "Rango de fechas",
+                        "LMRY_TYPE_PROCESS": "Proceso",
+                        "LMRY_SALES": "Ventas",
+                        "LMRY_PURCHASES": "Compras",
+                        "LMRY_ENTITY": "Entidad",
+                        "LMRY_CURRENCY": "Moneda",
+                        "LMRY_VIEW_LOG": "Ver registro",
+                        "LMRY_RETEICA": "ReteICA",
+                        "LMRY_RETEIVA": "ReteIVA",
+                        "LMRY_RETEFTE": "ReteFte",
+                        "LMRY_RETECRE": "ReteCre",
+                        "LMRY_RECLASIFICATION": "Reclasificación"
                     },
                     "en": {
                         "LMRY_MESSAGE": "Message",
@@ -537,60 +700,67 @@ define([
                         "LMRY_MESSAGE_CONTACT": "You can also contact us through",
                         "LMRY_PRIMARY_INFO": "Primary information",
                         "LMRY_SUBSIDIARY": "Subsidiary",
-                        "LMRY_VIEW_LOG": "View Log",
-                        "LMRY_ENTITY_TYPE": "Entity type",
-                        "LMRY_VENDOR": "Vendor",
-                        "LMRY_CUSTOMER": "Customer",
-                        "LMRY_TITLE_FORM": "LatamReady - Massive generation AGIP",
+                        "LMRY_WTH_TYPE": "Withholding type",
+                        "LMRY_PERIOD_INTERVAL": "Period interval",
+                        "LMRY_START_DATE": "Start date",
+                        "LMRY_END_DATE": "End date",
+                        "LMRY_PERIOD": "Accounting period",
+                        "LMRY_START_PERIOD": "Initial Accounting period",
+                        "LMRY_FINAL_PERIOD": "Final Accounting period",
+                        "LMRY_FILTER": "Filter",
+                        "LMRY_PROCESS": "Process",
+                        "LMRY_BACK": "Back",
                         "LMRY_RESTART": "Restart",
-                        "LMRY_GENERATE": "Generate",
+                        "LMRY_PERIOD_TYPE": "Type of period",
+                        "LMRY_TRANSACTIONS": "Transactions",
                         "LMRY_RESULTS": "Results",
-                        "LMRY_RESULT": "Result",
+                        "LMRY_APPLY": "Apply",
+                        "LMRY_DOCUMENT_NUMBER": "Document Number",
                         "LMRY_INTERNALID": "Internal ID",
-                        "LMRY_CREATION_DATE_LABEL": "Creation Date",
-                        "LMRY_CREATED_BY_LABEL": "Created By",
-                        "LMRY_PERIOD": "Period",
-                        "LMRY_SUMMARY": "Summary",
-                        "LMRY_STATUS": "Status",
-                        "LMRY_REFRESH": "Refresh",
-                        "LMRY_FINISH": "Finished",
-                        "LMRY_LOADING_DATA": "Loading Data",
-                        "LMRY_ERROR": "An Error Occurred",
-                        "LMRY_PROCESING": "Processing",
-                        "LMRY_DETAILS": "Details",
-                        "LMRY_NUMBER":"Position",
-                        "LMRY_RECORD":"Record",
-                        "LMRY_VIEW":"View",
-                        "LMRY_SUCESS":"successful",
-                        "LMRY_RAW":"unprocessed",
-                        "LMRY_WITH_ERROR":"with error",
-                        "LMRY_ENTITIES_FOUND":"entities found",
-
-                        "LMRY_PERIOD_START": "Date From",
-                        "LMRY_PERIOD_END": "Date To",
-                    }  
+                        "LMRY_TRANSACTION_TYPE": "Transaction type",
+                        "LMRY_FISCAL_DOCUMENT": "Fiscal document number",
+                        "LMRY_AMOUNT": "Amount",
+                        "LMRY_SELECT_ALL": "Select all",
+                        "LMRY_DESELECT_ALL": "Deselect all",
+                        "LMRY_WHT_HEADER": "Header",
+                        "LMRY_WHT_LINE": "Line",
+                        "LMRY_DATE_RANGE": "Date range",
+                        "LMRY_TYPE_PROCESS": "Process",
+                        "LMRY_SALES": "Sales",
+                        "LMRY_PURCHASES": "Purchases",
+                        "LMRY_ENTITY": "Entity",
+                        "LMRY_CURRENCY": "Currency",
+                        "LMRY_VIEW_LOG": "View Log",
+                        "LMRY_RETEICA": "ReteICA",
+                        "LMRY_RETEIVA": "ReteIVA",
+                        "LMRY_RETEFTE": "ReteFte",
+                        "LMRY_RETECRE": "ReteCre",
+                        "LMRY_RECLASIFICATION": "Reclasification"
+                    }
                 }
-                return translatedFields[language];
+                return translatedFields[country];
             }
 
-            
+
             toLogSuitelet() {
                 redirect.toSuitelet({
-                    scriptId: 'customscript_lmry_ar_mass_gene_agip_stlt',
-                    deploymentId: 'customdeploy_lmry_ar_mass_gene_agip_stlt'
+                    scriptId: this.names.scriptid,
+                    deploymentId: this.names.deployid
                 });
             }
 
             runMapReduce({ state, user }) {
+
+                const { scriptMapReduce: MPRD_SCRIPT_ID, deployMapReduce: MPRD_DEPLOY_ID } = this.names;
                 const parameters = {
-                    custscript_lmry_ar_mass_gen_agip_user: user,
-                    custscript_lmry_ar_mass_gen_agip_state: state
+                    custscript_lmry_co_head_wht_calc_user: user,
+                    custscript_lmry_co_head_wht_calc_state: state
                 };
 
                 task.create({
                     taskType: task.TaskType.MAP_REDUCE,
-                    scriptId: 'customscript_lmry_ste_ar_wht_send_email_mprd',
-                    deploymentId: 'customdeploy_lmry_ste_ar_wht_send_email_mprd',
+                    scriptId: MPRD_SCRIPT_ID,
+                    deploymentId: MPRD_DEPLOY_ID,
                     params: parameters
                 }).submit();
             }
@@ -599,35 +769,12 @@ define([
             isValid(bool) {
                 return (bool === "T" || bool === true);
             }
-            setParams(parameters){
+
+            setParams(parameters) {
                 this.params = parameters;
             }
 
-            getPeriod(){
-                let jsonPeriod = {};
-                const search_log = search.create({
-                    type: "accountingperiod",
-                    columns:
-                        [
-                            "internalid",
-                            "periodname"
-                        ]
-                });
-                let pageData = search_log.runPaged({ pageSize: 1000 });
-                if (pageData) {
-                    pageData.pageRanges.forEach(function (pageRange) {
-                        let page = pageData.fetch({ index: pageRange.index });
-                        page.data.forEach(function (result) {
-                            const id  = result.getValue("internalid");
-                            const periodname = result.getValue("periodname") || ' ';
-                            jsonPeriod[id] = periodname;
-                        });
-                    });
-                }
-                return jsonPeriod;
-            }
-
-            isFeatureActive(feature,subsidiary){
+            isFeatureActive(feature, subsidiary) {
                 const Licenses = new Licenses_LBRY.Licenses({ subsidiaryId: subsidiary });
                 return Licenses.getAuthorization(feature)
             }

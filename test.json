@@ -1,0 +1,23 @@
+jsonData[vendorID].payments.push({
+    paymentID:result.getValue(columns[0]),
+    tranID:result.getValue(columns[1]) || " - ",
+    recordType:result.getValue(columns[2]),
+    vendorID,
+    vendorName:result.getText(columns[3]),
+    email:result.getValue(columns[4]),
+})
+
+jsonData= {
+    "212":{
+        payments:[
+            {
+                paymentID:"212",
+                tranID:result.getValue(columns[1]) || " - ",
+                recordType:result.getValue(columns[2]),
+                vendorID,
+                vendorName:result.getText(columns[3]),
+                email:result.getValue(columns[4]),
+            }
+        ]
+    }
+}
