@@ -13,8 +13,8 @@ define([
     'N/ui/message',
     'N/url',
     'N/currentRecord',
-    "../../Constants/LMRY_AR_GlobalConstants_LBRY",
-    "../../Latam Tools/Router/LMRY_AR_Library_CLNT_ROUT"
+    "../Constants/LMRY_AR_GlobalConstants_LBRY",
+    "../Latam Tools/Router/LMRY_AR_Library_CLNT_ROUT"
 ],
     (
         runtime, 
@@ -111,14 +111,15 @@ define([
 
             pageInit(scriptContext) {
                 this.currentRecord = scriptContext.currentRecord;
+                const status = this.currentRecord.getValue('custpage_status');
+                //if (status === 1 || status === "1") this.setVendors(); 
             }
             validateField(scriptContext) {
 
                 try {
                     this.currentRecord = scriptContext.currentRecord;
                     if (scriptContext.fieldId == 'custpage_subsidiary') {
-                        let subsidiaryValue = this.currentRecord.getValue({ fieldId: 'custpage_subsidiary' });
-                        this.setVendors(subsidiaryValue);
+                        this.setVendors();
                     }
                     return true;
                 } catch (err) {
@@ -131,6 +132,7 @@ define([
 
             saveRecord(context) {
                 try {
+                    
                     this.currentRecord = context.currentRecord;
                     let recordObj = context.currentRecord;
                     let status = recordObj.getValue({ fieldId: 'custpage_status' });
@@ -154,6 +156,7 @@ define([
                         }
                     }
                 } catch (err) {
+                    alert(err.stack)
                     Error_LBRY.handleError({ title: "[Save Record]", err, script: LMRY_SCRIPT, suiteAppId: Constants.APP_ID });
                     return false;
                 }
@@ -260,6 +263,9 @@ define([
 
 
             createRecordLog() {
+                const recordStatus = this.getRecordStatus();
+                console.log("recordStatus :",recordStatus);
+
                 let currentRecord = this.currentRecord;
                 let form = {
                     ids: [],
@@ -282,14 +288,14 @@ define([
                     if (isApplied) {
                         form.transactions.push({
                             id: currentRecord.getSublistValue({ sublistId: 'custpage_results_list', fieldId: 'internalidtext', line: i }),
-                            vendorID: currentRecord.getSublistValue({ sublistId: 'custpage_results_list', fieldId: 'entity', line: i }),
+                            vendorID: currentRecord.getSublistValue({ sublistId: 'custpage_results_list', fieldId: 'entity_id', line: i }),
                             email: currentRecord.getSublistValue({ sublistId: 'custpage_results_list', fieldId: 'email', line: i }),
                         });
                     }
                 }
 
                 let pooledPayments = {};
-
+                console.log("form",  form);
                 //Agrupar bill payments por vendor
                 form.transactions.forEach(({id,vendorID,email}) => {
 
@@ -304,16 +310,17 @@ define([
                 let logIds = [];
                 for (const vendorID in pooledPayments) {
                     const {transactions,email} = pooledPayments[vendorID];
+                    console.log("pooledPayments[vendorID] :",pooledPayments[vendorID])
                     let recordlog = record.create({
-                        type: 'customrecord_lmry_co_head_wht_cal_log'
+                        type: 'customrecord_lmry_ste_ar_wht_send'
                     });
-                    recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_subsi', value: form.subsidiary });
+                    recordlog.setValue({ fieldId: 'custrecord_lmry_ste_ar_wht_se_subsi', value: form.subsidiary });
                     recordlog.setValue({ fieldId: 'custrecord_lmry_ste_ar_wht_se_vendor', value: vendorID });
                     recordlog.setValue({ fieldId: 'custrecord_lmry_ste_ar_wht_se_email', value: email });
                     recordlog.setValue({ fieldId: 'custrecord_lmry_ste_ar_wht_se_dfrom', value: form.dateFrom });
                     recordlog.setValue({ fieldId: 'custrecord_lmry_ste_ar_wht_se_dto', value: form.dateTo });
                     recordlog.setValue({ fieldId: 'custrecord_lmry_ste_ar_wht_se_employee', value: runtime.getCurrentUser().id });
-                    recordlog.setValue({ fieldId: 'custrecord_lmry_ste_ar_wht_se_status', value: "Loading Data" });
+                    recordlog.setValue({ fieldId: 'custrecord_lmry_ste_ar_wht_se_status', value: recordStatus["PREPARING"].id });
                     
                     recordlog.setValue({ fieldId: 'custrecord_lmry_ste_ar_wht_se_payments', value: JSON.stringify(transactions) });
 
@@ -350,14 +357,16 @@ define([
                 return translatedFields[country];
             }
 
-            setVendors(subsidiary){
+            setVendors(){
+                let subsidiary = this.currentRecord.getValue({ fieldId: 'custpage_subsidiary' });
                 const vendors = this.getVendors(subsidiary);
                 const entityField = this.currentRecord.getField({ fieldId: 'custpage_entity' });
 
                 if (entityField) {
                     entityField.removeSelectOption({ value: null });
+                    entityField.insertSelectOption({ value: 0, text:'&nbsp;'});
                     vendors.forEach(({value,text}) => {
-                        periodField.insertSelectOption({ value, text});
+                        entityField.insertSelectOption({ value, text});
                     });
                 }
                 
@@ -425,6 +434,30 @@ define([
                 });
             
                 return vendors;
+            }
+
+            getRecordStatus(){
+                let status = {}
+                const newSearchStatus = search.create({
+                    type: "customrecord_lmry_ste_process_status",
+                    filters: [],
+                    columns: [
+                        "name",
+                        "custrecord_lmry_ste_procstatus_code"
+                    ]
+                });
+                
+                newSearchStatus.run().each(result =>{
+                    const columns = result.columns;
+                    const code = result.getValue(columns[1]);
+                    status[code] = {
+                        id: result.id,
+                        name: result.getValue(columns[0])
+                    }  
+                    return true;
+                });
+
+                return status;
             }
         }
 

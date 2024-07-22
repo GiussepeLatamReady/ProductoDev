@@ -14,8 +14,8 @@ define([
     "N/redirect",
     "N/ui/serverWidget",
     "N/url",
-    "../../Latam Tools/Router/LMRY_AR_Library_ROUT",
-    "../../Constants/LMRY_AR_GlobalConstants_LBRY"
+    "../Latam Tools/Router/LMRY_AR_Library_ROUT",
+    "../Constants/LMRY_AR_GlobalConstants_LBRY"
 ],
     (
         log, 
@@ -139,7 +139,7 @@ define([
                 const sublist = this.form.getSublist({ id: "custpage_results_list" });
                 data.forEach((form, i) => {
                     const { id, subsidiary, vendor, created, employee, state } = form;
-                    const tranUrl = url.resolveRecord({ recordType: "customrecord_lmry_ste_ar_wht_se", recordId: id, isEditMode: false });
+                    const tranUrl = url.resolveRecord({ recordType: "customrecord_lmry_ste_ar_wht_send", recordId: id, isEditMode: false });
                     const urlID = `<a class="dottedlink" href=${tranUrl} target="_blank">${id}</a>`;
 
                     sublist.setSublistValue({ id: "internalid", line: i, value: urlID });
@@ -147,25 +147,7 @@ define([
                     sublist.setSublistValue({ id: "vendor", line: i, value: vendor });
                     sublist.setSublistValue({ id: "datecreated", line: i, value: created });
                     sublist.setSublistValue({ id: "created_by", line: i, value: employee });
-                    let stateResult;
-
-                    switch (state) {
-                        case "Finalizado": // Finalizado
-                            stateResult = this.translations.LMRY_FINISH;
-                            break;
-                        case "Loading data": // Loading
-                            stateResult = this.translations.LMRY_LOADING_DATA;
-                            break;
-                        case "Ocurrió un error": // Finalizado
-                            stateResult = this.translations.LMRY_ERROR;
-                            break;
-                        case "Procesando": // Finalizado
-                            stateResult = this.translations.LMRY_PROCESING;
-                            break;
-                        default:
-                            stateResult = this.translations.LMRY_LOADING_DATA;
-                    }
-                    sublist.setSublistValue({ id: "state", line: i, value: stateResult });
+                    sublist.setSublistValue({ id: "state", line: i, value: state });
                 })
                 if (data.length) {
                     sublist.label = `${sublist.label} (${data.length})`;
@@ -177,7 +159,7 @@ define([
                 let data = [];
 
                 let search_log = search.create({
-                    type: "customrecord_lmry_ste_ar_wht_se",
+                    type: "customrecord_lmry_ste_ar_wht_send",
                     filters:
                         [
                             ["isinactive", "is", "F"]
@@ -188,8 +170,8 @@ define([
                             "custrecord_lmry_ste_ar_wht_se_subsi",
                             "custrecord_lmry_ste_ar_wht_se_vendor",
                             "created",
-                            "custrecord_lmry_ste_ar_wht_se_employeee",
-                            "custrecord_lmry_ste_ar_wht_se_status"
+                            "custrecord_lmry_ste_ar_wht_se_employee",
+                            "custrecord_lmry_ste_ar_wht_se_status.name"
                         ]
                 });
                 let pageData = search_log.runPaged({ pageSize: 1000 });
@@ -226,7 +208,7 @@ define([
                     "es": {
                         "LMRY_NOTE": "Nota: Se está generando el pago y la creación de asientos diarios. La columna [ESTADO] indica el estado del proceso.",
                         "LMRY_MESSAGE_UPDATE": "Presione el botón Actualizar o Refresh para ver si el proceso terminó.",
-                        "LMRY_TITLE_STLT": "LatamReady - CO Registro de Cálculo de Retención de cabecera",
+                        "LMRY_TITLE_STLT": "LR AR Envio de centificados de retenciones - Registro",
                         "LMRY_BACK_TO_MAIN": "Volver a la página principal",
                         "LMRY_RESULTS_LABEL": "Resultados",
                         "LMRY_INTERNAL_ID_LABEL": "Id interno",
@@ -250,7 +232,7 @@ define([
                     "en": {
                         "LMRY_NOTE": "Note: The payment is being generated and journal entries are being created. The [STATUS] column indicates the process state.",
                         "LMRY_MESSAGE_UPDATE": "Press the Update or Refresh button to see if the process has finished.",
-                        "LMRY_TITLE_STLT": "LatamReady - CO Header WHT calculation Log",
+                        "LMRY_TITLE_STLT": "LR AR Wht Send Email Log",
                         "LMRY_BACK_TO_MAIN": "Back to Main Page",
                         "LMRY_RESULTS_LABEL": "Results",
                         "LMRY_INTERNAL_ID_LABEL": "Internal Id",

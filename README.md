@@ -49,7 +49,7 @@ Chile
 ## Records Configuration
 + Create
     Name: LR AR Wht Send Email
-    id: customrecord_lmry_ste_ar_wht_se
+    id: customrecord_lmry_ste_ar_wht_send
         Fields
             Subsidiary	                    custrecord_lmry_ste_ar_wht_se_subsi	        List/Record	Subsidiary	 	Yes
  	        Vendor	                        custrecord_lmry_ste_ar_wht_se_vendor	    List/Record	Vendor	 	    Yes
@@ -57,7 +57,7 @@ Chile
             Date From	                    custrecord_lmry_ste_ar_wht_se_dfrom	        Free-Form Text	 	 	    No
             Date To	                        custrecord_lmry_ste_ar_wht_se_dto	        Free-Form Text	 	 	    No
             Responsible user	            custrecord_lmry_ste_ar_wht_se_employee	    List/Record	Employee	 	No
-            Status	                        custrecord_lmry_ste_ar_wht_se_status	    Free-Form Text	 	 	    Yes
+            Status	                        custrecord_lmry_ste_ar_wht_se_status	    List record LR Process Status	 	 	    Yes
             Mailing details	                custrecord_lmry_ste_ar_wht_se_details	    Long Text	 	 	        No
             Bill Payments	                custrecord_lmry_ste_ar_wht_se_payments	    Long Text	 	 	        No
         

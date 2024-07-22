@@ -10,23 +10,21 @@ define([
     "N/record",
     "N/runtime",
     "N/search",
-    "N/log",
-    "./CO_Library_Mensual/LMRY_CO_Header_WHT_calculation_LBRY_V2.1",
+    "N/log"
 ],(
     record, 
     runtime, 
     search, 
-    log, 
-    lbryWHTHeader
+    log
 ) => {
         const getInputData = (inputContext) => {
             try {
                 const parameters = getParameters();
-                
+                log.error("parameters",parameters)
                 const transactions = getTransactions(parameters);
-                updateState(parameters, 'Procesando', 'Se ha comenzado a procesar las transacciones...');
-                
-                return transactions;
+                //updateState(parameters, 'Procesando', 'Se ha comenzado a procesar las transacciones...');
+                log.error("transactions",transactions);
+                return [];
             } catch (error) {
                 log.error("Error [getInputData]", error);
                 return [["isErrorInput", error.message]];
@@ -46,7 +44,7 @@ define([
                     const transaction = JSON.parse(mapContext.value);
 
                     if (transaction.whtType == "header") {
-                        lbryWHTHeader.calculateHeaderWHT(transaction.id);
+                        //lbryWHTHeader.calculateHeaderWHT(transaction.id);
                     }
                     mapContext.write({
                         key: mapContext.key,
@@ -122,8 +120,9 @@ define([
 
         let getTransactions = (parameters) => {
             let recordLog = [];
+            let billPaymentsResult = [];
             let searchRecordLog = search.create({
-                type: 'customrecord_lmry_ste_ar_wht_se',
+                type: 'customrecord_lmry_ste_ar_wht_send',
                 filters: [
                     ['internalid', 'anyof', parameters.idLog]
                 ],
@@ -142,9 +141,11 @@ define([
             
 
             recordLog.forEach(({transactions,vendor})=>{
-                
+                const billPayments = JSON.parse(transactions);
+                const paymentsObject = billPayments.map(billPayment => ({billPayment,vendor}));
+                billPaymentsResult = billPaymentsResult.concat(paymentsObject);
             });
-            return JSON.parse(recordLog.idTransaction).map(id => ({ id: id, whtType: recordLog.whtType }));
+            return billPaymentsResult;
         }
 
         /* ------------------------------------------------------------------------------------------------------
