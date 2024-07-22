@@ -115,16 +115,17 @@ define([
                 });
 
                 const fields = [
-                    { id: "internalid", label: this.translations.LMRY_INTERNAL_ID_LABEL },
-                    { id: "subsidiary", label: this.translations.LMRY_SUBSIDIARY_LABEL },
-                    { id: "vendor", label: this.translations.LMRY_VENDOR },
-                    { id: "datecreated", label: this.translations.LMRY_CREATION_DATE_LABEL },
-                    { id: "created_by", label: this.translations.LMRY_CREATED_BY_LABEL },
-                    { id: "state", label: this.translations.LMRY_STATUS_LABEL }
+                    { id: "internalid", label: this.translations.LMRY_INTERNAL_ID_LABEL, type: serverWidget.FieldType.TEXT },
+                    { id: "subsidiary", label: this.translations.LMRY_SUBSIDIARY_LABEL, type: serverWidget.FieldType.TEXT },
+                    { id: "vendor", label: this.translations.LMRY_VENDOR, type: serverWidget.FieldType.TEXT },
+                    { id: "datecreated", label: this.translations.LMRY_CREATION_DATE_LABEL, type: serverWidget.FieldType.TEXT },
+                    { id: "created_by", label: this.translations.LMRY_CREATED_BY_LABEL, type: serverWidget.FieldType.TEXT },
+                    { id: "details", label: this.translations.LMRY_DETAILS, type: serverWidget.FieldType.TEXTAREA },
+                    { id: "state", label: this.translations.LMRY_STATUS_LABEL, type: serverWidget.FieldType.TEXT }
                 ];
 
-                fields.forEach(({ id, label }) => {
-                    this.sublist.addField({ id, label, type: serverWidget.FieldType.TEXT });
+                fields.forEach((field) => {
+                    this.sublist.addField(field);
                 });
 
                 this.sublist.addRefreshButton();
@@ -139,21 +140,40 @@ define([
                 const sublist = this.form.getSublist({ id: "custpage_results_list" });
                 data.forEach((form, i) => {
                     const { id, subsidiary, vendor, created, employee, state } = form;
+                    const setStyle = (fieldId,fieldValue) => {
+                        fieldValue =  `<div style ="display: flex; align-items: center; height:80%">
+                                    <span>${fieldValue}</span>
+                                </div>`;
+                        return sublist.setSublistValue({ id: fieldId, line: i, value: fieldValue});
+                    }
                     const tranUrl = url.resolveRecord({ recordType: "customrecord_lmry_ste_ar_wht_send", recordId: id, isEditMode: false });
-                    const urlID = `<a class="dottedlink" href=${tranUrl} target="_blank">${id}</a>`;
-
-                    sublist.setSublistValue({ id: "internalid", line: i, value: urlID });
-                    sublist.setSublistValue({ id: "subsidiary", line: i, value: subsidiary });
-                    sublist.setSublistValue({ id: "vendor", line: i, value: vendor });
-                    sublist.setSublistValue({ id: "datecreated", line: i, value: created });
-                    sublist.setSublistValue({ id: "created_by", line: i, value: employee });
-                    sublist.setSublistValue({ id: "state", line: i, value: state });
+                    const urlID = `
+                    <a href="${tranUrl}" target="_blank" style="text-decoration: none; color: inherit;">
+                        <div style="display: grid; place-items: center; background: white; border-radius: 6px; transition: background-color 0.3s; border: 0.5px solid #bbd1e9;" onmouseover="this.style.backgroundColor='#bbd1e9'" onmouseout="this.style.backgroundColor='white';">
+                            <div style="color: color:#424950; font-size: 14px;">${this.translations.LMRY_DETAILS}</div>
+                        </div>
+                    </a>`;
+                    setStyle("internalid",id);
+                    setStyle("subsidiary",subsidiary);
+                    setStyle("vendor",vendor);
+                    setStyle("datecreated",created);
+                    setStyle("created_by",employee);
+                    setStyle("details",urlID);
+                    
+                    const statusResult= `
+                        <div style ="display: flex; align-items: center; height:80%">
+                            <h3>${state}</h3>
+                        </div>
+                        
+                    `;
+                    sublist.setSublistValue({ id: "state", line: i, value: statusResult });
                 })
                 if (data.length) {
                     sublist.label = `${sublist.label} (${data.length})`;
                 }
             }
 
+            
 
             getRecords() {
                 let data = [];
@@ -228,6 +248,7 @@ define([
                         "LMRY_PROCESING": "Procesando",
 
                         "LMRY_VENDOR": "Proveedor",
+                        "LMRY_DETAILS": "Detalles",
                     },
                     "en": {
                         "LMRY_NOTE": "Note: The payment is being generated and journal entries are being created. The [STATUS] column indicates the process state.",
@@ -252,6 +273,7 @@ define([
                         "LMRY_PROCESING": "Processing",
 
                         "LMRY_VENDOR": "Vendor",
+                        "LMRY_DETAILS": "Details",
                     }
                 };
                 return translatedFields[country];
