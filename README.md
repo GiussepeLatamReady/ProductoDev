@@ -14,18 +14,26 @@ Chile
 + Create
     + Name:     LR AR Wht Send Email
     + File:     LMRY_AR_Wht_Send_Email_STLT_V2.1.js
-    + idScript: custscript_lmry_ste_ar_wht_send_email_stlt
-    + idDeploy: customdeploy_lmry_ste_ar_wht_send_email_stlt
+    + idScript: customscript_lmry_ste_ar_wht_se_stlt
+    + idDeploy: customdeploy_lmry_ste_ar_wht_se_stlt
+
+    + Name:     LR AR Wht Send Email Log
+    + File:     LMRY_AR_Wht_Send_Email_STLT_Log_V2.1.js
+    + idScript: customscript_lmry_ste_ar_wht_se_log_stlt
+    + idDeploy: customdeploy_lmry_ste_ar_wht_se_log_stlt
 
     + Name:     LR AR Wht Send Email
     + file:     LMRY_AR_Wht_Send_Email_MPRD_V2.1.js
-    + idScript: custscript_lmry_ste_ar_wht_send_email_mprd
-    + idDeploy: customdeploy_lmry_ste_ar_wht_send_email_mprd
+    + idScript: customscript_lmry_ste_ar_wht_se_mprd
+    + idDeploy: customdeploy_lmry_ste_ar_wht_se_mprd
+        params:
+        +   user: custscript_lmry_ste_ar_wht_se_user
+        +   state: custscript_lmry_ste_ar_wht_se_state
 
     + Name:     LR AR Wht Send Email
     + file:     LMRY_AR_Wht_Send_Email_URET_V2.1.js
-    + idScript: custscript_lmry_ste_ar_wht_send_email_uret
-    + idDeploy: customdeploy_lmry_ste_ar_wht_send_email_uret
+    + idScript: customscript_lmry_ste_ar_wht_se_uret
+    + idDeploy: customdeploy_lmry_ste_ar_wht_se_uret
 
     + Name:
     + file: LMRY_AR_Wht_Send_Email_CLNT_V2.1.js 
@@ -40,6 +48,19 @@ Chile
 
 ## Records Configuration
 + Create
+    Name: LR AR Wht Send Email
+    id: customrecord_lmry_ste_ar_wht_se
+        Fields
+            Subsidiary	                    custrecord_lmry_ste_ar_wht_se_subsi	        List/Record	Subsidiary	 	Yes
+ 	        Vendor	                        custrecord_lmry_ste_ar_wht_se_vendor	    List/Record	Vendor	 	    Yes
+            email	                        custrecord_lmry_ste_ar_wht_se_email	        Free-Form Text	 	 	    Yes
+            Date From	                    custrecord_lmry_ste_ar_wht_se_dfrom	        Free-Form Text	 	 	    No
+            Date To	                        custrecord_lmry_ste_ar_wht_se_dto	        Free-Form Text	 	 	    No
+            Responsible user	            custrecord_lmry_ste_ar_wht_se_employee	    List/Record	Employee	 	No
+            Status	                        custrecord_lmry_ste_ar_wht_se_status	    Free-Form Text	 	 	    Yes
+            Mailing details	                custrecord_lmry_ste_ar_wht_se_details	    Long Text	 	 	        No
+            Bill Payments	                custrecord_lmry_ste_ar_wht_se_payments	    Long Text	 	 	        No
+        
     
 + Update
     

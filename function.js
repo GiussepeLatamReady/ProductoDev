@@ -68,4 +68,70 @@ function getVendorPaymentDetails() {
 
 }
 
+
+
 getVendorPaymentDetails()
+
+getVendors(subsidiary){
+
+    let vendors = [];
+    const newSearchVendor = search.create({
+        type: "vendor",
+        filters: [
+            ['subsidiary', 'is', subsidiary]
+        ],
+        columns: [
+            search.createColumn({
+                name: "formulatext",
+                formula: "CASE WHEN {isperson} = 'T' THEN {firstname} ELSE '' END",
+                label: "0. Nombres"
+            }),
+            search.createColumn({
+                name: "formulatext",
+                formula: "CASE WHEN {isperson} = 'T' THEN {middlename} ELSE '' END",
+                label: "1. Segundo nombre"
+            }),
+            search.createColumn({
+                name: "formulatext",
+                formula: "CASE WHEN {isperson} = 'T' THEN {lastname} ELSE '' END",
+                label: "2. Apellidos"
+            }),    
+            search.createColumn({
+                name: "formulatext",
+                formula: "CASE WHEN {isperson} = 'F' THEN {companyname} ELSE '' END",
+                label: "3. Razón Social"
+            }),
+            search.createColumn({
+                name: "formulatext",
+                formula: "{isperson}",
+                label: "4. tipo de entidad"
+            }),                        
+        ]
+    }); 
+
+    newSearchVendor.run().each(result =>{
+        const columns = result.columns;
+
+        const isPerson = result.getValue(columns[4]);
+
+        if (isPerson ==="T" || isPerson === true) {
+            const firstname = result.getValue(columns[0]);
+            const middlename = result.getValue(columns[1]);
+            const lastname = result.getValue(columns[2]);
+            const fullname = `${firstname} ${middlename} ${lastname}`;
+            vendors.push({
+                id:result.id,
+                text:fullname
+            });
+        }else{
+            const companyname = result.getValue(columns[3]);
+            vendors.push({
+                id:result.id,
+                text:companyname
+            });
+        }
+        return true;
+    });
+
+    return vendors;
+}

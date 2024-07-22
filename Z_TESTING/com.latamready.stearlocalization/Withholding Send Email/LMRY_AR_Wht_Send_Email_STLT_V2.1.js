@@ -15,7 +15,8 @@ define([
     'N/url',
     'N/task',
     "../../Latam Tools/Router/LMRY_AR_Library_ROUT",
-    "../../Constants/LMRY_AR_Features_CONST"
+    "../../Constants/LMRY_AR_Features_CONST",
+    "../../Constants/LMRY_AR_GlobalConstants_LBRY"
 ],
     (
         log,
@@ -26,9 +27,11 @@ define([
         url,
         task,
         Router_LBRY,
-        Features
+        Features,
+        Constants,
     ) => {
         const CLIENT_SCRIPT_PATH = "./LMRY_AR_Wht_Send_Email_CLNT_V2.1.js";
+        const LMRY_SCRIPT = "LMRY_AR_Wht_Send_Email_STLT_V2.1.js";
         const { Error_LBRY, Licenses_LBRY } = Router_LBRY;
         const onRequest = (context) => {
             const scriptContext = {
@@ -64,7 +67,9 @@ define([
                 response.writePage(form);
 
             } catch (err) {
+                
                 log.error("[ onRequest - GET ]", err);
+                Error_LBRY.handleError({ title: "[onRequest - GET]", err, script: LMRY_SCRIPT ,suiteAppId: Constants.APP_ID });
             }
         };
 
@@ -87,6 +92,7 @@ define([
                     handler.toLogSuitelet();
                 }
             } catch (err) {
+                Error_LBRY.handleError({ title: "[onRequest - POST]", err, script: LMRY_SCRIPT ,suiteAppId: Constants.APP_ID });
                 log.error("[ onRequest - POST ]", err);
             }
         };
@@ -107,13 +113,13 @@ define([
 
             getNames(deploy) {
                 let nameList = {
-                    customdeploy_lmry_co_head_wht_calc_stlt: {
-                        scriptid: 'customscript_lmry_co_head_calc_stlt_log',
-                        deployid: 'customdeploy_lmry_co_head_calc_stlt_log',
-                        scriptMapReduce: 'customscript_lmry_co_head_wht_calc_mprd',
-                        deployMapReduce: 'customdeploy_lmry_co_head_wht_calc_mprd',
-                        paramuser: 'custscript_lmry_co_head_wht_calc_user',
-                        paramstate: 'custscript_lmry_co_head_wht_calc_state'
+                    customdeploy_lmry_ste_ar_wht_se_stlt: {
+                        scriptid: 'customscript_lmry_ste_ar_wht_se_log_stlt',
+                        deployid: 'customdeploy_lmry_ste_ar_wht_se_log_stlt',
+                        scriptMapReduce: 'customscript_lmry_ste_ar_wht_se_mprd',
+                        deployMapReduce: 'customdeploy_lmry_ste_ar_wht_se_mprd',
+                        paramuser: 'custscript_lmry_ste_ar_wht_se_user',
+                        paramstate: 'custscript_lmry_ste_ar_wht_se_state'
                     }
                 };
                 return nameList[deploy];
@@ -196,11 +202,12 @@ define([
                 if (this.FEAT_SUBS) {
                     this.addSelectField('custpage_subsidiary', this.translations.LMRY_SUBSIDIARY, 'mainGroup').isMandatory();
                 }
+                this.addSelectField('custpage_entity', this.translations.LMRY_VENDOR, 'mainGroup')
                 this.addDateField('custpage_period_start', this.translations.LMRY_PERIOD_START, 'mainGroup').isMandatory();
                 this.addDateField('custpage_period_end', this.translations.LMRY_PERIOD_END, 'mainGroup').isMandatory();
-                this.addCheckField('custpage_view_sent', this.translations.LMRY_PERIOD_END, 'mainGroup').isMandatory();
+                this.addCheckField('custpage_view_sent', this.translations.LMRY_VIEW_SENT, 'mainGroup');
                 this.addSimpleField('custpage_status', 'Status', 'mainGroup').isHidden();
-                this.addSimpleField('custpage_log_id', 'Log ID', 'mainGroup').isHidden();
+                this.addAreaField('custpage_log_id', 'Log ID', 'mainGroup').isHidden();
                 this.addSimpleField('custpage_deploy_id', 'Deploy ID', 'mainGroup').setDefautValue(runtime.getCurrentScript().deploymentId).isHidden();
 
                 this.addFormButtons();
@@ -259,17 +266,15 @@ define([
             addSimpleField(id, label, container) {
                 return this.addCustomField(id, serverWidget.FieldType.TEXT, label, container).setHelpText({ help: id });
             }
-
-            addFormButtons() {
-                this.form.addSubmitButton({ label: this.translations.LMRY_GENERATE });
-                this.form.addResetButton({ label: this.translations.LMRY_RESTART });
+            addAreaField(id, label, container) {
+                return this.addCustomField(id, serverWidget.FieldType.TEXTAREA, label, container).setHelpText({ help: id });
             }
 
             addFormButtons() {
                 if (!Number(this.params.status)) {
                     this.form.addSubmitButton({ label: this.translations.LMRY_FILTER });
                 } else {
-                    this.form.addSubmitButton({ label: this.translations.LMRY_PROCESS });
+                    this.form.addSubmitButton({ label: this.translations.LMRY_SEND });
                     this.form.addButton({
                         id: 'btn_back',
                         label: this.translations.LMRY_BACK,
@@ -353,7 +358,7 @@ define([
                 const fields = [
                     { id: 'apply', label: this.translations.LMRY_APPLY, type: serverWidget.FieldType.CHECKBOX },
                     { id: 'tranid', label: this.translations.LMRY_DOCUMENT_NUMBER, type: serverWidget.FieldType.TEXT },
-                    { id: 'entity', label: this.translations.LMRY_ENTITY, type: serverWidget.FieldType.TEXT },
+                    { id: 'entity', label: this.translations.LMRY_VENDOR, type: serverWidget.FieldType.TEXT },
                     { id: 'email', label: this.translations.LMRY_EMAIL, type: serverWidget.FieldType.TEXT },
                     { id: 'internalidtext', label: 'internal_id', type: serverWidget.FieldType.TEXT, displayType: serverWidget.FieldDisplayType.HIDDEN }
                 ];
@@ -395,6 +400,7 @@ define([
                     });
                 }
             }
+
             fillPeriods() {
                 const startPeriod = this.form.getField({ id: 'custpage_period_start' });
                 const endPeriod = this.form.getField({ id: 'custpage_period_end' });
@@ -665,7 +671,7 @@ define([
                         "LMRY_START_PERIOD": "Periodo contable inicial",
                         "LMRY_FINAL_PERIOD": "Perido contable final",
                         "LMRY_FILTER": "Filtrar",
-                        "LMRY_PROCESS": "Procesar",
+                        "LMRY_SEND": "Enviar",
                         "LMRY_BACK": "Atras",
                         "LMRY_RESTART": "Reiniciar",
                         "LMRY_PERIOD_TYPE": "Tipo de período",
@@ -692,7 +698,13 @@ define([
                         "LMRY_RETEIVA": "ReteIVA",
                         "LMRY_RETEFTE": "ReteFte",
                         "LMRY_RETECRE": "ReteCre",
-                        "LMRY_RECLASIFICATION": "Reclasificación"
+                        "LMRY_RECLASIFICATION": "Reclasificación",
+
+                        "LMRY_VENDOR":"Proveedor",
+                        "LMRY_PERIOD_START":"Fecha desde :",
+                        "LMRY_PERIOD_END":"Fecha hasta :",
+                        "LMRY_VIEW_SENT": "Mostrar enviados",
+                        "LMRY_EMAIL": "CORREO"
                     },
                     "en": {
                         "LMRY_MESSAGE": "Message",
@@ -708,7 +720,7 @@ define([
                         "LMRY_START_PERIOD": "Initial Accounting period",
                         "LMRY_FINAL_PERIOD": "Final Accounting period",
                         "LMRY_FILTER": "Filter",
-                        "LMRY_PROCESS": "Process",
+                        "LMRY_SEND": "Send",
                         "LMRY_BACK": "Back",
                         "LMRY_RESTART": "Restart",
                         "LMRY_PERIOD_TYPE": "Type of period",
@@ -735,7 +747,14 @@ define([
                         "LMRY_RETEIVA": "ReteIVA",
                         "LMRY_RETEFTE": "ReteFte",
                         "LMRY_RETECRE": "ReteCre",
-                        "LMRY_RECLASIFICATION": "Reclasification"
+                        "LMRY_RECLASIFICATION": "Reclasification",
+
+
+                        "LMRY_VENDOR":"Vendor",
+                        "LMRY_PERIOD_START":"Date From :",
+                        "LMRY_PERIOD_END":"Date To :",
+                        "LMRY_VIEW_SENT": "View Sent",
+                        "LMRY_EMAIL": "EMAIL"
                     }
                 }
                 return translatedFields[country];
@@ -753,8 +772,8 @@ define([
 
                 const { scriptMapReduce: MPRD_SCRIPT_ID, deployMapReduce: MPRD_DEPLOY_ID } = this.names;
                 const parameters = {
-                    custscript_lmry_co_head_wht_calc_user: user,
-                    custscript_lmry_co_head_wht_calc_state: state
+                    custscript_lmry_ste_ar_wht_se_user: user,
+                    custscript_lmry_ste_ar_wht_se_state: state
                 };
 
                 task.create({
