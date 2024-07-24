@@ -323,7 +323,7 @@ define([
                     recordlog.setValue({ fieldId: 'custrecord_lmry_ste_ar_wht_se_status', value: recordStatus["PREPARING"].id });
                     
                     recordlog.setValue({ fieldId: 'custrecord_lmry_ste_ar_wht_se_payments', value: JSON.stringify(transactions) });
-
+                    recordlog.setValue({ fieldId: 'custrecord_lmry_ste_ar_wht_se_payments_m', value: transactions })
                     const idlog = recordlog.save({ enableSourcing: true, ignoreMandatoryFields: true, disableTriggers: true });
                     logIds.push(idlog);
                 }

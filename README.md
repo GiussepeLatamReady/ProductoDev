@@ -63,7 +63,10 @@ Chile
         
     
 + Update
-    
+    LR AR Withholding Certificate
+        create field
+            Latam - AR File ID - custrecord_lmry_ste_ar_wht_cert_file_id - free form text
+            Latam - AR Was Sent? - custrecord_lmry_ste_ar_was_sent - checkbox
 
 ## Fields
 + Create

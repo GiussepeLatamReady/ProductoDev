@@ -121,7 +121,8 @@ define([
                     { id: "datecreated", label: this.translations.LMRY_CREATION_DATE_LABEL, type: serverWidget.FieldType.TEXT },
                     { id: "created_by", label: this.translations.LMRY_CREATED_BY_LABEL, type: serverWidget.FieldType.TEXT },
                     { id: "details", label: this.translations.LMRY_DETAILS, type: serverWidget.FieldType.TEXTAREA },
-                    { id: "state", label: this.translations.LMRY_STATUS_LABEL, type: serverWidget.FieldType.TEXT }
+                    { id: "state", label: this.translations.LMRY_STATUS_LABEL, type: serverWidget.FieldType.TEXT },
+                    
                 ];
 
                 fields.forEach((field) => {
@@ -141,32 +142,34 @@ define([
                 data.forEach((form, i) => {
                     const { id, subsidiary, vendor, created, employee, state } = form;
                     const setStyle = (fieldId,fieldValue) => {
-                        fieldValue =  `<div style ="display: flex; align-items: center; height:80%">
+                        fieldValue =  `<div style ="display: flex; align-items: center; height:80%; padding-left:10px">
                                     <span>${fieldValue}</span>
                                 </div>`;
                         return sublist.setSublistValue({ id: fieldId, line: i, value: fieldValue});
                     }
-                    const tranUrl = url.resolveRecord({ recordType: "customrecord_lmry_ste_ar_wht_send", recordId: id, isEditMode: false });
-                    const urlID = `
-                    <a href="${tranUrl}" target="_blank" style="text-decoration: none; color: inherit;">
-                        <div style="display: grid; place-items: center; background: white; border-radius: 6px; transition: background-color 0.3s; border: 0.5px solid #bbd1e9;" onmouseover="this.style.backgroundColor='#bbd1e9'" onmouseout="this.style.backgroundColor='white';">
-                            <div style="color: color:#424950; font-size: 14px;">${this.translations.LMRY_DETAILS}</div>
+                    const setStyleBold = (fieldId,fieldValue) => {
+                        fieldValue =  `<div style ="display: flex; align-items: center; height:80%; font-weight: bold; padding-left:10px">
+                                    <span>${fieldValue}</span>
+                                </div>`;
+                        return sublist.setSublistValue({ id: fieldId, line: i, value: fieldValue});
+                    }
+
+                    const setStyleBtn = (fieldId,fieldValue,label) => {
+                        fieldValue =  `<a href="${fieldValue}" target="_blank" style="text-decoration: none; color: inherit;">
+                        <div style="display: flex; justify-content:center; align-items: center; place-items: center; height: 35px; background: white; border-radius: 6px; transition: background-color 0.3s; border: 0.5px solid #bbd1e9;" onmouseover="this.style.backgroundColor='#bbd1e9'" onmouseout="this.style.backgroundColor='white';">
+                            <div style="display: flex; justify-content:center; align-items: center; color: color:#424950; font-size: 14px; height: 100%;">${label}</div>
                         </div>
                     </a>`;
+                        return sublist.setSublistValue({ id: fieldId, line: i, value: fieldValue});
+                    }
+                    const tranUrl = url.resolveRecord({ recordType: "customrecord_lmry_ste_ar_wht_send", recordId: id, isEditMode: false });
                     setStyle("internalid",id);
                     setStyle("subsidiary",subsidiary);
                     setStyle("vendor",vendor);
                     setStyle("datecreated",created);
                     setStyle("created_by",employee);
-                    setStyle("details",urlID);
-                    
-                    const statusResult= `
-                        <div style ="display: flex; align-items: center; height:80%">
-                            <h3>${state}</h3>
-                        </div>
-                        
-                    `;
-                    sublist.setSublistValue({ id: "state", line: i, value: statusResult });
+                    setStyleBtn("details",tranUrl,this.translations.LMRY_DETAILS);
+                    setStyleBold("state",state)
                 })
                 if (data.length) {
                     sublist.label = `${sublist.label} (${data.length})`;
