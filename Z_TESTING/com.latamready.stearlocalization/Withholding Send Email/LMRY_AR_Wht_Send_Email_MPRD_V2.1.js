@@ -120,6 +120,8 @@ define([
 
             const paymentByvendor = values.map(payment => JSON.parse(payment));
             log.error("paymentByVendor",paymentByvendor)
+
+
             /*
             if (values.include("ERROR")) {
                 context.write({
