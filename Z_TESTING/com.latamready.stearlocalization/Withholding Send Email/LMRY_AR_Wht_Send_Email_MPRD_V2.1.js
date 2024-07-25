@@ -56,7 +56,8 @@ define([
             });
         } else {
             const transaction = value;
-            const { billPaymentID, vendorID } = transaction
+            const { billPaymentID, vendorID } = transaction;
+            transaction.tranid = setTranid(billPaymentID);
             try {      
                 const validationResponse = WhtCertificate_LBRY._validateVouchers(billPaymentID);
                 log.error("validationResponse", validationResponse);
@@ -116,6 +117,9 @@ define([
 
             const { values } = reduceContext;
             log.error("values reduce", values)
+
+            const paymentByvendor = values.map(payment => JSON.parse(payment));
+            log.error("paymentByVendor",paymentByvendor)
             /*
             if (values.include("ERROR")) {
                 context.write({
@@ -295,6 +299,15 @@ define([
             },
             options: { ignoreMandatoryFields: true, disableTriggers: true }
         });
+    }
+
+    const setTranid = (billPaymentID) => {
+        const tranid = search.lookupFields({
+            type: 'transaction',
+            id: billPaymentID,
+            columns: ['tranid']
+        }).tranid;
+        return tranid;
     }
 
     const createWhtCertificatePdf = (transaction) => {
