@@ -1,4 +1,4 @@
-function messageBody(subsidiaryVendor, nombreVendor, subsidiaryUser, payments) {
+const messageBody = (subsidiary, nombreVendor, subsidiaryUser, payments) => {
     const searchEmployee = search.lookupFields({ type: 'employee', id: user, columns: ['entityid'] }).entityid;
 
     const searchPayments = search.create({
@@ -93,7 +93,7 @@ function messageBody(subsidiaryVendor, nombreVendor, subsidiaryUser, payments) {
                 </tr>
                 <tr>
                   <td ${rowStyl} width="50%;">Subsidiaria del Proveedor</td>
-                  <td ${rowStyl} width="50%;">${subsidiaryVendor}</td>
+                  <td ${rowStyl} width="50%;">${subsidiary}</td>
                 </tr>
                 <tr>
                   <td ${rowStyl} width="50%;">Proveedor</td>

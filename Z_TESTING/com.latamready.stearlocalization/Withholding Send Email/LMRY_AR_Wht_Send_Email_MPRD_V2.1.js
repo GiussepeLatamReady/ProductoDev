@@ -57,8 +57,8 @@ define([
         } else {
             const transaction = value;
             const { billPaymentID, vendorID } = transaction;
-            transaction.tranid = setTranid(billPaymentID);
             try {      
+                setDataAditional(transaction);
                 const validationResponse = WhtCertificate_LBRY._validateVouchers(billPaymentID);
                 log.error("validationResponse", validationResponse);
                 let certificate;
@@ -191,7 +191,7 @@ define([
         }
         */
         return {
-            idUser: "3787",
+            userID: "3787",
             logIDs: [
                 9,
                 10
@@ -235,12 +235,13 @@ define([
     }
 
     const getTransactions = (parameters) => {
+        const {logIDs,userID} = parameters;
         let recordLog = [];
         let billPaymentsResult = [];
         let searchRecordLog = search.create({
             type: 'customrecord_lmry_ste_ar_wht_send',
             filters: [
-                ['internalid', 'anyof', parameters.logIDs]
+                ['internalid', 'anyof', logIDs]
             ],
             columns: [
                 'custrecord_lmry_ste_ar_wht_se_payments',
@@ -263,7 +264,7 @@ define([
 
         recordLog.forEach(({ transactions, vendorID, subsidiaryID, email }) => {
             const billPayments = JSON.parse(transactions);
-            const paymentsObject = billPayments.map(billPaymentID => ({ billPaymentID, vendorID, subsidiaryID, email }));
+            const paymentsObject = billPayments.map(billPaymentID => ({ billPaymentID, vendorID, subsidiaryID, email, userID}));
             billPaymentsResult = billPaymentsResult.concat(paymentsObject);
         });
         return billPaymentsResult;
@@ -301,13 +302,37 @@ define([
         });
     }
 
-    const setTranid = (billPaymentID) => {
-        const tranid = search.lookupFields({
-            type: 'transaction',
-            id: billPaymentID,
-            columns: ['tranid']
-        }).tranid;
-        return tranid;
+    const setDataAditional = (transaction) => {
+
+        const {billPaymentID,userID} = transaction;
+        const searchPayment = search.create({
+            type: 'vendorpayment',
+            columns: ['internalid', 'tranid','entity'],
+            filters: [
+                { name: 'internalid', operator: 'anyof', values: billPaymentID },
+                { name: 'mainline', operator: 'is', values: 'T' }
+            ]
+        });
+
+        searchPayment.run().each(result => {
+            transaction.tranid = result.getValue("tranid");
+            transaction.vendorName = result.getText("entity");
+        });
+
+        const searchEmployee = search.create({
+            type: 'employee',
+            columns: ['subsidiary','entityid'],
+            filters: [
+                { name: 'internalid', operator: 'anyof', values: userID },
+                { name: 'mainline', operator: 'is', values: 'T' }
+            ]
+        });
+
+        searchEmployee.run().each(result => {
+            transaction.userSubsidiary = result.getText("subsidiary");
+            transaction.userName = result.getValue("entityid");
+        });
+
     }
 
     const createWhtCertificatePdf = (transaction) => {
