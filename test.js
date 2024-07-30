@@ -1,69 +1,197 @@
-function getVendorPaymentDetails() {
-    try {
-        let jsonData = {};
-        let subsidiary = "15"; // Ajustar según sea necesario
-        let myQuery = query.create({
-            type: 'customrecord_lmry_ste_ar_wht_vp_details'
-        });
+function messageBody(data){
 
-        myQuery.condition = myQuery.createCondition({
-            fieldId: 'custrecord_lmry_ste_ar_whtvpd_payment.subsidiary',
-            operator: query.Operator.IS,
-            values: [subsidiary]
-        });
-        const createColumnJoin = (myQuery,joinId) => myQuery.createColumn({ fieldId: joinId });
-        const joinPayment = myQuery.autoJoin({ fieldId: 'custrecord_lmry_ste_ar_whtvpd_payment'});
-        const joinVendor = myQuery.autoJoin({ fieldId: 'custrecord_lmry_ste_ar_whtvpd_vendor'});
-        const joinStatusCode = myQuery.autoJoin({ fieldId: 'custrecord_lmry_ste_ar_whtvpd_status'});
-        myQuery.columns = [
-            myQuery.createColumn({ fieldId: 'custrecord_lmry_ste_ar_whtvpd_payment' }),     //0
-            createColumnJoin(joinPayment,"tranid"),                                         //1
-            createColumnJoin(joinPayment,"recordType"),                                     //2
-            myQuery.createColumn({ fieldId: 'custrecord_lmry_ste_ar_whtvpd_vendor' }),      //3
-            createColumnJoin(joinVendor,"email"),                                           //4
-            createColumnJoin(joinVendor,"id"),                                              //5
-            createColumnJoin(joinStatusCode,"custrecord_lmry_ste_procstatus_code"),          //6
-            createColumnJoin(joinPayment,"id"), 
-        ];
-
-        let resultSet = myQuery.run();
-        let results = resultSet.asMappedResults();
-
-        results.forEach(function(result) {
-            console.log(result)
-            /*
-            const statusCode = result[6];
-            if (statusCode === "DONE") {
-                const vendorID = result[5];
-                const paymentID = result[7];
-
-                if (!jsonData[vendorID]) {
-                    jsonData[vendorID] = { payments: [], paymentIDs: new Set() };
-                }
-
-                if (!jsonData[vendorID].paymentIDs.has(paymentID)) {
-                    jsonData[vendorID].paymentIDs.add(paymentID);
-                    jsonData[vendorID].payments.push({
-                        paymentID: paymentID,
-                        tranID: result[0] || " - ",
-                        recordType: result[2],
-                        vendorID,
-                        vendorName: result[3],
-                        email: result[4],
-                    });
-                }
-            }
-                */
-        });
-
-        let payments = [];
-        for (let vendorID in jsonData) {
-            payments = payments.concat(jsonData[vendorID].payments);
-        }
-        return payments;
-    } catch (e) {
-        console.error('Error', e);
+    const {transaction} = data[0];
+    const {subsidiaryID, vendorName, userSubsidiary, userName} = transaction;
+  
+    const tranidList = data.map(value => value.transaction.tranid); 
+  
+    var body =  '<body text="#333333" link="#014684" vlink="#014684" alink="#014684">';
+    body += '<table width="642" border="0" align="center" cellpadding="0" cellspacing="0">';
+    body += '<tr>';
+    body += '<td width="100%" valign="top">';
+    body += '<table width="100%" border="0" align="center" cellpadding="0" cellspacing="0">';
+    body += '<tr>';
+    body += '<td width="100%" colspan="2"><img style="display: block;" src="https://system.na1.netsuite.com/core/media/media.nl?id=921&c=TSTDRV1038915&h=c493217843d184e7f054" width="645" alt="main banner"/></td>';
+    body += '</tr>';
+    body += '</table>';
+    body += '<table width="100%" border="0" align="center" cellpadding="0" cellspacing="0">';
+    body += '<tr>';
+    body += '<td bgcolor="#d50303" width="15%">&nbsp;</td>';
+    body += '<td bgcolor="#d50303" width="85%">';
+    body += '<font style="color:#FFFFFF; line-height:130%; font-family:Arial, Helvetica, sans-serif; font-size:19px">';
+    body += 'Estimado(a) ' + userName + ':<br>';
+    body += '</font>';
+    body += '</td>';
+    body += '</tr>';
+    body += '<tr>';
+    body += '<td width="100%" bgcolor="#d50303" colspan="2" align="right"><a href="http://www.latamready.com/#contac"><img src="https://system.na1.netsuite.com/core/media/media.nl?id=923&c=TSTDRV1038915&h=3c7406d759735a1e791d" width="94" style="margin-right:45px" /></a></td>';
+    body += '</tr>';
+    body += '<tr>';
+    body += '<td width="100%" bgcolor="#FFF" colspan="2" align="right">';
+    body += '<a href="https://www.linkedin.com/company/9207808"><img src="https://system.na1.netsuite.com/core/media/media.nl?id=924&c=TSTDRV1038915&h=c135e74bcb8d5e1ac356" width="15" style="margin:5px 1px 5px 0px" /></a>';
+    body += '<a href="https://www.facebook.com/LatamReady-337412836443120/"><img src="https://system.na1.netsuite.com/core/media/media.nl?id=919&c=TSTDRV1038915&h=9c937774d04fb76747f7" width="15" style="margin:5px 1px 5px 0px" /></a>';
+    body += '<a href="https://twitter.com/LatamReady"><img src="https://system.na1.netsuite.com/core/media/media.nl?id=928&c=TSTDRV1038915&h=fc69b39a8e7210c65984" width="15" style="margin:5px 47px 5px 0px" /></a>';
+    body += '</td>';
+    body += '</tr>';
+    body += '</table>';
+    body += '<p>Este es un mensaje automatico de LatamReady SuiteApp.</p>';
+  
+    var width_td1 = " width:50%;\">";
+    var width_td2 = " width:50%;\">";
+    var colStyl = 'style=\"text-align: center; font-size: 9pt; font-weight:bold; color:white; background-color:#d50303; border: 1px solid #d50303; ';
+    var rowStyl = 'style=\"text-align: Left;   font-size: 9pt; font-weight:bold; border: 1px solid #d50303; ';
+  
+    var body = '';
+    body += "<table style=\"font-family: Courier New, Courier, monospace; width:95%; border: 1px solid #d50303;\">";
+    body += "<tr>";
+    body += "<td " + colStyl + width_td1;
+    body += "Descripcion";
+    body += "</td>";
+    body += "<td " + colStyl + width_td2;
+    body += "Detalle";
+    body += "</td>";
+    body += "</tr>";
+    body += "<tr>";
+    body += "<td " + rowStyl + width_td1;
+    body += "Fecha y Hora";
+    body += "</td>";
+    body += "<td " + rowStyl + width_td2;
+    body += new Date();
+    body += "</td>";
+    body += "</tr>";
+    body += "<tr>";
+    body += "<td " + rowStyl + width_td1;
+    body += "Ambiente";
+    body += "</td>";
+    body += "<td " + rowStyl + width_td2;
+    body += runtime.envType;
+    body += "</td>";
+    body += "</tr>";
+    body += "<tr>";
+    body += "<td " + rowStyl + width_td1;
+    body += "NetSuite Version (Release)";
+    body += "</td>";
+    body += "<td " + rowStyl + width_td2;
+    body += runtime.version;
+    body += "</td>";
+    body += "</tr>";
+    body += "<tr>";
+    body += "<td " + rowStyl + width_td1;
+    body += "Codigo Cliente (Company)";
+    body += "</td>";
+    body += "<td " + rowStyl + width_td2;
+    body += runtime.accountId;
+    body += "</td>";
+    body += "</tr>";
+    body += "<tr>";
+    body += "<td " + rowStyl + width_td1;
+    body += "Subsidiaria del Usuario (ID)";
+    body += "</td>";
+    body += "<td " + rowStyl + width_td2;
+    body += userSubsidiary;
+    body += "</td>";
+    body += "</tr>";
+    body += "<tr>";
+    body += "<td " + rowStyl + width_td1;
+    body += "Nombre del Usuario (User) ";
+    body += "</td>";
+    body += "<td " + rowStyl + width_td2;
+    body += userName;
+    body += "</td>";
+    body += "</tr>";
+    body += "<tr>";
+    body += "<td " + rowStyl + width_td1;
+    body += "Subsidiaria del Proveedor";
+    body += "</td>";
+    body += "<td " + rowStyl + width_td2;
+    body += subsidiaryID;
+    body += "</td>";
+    body += "</tr>";
+    body += "<tr>";
+    body += "<td " + rowStyl + width_td1;
+    body += "Proveedor";
+    body += "</td>";
+    body += "<td " + rowStyl + width_td2;
+    body += vendorName;
+    body += "</td>";
+    body += "</tr>";
+    body += "<tr>";
+    body += "<td " + rowStyl + width_td1;
+    body += "Payments";
+    body += "</td>";
+    body += "<td " + rowStyl + width_td2;
+    for(var k = 0; k < tranidList.length; k++){
+      body += tranidList[k] + "<br>";
     }
-}
-
-getVendorPaymentDetails()
+    body += "</td>";
+    body += "</tr>";
+    body += "</table>";
+  
+    body += "<br>";
+  
+    body += '<p>Saludos,</p>';
+    body += '<p>El Equipo de LatamReady</p>';
+    body += '</font>';
+    body += '</td>';
+    body += '<td width="15%">&nbsp;</td>';
+    body += '</tr>';
+    body += '</table>';
+    body += '<br>';
+    body += '<table width="100%" border="0" cellspacing="0" cellpadding="2" bgcolor="#e5e6e7">';
+    body += '<tr>';
+    body += '<td>&nbsp;</td>';
+    body += '</tr>';
+    body += '<tr>';
+    body += '<td width="15%">&nbsp;</td>';
+    body += '<td width="70%" align="center">';
+    body += '<font style="color:#333333;line-height:200%; font-family:Trebuchet MS, Helvetica, sans-serif; font-size:12px;" >';
+    body += '<i>Este es un mensaje automatico. Por favor, no responda este correo electronico.</i>';
+    body += '</font>';
+    body += '</td>';
+    body += '<td width="15%">&nbsp;</td>';
+    body += '</tr>';
+    body += '<tr>';
+    body += '<td>&nbsp;</td>';
+    body += '</tr>';
+    body += '</table>';
+    body += '<table width="100%" border="0" cellspacing="0" cellpadding="2">';
+    body += '<tr>';
+    body += '<td width="15%">&nbsp;</td>';
+    body += '<td width="70%" align="center">';
+    body += '<a href="http://www.latamready.com/"><img src="https://system.na1.netsuite.com/core/media/media.nl?id=926&c=TSTDRV1038915&h=e14f0c301f279780eb38" width="169" style="margin:15px 0px 15px 0px" /></a>';
+    body += '</td>';
+    body += '<td width="15%">&nbsp;</td>';
+    body += '</tr>';
+    body += '</table>';
+    body += '<table width="100%" border="0" cellspacing="0" cellpadding="2">';
+    body += '<tr>';
+    body += '<td width="15%">&nbsp;</td>';
+    body += '<td width="70%" align="center">';
+    body += '<a href="https://www.linkedin.com/company/9207808"><img src="https://system.na1.netsuite.com/core/media/media.nl?id=925&c=TSTDRV1038915&h=41ec53b63dba135488be" width="101" style="margin:0px 5px 0px 5px" /></a>';
+    body += '<a href="https://www.facebook.com/LatamReady-337412836443120/"><img src="https://system.na1.netsuite.com/core/media/media.nl?id=920&c=TSTDRV1038915&h=7fb4d03fff9283e55318" width="101" style="margin:0px 5px 0px 5px" /></a>';
+    body += '<a href="https://twitter.com/LatamReady"><img src="https://system.na1.netsuite.com/core/media/media.nl?id=929&c=TSTDRV1038915&h=300c376863035d25c42a" width="101" style="margin:0px 5px 0px 5px" /></a>';
+    body += '</td>';
+    body += '<td width="15%">&nbsp;</td>';
+    body += '</tr>';
+    body += '</table>';
+    body += '<table width="100%" border="0" cellspacing="0">';
+    body += '<tr>';
+    body += '<td>';
+    body += '<img src="https://system.na1.netsuite.com/core/media/media.nl?id=918&c=TSTDRV1038915&h=7f0198f888bdbb495497" width="642" style="margin:15px 0px 15px 0px" /></a>';
+    body += '</td>';
+    body += '</tr>';
+    body += '</table>';
+    body += '</td>';
+    body += '</tr>';
+    body += '</table>';
+    body += '</body>';
+  
+    /*body += '<table width="100%" border="0" cellspacing="0" cellpadding="2">';
+    body += '<tr>';
+    body += '<td width="15%">&nbsp;</td>';
+    body += '<td width="70%">';
+    body += '<font style="color:#333333;line-height:200%; font-family:Trebuchet MS, Helvetica, sans-serif; font-size:13px">';*/
+  
+    return body;
+  
+  }

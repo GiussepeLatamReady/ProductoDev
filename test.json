@@ -1,2 +1,14 @@
-UNEXPECTED_ERROR: Unexpected Error,    at Object.createError [as nlapiCreateError
-] (https: //tstdrv2570728.app.netsuite.com/javascript/suitescript/2.0/client/N.js?NS_VER=2024.1&minver=15&buildver=31044:828:16),    at Object.createError [as create] (https://tstdrv2570728.app.netsuite.com/javascript/suitescript/2.0/client/N.js?NS_VER=2024.1&minver=15&buildver=31044:2103:39),    at invokeOn (https://tstdrv2570728.app.netsuite.com/javascript/suitescript/2.0/client/N.js?NS_VER=2024.1&minver=15&buildver=31044:2363:47),    at Function.getSelectOptionForPopup (https://tstdrv2570728.app.netsuite.com/javascript/suitescript/2.0/client/N.js?NS_VER=2024.1&minver=15&buildver=31044:43046:49),    at thenableFunction(getSelectOptionForPopup).thenable (https://tstdrv2570728.app.netsuite.com/javascript/suitescript/2.0/client/N.js?NS_VER=2024.1&minver=15&buildver=31044:3800:26),    at https://tstdrv2570728.app.netsuite.com/javascript/suitescript/2.0/client/N.js?NS_VER=2024.1&minver=15&buildver=31044:43060:40,    at Function.create (https://tstdrv2570728.app.netsuite.com/javascript/suitescript/2.0/client/N.js?NS_VER=2024.1&minver=15&buildver=31044:2459:16),    at https://tstdrv2570728.app.netsuite.com/javascript/suitescript/2.0/client/N.js?NS_VER=2024.1&minver=15&buildver=31044:43058:28,    at Function.create (https://tstdrv2570728.app.netsuite.com/javascript/suitescript/2.0/client/N.js?NS_VER=2024.1&minver=15&buildver=31044:2459:16),    at Function.getSelectOptions (https://tstdrv2570728.app.netsuite.com/javascript/suitescript/2.0/client/N.js?...
+[
+    {
+        "billPaymentID": "91762",
+        "message": "successful mailing",
+        "status": "sent",
+        "code": "OK"
+    },
+    {
+        "billPaymentID": "91149",
+        "message": "format: Missing a required argument: value",
+        "status": "no sent",
+        "code": "VALIDATION"
+    }
+]
