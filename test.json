@@ -1,14 +1,32 @@
-[
-    {
-        "billPaymentID": "91762",
-        "message": "successful mailing",
-        "status": "sent",
-        "code": "OK"
+{
+    "201": {
+        "number": "000001",
+        "taxName": "Ingresos Brutos / Buenos Aires",
+        "regimen": "Agencias de Noticias Internacionales",
+        "taxRate": "10 %",
+        "billOriginDescription": "",
+        "billTotalAmount": null,
+        "basePaymentAmount": 121304.35,
+        "whtAmount": null
     },
-    {
-        "billPaymentID": "91149",
-        "message": "format: Missing a required argument: value",
-        "status": "no sent",
-        "code": "VALIDATION"
+    "202": {
+        "number": "000002",
+        "taxName": "Ingresos Brutos / Buenos Aires",
+        "regimen": "Agencias de Noticias Internacionales",
+        "taxRate": "10 %",
+        "billOriginDescription": "FACTURAS A",
+        "billTotalAmount": null,
+        "basePaymentAmount": 121304.35,
+        "whtAmount": null
+    },
+    "205": {
+        "number": "000001",
+        "taxName": "Ingresos Brutos / Extranjero",
+        "regimen": "",
+        "taxRate": "10 %",
+        "billOriginDescription": "FACTURAS A",
+        "billTotalAmount": null,
+        "basePaymentAmount": 121304.35,
+        "whtAmount": null
     }
-]
+}

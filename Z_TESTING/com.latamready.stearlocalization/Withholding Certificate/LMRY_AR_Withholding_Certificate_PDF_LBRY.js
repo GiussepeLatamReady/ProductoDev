@@ -34,6 +34,7 @@ define(["N/log", "N/error", "N/record", "N/search", "N/query", "N/xml", "N/file"
         #folderPath;
         #pdf;
         #certificateId;
+        #pdfID;
         
 
         constructor({ paymentId, subsidiaryId, vendorId }) {
@@ -47,12 +48,15 @@ define(["N/log", "N/error", "N/record", "N/search", "N/query", "N/xml", "N/file"
             nLog.debug("subsidiaryId", this.#subsidiaryId);
             nLog.debug("vendorId", this.#vendorId);
             this.#getSetupTaxSubsidiaryData();
-            this.#getSubsidiaryData();
-            this.#getVendorData();
-            this.#getVoucherDetails();
             nLog.debug("setupTaxSubsidiaryData", this.#setupTaxSubsidiaryDataJson);
+            this.#getSubsidiaryData();
             nLog.debug("subsidiaryData", this.#subsidiaryDataJson);
+            this.#getVendorData();
             nLog.debug("vendorData", this.#vendorDataJson);
+            this.#getVoucherDetails();
+            
+            
+            
             nLog.debug("paymentDate", this.#paymentDate);
             nLog.debug("voucherDetailsList", this.#voucherDetailsList);
             this.#renderPdf();
@@ -451,8 +455,9 @@ define(["N/log", "N/error", "N/record", "N/search", "N/query", "N/xml", "N/file"
                         }
                     }
                 );
-
+                nLog.error("voucherDataJson",voucherDataJson)
                 this.#voucherDetailsList = Object.values(voucherDataJson).map(({ billTotalAmount, basePaymentAmount, whtAmount, ...otherValues }) => {
+                    nLog.error("billTotalAmount",billTotalAmount)
                     return {
                         billTotalAmount: format.format({ value: billTotalAmount, type: format.Type.CURRENCY2 }),
                         basePaymentAmount: format.format({ value: basePaymentAmount, type: format.Type.CURRENCY2 }),
@@ -608,7 +613,7 @@ define(["N/log", "N/error", "N/record", "N/search", "N/query", "N/xml", "N/file"
             whtCertificate.setValue("custrecord_lmry_ste_ar_wht_cert_file_id", idFile);
             whtCertificate.setValue("custrecord_lmry_ste_ar_wht_cert_size", parseInt(this.#pdf.size / 1000));
             whtCertificate.setValue("custrecord_lmry_ste_ar_wht_cert_path", this.#folderPath);
-
+            this.#pdfID = idFile;
             this.#certificateId = whtCertificate.save({
                 enableSourcing: true,
                 ignoreMandatoryFields: true
@@ -621,6 +626,10 @@ define(["N/log", "N/error", "N/record", "N/search", "N/query", "N/xml", "N/file"
 
         getWhtRecordCertificate() {
             return this.#certificateId;
+        }
+
+        getWhtPdfID() {
+            return this.#pdfID;
         }
 
         /**

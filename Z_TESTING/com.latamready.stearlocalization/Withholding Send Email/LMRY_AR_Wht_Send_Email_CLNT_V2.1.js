@@ -14,7 +14,10 @@ define([
     'N/url',
     'N/currentRecord',
     "../Constants/LMRY_AR_GlobalConstants_LBRY",
-    "../Latam Tools/Router/LMRY_AR_Library_CLNT_ROUT"
+    "../Latam Tools/Router/LMRY_AR_Library_CLNT_ROUT",
+    "./Constants/LMRY_AR_Wht_Send_Email_CONST",
+    "../Helper/LMRY_AR_Search_Library_HELPER"
+    
 ],
     (
         runtime, 
@@ -24,7 +27,9 @@ define([
         urlApi, 
         currentRecord, 
         Constants, 
-        Router_LBRY
+        Router_LBRY,
+        Constants_LBRY,
+        Search_HELPER
     ) => {
         const STLT_ID = 'customscript_lmry_ste_ar_wht_se_stlt';
         const LMRY_SCRIPT = "LMRY_AR_Wht_Send_Email_CLNT_V2.1.js";
@@ -95,7 +100,9 @@ define([
                 language = language === "es" ? language : "en";
                 this.deploy = options.deployid;
                 this.names = this.getNames(this.deploy);
-                this.translations = this.getTranslations(language);
+
+                const { REGISTRY_COLLECTION, REGISTRY_TRANSLATION_KEYS } = Constants_LBRY;
+                this.translations = Search_HELPER.getTranslations( REGISTRY_TRANSLATION_KEYS, REGISTRY_COLLECTION );
             }
 
 
@@ -170,6 +177,7 @@ define([
                 const fieldsObj = {};
                 //const periodTypeValue = this.currentRecord.getValue({ fieldId: 'custpage_ period _type' });
                 let mandatoryFields = [
+                    'custpage_subsidiary',
                     'custpage_period_start',
                     'custpage_period_end'
                 ];
@@ -178,7 +186,7 @@ define([
                     fieldsObj[fieldId] = value;
                     if (value == 0 || !value) {
                         const fieldLabel = recordObj.getField({ fieldId }).label;
-                        alert(`${this.translations.LMRY_VALIDATE_VALUES} ${fieldLabel}`);
+                        alert(`${this.translations.AR_VALIDATE_VALUES()} ${fieldLabel}`);
                         return true;
                     }
                     return false;
@@ -193,7 +201,7 @@ define([
                 var secondDate = new Date(perfin);
                 
                 if (firstDate > secondDate){
-                    alert(this.translations.LMRY_VALIDATE_PERIODS);
+                    alert(this.translations.AR_VALIDATE_PERIODS());
                     return false;
                 }
 
@@ -206,7 +214,7 @@ define([
                 const numberLines = recordObj.getLineCount({ sublistId: 'custpage_results_list' });
 
                 if (numberLines < 1) {
-                    alert(this.translations.LMRY_FILTER_TRANSACTIONS);
+                    alert(this.translations.AR_FILTER_TRANSACTIONS());
                     return false;
                 }
 
@@ -214,7 +222,7 @@ define([
                     count + (recordObj.getSublistValue({ sublistId: 'custpage_results_list', fieldId: 'apply', line: i }) ? 1 : 0), 0);
 
                 if (numApplieds === 0) {
-                    alert(this.translations.LMRY_SELECTED_TRANSACTIONS);
+                    alert(this.translations.AR_SELECTED_TRANSACTIONS());
                     return false;
                 }
                 return true;
@@ -249,8 +257,8 @@ define([
 
                 if (results && results.length) {
                     let myMsg = message.create({
-                        title: this.translations.LMRY_ALERT,
-                        message: this.translations.LMRY_PROCESS_ACTIVATE,
+                        title: this.translations.AR_ALERT(),
+                        message: this.translations.AR_PROCESS_ACTIVATE(),
                         type: message.Type.INFORMATION,
                         duration: 8000
                     });
@@ -333,28 +341,6 @@ define([
 
             isValid(bool) {
                 return (bool === "T" || bool === true);
-            }
-
-            getTranslations(country) {
-                const translatedFields = {
-                    "es": {
-                      "LMRY_VALIDATE_VALUES": "Ingrese un valor para:",
-                      "LMRY_PROCESS_ACTIVATE": "Espere un momento por favor, el proceso se encuentra en curso.",
-                      "LMRY_FILTER_TRANSACTIONS": "No hay transacciones Filtradas",
-                      "LMRY_SELECTED_TRANSACTIONS": "No hay transacciones Seleccionadas",
-                      "LMRY_ALERT": "Alerta",
-                      "LMRY_VALIDATE_PERIODS": "El período inicial no puede ser mayor que el período final",
-                    },
-                    "en": {
-                      "LMRY_VALIDATE_VALUES": "Enter a value for:",
-                      "LMRY_PROCESS_ACTIVATE": "Please wait a moment, the process is in progress.",
-                      "LMRY_FILTER_TRANSACTIONS": "No Filtered Transactions",
-                      "LMRY_SELECTED_TRANSACTIONS": "No Selected Transactions",
-                      "LMRY_ALERT": "Alert",
-                      "LMRY_VALIDATE_PERIODS": "Initial period can't be bigger than final period",
-                    }
-                  };
-                return translatedFields[country];
             }
 
             setVendors(){

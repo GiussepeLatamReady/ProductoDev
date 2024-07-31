@@ -12,12 +12,16 @@ define(
         'N/runtime', 
         'N/ui/serverWidget', 
         'N/search', 
-        'N/url'
+        'N/url',
+        "./Constants/LMRY_AR_Wht_Send_Email_CONST",
+        "../Helper/LMRY_AR_Search_Library_HELPER"
     ], (
         runtime, 
         serverWidget, 
         search, 
-        url
+        url,
+        Constants_LBRY,
+        Search_HELPER
     ) => {
 
     const beforeLoad = (scriptContext) => {
@@ -27,7 +31,6 @@ define(
                 mainUIManager.hiddenFields();
                 mainUIManager.buildTable();
                 mainUIManager.loadTable();
-                mainUIManager.getButtomResponse();
             }
         } catch (error) {
             log.error('Error beforeLoad ', error)
@@ -38,37 +41,37 @@ define(
 
     class UIManager {
         constructor(scriptContext) {
-            let language = runtime.getCurrentScript().getParameter({ name: "LANGUAGE" }).substring(0, 2);
-            language = language === "es" ? language : "en";
-            this.translations = this.getTranslations(language);
+            const { REGISTRY_COLLECTION, REGISTRY_TRANSLATION_KEYS } = Constants_LBRY;
+            this.translations = Search_HELPER.getTranslations( REGISTRY_TRANSLATION_KEYS, REGISTRY_COLLECTION );
             this.scriptContext = scriptContext;
             this.form = scriptContext.form;
             this.newRecord = scriptContext.newRecord;
+            this.recordStatus = this.getRecordStatus();
         }
 
         buildTable() {
 
-            this.form.clientScriptModulePath = './LMRY_AR_Wht_Send_Email_URET_V2.1.js';
+            this.form.clientScriptModulePath = './LMRY_AR_Wht_Send_Email_CLNT_V2.1.js';
             this.form.addButton({
                 id: "custpage_btn_reload",
-                label: this.translations.LMRY_REFRESH,
+                label: this.translations.AR_REFRESH(),
                 functionName: "reload()"
             });
-            this.tab = this.form.addTab({ id: 'custpage_tab_entities', label: this.translations.LMRY_PAYMENTS });
+            this.tab = this.form.addTab({ id: 'custpage_tab_entities', label: this.translations.AR_PAYMENTS() });
             this.form.insertTab({ tab: this.tab, nexttab: 'notes' });
             this.sublist = this.form.addSublist({
                 id: 'custpage_custlist_payments',
-                label: this.translations.LMRY_PAYMENTS,
+                label: this.translations.AR_PAYMENTS(),
                 tab: 'custpage_tab_entities',
                 type: serverWidget.SublistType.LIST
             });
 
             const fields = [
-                { id: 'custpage_col_number', label: this.translations.LMRY_NUMBER, type: serverWidget.FieldType.TEXT },
-                { id: 'custpage_col_payment', label: this.translations.LMRY_BILLPAYMENT, type: serverWidget.FieldType.TEXT },
-                { id: 'custpage_col_certified', label: this.translations.LMRY_CERTIFICATE, type: serverWidget.FieldType.TEXT },
-                { id: 'custpage_col_sent_status', label: this.translations.LMRY_SENT_STATUS, type: serverWidget.FieldType.TEXT },
-                { id: 'custpage_col_status', label: this.translations.LMRY_STATUS, type: serverWidget.FieldType.TEXTAREA},
+                { id: 'custpage_col_number', label: this.translations.AR_NUMBER(), type: serverWidget.FieldType.TEXT },
+                { id: 'custpage_col_payment', label: this.translations.AR_BILLPAYMENT(), type: serverWidget.FieldType.TEXT },
+                { id: 'custpage_col_certified', label: this.translations.AR_CERTIFICATE(), type: serverWidget.FieldType.TEXT },
+                { id: 'custpage_col_sent_status', label: this.translations.AR_SENT_STATUS(), type: serverWidget.FieldType.TEXT },
+                { id: 'custpage_col_status', label: this.translations.AR_STATUS(), type: serverWidget.FieldType.TEXTAREA},
             ];
             fields.forEach(fieldInfo => {
                 this.sublist.addField(fieldInfo);
@@ -78,58 +81,35 @@ define(
 
         loadTable() {
             const data = this.getPayments();
-            
             const sublist = this.form.getSublist({ id: "custpage_custlist_payments" });
             const ids = Object.keys(data);
             ids.forEach((id, i) => {
-                const { internalid,status,message,code,type,certificate} = data[id];
+                const {status,message,code,certificate,tranid} = data[id];
 
                 const setSublistValue = (colId, value) => sublist.setSublistValue({ id: colId, line: i, value });
 
                 setSublistValue("custpage_col_number", i + 1);
 
-                const paymentUrl = url.resolveRecord({ recordType:"vendorpayment", recordId: internalid, isEditMode: false });
+                const paymentUrl = url.resolveRecord({ recordType:"vendorpayment", recordId: id, isEditMode: false });
                 setSublistValue("custpage_col_payment", `<a class="dottedlink" href="${paymentUrl}" target="_blank">${tranid}</a>` );
-                const certificatetUrl = url.resolveRecord({ recordType:"file", recordId: certificate, isEditMode: false });
-                
-                setSublistValue("custpage_col_certified", `<a class="dottedlink" href="${certificatetUrl}" target="_blank">${names}</a>`);
-                setSublistValue("custpage_col_created_from", createdSetup);
-
-                if (CCId) {
-                    const ccUrl = url.resolveRecord({ recordType:"customrecord_lmry_ar_contrib_class", recordId: CCId, isEditMode: false });
-                    setSublistValue("custpage_col_contributory_class", `<a class="dottedlink" href="${ccUrl}" target="_blank">${CCId}</a>`);
-                }else {
-                    setSublistValue("custpage_col_contributory_class", " ");
+                if (code ==="OK") {
+                    setSublistValue("custpage_col_certified", `<a class="dottedlink" href="${certificate}" target="_blank">${"Certificate.pdf"}</a>`);
                 }
                 
+                setSublistValue("custpage_col_sent_status", status);
 
-                const jsonStatus = {
-                    "s":this.translations.LMRY_PROCESING_CHECK,
-                    "e":this.translations.LMRY_ERROR,
-                    "p":this.translations.LMRY_PROCESING,
-                    "n":this.translations.LMRY_NOT_PROCESING
-                }
-
-                const title = jsonStatus[status];
                 let htmlStatus;
-                /*
-                if (status=="n") {
-
-                    htmlStatus = title + " : " + message
-                }else{
-                    htmlStatus = title;
-                }
-                */
-                const JsonMessage = this.translations[message];
-                htmlStatus= `
+                if (code != "PROCESSING") {
+                    htmlStatus= `
                         <div style="display:flex; flex-direction: column; justify-content: center;">
-                            <h3>${title}</h3>
-                            ${status=="n" &&  JsonMessage ? `<span style="font-size: 0.9em; font-style: italic; margin: 5px 0">${JsonMessage}</span>`:""}
+                            <h3>${code}</h3>
+                            ${`<span style="font-size: 0.9em; font-style: italic; margin: 5px 0">${message}</span>`}
                         </div>
-                        
                     `;
-               
-                setSublistValue("custpage_col_status", htmlStatus);
+                    setSublistValue("custpage_col_status", htmlStatus);
+                }
+                
+                
                 
             });
 
@@ -145,35 +125,40 @@ define(
             if (!fieldPayments) return {};
             
             const payments = JSON.parse(fieldPayments);
-            const processStatus = this.scriptContext.newRecord.getValue('custrecord_lmry_ar_gen_agip_status');
-            const typeTransaction = "vendorpayment";
-            /*
-            let transactionIds = entitiesIds.map(ts => typeof ts === 'object' && ts !== null ? ts.id : ts);
-            let state = transactionIds.length > 0 && typeof entitiesIds[0] !== 'object' ? "Procesando" : undefined;
-            */
+            const processStatus = this.scriptContext.newRecord.getValue('custrecord_lmry_ste_ar_wht_se_status');
+        
             let processCompleted = false;
             let paymentIds = payments;
             let listPayments = {};
-            if (processStatus=="2") return {};
-
+            let codeStatus = this.recordStatus[processStatus].code;
+            if (codeStatus=="PREPARING") return {};
             if (payments.length) {
                 processCompleted = typeof payments[0] === 'object';
-                if (processCompleted) {
+                if (processCompleted && codeStatus == "DONE") {
                     paymentIds = payments.map(payment => payment.billPaymentID);
-                    //entities = entities.map(entity => entity[0])
-
                     for (let i = 0; i < paymentIds.length; i++) {
-                        const {billPaymentID,message,code,certificate} = payments[i];
+                        const {billPaymentID:id,message,code,certificate} = payments[i];
                         listPayments[id] = {
-                            internalid:billPaymentID,
-                            status: code ==="OK" ? this.translations.LMRY_SENT: this.translations.LMRY_NOT_SENT,
+                            status: code === "OK" ? this.translations.AR_SENT(): this.translations.AR_NOT_SENT(),
                             message: message ?? " ",
                             code,
-                            type:typeTransaction,
                             certificate
                         };
                     }
+                    this.setPaymentsDetails(paymentIds,listPayments);
                 };
+
+                if (codeStatus == "PROCESSING") {
+                    
+                    for (let i = 0; i < payments.length; i++) {
+                        const id = payments[i];
+                        listPayments[id] = {
+                            code: codeStatus,
+                            status: this.translations.AR_PROCESING()
+                        };
+                    }
+                    this.setPaymentsDetails(payments,listPayments)
+                }
             } else {
                 return {};
             }
@@ -187,86 +172,60 @@ define(
             fieldsHideen.forEach(field => this.form.getField(field).updateDisplayType({ displayType: 'hidden' }));
         }
 
-        getButtomResponse(){
-            const responseField = this.form.addField({
-                id: "custpage_response",
-                type: serverWidget.FieldType.TEXTAREA,
-                label: "File"
+        getRecordStatus() {
+            let status = {}
+            const newSearchStatus = search.create({
+                type: "customrecord_lmry_ste_process_status",
+                filters: [],
+                columns: [
+                    "name",
+                    "custrecord_lmry_ste_procstatus_code"
+                ]
             });
-            const urlFile = this.newRecord.getValue("custrecord_lmry_ar_gen_agip_url");
-            if (urlFile) {
-                const htmlUrlFile = `
-                            <a href="${urlFile}" target="_blank" >
-                                Response.csv
-                            </a>
-                            `;
-                responseField.defaultValue = htmlUrlFile;
-            }
-            
-            
+    
+            newSearchStatus.run().each(result => {
+                const columns = result.columns;
+                status[result.id] = {
+                    code: result.getValue(columns[1]),
+                    name: result.getValue(columns[0])
+                }
+                return true;
+            });
+    
+            return status;
         }
+
 
 
         isUserInterface() {
             return runtime.executionContext == 'USERINTERFACE';
         }
 
-        getTranslations(lenguage) {
-            const translatedFields = {
-                "es": {
-                    "LMRY_PAYMENTS": "Pagos",
-                    "LMRY_NUMBER": "Posición",
-                    "LMRY_CITY": "Ciudad",
-                    "LMRY_INTERNALID": "ID Interno",
-                    "LMRY_CC": "Clase contributiva",
-                    "LMRY_BILLPAYMENT": "Pago",
-                    "LMRY_STATUS": "Estado",
-                    "LMRY_RESTART": "Reiniciar",
-                    "LMRY_PROCESING": "Procesando",
-                    "LMRY_ERROR": "Error",
-                    "LMRY_NOT_PROCESING": "No procesada",
-                    "LMRY_PROCESING_CHECK": "Procesada con éxito",
-                    "LMRY_REFRESH": "Actualizar Pagina",
-                    "LMRY_CREATED_FROM": "Creado desde",
-                    "LMRY_NOT_PROCESING": "No procesada",
-                    "LMRY_PROCESING_CHECK": "Procesada con éxito",
-                    "LMRY_NOT_TAX_APPLY": "Entidad no registrada o con configuración incorrecta",
-                    "LMRY_NOT_LIST": "No se ha encontrado ninguna lista para este periodo",
-                    
-                    "LMRY_CERTIFICATE": "Certificado",
-                    "LMRY_SENT_STATUS": "Estado de envio",
-                    "LMRY_SENT" : "Enviado",
-                    "LMRY_NOT_SENT": "No enviado"
-                },
-                "en": {
-                    "LMRY_PAYMENTS": "Bill Payments",
-                    "LMRY_NUMBER": "Position",
-                    "LMRY_CITY": "City",
-                    "LMRY_INTERNALID": "Internal ID",
-                    "LMRY_CC": "Contributory Class",
-                    "LMRY_BILLPAYMENT": "Bill Payment",
-                    "LMRY_STATUS": "Status",
-                    "LMRY_RESTART": "Restart",
-                    "LMRY_PROCESING": "Processing",
-                    "LMRY_ERROR": "Error",
-                    "LMRY_NOT_PROCESING": "Not Processed",
-                    "LMRY_PROCESING_CHECK": "Successfully Processed",
-                    "LMRY_REFRESH": "Refresh",
-                    "LMRY_CREATED_FROM": "Created from",
-                    "LMRY_NOT_TAX_APPLY": "Entity not registered or incorrectly configured",
-                    "LMRY_NOT_LIST": "No list was found for this period",
-                    
-                    "LMRY_CERTIFICATE": "Certificate",
-                    "LMRY_SENT_STATUS": "Mailing status",
-                    "LMRY_SENT" : "Sent",
-                    "LMRY_NOT_SENT": "Not Sent"
-                }
-            }
-            return translatedFields[lenguage];
-        }
-
         isValid(bool) {
             return (bool === "T" || bool === true);
+        }
+
+
+        setPaymentsDetails(paymentIds,listPayments){
+            log.error("listPayments",listPayments)
+            let filters = [
+                ["internalid", "anyof", paymentIds]
+            ];
+            let columns = [];
+            columns.push(search.createColumn({ name: 'formulatext', formula: '{internalid}', sort: search.Sort.DESC }));
+            columns.push(search.createColumn({ name: 'formulatext', formula: '{tranid}' }));
+            search.create({
+                type: "vendorpayment",
+                filters: filters,
+                columns: columns
+            }).run().each(result => {
+                let columns = result.columns;
+                const internalid = result.getValue(columns[0]);
+                if (listPayments[internalid]) {
+                    listPayments[internalid].tranid = result.getValue(columns[1]) || " - ";
+                }
+                return true;
+            });
         }
 
     }

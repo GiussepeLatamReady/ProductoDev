@@ -1,0 +1,186 @@
+<translationcollection scriptid="custcollection_lmry_ste_ar_send_email">
+  <defaultlanguage>en</defaultlanguage>
+  <name>LR AR Send Email</name>
+  <strings>
+    <string scriptid="ar_validate_values">
+      <defaulttranslation>Enter a value for:</defaulttranslation>
+    </string>
+    <string scriptid="ar_process_activate">
+      <defaulttranslation>Please wait a moment, the process is in progress.</defaulttranslation>
+    </string>
+    <string scriptid="ar_filter_transactions">
+      <defaulttranslation>No Filtered Transactions</defaulttranslation>
+    </string>
+    <string scriptid="ar_selected_transactions">
+      <defaulttranslation>No Selected Transactions</defaulttranslation>
+    </string>
+    <string scriptid="ar_alert">
+      <defaulttranslation>Alert</defaulttranslation>
+    </string>
+    <string scriptid="ar_validate_periods">
+      <defaulttranslation>Initial period can't be bigger than final period</defaulttranslation>
+    </string>
+    <string scriptid="ar_dear">
+      <defaulttranslation>Dear</defaulttranslation>
+    </string>
+    <string scriptid="ar_msg_suiteapp">
+      <defaulttranslation>This is an automatic message from latamready suiteApp.</defaulttranslation>
+    </string>
+    <string scriptid="ar_enviroment">
+      <defaulttranslation>Environment</defaulttranslation>
+    </string>
+    <string scriptid="ar_account_id">
+      <defaulttranslation>Account ID</defaulttranslation>
+    </string>
+    <string scriptid="ar_e_subsidiary">
+      <defaulttranslation>Subsidiary of the employee</defaulttranslation>
+    </string>
+    <string scriptid="ar_version">
+      <defaulttranslation>Versión Netsuite</defaulttranslation>
+    </string>
+    <string scriptid="ar_vendor_details">
+      <defaulttranslation>Vendor details</defaulttranslation>
+    </string>
+    <string scriptid="ar_vendor_name">
+      <defaulttranslation>Vendor name</defaulttranslation>
+    </string>
+    <string scriptid="ar_process_payments">
+      <defaulttranslation>Processed Payments</defaulttranslation>
+    </string>
+    <string scriptid="ar_corrects">
+      <defaulttranslation>Corrects</defaulttranslation>
+    </string>
+    <string scriptid="ar_incorrect">
+      <defaulttranslation>Incorrect</defaulttranslation>
+    </string>
+    <string scriptid="ar_payment">
+      <defaulttranslation>Bill Payment</defaulttranslation>
+    </string>
+    <string scriptid="ar_order">
+      <defaulttranslation>Order</defaulttranslation>
+    </string>
+    <string scriptid="ar_status">
+      <defaulttranslation>Status</defaulttranslation>
+    </string>
+    <string scriptid="ar_status_details">
+      <defaulttranslation>Status details</defaulttranslation>
+    </string>
+    <string scriptid="ar_note">
+      <defaulttranslation>Note: The payment is being generated and journal entries are being created. The [STATUS] column indicates the process state.</defaulttranslation>
+    </string>
+    <string scriptid="ar_message_update">
+      <defaulttranslation>Press the Update or Refresh button to see if the process has finished.</defaulttranslation>
+    </string>
+    <string scriptid="ar_title_stlt">
+      <defaulttranslation>AR Wht Send Email Log</defaulttranslation>
+    </string>
+    <string scriptid="ar_back_to_main">
+      <defaulttranslation>Back to Main Page</defaulttranslation>
+    </string>
+    <string scriptid="ar_results_label">
+      <defaulttranslation>Results</defaulttranslation>
+    </string>
+    <string scriptid="ar_internal_id_label">
+      <defaulttranslation>Internal Id</defaulttranslation>
+    </string>
+    <string scriptid="ar_creation_date_label">
+      <defaulttranslation>Creation Date</defaulttranslation>
+    </string>
+    <string scriptid="ar_created_by_label">
+      <defaulttranslation>Created By</defaulttranslation>
+    </string>
+    <string scriptid="ar_vendor">
+      <defaulttranslation>Vendor</defaulttranslation>
+    </string>
+    <string scriptid="ar_details">
+      <defaulttranslation>Details</defaulttranslation>
+    </string>
+    <string scriptid="ar_message">
+      <defaulttranslation>Message</defaulttranslation>
+    </string>
+    <string scriptid="ar_message_license">
+      <defaulttranslation>NOTICE: Currently the license for this module is expired, please contact the LatamReady sales team.</defaulttranslation>
+    </string>
+    <string scriptid="ar_message_contact">
+      <defaulttranslation>You can also contact us through</defaulttranslation>
+    </string>
+    <string scriptid="ar_primary_info">
+      <defaulttranslation>Primary information</defaulttranslation>
+    </string>
+    <string scriptid="ar_subsidiary">
+      <defaulttranslation>Subsidiary</defaulttranslation>
+    </string>
+    <string scriptid="ar_filter">
+      <defaulttranslation>Filter</defaulttranslation>
+    </string>
+    <string scriptid="ar_send">
+      <defaulttranslation>Send</defaulttranslation>
+    </string>
+    <string scriptid="ar_back">
+      <defaulttranslation>Back</defaulttranslation>
+    </string>
+    <string scriptid="ar_restart">
+      <defaulttranslation>Restart</defaulttranslation>
+    </string>
+    <string scriptid="ar_apply">
+      <defaulttranslation>Apply</defaulttranslation>
+    </string>
+    <string scriptid="ar_document_number">
+      <defaulttranslation>Document Number</defaulttranslation>
+    </string>
+    <string scriptid="ar_select_all">
+      <defaulttranslation>Select all</defaulttranslation>
+    </string>
+    <string scriptid="ar_deselect_all">
+      <defaulttranslation>Deselect all</defaulttranslation>
+    </string>
+    <string scriptid="ar_view_log">
+      <defaulttranslation>View Log</defaulttranslation>
+    </string>
+    <string scriptid="ar_period_start">
+      <defaulttranslation>Date From:</defaulttranslation>
+    </string>
+    <string scriptid="ar_period_end">
+      <defaulttranslation>Date To:</defaulttranslation>
+    </string>
+    <string scriptid="ar_view_sent">
+      <defaulttranslation>View Sent</defaulttranslation>
+    </string>
+    <string scriptid="ar_email">
+      <defaulttranslation>EMAIL</defaulttranslation>
+    </string>
+    <string scriptid="ar_sent">
+      <defaulttranslation>Sent</defaulttranslation>
+    </string>
+    <string scriptid="ar_without_email">
+      <defaulttranslation>Without Email</defaulttranslation>
+    </string>
+    <string scriptid="ar_with_email">
+      <defaulttranslation>With Email</defaulttranslation>
+    </string>
+    <string scriptid="ar_payments">
+      <defaulttranslation>Bill Payments</defaulttranslation>
+    </string>
+    <string scriptid="ar_number">
+      <defaulttranslation>Position</defaulttranslation>
+    </string>
+    <string scriptid="ar_billpayment">
+      <defaulttranslation>Bill Payment</defaulttranslation>
+    </string>
+    <string scriptid="ar_procesing">
+      <defaulttranslation>Processing</defaulttranslation>
+    </string>
+    <string scriptid="ar_refresh">
+      <defaulttranslation>Refresh</defaulttranslation>
+    </string>
+    <string scriptid="ar_certificate">
+      <defaulttranslation>Certificate</defaulttranslation>
+    </string>
+    <string scriptid="ar_sent_status">
+      <defaulttranslation>Mailing status</defaulttranslation>
+    </string>
+    <string scriptid="ar_not_sent">
+      <defaulttranslation>Not Sent</defaulttranslation>
+    </string>
+  </strings>
+</translationcollection>

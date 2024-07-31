@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<xliff xmlns:ns="netsuite" xmlns:ns3="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file original="netsuite-database" source-language="en" datatype="database" target-language="es-ES">
+    <body>
+      <group ns:collection="custcollection_lmry_ste_ar_registry">
+        <trans-unit id="AR_REGISTRY_TITLE">
+          <source>LatamReady - Padrones</source>
+          <target>LatamReady - Padrones</target>
+        </trans-unit>
+        <trans-unit id="AR_REGISTRY_CUIT">
+          <source>Cuit</source>
+          <target>Cuit</target>
+        </trans-unit>
+      </group>
+    </body>
+  </file>
+</xliff>

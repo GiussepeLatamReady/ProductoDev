@@ -14,8 +14,11 @@ define([
     "N/query",
     'N/file',
     'N/email',
+    'N/url',
     "../Withholding Certificate/LMRY_AR_Withholding_Certificate_LBRY",
-    "../Withholding Certificate/LMRY_AR_Withholding_Certificate_PDF_LBRY"
+    "../Withholding Certificate/LMRY_AR_Withholding_Certificate_PDF_LBRY",
+    "./Constants/LMRY_AR_Wht_Send_Email_CONST",
+    "../Helper/LMRY_AR_Search_Library_HELPER"
 ], (
     record,
     runtime,
@@ -24,8 +27,11 @@ define([
     query,
     file,
     email,
+    url,
     WhtCertificate_LBRY,
-    WthCertificatePdf_LBRY
+    WthCertificatePdf_LBRY,
+    Constants_LBRY,
+    Search_HELPER
 ) => {
 
     let recordStatus;
@@ -33,17 +39,13 @@ define([
     const getInputData = (inputContext) => {
         try {
             setRecordStatus();
-            log.error("recordStatus", recordStatus);
             const parameters = getParameters();
-            log.error("parameters", parameters);
+            log.debug("parameters",parameters);
             const transactions = getTransactions(parameters);
             updateState(parameters, 'PROCESSING', 'Transactions have begun to be processed...');
-            log.error("transactions", transactions);
             return transactions;
         } catch (error) {
             log.error("Error [getInputData]", error);
-            //return [["isError", error.message]];
-
             return [{
                 code: "ERROR",
                 message: error.message
@@ -61,17 +63,14 @@ define([
         } else {
             const transaction = value;
             const { billPaymentID, vendorID } = transaction;
-            log.error("billPaymentID",billPaymentID)
             try {
                 setDataAditional(transaction);
                 const validationResponse = WhtCertificate_LBRY._validateVouchers(billPaymentID);
-                log.error("validationResponse", validationResponse);
                 let certificate;
                 if (validationResponse.status) {
+                    log.error("billPaymentID",billPaymentID)
                     certificate = getCertificate(billPaymentID);
-
                     if (!(certificate?.pdfID)) certificate = createWhtCertificatePdf(transaction);
-
                     if (certificate.error) {
                         transaction.status = "no sent";
                         transaction.message = certificate.message;
@@ -86,6 +85,9 @@ define([
                     } else {
                         transaction.status = "sent";
                         transaction.message = "successful mailing";
+
+                        if(certificate.pdfID) certificate.url = generateUrlFile(certificate.pdfID);
+                        updateCertificate(certificate.id,"T");
                         mapContext.write({
                             key: vendorID,
                             value: {
@@ -134,23 +136,13 @@ define([
             const errors = payments.filter(payment => payment.code === "ERROR");
             const { userID, email: emailVendor } = payments[0].transaction;
 
-            /*
-            const certifiedPaymentsPDF = payments.reduce((acc, payment) => {
-                if (payment.code === "OK") acc.push(payment.certificate.pdf);
-                return acc;
-            }, []);
-            */
             const certifiedPaymentsPDF = payments.reduce((acc, payment) => {
                 if (payment.code === "OK") acc.push(file.load({ id: payment.certificate.pdfID }));
                 return acc;
             }, []);
 
-            log.error("certifiedPaymentsPDF", certifiedPaymentsPDF.length);
             payments.certifiedCount = certifiedPaymentsPDF.length;
             const emailBodyContent = buildMailBody(payments);
-
-            
-
             if (certifiedPaymentsPDF.length) {
                 email.send(
                     {
@@ -161,22 +153,19 @@ define([
                         body: emailBodyContent
                     }
                 );
-                log.error("responseEmail","se envio el email");
                 updateState(parameters,"DONE","payments sent", payments[0].transaction.logID);
             }else{
-                log.error("responseEmail","no hay certificaciones para enviar");
                 updateState(parameters,"DONE","no certification was sent", payments[0].transaction.logID);
             }
 
             const paymentsDetail = payments.map(payment => {
                 const {billPaymentID, message} = payment.transaction;
-                const certificate = payment.certificate ?  payment.certificate.pdfID : "0";
+                const certificate = payment.certificate ?  payment.certificate.url : "0";
                 return {billPaymentID,message,code:payment.code,certificate};
             });
 
             updatePaymentsState(payments[0].transaction.logID,paymentsDetail);
             if (errors.length) {
-                log.error("responseEmail","errores reduce");
                 updateState(parameters,"ERROR",errors[0].message, errors[0].transaction.logID);
             }
 
@@ -195,60 +184,25 @@ define([
     }
 
     const summarize = summaryContext => {
-        /*
-        try {
-            
-            const results = [];
-            summaryContext.output.iterator().each(function (key, value) {
-                results.push(JSON.parse(value));
-                return true;
-            });
-            const errors = results.filter(([key]) => key === 'ERROR');
-    
-            const transactionsData = getTransactions(parameters);
-            const transactionIds = transactionsData.map(({id}) => id);
-            const idsSuccess = results.filter(([key, value]) => value === 'T').map(([id]) => id);
-            const idsError = transactionIds.filter(id => !idsSuccess.includes(id));
-    
-            const transactions = [
-                ...idsSuccess.map(id => ({id, state: 'Procesada con exito'})),
-                ...idsError.map(id => ({id, state: 'Error'}))
-            ];
-    
-            
-            updateTransactionState(parameters, transactions);
-            
-    
-            if (errors.length === 0) {
-                updateState(parameters, 'Finalizado', 'Las transacciones han sido procesadas con exito');
-            } else {
-                log.error("error Summarize [interno]", errors[0][1]);
-                updateState(parameters, 'Ocurrió un error', errors[0][1]);
-            }
-        } catch (error) {
-            
-            log.error("error Summarize [interno]", error.message);
-            updateState(parameters, 'Ocurrió un error', error.message);
-        }
-        */
+       
+    };
+
+    const generateUrlFile = (idfile) => {
+        const fileLoad = file.load({ id: idfile });
+        const netSuiteLocation = url.resolveDomain({
+            hostType: url.HostType.APPLICATION
+        });
+        const urlfile = `https://${netSuiteLocation || ''}${fileLoad.url}`;
+        return urlfile;
     };
 
 
     const getParameters = () => {
-        /*
+        
         return {
-            idUser: runtime.getCurrentScript().getParameter({ name: 'custscript_lmry_ste_ar_wht_se_user' }),
+            userID: runtime.getCurrentScript().getParameter({ name: 'custscript_lmry_ste_ar_wht_se_user' }),
             logIDs: JSON.parse(runtime.getCurrentScript().getParameter({ name: 'custscript_lmry_ste_ar_wht_se_state' })),
-        }
-         */
-        return {
-            userID: "3787",
-            logIDs: [
-                9,
-                10
-            ]
-        }
-           
+        }           
     }
 
 
@@ -274,16 +228,6 @@ define([
         });
 
         recordStatus = status;
-    }
-    const getFeatures = () => {
-
-        return {
-            department: runtime.isFeatureInEffect({ feature: "DEPARTMENTS" }),
-            "class": runtime.isFeatureInEffect({ feature: "CLASS" }),
-            location: runtime.isFeatureInEffect({ feature: "LOCATIONS" }),
-            multibook: runtime.isFeatureInEffect({ feature: "MULTIBOOK" }),
-            subsidiary: runtime.isFeatureInEffect({ feature: 'SUBSIDIARIES' })
-        }
     }
 
     const getTransactions = (parameters) => {
@@ -358,6 +302,19 @@ define([
 
     }
 
+    const updateCertificate = (certificateID, status) => {
+        record.submitFields({
+            type: 'customrecord_lmry_ste_ar_wht_certificate',
+            id: certificateID,
+            values: {
+                custrecord_lmry_ste_ar_was_sent: status
+            },
+            options: { ignoreMandatoryFields: true, disableTriggers: true }
+        });
+    }
+
+
+
     const updatePaymentsState = (logID, billPayments) => {
         record.submitFields({
             type: 'customrecord_lmry_ste_ar_wht_send',
@@ -404,14 +361,17 @@ define([
     const createWhtCertificatePdf = (transaction) => {
         let certificate = {};
         try {
-            const { billPaymentID: paymentId, subsidiaryID: subsidiaryId, vendorID: vendorId } = transaction;
-            const pdfWhtCertificate = new WthCertificatePdf_LBRY.WthCertificatePdf({ paymentId, subsidiaryId, vendorId });
+            const { billPaymentID, subsidiaryID, vendorID } = transaction;
+            const pdfWhtCertificate = new WthCertificatePdf_LBRY.WthCertificatePdf({ paymentId:billPaymentID, subsidiaryId:subsidiaryID, vendorId:vendorID });
             pdfWhtCertificate.createPdf();
             pdfWhtCertificate.savePdf();
             certificate.pdf = pdfWhtCertificate.getWhtPdfCertificate();
             certificate.id = pdfWhtCertificate.getWhtRecordCertificate();
+            certificate.pdfID = pdfWhtCertificate.getWhtPdfID();
+            log.error("createWhtCertificatePdf validate","certificado creado")
             return certificate;
         } catch (error) {
+            log.error("createWhtCertificatePdf error",error.stack)
             certificate.error = true;
             certificate.message = error.message;
             return certificate;
@@ -461,12 +421,6 @@ define([
         if (whtCertificateQueryResults && whtCertificateQueryResults.length > 0) {
             certificate = whtCertificateQueryResults[0];
         }
-        /*
-        log.error("get certificate", certificate);
-        if (certificate?.pdfID) {
-            certificate.pdf = file.load({ id: certificate.pdfID });
-        }
-            */
         return certificate;
     }
 
@@ -474,73 +428,74 @@ define([
         const { transaction } = data[0];
         const { vendorName, userSubsidiary, userName } = transaction;
 
-        
+        const { REGISTRY_COLLECTION, REGISTRY_TRANSLATION_KEYS } = Constants_LBRY;
+        const translations = Search_HELPER.getTranslations( REGISTRY_TRANSLATION_KEYS, REGISTRY_COLLECTION );
         const body = `
       
                 <div style="color: #483838; margin-bottom: 2.5rem" class="container-body">
                   <div style="text-align: center">
                     <img src="https://tstdrv1930452.app.netsuite.com/core/media/media.nl?id=81015&c=TSTDRV1930452&h=58hbjHzF0ZDtq-F905Nr-8LibSvzYGEq0aTFdlmqxQL-noK9" alt="" class="imgBanner" />
                     <p style="font-size: 18px">
-                        <strong>Dear: </strong>${userName}
+                        <strong>${translations.AR_DEAR()}: </strong>${userName}
                     </p>
                   </div>
                   <p style="margin-bottom: 25px">
-                    This is an automatic error message from latamready suiteApp
+                    ${translations.AR_MSG_SUITEAPP()}
                   </p>
                   <br/>
                   <p style="font-weight: bold;">General details</p>
                   <div style="border-radius: 5px; border: 1px solid #64748b; background-color: #f8fafc; padding: 16px; color: #64748b; word-break: break-all; margin-bottom: 16px;">
                       <p style="font-weight: bold; margin: 0; margin-bottom: 5px">
-                          Enviroment
+                      ${translations.AR_ENVIROMENT()}
                       </p>
                     <p style="margin: 0">${runtime.envType}</p>
                   </div>
                   <div style="border-radius: 5px; border: 1px solid #64748b; background-color: #f8fafc; padding: 16px; color: #64748b; word-break: break-all; margin-bottom: 16px;">
                       <p style="font-weight: bold; margin: 0; margin-bottom: 5px">
-                          Account ID
+                      ${translations.AR_ACCOUNT_ID()}
                       </p>
                       <p style="margin: 0">${runtime.accountId}</p>
                   </div>
                   <div style="border-radius: 5px; border: 1px solid #64748b; background-color: #f8fafc; padding: 16px; color: #64748b; word-break: break-all; margin-bottom: 16px;">
                       <p style="font-weight: bold; margin: 0; margin-bottom: 5px">
-                          Employee Subsidiary
+                      ${translations.AR_E_SUBSIDIARY()}
                       </p>
                       <p style="margin: 0">${userSubsidiary}</p>
                   </div>
                   
                   <div style="border-radius: 5px; border: 1px solid #64748b; background-color: #f8fafc; padding: 16px; color: #64748b; word-break: break-all; margin-bottom: 16px;">
                       <p style="font-weight: bold; margin: 0; margin-bottom: 5px">
-                          Netsuite Released Version
+                      ${translations.AR_VERSION()}
                       </p>
                       <p style="margin: 0">${runtime.version}</p>
                   </div>
                   <br/>
-                  <p style="font-weight: bold;">Vendor details</p>
+                  <p style="font-weight: bold;">${translations.AR_VENDOR_DETAILS()}</p>
                   <div style="border-radius: 5px; border: 1px solid #64748b; background-color: #f8fafc; padding: 16px; color: #64748b; word-break: break-all; margin-bottom: 16px;">
                       <p style="font-weight: bold; margin: 0; margin-bottom: 5px">
-                          Proveedor name
+                      ${translations.AR_VENDOR_NAME()}
                       </p>
                       <p style="margin: 0">${vendorName}</p>
                   </div>
                   <br/>
-                  <p style="font-weight: bold;">Payments</p>
+                  <p style="font-weight: bold;">${translations.AR_PAYMENTS()}</p>
                   
                   <table style="width: 100%; border-collapse: collapse; margin-bottom: 2rem" role="presentation">
                     <tbody style="line-height: 24px">
                       <tr style="margin: 100px">
-                        <td style="padding: 10px">Processed Payments</td>
+                        <td style="padding: 10px">${translations.AR_PROCESS_PAYMENTS()}</td>
                         <td style="padding: 10px; text-align: right">
                           <strong>${data.length}</strong>
                         </td>
                         </tr>
                           <tr style="background-color: #EBFBDF">
-                            <td style="padding: 10px">Corrects</td>
+                            <td style="padding: 10px">${translations.AR_CORRECTS()}</td>
                             <td style="text-align: right; padding: 10px">
                               <strong>${data.certifiedCount}</strong>
                             </td>
                         </tr>
                           <tr style="background-color: #fef2f2">
-                            <td style="padding: 10px">Incorrects</td>
+                            <td style="padding: 10px">${translations.AR_INCORRECT()}</td>
                             <td style="text-align: right; padding: 10px">
                               <strong>${data.length - data.certifiedCount}</strong>
                             </td>
@@ -551,10 +506,10 @@ define([
                               <table style="width: 100%; font-size: 14px; text-align: left; border-collapse: collapse;">
                                   <thead>
                                       <tr style="background-color: #fef2f2">
-                                          <th style="padding: 10px">Order</th>
-                                          <th style="padding: 10px">Payment</th>
-                                          <th style="padding: 10px">Status</th>
-                                          <th style="padding: 10px">Details status</th>
+                                          <th style="padding: 10px">${translations.AR_ORDER()}</th>
+                                          <th style="padding: 10px">${translations.AR_PAYMENT()}</th>
+                                          <th style="padding: 10px">${translations.AR_STATUS()}</th>
+                                          <th style="padding: 10px">${translations.AR_STATUS_DETAILS()}</th>
                                       </tr>
                                   </thead>
                                   <tbody >

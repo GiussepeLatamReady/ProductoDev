@@ -16,7 +16,9 @@ define([
     'N/task',
     "../Latam Tools/Router/LMRY_AR_Library_ROUT",
     "../Constants/LMRY_AR_Features_CONST",
-    "../Constants/LMRY_AR_GlobalConstants_LBRY"
+    "../Constants/LMRY_AR_GlobalConstants_LBRY",
+    "./Constants/LMRY_AR_Wht_Send_Email_CONST",
+    "../Helper/LMRY_AR_Search_Library_HELPER"
 ],
     (
         log,
@@ -29,6 +31,8 @@ define([
         Router_LBRY,
         Features,
         Constants,
+        Constants_LBRY,
+        Search_HELPER
     ) => {
         const CLIENT_SCRIPT_PATH = "./LMRY_AR_Wht_Send_Email_CLNT_V2.1.js";
         const LMRY_SCRIPT = "LMRY_AR_Wht_Send_Email_STLT_V2.1.js";
@@ -73,7 +77,6 @@ define([
                         );
                     if (status){
                         handler.getVendorPaymentDetails();
-                        log.error("data",handler.data);
                         handler.loadTransactionSublist("custpage_results_list",true);
                         handler.loadTransactionSublist("custpage_results_list_no_email",false);
                     } 
@@ -85,7 +88,6 @@ define([
             } catch (err) {
                 
                 log.error("[ onRequest - GET ]", err);
-                log.error("[ onRequest - GET stack ]", err.stack);
                 Error_LBRY.handleError({ title: "[onRequest - GET]", err, script: LMRY_SCRIPT ,suiteAppId: Constants.APP_ID });
             }
         };
@@ -120,9 +122,8 @@ define([
                 this.method = options.method;
                 this.FEAT_SUBS = this.isValid(runtime.isFeatureInEffect({ feature: 'SUBSIDIARIES' }));
                 this.FEAT_CALENDAR = this.isValid(runtime.isFeatureInEffect({ feature: 'MULTIPLECALENDARS' }));
-                let language = runtime.getCurrentScript().getParameter({ name: "LANGUAGE" }).substring(0, 2);
-                language = language === "es" ? language : "en";
-                this.translations = this.getTranslations(language);
+                const { REGISTRY_COLLECTION, REGISTRY_TRANSLATION_KEYS } = Constants_LBRY;
+                this.translations = Search_HELPER.getTranslations( REGISTRY_TRANSLATION_KEYS, REGISTRY_COLLECTION );
                 this.subsidiaries = [];
                 this.deploy = runtime.getCurrentScript().deploymentId;
                 this.names = this.getNames(this.deploy);
@@ -162,7 +163,7 @@ define([
             addNoSubsidiaryMessage() {
                 let myInlineHtml = this.form.addField({
                     id: 'custpage_lmry_v_message',
-                    label: this.translations.LMRY_MESSAGE,
+                    label: this.translations.AR_MESSAGE(),
                     type: serverWidget.FieldType.INLINEHTML
                 }).updateLayoutType({
                     layoutType: serverWidget.FieldLayoutType.OUTSIDEBELOW
@@ -201,8 +202,8 @@ define([
                     <body>
                         <div class="container">
                             <p class="message">
-                                ${this.translations.LMRY_MESSAGE_LICENSE}. <br>
-                                ${this.translations.LMRY_MESSAGE_CONTACT} <a href="https://www.Latamready.com" target="_blank">www.Latamready.com</a>
+                                ${this.translations.AR_MESSAGE_LICENSE()}. <br>
+                                ${this.translations.AR_MESSAGE_CONTACT()} <a href="https://www.Latamready.com" target="_blank">www.Latamready.com</a>
                             </p>
                         </div>
                     </body>
@@ -212,18 +213,18 @@ define([
 
             setupFormWithSubsidiaries() {
                 this.form.addButton({
-                    label: this.translations.LMRY_VIEW_LOG,
+                    label: this.translations.AR_VIEW_LOG(),
                     id: "custpage_btn_log",
                     functionName: "backLog"
                 });
-                this.addGroup('mainGroup', this.translations.LMRY_PRIMARY_INFO);
+                this.addGroup('mainGroup', this.translations.AR_PRIMARY_INFO());
                 if (this.FEAT_SUBS) {
-                    this.addSelectField('custpage_subsidiary', this.translations.LMRY_SUBSIDIARY, 'mainGroup').isMandatory();
+                    this.addSelectField('custpage_subsidiary', this.translations.AR_SUBSIDIARY(), 'mainGroup').isMandatory();
                 }
-                this.addSelectField('custpage_entity', this.translations.LMRY_VENDOR, 'mainGroup')
-                this.addCheckField('custpage_view_sent', this.translations.LMRY_VIEW_SENT, 'mainGroup');
-                this.addDateField('custpage_period_start', this.translations.LMRY_PERIOD_START, 'mainGroup').isMandatory();
-                this.addDateField('custpage_period_end', this.translations.LMRY_PERIOD_END, 'mainGroup').isMandatory();
+                this.addSelectField('custpage_entity', this.translations.AR_VENDOR(), 'mainGroup')
+                this.addCheckField('custpage_view_sent', this.translations.AR_VIEW_SENT(), 'mainGroup');
+                this.addDateField('custpage_period_start', this.translations.AR_PERIOD_START(), 'mainGroup').isMandatory();
+                this.addDateField('custpage_period_end', this.translations.AR_PERIOD_END(), 'mainGroup').isMandatory();
                 
                 this.addSimpleField('custpage_status', 'Status', 'mainGroup').isHidden();
                 this.addAreaField('custpage_log_id', 'Log ID', 'mainGroup').isHidden();
@@ -291,19 +292,19 @@ define([
 
             addFormButtons() {
                 if (!Number(this.params.status)) {
-                    this.form.addSubmitButton({ label: this.translations.LMRY_FILTER });
+                    this.form.addSubmitButton({ label: this.translations.AR_FILTER() });
                 } else {
-                    this.form.addSubmitButton({ label: this.translations.LMRY_SEND });
+                    this.form.addSubmitButton({ label: this.translations.AR_SEND() });
                     this.form.addButton({
                         id: 'btn_back',
-                        label: this.translations.LMRY_BACK,
+                        label: this.translations.AR_BACK(),
                         functionName: 'back'
                     });
                     // Deshabilitar campos si es necesario
 
                     this.disableFields();
                 }
-                this.form.addResetButton({ label: this.translations.LMRY_RESTART });
+                this.form.addResetButton({ label: this.translations.AR_RESTART() });
             }
 
 
@@ -374,21 +375,21 @@ define([
                 let fields;
                 if (isWithEmail) {
                     fields = [
-                        { id: 'apply', label: this.translations.LMRY_APPLY, type: serverWidget.FieldType.CHECKBOX },
-                        { id: 'tranid', label: this.translations.LMRY_DOCUMENT_NUMBER, type: serverWidget.FieldType.TEXT },
-                        { id: 'entity', label: this.translations.LMRY_VENDOR, type: serverWidget.FieldType.TEXT },
-                        { id: 'email', label: this.translations.LMRY_EMAIL, type: serverWidget.FieldType.TEXT },
-                        { id: 'sent', label: this.translations.LMRY_SENT, type: serverWidget.FieldType.CHECKBOX },
+                        { id: 'apply', label: this.translations.AR_APPLY(), type: serverWidget.FieldType.CHECKBOX },
+                        { id: 'tranid', label: this.translations.AR_DOCUMENT_NUMBER(), type: serverWidget.FieldType.TEXT },
+                        { id: 'entity', label: this.translations.AR_VENDOR(), type: serverWidget.FieldType.TEXT },
+                        { id: 'email', label: this.translations.AR_EMAIL(), type: serverWidget.FieldType.TEXT },
+                        { id: 'sent', label: this.translations.AR_SENT(), type: serverWidget.FieldType.CHECKBOX },
                         { id: 'internalidtext', label: 'internal_id', type: serverWidget.FieldType.TEXT, displayType: serverWidget.FieldDisplayType.HIDDEN },
                         { id: 'entity_id', label: 'entity_id', type: serverWidget.FieldType.TEXT, displayType: serverWidget.FieldDisplayType.HIDDEN }
                     ];
                     
                 }else{
                     fields = [
-                        { id: 'tranid_out', label: this.translations.LMRY_DOCUMENT_NUMBER, type: serverWidget.FieldType.TEXT },
-                        { id: 'entity_out', label: this.translations.LMRY_VENDOR, type: serverWidget.FieldType.TEXT },
-                        { id: 'email_out', label: this.translations.LMRY_EMAIL, type: serverWidget.FieldType.TEXT },
-                        { id: 'sent_out', label: this.translations.LMRY_SENT, type: serverWidget.FieldType.CHECKBOX },
+                        { id: 'tranid_out', label: this.translations.AR_DOCUMENT_NUMBER(), type: serverWidget.FieldType.TEXT },
+                        { id: 'entity_out', label: this.translations.AR_VENDOR(), type: serverWidget.FieldType.TEXT },
+                        { id: 'email_out', label: this.translations.AR_EMAIL(), type: serverWidget.FieldType.TEXT },
+                        { id: 'sent_out', label: this.translations.AR_SENT(), type: serverWidget.FieldType.CHECKBOX },
                         { id: 'internalidtext_out', label: 'internal_id', type: serverWidget.FieldType.TEXT, displayType: serverWidget.FieldDisplayType.HIDDEN },
                         { id: 'entity_id_out', label: 'entity_id', type: serverWidget.FieldType.TEXT, displayType: serverWidget.FieldDisplayType.HIDDEN }
                     ];
@@ -405,12 +406,12 @@ define([
                 if (isWithEmail) {
                     this.sublist.addButton({
                         id: 'markAll',
-                        label: this.translations.LMRY_SELECT_ALL,
+                        label: this.translations.AR_SELECT_ALL(),
                         functionName: 'toggleCheckBoxes(true)'
                     });
                     this.sublist.addButton({
                         id: 'desmarkAll',
-                        label: this.translations.LMRY_DESELECT_ALL,
+                        label: this.translations.AR_DESELECT_ALL(),
                         functionName: 'toggleCheckBoxes(false)'
                     });
                 }
@@ -454,7 +455,6 @@ define([
                 } = this.params;
                 let form = this.form;
 
-                log.error("setFormValues params",this.params);
                 if (this.FEAT_SUBS == true || this.FEAT_SUBS == 'T') {
                     if (Number(subsidiary)) {
                         let subsidiaryField = form.getField({ id: 'custpage_subsidiary' });
@@ -489,10 +489,10 @@ define([
 
             loadTransactionSublist(listID,isWithEmail) {
                 
-                log.error("listID",listID)
                 let sublist = this.form.getSublist({ id: listID });
                 let countData=0;
                 let countDataOut=0;
+                log.error("data",this.data)
                 this.data.forEach((billPayment, i) => {
                     const {
                         paymentID,
@@ -505,7 +505,6 @@ define([
                     } = billPayment;
                     
                     if (email && isWithEmail) {
-                        log.error("billPayment with email",billPayment)
                         const setSublistValue = (colId, value) => sublist.setSublistValue({ id: colId, line: countData, value });
                         setSublistValue("internalidtext", paymentID);
                         setSublistValue("entity_id", vendorID);
@@ -517,12 +516,10 @@ define([
                         setSublistValue("entity", `<a class="dottedlink" href="${tranUrlEntity}" target="_blank">${vendorName}</a>`);
                         setSublistValue("email", email);
                         setSublistValue("sent", sent);
-                        log.error("countData with email antes",countData)
                         countData++;
-                        log.error("countData with email despues",countData)
                     } 
                     if (!email && !isWithEmail) {
-                        log.error("billPayment without email",billPayment)
+
                         const setSublistValue = (colId, value) => sublist.setSublistValue({ id: colId, line: countDataOut, value });
                         setSublistValue("internalidtext_out", paymentID);
                         setSublistValue("entity_id_out", vendorID);
@@ -532,13 +529,10 @@ define([
                         const tranUrlEntity = url.resolveRecord({ recordType: "vendor", recordId: vendorID, isEditMode: false });
                         setSublistValue("entity_out", `<a class="dottedlink" href="${tranUrlEntity}" target="_blank">${vendorName}</a>`);
                         setSublistValue("sent_out", sent);
-                        log.error("countData without email antes",countDataOut)
                         countDataOut++;
-                        log.error("countData without email despues",countDataOut)
                     }
                     
                 })
-                log.error("countData",countData)
                 if (countData && isWithEmail) {
                     sublist.label = `${sublist.label} (${countData})`;
                 }
@@ -558,9 +552,7 @@ define([
                             ['custrecord_lmry_ste_ar_whtvpd_payment.subsidiary', 'is', subsidiary]
                         ];
                     }
-                    log.error("params",this.params);
                     if (vendor && vendor !== "0") {
-                        log.error("entre","entre vendor");
                         filters.push('AND',['custrecord_lmry_ste_ar_whtvpd_vendor', 'is', vendor]);
                     }
 
@@ -624,13 +616,16 @@ define([
                     }
 
                     const paymentsSent = this.getPaymentsSent();
-
+                    log.error("paymentsSent",[...paymentsSent])
+                    log.error("paymentsSent.size",paymentsSent.size)
+                    log.error("payments",payments)
                     if (paymentsSent.size) {
                         if (this.isValid(viewSent)) {
                             // Se obtiene todos los payments
                             payments = payments.map((payment) => {
                                 const isSent = paymentsSent.has(payment.paymentID);
                                 payment.sent = isSent ? "T": "F";
+                                return payment;
                             } );
                         }else{
                             // Se obtiene los payments que no han sido enviados
@@ -639,6 +634,7 @@ define([
                                     payment.sent = "F"
                                     paymentsResult.push(payment);
                                 }
+                                return paymentsResult;
                             },[]);
                         }
                     }
@@ -647,6 +643,7 @@ define([
                     this.data = payments;
                 } catch (error) {
                     log.error('Error', error)
+                    log.error('Error stack', error.stack)
                 }
             }
 
@@ -654,11 +651,11 @@ define([
             getPaymentsSent() { // falta revisar
                 let paymentsSent = [];
                 const searchBillPaymentsSent = search.create({
-                    type: "customrecord_lmry_ste_ar_wht_send",
+                    type: "customrecord_lmry_ste_ar_wht_certificate",
                     filters: [
-                        ["custrecord_lmry_ste_ar_wht_se_status.custrecord_lmry_ste_procstatus_code","is","DONE"]
+                        ["custrecord_lmry_ste_ar_was_sent","is","T"]
                     ],
-                    columns: ["custrecord_lmry_ste_ar_wht_se_payments"]
+                    columns: ["custrecord_lmry_ste_ar_wht_cert_trans"]
                 });
 
                 let pageData = searchBillPaymentsSent.runPaged({ pageSize: 1000 });
@@ -666,16 +663,13 @@ define([
                     pageData.pageRanges.forEach(function (pageRange) {
                         let page = pageData.fetch({ index: pageRange.index });
                         page.data.forEach(function (result) {
-                            const billpayments = result.getValue("custrecord_lmry_ste_ar_wht_se_payments");
-                            paymentsSent = paymentsSent.concat(JSON.parse(billpayments));
+                            const billpaymentID = result.getValue("custrecord_lmry_ste_ar_wht_cert_trans");
+                            paymentsSent.push(billpaymentID);
                         });
                     });
                 }
-                
-                const paymentsIds =  new Set(paymentsSent.map(({id}) => (id)));
-                return paymentsIds;
+                return new Set(paymentsSent);
             }
-            
 
             generatePeriodFormula(idsPeriod) {
                 const periodsString = idsPeriod.map(id => `'${id}'`).join(', ');
@@ -700,118 +694,6 @@ define([
                     status: '1'
                 };
             }
-
-            getTranslations(country) {
-                const translatedFields = {
-                    "es": {
-                        "LMRY_MESSAGE": "Mensaje",
-                        "LMRY_MESSAGE_LICENSE": "AVISO: Actualmente la licencia para este módulo está vencida, por favor contacte al equipo comercial de LatamReady.",
-                        "LMRY_MESSAGE_CONTACT": "También puedes contactar con nosotros a",
-                        "LMRY_PRIMARY_INFO": "Informacion primaria",
-                        "LMRY_SUBSIDIARY": "Subsidiaria",
-                        "LMRY_WTH_TYPE": "Tipo de retención",
-                        "LMRY_PERIOD_INTERVAL": "Intervalo de periodos",
-                        "LMRY_START_DATE": "Fecha de inicio",
-                        "LMRY_END_DATE": "Fecha final",
-                        "LMRY_PERIOD": "Periodo contable",
-                        "LMRY_START_PERIOD": "Periodo contable inicial",
-                        "LMRY_FINAL_PERIOD": "Perido contable final",
-                        "LMRY_FILTER": "Filtrar",
-                        "LMRY_SEND": "Enviar",
-                        "LMRY_BACK": "Atras",
-                        "LMRY_RESTART": "Reiniciar",
-                        "LMRY_PERIOD_TYPE": "Tipo de período",
-                        "LMRY_TRANSACTIONS": "Transacciones",
-                        "LMRY_RESULTS": "Resultados",
-                        "LMRY_APPLY": "Aplicar",
-                        "LMRY_DOCUMENT_NUMBER": "Nùmero de Documento",
-                        "LMRY_INTERNALID": "ID Interno",
-                        "LMRY_TRANSACTION_TYPE": "Tipo de transaccion",
-                        "LMRY_FISCAL_DOCUMENT": "Numero de documento fiscal",
-                        "LMRY_AMOUNT": "Importe",
-                        "LMRY_SELECT_ALL": "Seleccionar todo",
-                        "LMRY_DESELECT_ALL": "Deseleccionar todo",
-                        "LMRY_WHT_HEADER": "Cabecera",
-                        "LMRY_WHT_LINE": "Linea",
-                        "LMRY_DATE_RANGE": "Rango de fechas",
-                        "LMRY_TYPE_PROCESS": "Proceso",
-                        "LMRY_SALES": "Ventas",
-                        "LMRY_PURCHASES": "Compras",
-                        "LMRY_ENTITY": "Entidad",
-                        "LMRY_CURRENCY": "Moneda",
-                        "LMRY_VIEW_LOG": "Ver registro",
-                        "LMRY_RETEICA": "ReteICA",
-                        "LMRY_RETEIVA": "ReteIVA",
-                        "LMRY_RETEFTE": "ReteFte",
-                        "LMRY_RETECRE": "ReteCre",
-                        "LMRY_RECLASIFICATION": "Reclasificación",
-
-                        "LMRY_VENDOR":"Proveedor",
-                        "LMRY_PERIOD_START":"Fecha desde :",
-                        "LMRY_PERIOD_END":"Fecha hasta :",
-                        "LMRY_VIEW_SENT": "Mostrar enviados",
-                        "LMRY_EMAIL": "CORREO",
-                        "LMRY_SENT": "Enviado",
-                        "LMRY_WITHOUT_EMAIL": "Sin Correo",
-                        "LMRY_WITH_EMAIL": "Con correo"
-                    },
-                    "en": {
-                        "LMRY_MESSAGE": "Message",
-                        "LMRY_MESSAGE_LICENSE": "NOTICE: Currently the license for this module is expired, please contact the LatamReady sales team.",
-                        "LMRY_MESSAGE_CONTACT": "You can also contact us through",
-                        "LMRY_PRIMARY_INFO": "Primary information",
-                        "LMRY_SUBSIDIARY": "Subsidiary",
-                        "LMRY_WTH_TYPE": "Withholding type",
-                        "LMRY_PERIOD_INTERVAL": "Period interval",
-                        "LMRY_START_DATE": "Start date",
-                        "LMRY_END_DATE": "End date",
-                        "LMRY_PERIOD": "Accounting period",
-                        "LMRY_START_PERIOD": "Initial Accounting period",
-                        "LMRY_FINAL_PERIOD": "Final Accounting period",
-                        "LMRY_FILTER": "Filter",
-                        "LMRY_SEND": "Send",
-                        "LMRY_BACK": "Back",
-                        "LMRY_RESTART": "Restart",
-                        "LMRY_PERIOD_TYPE": "Type of period",
-                        "LMRY_TRANSACTIONS": "Transactions",
-                        "LMRY_RESULTS": "Results",
-                        "LMRY_APPLY": "Apply",
-                        "LMRY_DOCUMENT_NUMBER": "Document Number",
-                        "LMRY_INTERNALID": "Internal ID",
-                        "LMRY_TRANSACTION_TYPE": "Transaction type",
-                        "LMRY_FISCAL_DOCUMENT": "Fiscal document number",
-                        "LMRY_AMOUNT": "Amount",
-                        "LMRY_SELECT_ALL": "Select all",
-                        "LMRY_DESELECT_ALL": "Deselect all",
-                        "LMRY_WHT_HEADER": "Header",
-                        "LMRY_WHT_LINE": "Line",
-                        "LMRY_DATE_RANGE": "Date range",
-                        "LMRY_TYPE_PROCESS": "Process",
-                        "LMRY_SALES": "Sales",
-                        "LMRY_PURCHASES": "Purchases",
-                        "LMRY_ENTITY": "Entity",
-                        "LMRY_CURRENCY": "Currency",
-                        "LMRY_VIEW_LOG": "View Log",
-                        "LMRY_RETEICA": "ReteICA",
-                        "LMRY_RETEIVA": "ReteIVA",
-                        "LMRY_RETEFTE": "ReteFte",
-                        "LMRY_RETECRE": "ReteCre",
-                        "LMRY_RECLASIFICATION": "Reclasification",
-
-
-                        "LMRY_VENDOR":"Vendor",
-                        "LMRY_PERIOD_START":"Date From :",
-                        "LMRY_PERIOD_END":"Date To :",
-                        "LMRY_VIEW_SENT": "View Sent",
-                        "LMRY_EMAIL": "EMAIL",
-                        "LMRY_SENT": "Sent",
-                        "LMRY_WITHOUT_EMAIL": "Without Email",
-                        "LMRY_WITH_EMAIL": "With Email"
-                    }
-                }
-                return translatedFields[country];
-            }
-
 
             toLogSuitelet() {
                 redirect.toSuitelet({

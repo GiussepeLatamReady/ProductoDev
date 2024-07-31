@@ -1,197 +1,197 @@
-function messageBody(data){
+const collection = {
+    "es": {
+      "AR_VALIDATE_VALUES": "Ingrese un valor para:",
+      "AR_PROCESS_ACTIVATE": "Espere un momento por favor, el proceso se encuentra en curso.",
+      "AR_FILTER_TRANSACTIONS": "No hay transacciones Filtradas",
+      "AR_SELECTED_TRANSACTIONS": "No hay transacciones Seleccionadas",
+      "AR_ALERT": "Alerta",
+      "AR_VALIDATE_PERIODS": "El período inicial no puede ser mayor que el período final",
+      "AR_DEAR": "Estimado",
+      "AR_MSG_SUITEAPP": "Este es un mensaje automático de latamready suiteApp.",
+      "AR_ENVIROMENT": "Ambiente",
+      "AR_ACCOUNT_ID": "Id de la cuenta",
 
-    const {transaction} = data[0];
-    const {subsidiaryID, vendorName, userSubsidiary, userName} = transaction;
-  
-    const tranidList = data.map(value => value.transaction.tranid); 
-  
-    var body =  '<body text="#333333" link="#014684" vlink="#014684" alink="#014684">';
-    body += '<table width="642" border="0" align="center" cellpadding="0" cellspacing="0">';
-    body += '<tr>';
-    body += '<td width="100%" valign="top">';
-    body += '<table width="100%" border="0" align="center" cellpadding="0" cellspacing="0">';
-    body += '<tr>';
-    body += '<td width="100%" colspan="2"><img style="display: block;" src="https://system.na1.netsuite.com/core/media/media.nl?id=921&c=TSTDRV1038915&h=c493217843d184e7f054" width="645" alt="main banner"/></td>';
-    body += '</tr>';
-    body += '</table>';
-    body += '<table width="100%" border="0" align="center" cellpadding="0" cellspacing="0">';
-    body += '<tr>';
-    body += '<td bgcolor="#d50303" width="15%">&nbsp;</td>';
-    body += '<td bgcolor="#d50303" width="85%">';
-    body += '<font style="color:#FFFFFF; line-height:130%; font-family:Arial, Helvetica, sans-serif; font-size:19px">';
-    body += 'Estimado(a) ' + userName + ':<br>';
-    body += '</font>';
-    body += '</td>';
-    body += '</tr>';
-    body += '<tr>';
-    body += '<td width="100%" bgcolor="#d50303" colspan="2" align="right"><a href="http://www.latamready.com/#contac"><img src="https://system.na1.netsuite.com/core/media/media.nl?id=923&c=TSTDRV1038915&h=3c7406d759735a1e791d" width="94" style="margin-right:45px" /></a></td>';
-    body += '</tr>';
-    body += '<tr>';
-    body += '<td width="100%" bgcolor="#FFF" colspan="2" align="right">';
-    body += '<a href="https://www.linkedin.com/company/9207808"><img src="https://system.na1.netsuite.com/core/media/media.nl?id=924&c=TSTDRV1038915&h=c135e74bcb8d5e1ac356" width="15" style="margin:5px 1px 5px 0px" /></a>';
-    body += '<a href="https://www.facebook.com/LatamReady-337412836443120/"><img src="https://system.na1.netsuite.com/core/media/media.nl?id=919&c=TSTDRV1038915&h=9c937774d04fb76747f7" width="15" style="margin:5px 1px 5px 0px" /></a>';
-    body += '<a href="https://twitter.com/LatamReady"><img src="https://system.na1.netsuite.com/core/media/media.nl?id=928&c=TSTDRV1038915&h=fc69b39a8e7210c65984" width="15" style="margin:5px 47px 5px 0px" /></a>';
-    body += '</td>';
-    body += '</tr>';
-    body += '</table>';
-    body += '<p>Este es un mensaje automatico de LatamReady SuiteApp.</p>';
-  
-    var width_td1 = " width:50%;\">";
-    var width_td2 = " width:50%;\">";
-    var colStyl = 'style=\"text-align: center; font-size: 9pt; font-weight:bold; color:white; background-color:#d50303; border: 1px solid #d50303; ';
-    var rowStyl = 'style=\"text-align: Left;   font-size: 9pt; font-weight:bold; border: 1px solid #d50303; ';
-  
-    var body = '';
-    body += "<table style=\"font-family: Courier New, Courier, monospace; width:95%; border: 1px solid #d50303;\">";
-    body += "<tr>";
-    body += "<td " + colStyl + width_td1;
-    body += "Descripcion";
-    body += "</td>";
-    body += "<td " + colStyl + width_td2;
-    body += "Detalle";
-    body += "</td>";
-    body += "</tr>";
-    body += "<tr>";
-    body += "<td " + rowStyl + width_td1;
-    body += "Fecha y Hora";
-    body += "</td>";
-    body += "<td " + rowStyl + width_td2;
-    body += new Date();
-    body += "</td>";
-    body += "</tr>";
-    body += "<tr>";
-    body += "<td " + rowStyl + width_td1;
-    body += "Ambiente";
-    body += "</td>";
-    body += "<td " + rowStyl + width_td2;
-    body += runtime.envType;
-    body += "</td>";
-    body += "</tr>";
-    body += "<tr>";
-    body += "<td " + rowStyl + width_td1;
-    body += "NetSuite Version (Release)";
-    body += "</td>";
-    body += "<td " + rowStyl + width_td2;
-    body += runtime.version;
-    body += "</td>";
-    body += "</tr>";
-    body += "<tr>";
-    body += "<td " + rowStyl + width_td1;
-    body += "Codigo Cliente (Company)";
-    body += "</td>";
-    body += "<td " + rowStyl + width_td2;
-    body += runtime.accountId;
-    body += "</td>";
-    body += "</tr>";
-    body += "<tr>";
-    body += "<td " + rowStyl + width_td1;
-    body += "Subsidiaria del Usuario (ID)";
-    body += "</td>";
-    body += "<td " + rowStyl + width_td2;
-    body += userSubsidiary;
-    body += "</td>";
-    body += "</tr>";
-    body += "<tr>";
-    body += "<td " + rowStyl + width_td1;
-    body += "Nombre del Usuario (User) ";
-    body += "</td>";
-    body += "<td " + rowStyl + width_td2;
-    body += userName;
-    body += "</td>";
-    body += "</tr>";
-    body += "<tr>";
-    body += "<td " + rowStyl + width_td1;
-    body += "Subsidiaria del Proveedor";
-    body += "</td>";
-    body += "<td " + rowStyl + width_td2;
-    body += subsidiaryID;
-    body += "</td>";
-    body += "</tr>";
-    body += "<tr>";
-    body += "<td " + rowStyl + width_td1;
-    body += "Proveedor";
-    body += "</td>";
-    body += "<td " + rowStyl + width_td2;
-    body += vendorName;
-    body += "</td>";
-    body += "</tr>";
-    body += "<tr>";
-    body += "<td " + rowStyl + width_td1;
-    body += "Payments";
-    body += "</td>";
-    body += "<td " + rowStyl + width_td2;
-    for(var k = 0; k < tranidList.length; k++){
-      body += tranidList[k] + "<br>";
-    }
-    body += "</td>";
-    body += "</tr>";
-    body += "</table>";
-  
-    body += "<br>";
-  
-    body += '<p>Saludos,</p>';
-    body += '<p>El Equipo de LatamReady</p>';
-    body += '</font>';
-    body += '</td>';
-    body += '<td width="15%">&nbsp;</td>';
-    body += '</tr>';
-    body += '</table>';
-    body += '<br>';
-    body += '<table width="100%" border="0" cellspacing="0" cellpadding="2" bgcolor="#e5e6e7">';
-    body += '<tr>';
-    body += '<td>&nbsp;</td>';
-    body += '</tr>';
-    body += '<tr>';
-    body += '<td width="15%">&nbsp;</td>';
-    body += '<td width="70%" align="center">';
-    body += '<font style="color:#333333;line-height:200%; font-family:Trebuchet MS, Helvetica, sans-serif; font-size:12px;" >';
-    body += '<i>Este es un mensaje automatico. Por favor, no responda este correo electronico.</i>';
-    body += '</font>';
-    body += '</td>';
-    body += '<td width="15%">&nbsp;</td>';
-    body += '</tr>';
-    body += '<tr>';
-    body += '<td>&nbsp;</td>';
-    body += '</tr>';
-    body += '</table>';
-    body += '<table width="100%" border="0" cellspacing="0" cellpadding="2">';
-    body += '<tr>';
-    body += '<td width="15%">&nbsp;</td>';
-    body += '<td width="70%" align="center">';
-    body += '<a href="http://www.latamready.com/"><img src="https://system.na1.netsuite.com/core/media/media.nl?id=926&c=TSTDRV1038915&h=e14f0c301f279780eb38" width="169" style="margin:15px 0px 15px 0px" /></a>';
-    body += '</td>';
-    body += '<td width="15%">&nbsp;</td>';
-    body += '</tr>';
-    body += '</table>';
-    body += '<table width="100%" border="0" cellspacing="0" cellpadding="2">';
-    body += '<tr>';
-    body += '<td width="15%">&nbsp;</td>';
-    body += '<td width="70%" align="center">';
-    body += '<a href="https://www.linkedin.com/company/9207808"><img src="https://system.na1.netsuite.com/core/media/media.nl?id=925&c=TSTDRV1038915&h=41ec53b63dba135488be" width="101" style="margin:0px 5px 0px 5px" /></a>';
-    body += '<a href="https://www.facebook.com/LatamReady-337412836443120/"><img src="https://system.na1.netsuite.com/core/media/media.nl?id=920&c=TSTDRV1038915&h=7fb4d03fff9283e55318" width="101" style="margin:0px 5px 0px 5px" /></a>';
-    body += '<a href="https://twitter.com/LatamReady"><img src="https://system.na1.netsuite.com/core/media/media.nl?id=929&c=TSTDRV1038915&h=300c376863035d25c42a" width="101" style="margin:0px 5px 0px 5px" /></a>';
-    body += '</td>';
-    body += '<td width="15%">&nbsp;</td>';
-    body += '</tr>';
-    body += '</table>';
-    body += '<table width="100%" border="0" cellspacing="0">';
-    body += '<tr>';
-    body += '<td>';
-    body += '<img src="https://system.na1.netsuite.com/core/media/media.nl?id=918&c=TSTDRV1038915&h=7f0198f888bdbb495497" width="642" style="margin:15px 0px 15px 0px" /></a>';
-    body += '</td>';
-    body += '</tr>';
-    body += '</table>';
-    body += '</td>';
-    body += '</tr>';
-    body += '</table>';
-    body += '</body>';
-  
-    /*body += '<table width="100%" border="0" cellspacing="0" cellpadding="2">';
-    body += '<tr>';
-    body += '<td width="15%">&nbsp;</td>';
-    body += '<td width="70%">';
-    body += '<font style="color:#333333;line-height:200%; font-family:Trebuchet MS, Helvetica, sans-serif; font-size:13px">';*/
-  
-    return body;
-  
+      "AR_E_SUBSIDIARY": "Subsidiaria del empleado",
+      "AR_VERSION": "Netsuite Released Version",
+      "AR_VENDOR_DETAILS": "Detalles del proveedor",
+      "AR_VENDOR_NAME": "Nombre del proveedor",
+      "AR_PAYMENT": "Pago",
+      "AR_PROCESS_PAYMENTS": "Pagos procesados",
+      "AR_CORRECTS": "Correctos",
+      "AR_INCORRECT": "Incorrectos",
+      "AR_ORDER": "Orden",
+      "AR_STATUS": "Estado",
+
+      "AR_STATUS_DETAILS": "Detalle del estado",
+      "AR_NOTE": "Nota: Se está generando el pago y la creación de asientos diarios. La columna [ESTADO] indica el estado del proceso.",
+      "AR_MESSAGE_UPDATE": "Presione el botón Actualizar o Refresh para ver si el proceso terminó.",
+      "AR_TITLE_STLT": "AR Envio de certificados de retenciones - Registro",
+      "AR_BACK_TO_MAIN": "Volver a la página principal",
+      "AR_RESULTS_LABEL": "Resultados",
+      "AR_INTERNAL_ID_LABEL": "Id interno",
+      "AR_SUBSIDIARY_LABEL": "Subsidiaria",
+      "AR_CREATION_DATE_LABEL": "Fecha de Creación",
+      "AR_CREATED_BY_LABEL": "Creado por",
+
+      "AR_VENDOR": "Proveedor",
+      "AR_DETAILS": "Detalles",
+      "AR_MESSAGE": "Mensaje",
+      "AR_MESSAGE_LICENSE": "AVISO: Actualmente la licencia para este módulo está vencida, por favor contacte al equipo comercial de LatamReady.",
+      "AR_MESSAGE_CONTACT": "También puedes contactar con nosotros a",
+      "AR_PRIMARY_INFO": "Información primaria",
+      "AR_SUBSIDIARY": "Subsidiaria",
+      "AR_FILTER": "Filtrar",
+      "AR_SEND": "Enviar",
+      "AR_BACK": "Atrás",
+
+      "AR_RESTART": "Reiniciar",
+      "AR_APPLY": "Aplicar",
+      "AR_DOCUMENT_NUMBER": "Número de Documento",
+      "AR_SELECT_ALL": "Seleccionar todo",
+      "AR_DESELECT_ALL": "Deseleccionar todo",
+      "AR_VIEW_LOG": "Ver registro",
+      "AR_PERIOD_START": "Fecha desde:",
+      "AR_PERIOD_END": "Fecha hasta:",
+      "AR_VIEW_SENT": "Mostrar enviados",
+      "AR_EMAIL": "CORREO",
+
+      "AR_SENT": "Enviado",
+      "AR_WITHOUT_EMAIL": "Sin Correo",
+      "AR_WITH_EMAIL": "Con correo",
+      "AR_PAYMENTS": "Pagos",
+      "AR_NUMBER": "Posición",
+      "AR_BILLPAYMENT": "Pago",
+      "AR_PROCESING": "Procesando",
+      "AR_REFRESH": "Actualizar Página",
+      "AR_CERTIFICATE": "Certificado",
+      "AR_SENT_STATUS": "Estado de envío",
+
+      "AR_NOT_SENT": "No enviado"
+    },
+    "en": {
+      "AR_VALIDATE_VALUES": "Enter a value for:",
+      "AR_PROCESS_ACTIVATE": "Please wait a moment, the process is in progress.",
+      "AR_FILTER_TRANSACTIONS": "No Filtered Transactions",
+      "AR_SELECTED_TRANSACTIONS": "No Selected Transactions",
+      "AR_ALERT": "Alert",
+      "AR_VALIDATE_PERIODS": "Initial period can't be bigger than final period",
+      "AR_DEAR": "Dear",
+      "AR_MSG_SUITEAPP": "This is an automatic message from latamready suiteApp.",
+      "AR_ENVIROMENT": "Environment",
+      "AR_ACCOUNT_ID": "Account ID",
+      "AR_E_SUBSIDIARY": "Subsidiary of the employee",
+      "AR_VERSION": "Versión Netsuite",
+      "AR_VENDOR_DETAILS": "Vendor details",
+      "AR_VENDOR_NAME": "Vendor name",
+      "AR_PROCESS_PAYMENTS": "Processed Payments",
+      "AR_CORRECTS": "Corrects",
+      "AR_INCORRECT": "Incorrect",
+      "AR_PAYMENT": "Bill Payment",
+      "AR_ORDER": "Order",
+      "AR_STATUS": "Status",
+      "AR_STATUS_DETAILS": "Status details",
+      "AR_NOTE": "Note: The payment is being generated and journal entries are being created. The [STATUS] column indicates the process state.",
+      "AR_MESSAGE_UPDATE": "Press the Update or Refresh button to see if the process has finished.",
+      "AR_TITLE_STLT": "AR Wht Send Email Log",
+      "AR_BACK_TO_MAIN": "Back to Main Page",
+      "AR_RESULTS_LABEL": "Results",
+      "AR_INTERNAL_ID_LABEL": "Internal Id",
+      "AR_SUBSIDIARY_LABEL": "Subsidiary",
+      "AR_CREATION_DATE_LABEL": "Creation Date",
+      "AR_CREATED_BY_LABEL": "Created By",
+      "AR_VENDOR": "Vendor",
+      "AR_DETAILS": "Details",
+      "AR_MESSAGE": "Message",
+      "AR_MESSAGE_LICENSE": "NOTICE: Currently the license for this module is expired, please contact the LatamReady sales team.",
+      "AR_MESSAGE_CONTACT": "You can also contact us through",
+      "AR_PRIMARY_INFO": "Primary information",
+      "AR_SUBSIDIARY": "Subsidiary",
+      "AR_FILTER": "Filter",
+      "AR_SEND": "Send",
+      "AR_BACK": "Back",
+      "AR_RESTART": "Restart",
+      "AR_APPLY": "Apply",
+      "AR_DOCUMENT_NUMBER": "Document Number",
+      "AR_SELECT_ALL": "Select all",
+      "AR_DESELECT_ALL": "Deselect all",
+      "AR_VIEW_LOG": "View Log",
+      "AR_PERIOD_START": "Date From:",
+      "AR_PERIOD_END": "Date To:",
+      "AR_VIEW_SENT": "View Sent",
+      "AR_EMAIL": "EMAIL",
+      "AR_SENT": "Sent",
+      "AR_WITHOUT_EMAIL": "Without Email",
+      "AR_WITH_EMAIL": "With Email",
+      "AR_PAYMENTS": "Bill Payments",
+      "AR_NUMBER": "Position",
+      "AR_BILLPAYMENT": "Bill Payment",
+      "AR_PROCESING": "Processing",
+      "AR_REFRESH": "Refresh",
+      "AR_CERTIFICATE": "Certificate",
+      "AR_SENT_STATUS": "Mailing status",
+      "AR_NOT_SENT": "Not Sent"
+    },
+    "pt": {
+    "AR_VALIDATE_VALUES": "Digite um valor para:",
+    "AR_PROCESS_ACTIVATE": "Por favor, aguarde um momento, o processo está em andamento.",
+    "AR_FILTER_TRANSACTIONS": "Nenhuma transação filtrada",
+    "AR_SELECTED_TRANSACTIONS": "Nenhuma transação selecionada",
+    "AR_ALERT": "Alerta",
+    "AR_VALIDATE_PERIODS": "O período inicial não pode ser maior que o período final",
+    "AR_DEAR": "Caro",
+    "AR_MSG_SUITEAPP": "Esta é uma mensagem automática do LatamReady SuiteApp.",
+    "AR_ENVIROMENT": "Ambiente",
+    "AR_ACCOUNT_ID": "ID da conta",
+    "AR_E_SUBSIDIARY": "Subsidiária do empregado",
+    "AR_VERSION": "Versão Netsuite lançada",
+    "AR_VENDOR_DETAILS": "Detalhes do fornecedor",
+    "AR_VENDOR_NAME": "Nome do fornecedor",
+    "AR_PAYMENT": "Pagamento",
+    "AR_PROCESS_PAYMENTS": "Pagamentos processados",
+    "AR_CORRECTS": "Corretos",
+    "AR_INCORRECT": "Incorretos",
+    "AR_ORDER": "Ordem",
+    "AR_STATUS": "Status",
+    "AR_STATUS_DETAILS": "Detalhes do status",
+    "AR_NOTE": "Nota: O pagamento está sendo gerado e as entradas do diário estão sendo criadas. A coluna [STATUS] indica o estado do processo.",
+    "AR_MESSAGE_UPDATE": "Pressione o botão Atualizar ou Refresh para ver se o processo terminou.",
+    "AR_TITLE_STLT": "AR Envio de certificados de retenções - Registro",
+    "AR_BACK_TO_MAIN": "Voltar à página principal",
+    "AR_RESULTS_LABEL": "Resultados",
+    "AR_INTERNAL_ID_LABEL": "ID interno",
+    "AR_SUBSIDIARY_LABEL": "Subsidiária",
+    "AR_CREATION_DATE_LABEL": "Data de criação",
+    "AR_CREATED_BY_LABEL": "Criado por",
+    "AR_DETAILS": "Detalhes",
+    "AR_MESSAGE": "Mensagem",
+    "AR_MESSAGE_LICENSE": "AVISO: Atualmente a licença para este módulo está expirada, por favor contate a equipe de vendas da LatamReady.",
+    "AR_MESSAGE_CONTACT": "Você também pode nos contatar através de",
+    "AR_PRIMARY_INFO": "Informações primárias",
+    "AR_FILTER": "Filtrar",
+    "AR_SEND": "Enviar",
+    "AR_BACK": "Voltar",
+    "AR_RESTART": "Reiniciar",
+    "AR_APPLY": "Aplicar",
+    "AR_DOCUMENT_NUMBER": "Número do documento",
+    "AR_SELECT_ALL": "Selecionar tudo",
+    "AR_DESELECT_ALL": "Desmarcar tudo",
+    "AR_VIEW_LOG": "Ver registro",
+    "AR_PERIOD_START": "Data inicial:",
+    "AR_PERIOD_END": "Data final:",
+    "AR_VIEW_SENT": "Ver enviados",
+    "AR_EMAIL": "EMAIL",
+    "AR_SENT": "Enviado",
+    "AR_WITHOUT_EMAIL": "Sem email",
+    "AR_WITH_EMAIL": "Com email",
+    "AR_PAYMENTS": "Pagamentos",
+    "AR_NUMBER": "Posição",
+    "AR_BILLPAYMENT": "Pagamento",
+    "AR_PROCESING": "Processando",
+    "AR_REFRESH": "Atualizar página",
+    "AR_CERTIFICATE": "Certificado",
+    "AR_SENT_STATUS": "Status de envio",
+    "AR_NOT_SENT": "Não enviado"
   }
+}
+
+

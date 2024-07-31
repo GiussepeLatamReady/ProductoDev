@@ -42,7 +42,8 @@ Chile
 
 
 + Update
-
+    + LMRY_AR_Withholding_Certificate_LBRY.js
+    + LMRY_AR_Withholding_Certificate_PDF_LBRY.js
 + Delete
 
 
@@ -60,6 +61,7 @@ Chile
             Status	                        custrecord_lmry_ste_ar_wht_se_status	    List record LR Process Status	 	 	    Yes
             Mailing details	                custrecord_lmry_ste_ar_wht_se_details	    Long Text	 	 	        No
             Bill Payments	                custrecord_lmry_ste_ar_wht_se_payments	    Long Text	 	 	        No
+            Bill Payments                   custrecord_lmry_ste_ar_wht_se_payments_m    List/record transaction     Yes
         
     
 + Update

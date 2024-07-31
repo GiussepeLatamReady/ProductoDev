@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<xliff xmlns:ns="netsuite" xmlns:ns3="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file original="netsuite-database" source-language="en" datatype="database" target-language="pt-BR">
+    <body>
+      <group ns:collection="custcollection_lmry_ste_ar_send_email">
+        <trans-unit id="AR_VALIDATE_VALUES">
+          <source>Enter a value for:</source>
+          <target>Digite um valor para:</target>
+        </trans-unit>
+        <trans-unit id="AR_PROCESS_ACTIVATE">
+          <source>Please wait a moment, the process is in progress.</source>
+          <target>Por favor, aguarde um momento, o processo está em andamento.</target>
+        </trans-unit>
+        <trans-unit id="AR_FILTER_TRANSACTIONS">
+          <source>No Filtered Transactions</source>
+          <target>Nenhuma transação filtrada</target>
+        </trans-unit>
+        <trans-unit id="AR_SELECTED_TRANSACTIONS">
+          <source>No Selected Transactions</source>
+          <target>Nenhuma transação selecionada</target>
+        </trans-unit>
+        <trans-unit id="AR_ALERT">
+          <source>Alert</source>
+          <target>Alerta</target>
+        </trans-unit>
+        <trans-unit id="AR_VALIDATE_PERIODS">
+          <source>Initial period can't be bigger than final period</source>
+          <target>O período inicial não pode ser maior que o período final</target>
+        </trans-unit>
+        <trans-unit id="AR_DEAR">
+          <source>Dear</source>
+          <target>Caro</target>
+        </trans-unit>
+        <trans-unit id="AR_MSG_SUITEAPP">
+          <source>This is an automatic message from latamready suiteApp.</source>
+          <target>Esta é uma mensagem automática do LatamReady SuiteApp.</target>
+        </trans-unit>
+        <trans-unit id="AR_ENVIROMENT">
+          <source>Environment</source>
+          <target>Ambiente</target>
+        </trans-unit>
+        <trans-unit id="AR_ACCOUNT_ID">
+          <source>Account ID</source>
+          <target>ID da conta</target>
+        </trans-unit>
+        <trans-unit id="AR_E_SUBSIDIARY">
+          <source>Subsidiary of the employee</source>
+          <target>Subsidiária do empregado</target>
+        </trans-unit>
+        <trans-unit id="AR_VERSION">
+          <source>Versión Netsuite</source>
+          <target>Versão Netsuite lançada</target>
+        </trans-unit>
+        <trans-unit id="AR_VENDOR_DETAILS">
+          <source>Vendor details</source>
+          <target>Detalhes do fornecedor</target>
+        </trans-unit>
+        <trans-unit id="AR_VENDOR_NAME">
+          <source>Vendor name</source>
+          <target>Nome do fornecedor</target>
+        </trans-unit>
+        <trans-unit id="AR_PAYMENT">
+          <source>Bill Payment</source>
+          <target>Pagamento</target>
+        </trans-unit>
+        <trans-unit id="AR_PROCESS_PAYMENTS">
+          <source>Processed Payments</source>
+          <target>Pagamentos processados</target>
+        </trans-unit>
+        <trans-unit id="AR_CORRECTS">
+          <source>Corrects</source>
+          <target>Corretos</target>
+        </trans-unit>
+        <trans-unit id="AR_INCORRECT">
+          <source>Incorrect</source>
+          <target>Incorretos</target>
+        </trans-unit>
+        <trans-unit id="AR_ORDER">
+          <source>Order</source>
+          <target>Ordem</target>
+        </trans-unit>
+        <trans-unit id="AR_STATUS">
+          <source>Status</source>
+          <target>Status</target>
+        </trans-unit>
+        <trans-unit id="AR_STATUS_DETAILS">
+          <source>Status details</source>
+          <target>Detalhes do status</target>
+        </trans-unit>
+        <trans-unit id="AR_NOTE">
+          <source>Note: The payment is being generated and journal entries are being created. The [STATUS] column indicates the process state.</source>
+          <target>Nota: O pagamento está sendo gerado e as entradas do diário estão sendo criadas. A coluna [STATUS] indica o estado do processo.</target>
+        </trans-unit>
+        <trans-unit id="AR_MESSAGE_UPDATE">
+          <source>Press the Update or Refresh button to see if the process has finished.</source>
+          <target>Pressione o botão Atualizar ou Refresh para ver se o processo terminou.</target>
+        </trans-unit>
+        <trans-unit id="AR_TITLE_STLT">
+          <source>AR Wht Send Email Log</source>
+          <target>AR Envio de certificados de retenções - Registro</target>
+        </trans-unit>
+        <trans-unit id="AR_BACK_TO_MAIN">
+          <source>Back to Main Page</source>
+          <target>Voltar à página principal</target>
+        </trans-unit>
+        <trans-unit id="AR_RESULTS_LABEL">
+          <source>Results</source>
+          <target>Resultados</target>
+        </trans-unit>
+        <trans-unit id="AR_INTERNAL_ID_LABEL">
+          <source>Internal Id</source>
+          <target>ID interno</target>
+        </trans-unit>
+        <trans-unit id="AR_CREATION_DATE_LABEL">
+          <source>Creation Date</source>
+          <target>Data de criação</target>
+        </trans-unit>
+        <trans-unit id="AR_CREATED_BY_LABEL">
+          <source>Created By</source>
+          <target>Criado por</target>
+        </trans-unit>
+        <trans-unit id="AR_DETAILS">
+          <source>Details</source>
+          <target>Detalhes</target>
+        </trans-unit>
+        <trans-unit id="AR_MESSAGE">
+          <source>Message</source>
+          <target>Mensagem</target>
+        </trans-unit>
+        <trans-unit id="AR_MESSAGE_LICENSE">
+          <source>NOTICE: Currently the license for this module is expired, please contact the LatamReady sales team.</source>
+          <target>AVISO: Atualmente a licença para este módulo está expirada, por favor contate a equipe de vendas da LatamReady.</target>
+        </trans-unit>
+        <trans-unit id="AR_MESSAGE_CONTACT">
+          <source>You can also contact us through</source>
+          <target>Você também pode nos contatar através de</target>
+        </trans-unit>
+        <trans-unit id="AR_PRIMARY_INFO">
+          <source>Primary information</source>
+          <target>Informações primárias</target>
+        </trans-unit>
+        <trans-unit id="AR_FILTER">
+          <source>Filter</source>
+          <target>Filtrar</target>
+        </trans-unit>
+        <trans-unit id="AR_SEND">
+          <source>Send</source>
+          <target>Enviar</target>
+        </trans-unit>
+        <trans-unit id="AR_BACK">
+          <source>Back</source>
+          <target>Voltar</target>
+        </trans-unit>
+        <trans-unit id="AR_RESTART">
+          <source>Restart</source>
+          <target>Reiniciar</target>
+        </trans-unit>
+        <trans-unit id="AR_APPLY">
+          <source>Apply</source>
+          <target>Aplicar</target>
+        </trans-unit>
+        <trans-unit id="AR_DOCUMENT_NUMBER">
+          <source>Document Number</source>
+          <target>Número do documento</target>
+        </trans-unit>
+        <trans-unit id="AR_SELECT_ALL">
+          <source>Select all</source>
+          <target>Selecionar tudo</target>
+        </trans-unit>
+        <trans-unit id="AR_DESELECT_ALL">
+          <source>Deselect all</source>
+          <target>Desmarcar tudo</target>
+        </trans-unit>
+        <trans-unit id="AR_VIEW_LOG">
+          <source>View Log</source>
+          <target>Ver registro</target>
+        </trans-unit>
+        <trans-unit id="AR_PERIOD_START">
+          <source>Date From:</source>
+          <target>Data inicial:</target>
+        </trans-unit>
+        <trans-unit id="AR_PERIOD_END">
+          <source>Date To:</source>
+          <target>Data final:</target>
+        </trans-unit>
+        <trans-unit id="AR_VIEW_SENT">
+          <source>View Sent</source>
+          <target>Ver enviados</target>
+        </trans-unit>
+        <trans-unit id="AR_EMAIL">
+          <source>EMAIL</source>
+          <target>EMAIL</target>
+        </trans-unit>
+        <trans-unit id="AR_SENT">
+          <source>Sent</source>
+          <target>Enviado</target>
+        </trans-unit>
+        <trans-unit id="AR_WITHOUT_EMAIL">
+          <source>Without Email</source>
+          <target>Sem email</target>
+        </trans-unit>
+        <trans-unit id="AR_WITH_EMAIL">
+          <source>With Email</source>
+          <target>Com email</target>
+        </trans-unit>
+        <trans-unit id="AR_PAYMENTS">
+          <source>Bill Payments</source>
+          <target>Pagamentos</target>
+        </trans-unit>
+        <trans-unit id="AR_NUMBER">
+          <source>Position</source>
+          <target>Posição</target>
+        </trans-unit>
+        <trans-unit id="AR_BILLPAYMENT">
+          <source>Bill Payment</source>
+          <target>Pagamento</target>
+        </trans-unit>
+        <trans-unit id="AR_PROCESING">
+          <source>Processing</source>
+          <target>Processando</target>
+        </trans-unit>
+        <trans-unit id="AR_REFRESH">
+          <source>Refresh</source>
+          <target>Atualizar página</target>
+        </trans-unit>
+        <trans-unit id="AR_CERTIFICATE">
+          <source>Certificate</source>
+          <target>Certificado</target>
+        </trans-unit>
+        <trans-unit id="AR_SENT_STATUS">
+          <source>Mailing status</source>
+          <target>Status de envio</target>
+        </trans-unit>
+        <trans-unit id="AR_NOT_SENT">
+          <source>Not Sent</source>
+          <target>Não enviado</target>
+        </trans-unit>
+      </group>
+    </body>
+  </file>
+</xliff>
