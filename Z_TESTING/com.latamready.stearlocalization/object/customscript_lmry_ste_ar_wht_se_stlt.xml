@@ -1,0 +1,25 @@
+<suitelet scriptid="customscript_lmry_ste_ar_wht_se_stlt">
+  <description></description>
+  <isinactive>F</isinactive>
+  <name>LR AR Wht Send Email</name>
+  <notifyadmins>F</notifyadmins>
+  <notifyemails></notifyemails>
+  <notifyowner>T</notifyowner>
+  <notifyuser>F</notifyuser>
+  <scriptfile>[/SuiteApps/com.latamready.stearlocalization/Withholding Send Email/LMRY_AR_Wht_Send_Email_STLT_V2.1.js]</scriptfile>
+  <scriptdeployments>
+    <scriptdeployment scriptid="customdeploy_lmry_ste_ar_wht_se_stlt">
+      <allemployees>T</allemployees>
+      <allpartners>F</allpartners>
+      <allroles>T</allroles>
+      <audslctrole></audslctrole>
+      <eventtype></eventtype>
+      <isdeployed>T</isdeployed>
+      <isonline>F</isonline>
+      <loglevel>ERROR</loglevel>
+      <runasrole>ADMINISTRATOR</runasrole>
+      <status>TESTING</status>
+      <title>LR AR Wht Send Email</title>
+    </scriptdeployment>
+  </scriptdeployments>
+</suitelet>
