@@ -77,7 +77,7 @@ define([
                     let pdf = record.load({
                         type: "customrecord_lmry_ste_ar_wht_certificate",
                         id: element.id
-                    }).getValue("custrecord_lmry_ste_ar_wht_cert_file");
+                    }).getValue("custrecord_lmry_ste_ar_wht_cert_file_id");
                     log.error("pdf",pdf)
                     log.error("pdf",typeof pdf)
 
