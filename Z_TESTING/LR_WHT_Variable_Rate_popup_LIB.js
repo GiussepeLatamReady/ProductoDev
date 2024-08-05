@@ -1,7 +1,7 @@
 /**
  * @NApiVersion 2.1
  * @NModuleScope Public
- * @Name LMRY_WHT_Variable_Rate_popup_LBRY_V2.0.js
+ * @Name LR_WHT_Variable_Rate_popup_LIB.js
  * @Author LatamReady - Giussepe Delgado
  * @Date 12/06/2024
  */

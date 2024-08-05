@@ -1750,10 +1750,10 @@ define([
             });
           
             const pathScript = {
-              "vendorbill" : "./LMRY_VendorBill_CO_CLNT_HNDL.js",
-              "vendorcredit" : "./LMRY_VendorCredit_CO_CLNT_HNDL.js",
-              "invoice" : "./LMRY_Invoice_CO_CLNT_HNDL.js",
-              "creditmemo": "./LMRY_CreditMemo_CO_CLNT_HNDL.js"
+              "vendorbill" : "../../pluginImpl/vendorbill/LMRY_VendorBill_CO_CLNT_HNDL.js",
+              "vendorcredit" : "../../pluginImpl/vendorcredit/LMRY_VendorCredit_CO_CLNT_HNDL.js",
+              "invoice" : "../../pluginImpl/invoice/LMRY_Invoice_CO_CLNT_HNDL.js",
+              "creditmemo": "../../pluginImpl/creditmemo/LMRY_CreditMemo_CO_CLNT_HNDL.js"
             }
           
             form.clientScriptModulePath = pathScript[type];
