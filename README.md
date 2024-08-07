@@ -32,6 +32,10 @@
     + LMRY_CO_Header_WHT_calculation_STLT_LOG_V2.1.js
         + Name: LatamReady - CO Header WHT calc STLT Log
         + Id: _lmry_co_head_calc_stlt_log
+
+    + LMRY_CO_Main_WHT_calculation_auto_MPRD_V2.1.js
+        + scriptMapReduce: customscript_lmry_co_head_wht_calc_mprd
+        + deployMapReduce: customdeploy_lmry_co_head_wht_calc_mprd
         
 ## Scripts resumidos
     Librerias

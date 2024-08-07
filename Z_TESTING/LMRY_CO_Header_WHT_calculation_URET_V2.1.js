@@ -14,7 +14,7 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/url'], (runtime, server
         try {
             let mainUIManager = new UIManager(scriptContext);
             if (mainUIManager.isUserInterface()) {
-                mainUIManager.hiddenFields();
+                //mainUIManager.hiddenFields();
                 mainUIManager.buildTable();
                 mainUIManager.loadTable();
             }
@@ -130,7 +130,7 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/url'], (runtime, server
             const recordLogState = this.scriptContext.newRecord.getValue('custrecord_lmry_co_hwht_log_state');
             let transactionIds = transactionsState.map(ts => typeof ts === 'object' && ts !== null ? ts.id : ts);
             let state = transactionIds.length > 0 && typeof transactionsState[0] !== 'object' ? "Procesando" : undefined;
-
+            
             if (transactionIds.length === 0) return {};
 
             const transactions = {};
@@ -170,17 +170,20 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/url'], (runtime, server
                 };
                 return true;
             });
-            
+            log.error("state",state)
+            log.error("recordLogState",recordLogState)
             if (!state) {
                 transactionsState.forEach(({ id, state }) => {
                     Object.assign(transactions[id], { state: state });
                 });
             } else if (!["Finalizado", "Procesando", "Cargando datos"].includes(recordLogState)) {
+                log.error("entro","entro")
                 transactionIds.forEach(id => {
                     transactions[id].state = "No procesada";
                 });
             }
 
+            log.error("validacion",["Finalizado", "Procesando", "Cargando datos"].includes(recordLogState))
             return transactions;
         }
 
