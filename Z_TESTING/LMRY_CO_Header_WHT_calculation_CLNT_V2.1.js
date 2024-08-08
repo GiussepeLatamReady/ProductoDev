@@ -110,6 +110,19 @@ define(['N/runtime',
                 if (scriptContext.fieldId == 'custpage_subsidiary') {
                     this.setFieldPeriod();
                 }
+
+                if (scriptContext.fieldId == 'custpage_execution') {
+                    const executionType = this.currentRecord.getValue("custpage_execution");
+
+                    const path = urlApi.resolveScript({
+                        scriptId: "customscript_lmry_co_head_calc_stlt_log",
+                        deploymentId: "customdeploy_lmry_co_head_calc_stlt_log",
+                        params:{
+                            executionType
+                        }
+                    });
+                    window.location.href = path
+                }
                
                 return true
             }

@@ -15,7 +15,9 @@ define([
     "N/ui/serverWidget",
     "N/url"],
     (log, search, runtime, redirect, serverWidget, url) => {
+        const CLIENT_SCRIPT_PATH = "./CO_Library_Mensual/LMRY_CO_Header_WHT_calculation_CLNT_V2.1.js";
         const onRequest = context => {
+            //log.error("request",context.request)
             const handler = new SuiteletFormLogManager({
                 params: context.request.parameters,
                 method: context.request.method
@@ -26,6 +28,7 @@ define([
                     const form = handler.createLogForm();
                     handler.createSublist();
                     handler.loadSublist();
+                    form.clientScriptModulePath = CLIENT_SCRIPT_PATH;
                     context.response.writePage(form);
                 } catch (err) {
                     log.error("[ onRequest - GET ]", err);
@@ -41,6 +44,7 @@ define([
 
         class SuiteletFormLogManager {
             constructor(options) {
+                log.error("options",options)
                 this.params = options.params || {};
                 this.method = options.method;
                 let language = runtime.getCurrentScript().getParameter({ name: "LANGUAGE" }).substring(0, 2);
@@ -56,6 +60,17 @@ define([
                 this.form = serverWidget.createForm({
                     title: this.translations.LMRY_TITLE_STLT
                 });
+
+                const executionType = this.form.addField({
+                    id: 'custpage_execution',
+                    label: 'Execution Type',
+                    type: serverWidget.FieldType.SELECT
+                });
+                log.error("this.params.executionType",this.params.executionType)
+                executionType.addSelectOption({ value: "ALL", text: this.translations.LMRY_ALL });
+                executionType.addSelectOption({ value: "UI", text: this.translations.LMRY_UI });
+                executionType.addSelectOption({ value: "SCHEDULE", text: this.translations.LMRY_SCHEDULE });
+                executionType.defaultValue = this.params.executionType || "ALL";
 
                 const myInlineHtml = this.form.addField({
                     id: 'custpage_id_message',
@@ -124,7 +139,8 @@ define([
                 data.forEach((form, i) => {
                     const { id, subsidiary, created, employee, whtType, process, state } = form;
                     const tranUrl = url.resolveRecord({ recordType: "customrecord_lmry_co_head_wht_cal_log", recordId: id, isEditMode: false });
-                    const urlID = `<a class="dottedlink" href=${tranUrl} target="_blank">${id}</a>`;
+                    const position = data.length - i ;
+                    const urlID = `<a class="dottedlink" href=${tranUrl} target="_blank">${position}</a>`;
                     sublist.setSublistValue({ id: "internalid", line: i, value: urlID });
                     sublist.setSublistValue({ id: "subsidiary", line: i, value: subsidiary });
                     sublist.setSublistValue({ id: "datecreated", line: i, value: created });
@@ -164,15 +180,20 @@ define([
 
             getRecords() {
                 let data = [];
+                const executionType = this.params.executionType || "ALL";
 
+                const filters = [
+                    ["isinactive", "is", "F"]
+                ]
+                //log.error("p","antes")
+                if (executionType != "ALL") {
+                    filters.push("AND",["custrecord_lmry_co_hwht_log_exect", "is", executionType]);
+                    //log.error("p","dentro")
+                }
+                //log.error("p","despues")
                 let search_log = search.create({
                     type: "customrecord_lmry_co_head_wht_cal_log",
-                    filters:
-                        [
-                            ["isinactive", "is", "F"],
-                            "AND",
-                            ["custrecord_lmry_co_hwht_log_exect", "is", "UI"]
-                        ],
+                    filters: filters,
                     columns:
                         [
                             search.createColumn({ name: "internalid", sort: search.Sort.DESC }),
@@ -184,6 +205,7 @@ define([
                             "custrecord_lmry_co_hwht_log_state"
                         ]
                 });
+                //log.error("search_log",search_log)
                 let pageData = search_log.runPaged({ pageSize: 1000 });
                 if (pageData) {
                     pageData.pageRanges.forEach(function (pageRange) {
@@ -203,7 +225,7 @@ define([
                         });
                     });
                 }
-
+                log.error("data",data)
                 return data;
             }
 
@@ -237,9 +259,12 @@ define([
                         "LMRY_LOADING_DATA": "Cargando datos",
                         "LMRY_ERROR": "Ocurrió un error",
                         "LMRY_PROCESING": "Procesando",
+                        "LMRY_UI": "Manual",
+                        "LMRY_SCHEDULE": "Programado",
+                        "LMRY_ALL": "Todos"
                     },
                     "en": {
-                        "LMRY_NOTE": "Note: The payment is being generated and journal entries are being created. The [STATUS] column indicates the process state.",
+                        "LMRY_NOTE": "Note: The payment is being generated and journal entries are being created. The [STATUS] column indicates the process status.",
                         "LMRY_MESSAGE_UPDATE": "Press the Update or Refresh button to see if the process has finished.",
                         "LMRY_TITLE_STLT": "LatamReady - CO Header WHT calculation Log",
                         "LMRY_BACK_TO_MAIN": "Back to Main Page",
@@ -259,6 +284,9 @@ define([
                         "LMRY_LOADING_DATA": "Loading Data",
                         "LMRY_ERROR": "An Error Occurred",
                         "LMRY_PROCESING": "Processing",
+                        "LMRY_UI": "Manual",
+                        "LMRY_SCHEDULE": "Scheduled",
+                        "LMRY_ALL": "All"
                     }
                 };
                 return translatedFields[country];

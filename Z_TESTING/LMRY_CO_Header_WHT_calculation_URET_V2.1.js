@@ -14,7 +14,7 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/url'], (runtime, server
         try {
             let mainUIManager = new UIManager(scriptContext);
             if (mainUIManager.isUserInterface()) {
-                //mainUIManager.hiddenFields();
+                mainUIManager.hiddenFields();
                 mainUIManager.buildTable();
                 mainUIManager.loadTable();
             }

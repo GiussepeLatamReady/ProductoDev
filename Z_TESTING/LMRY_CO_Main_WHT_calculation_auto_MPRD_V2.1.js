@@ -49,7 +49,7 @@ define([
                 const key = `${subsidiary}-${typeProcess}`;
                 try {
                     
-                    //lbryWHTHeader.calculateHeaderWHT(transaction.id);
+                    lbryWHTHeader.calculateHeaderWHT(transaction.id);
                     log.error("CREATE","Creacion de tax result");
                     transaction.state = "Procesada con exito";
                     mapContext.write({
@@ -183,7 +183,7 @@ define([
             let endDate = new Date();
             let startDate = "start of operations";
             
-            if (isFirstExecution()) {
+            if (isFirstExecution(typeProcess)) {
                 endDate = formatDate(endDate)
                 filters.push("AND", ["trandate", "onorbefore",endDate])
             } else {
@@ -219,19 +219,23 @@ define([
                         const id = result.getValue(result.columns[0]);
                         //const memo = result.getValue(result.columns[1]);
                         const subsidiary = result.getValue(result.columns[1]);
-                        if (id && Object.keys(transactions).length<10) {
-                            transactions[id] = { id, subsidiary, startDate, endDate, typeProcess };
-                        }
+                        
+                        transactions[id] = { id, subsidiary, startDate, endDate, typeProcess };
+                        
                     });
                 });
             }
 
             return Object.values(transactions);
         }
-        const isFirstExecution = () => {
+        const isFirstExecution = (typeProcess) => {
 
             const filters = [
-                ["custrecord_lmry_co_hwht_log_exect", "is", "SCHEDULE"]
+                ["custrecord_lmry_co_hwht_log_exect", "is", "SCHEDULE"],
+                "AND",
+                ["custrecord_lmry_co_hwht_log_state","is","Finalizado"],
+                "AND",
+                ["custrecord_lmry_co_hwht_log_process","is",typeProcess]
             ];
             const columns = ["internalid"];
             const recordCount = search.create({
@@ -253,10 +257,10 @@ define([
             let recordlog = record.create({
                 type: 'customrecord_lmry_co_head_wht_cal_log'
             });
-            log.error("employee",runtime.getCurrentUser().id);
+            log.error("employee",employeeSystem);
             recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_subsi', value: subsidiary });
             recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_state', value: statusGeneral });
-            //recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_employee', value: employeeSystem });
+            recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_employee', value: employeeSystem });
             recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_transactions', value: JSON.stringify(ids) });
             recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_process', value: typeProcess });
             recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_whttype', value: "header" });
