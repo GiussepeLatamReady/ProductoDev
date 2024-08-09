@@ -11,31 +11,15 @@
 ## Scripts
 + Create
 
-    + LMRY_CO_Header_WHT_calculation_STLT_V2.1.js
-        + Name: LatamReady - CO Header WHT calc STLT
-        + Id: _lmry_co_head_wht_calc_stlt
-
-    + LMRY_CO_Header_WHT_calculation_CLNT_V2.1.js
-
-    + LMRY_CO_Header_WHT_calculation_URET_V2.1.js
-        + Name: LatamReady - CO Header WHT Calc URET
-        + Id: _lmry_co_head_wht_calc_uret
-
-    + LMRY_CO_Header_WHT_calculation_LBRY_V2.1.js
-    + LMRY_CO_Header_WHT_calculation_MPRD_V2.1.js
-        + scriptMapReduce: customscript_lmry_co_head_wht_calc_mprd
-        + deployMapReduce: customdeploy_lmry_co_head_wht_calc_mprd
-        + parameters: 
-            + User: custscript_lmry_co_head_wht_calc_user
-            + State: custscript_lmry_co_head_wht_calc_state
-
-    + LMRY_CO_Header_WHT_calculation_STLT_LOG_V2.1.js
-        + Name: LatamReady - CO Header WHT calc STLT Log
-        + Id: _lmry_co_head_calc_stlt_log
-
     + LMRY_CO_Main_WHT_calculation_auto_MPRD_V2.1.js
+        + Name: LatamReady - CO Main WHT Calc auto MPRD
         + scriptMapReduce: customscript_lmry_co_head_wht_calc_mprd
         + deployMapReduce: customdeploy_lmry_co_head_wht_calc_mprd
+
++ Update
+    + LMRY_CO_Header_WHT_calculation_URET_V2.1.js
+    + LMRY_CO_Header_WHT_calculation_STLT_LOG_V2.1.js
+    + LMRY_CO_Header_WHT_calculation_CLNT_V2.1.js
         
 ## Scripts resumidos
     Librerias
