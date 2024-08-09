@@ -22,8 +22,8 @@ define([
             try {
                 const sales = getTransactions("sales");
                 const purchases = getTransactions("purchases");
-                log.error("sales",sales)
-                log.error("purchases",purchases)
+                log.error("sales", sales)
+                log.error("purchases", purchases)
                 return sales.concat(purchases);
             } catch (error) {
                 log.error("Error [getInputData]", error);
@@ -45,12 +45,12 @@ define([
             } else {
 
                 const transaction = value;
-                const {subsidiary,typeProcess} = transaction;
+                const { subsidiary, typeProcess } = transaction;
                 const key = `${subsidiary}-${typeProcess}`;
                 try {
-                    
+
                     lbryWHTHeader.calculateHeaderWHT(transaction.id);
-                    log.error("CREATE","Creacion de tax result");
+                    log.error("CREATE", "Creacion de tax result");
                     transaction.state = "Procesada con exito";
                     mapContext.write({
                         key,
@@ -77,29 +77,29 @@ define([
         }
 
         const reduce = (reduceContext) => {
-  
+
             const { values } = reduceContext;
             const transactions = values.map(transaction => JSON.parse(transaction));
             try {
                 const errors = transactions.filter(transaction => transaction.code === "ERROR");
-                log.error("transasction",transactions)
-                log.error("errors",errors)
-                if (errors.length) { 
+                log.error("transasction", transactions)
+                log.error("errors", errors)
+                if (errors.length) {
 
-                    if (transactions.length!= errors.length) {
+                    if (transactions.length != errors.length) {
                         const message = errors[0].message;
-                        log.error("responseEmail","errores reduce");
-                        createRecordLog(transactions,"Ocurrió un error",message)
+                        log.error("responseEmail", "errores reduce");
+                        createRecordLog(transactions, "Ocurrió un error", message)
                     }
-                    
-                }else{
-                    createRecordLog(transactions,"Finalizado",'Las transacciones han sido procesadas con exito')
+
+                } else {
+                    createRecordLog(transactions, "Finalizado", 'Las transacciones han sido procesadas con exito')
                 }
-    
-    
+
+
             } catch (error) {
                 log.error("Error [reduce]", error);
-                
+
             }
         }
 
@@ -180,23 +180,28 @@ define([
                 ]
             );
 
-            let endDate = new Date();
-            let startDate = "start of operations";
+            let endDate = new Date()
+            let startDate;
             
             if (isFirstExecution(typeProcess)) {
-                endDate = formatDate(endDate)
-                filters.push("AND", ["trandate", "onorbefore",endDate])
+                startDate = getStartDate(endDate)
             } else {
+                startDate = new Date()
+                startDate.setDate(endDate.getDate() - 7)
 
-                startDate = new Date();
-                startDate.setDate(endDate.getDate() - 7);
+            }
+            if (startDate) {
                 startDate = formatDate(startDate)
-                endDate = formatDate(endDate)
                 filters.push("AND", ["trandate", "onorafter", startDate])
+            }
+            if (endDate) {
+                endDate = formatDate(endDate)
                 filters.push("AND", ["trandate", "onorbefore", endDate])
             }
-
             
+            
+            
+
             let columns = [];
             columns.push(search.createColumn({ name: 'formulatext', formula: '{custbody_lmry_reference_transaction.internalid}', sort: search.Sort.DESC }));
             //columns.push(search.createColumn({ name: 'formulatext', formula: '{memomain}' }));
@@ -212,30 +217,58 @@ define([
             let transactions = {};
             //log.error("searchTransactionsWht",searchTransactionsWht)
             let pageData = searchTransactionsWht.runPaged({ pageSize: 1000 });
-            if (pageData) {  
+            if (pageData) {
                 pageData.pageRanges.forEach(function (pageRange) {
                     let page = pageData.fetch({ index: pageRange.index });
                     page.data.forEach(function (result) {
                         const id = result.getValue(result.columns[0]);
                         //const memo = result.getValue(result.columns[1]);
                         const subsidiary = result.getValue(result.columns[1]);
-                        
+
                         transactions[id] = { id, subsidiary, startDate, endDate, typeProcess };
-                        
+
                     });
                 });
             }
 
             return Object.values(transactions);
         }
+
+        const getStartDate = (endDate) => {
+            const year = endDate.getFullYear()
+            let startDate;
+            const accountingperiodSearchObj = search.create({
+                type: "accountingperiod",
+                filters:
+                    [
+                        ["isyear", "is", "T"]
+                    ],
+                columns:
+                    [
+                        search.createColumn({ name: "periodname", label: "Name" }),
+                        search.createColumn({ name: "startdate", label: "Start Date" })
+                    ]
+            });
+
+            accountingperiodSearchObj.run().each(result => {
+                const columns = result.columns;
+                const name = result.getValue(columns[0]);
+
+                if (name.includes(year)) {
+                    startDate = result.getValue(columns[1]);
+                }
+                return true;
+            })
+            return startDate;
+        }
         const isFirstExecution = (typeProcess) => {
 
             const filters = [
                 ["custrecord_lmry_co_hwht_log_exect", "is", "SCHEDULE"],
                 "AND",
-                ["custrecord_lmry_co_hwht_log_state","is","Finalizado"],
+                ["custrecord_lmry_co_hwht_log_state", "is", "Finalizado"],
                 "AND",
-                ["custrecord_lmry_co_hwht_log_process","is",typeProcess]
+                ["custrecord_lmry_co_hwht_log_process", "is", typeProcess]
             ];
             const columns = ["internalid"];
             const recordCount = search.create({
@@ -243,28 +276,28 @@ define([
                 filters: filters,
                 columns: columns
             }).runPaged().count;
-            log.error("is First",recordCount == 0)
+            log.error("is First", recordCount == 0)
             return recordCount == 0;
         }
-        
-        const createRecordLog = (data, statusGeneral,processDetail) => {
-            log.error("data",data)
+
+        const createRecordLog = (data, statusGeneral, processDetail) => {
+            log.error("data", data)
             const employeeSystem = runtime.getCurrentScript().getParameter({
                 name: 'custscript_lmry_employee_manager'
             });
             const { subsidiary, startDate, endDate, typeProcess } = data[0].transaction;
-            const ids = data.map(({ transaction }) => ({ id:transaction.id, state:transaction.state }));
+            const ids = data.map(({ transaction }) => ({ id: transaction.id, state: transaction.state }));
             let recordlog = record.create({
                 type: 'customrecord_lmry_co_head_wht_cal_log'
             });
-            log.error("employee",employeeSystem);
+            log.error("employee", employeeSystem);
             recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_subsi', value: subsidiary });
             recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_state', value: statusGeneral });
             recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_employee', value: employeeSystem });
             recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_transactions', value: JSON.stringify(ids) });
             recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_process', value: typeProcess });
             recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_whttype', value: "header" });
-            recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_period', value: startDate });
+            recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_period', value: startDate || " " });
             recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_period_fin', value: endDate });
             recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_exect', value: "SCHEDULE" });
             recordlog.setValue({ fieldId: 'custrecord_lmry_co_hwht_log_details', value: processDetail });

@@ -44,7 +44,7 @@ define([
 
         class SuiteletFormLogManager {
             constructor(options) {
-                log.error("options",options)
+                log.error("options", options)
                 this.params = options.params || {};
                 this.method = options.method;
                 let language = runtime.getCurrentScript().getParameter({ name: "LANGUAGE" }).substring(0, 2);
@@ -66,7 +66,7 @@ define([
                     label: 'Execution Type',
                     type: serverWidget.FieldType.SELECT
                 });
-                log.error("this.params.executionType",this.params.executionType)
+                log.error("this.params.executionType", this.params.executionType)
                 executionType.addSelectOption({ value: "ALL", text: this.translations.LMRY_ALL });
                 executionType.addSelectOption({ value: "UI", text: this.translations.LMRY_UI });
                 executionType.addSelectOption({ value: "SCHEDULE", text: this.translations.LMRY_SCHEDULE });
@@ -113,17 +113,18 @@ define([
                 });
 
                 const fields = [
-                    { id: "internalid", label: this.translations.LMRY_INTERNAL_ID_LABEL },
-                    { id: "subsidiary", label: this.translations.LMRY_SUBSIDIARY_LABEL },
-                    { id: "datecreated", label: this.translations.LMRY_CREATION_DATE_LABEL },
-                    { id: "created_by", label: this.translations.LMRY_CREATED_BY_LABEL },
-                    { id: "wht_type", label: this.translations.LMRY_WHT_TYPE_LABEL },
-                    { id: "process", label: this.translations.LMRY_PROCESS_TYPE_LABEL },
-                    { id: "state", label: this.translations.LMRY_STATUS_LABEL }
+                    { id: "internalid", label: this.translations.LMRY_INTERNAL_ID_LABEL, type: serverWidget.FieldType.TEXT },
+                    { id: "details", label: this.translations.LMRY_DETAILS, type: serverWidget.FieldType.TEXTAREA },
+                    { id: "subsidiary", label: this.translations.LMRY_SUBSIDIARY_LABEL, type: serverWidget.FieldType.TEXT },
+                    { id: "datecreated", label: this.translations.LMRY_CREATION_DATE_LABEL, type: serverWidget.FieldType.TEXT },
+                    { id: "created_by", label: this.translations.LMRY_CREATED_BY_LABEL, type: serverWidget.FieldType.TEXT },
+                    { id: "wht_type", label: this.translations.LMRY_WHT_TYPE_LABEL, type: serverWidget.FieldType.TEXT },
+                    { id: "process", label: this.translations.LMRY_PROCESS_TYPE_LABEL, type: serverWidget.FieldType.TEXT },
+                    { id: "state", label: this.translations.LMRY_STATUS_LABEL, type: serverWidget.FieldType.TEXT }
                 ];
 
-                fields.forEach(({ id, label }) => {
-                    this.sublist.addField({ id, label, type: serverWidget.FieldType.TEXT });
+                fields.forEach(({ id, label, type }) => {
+                    this.sublist.addField({ id, label, type });
                 });
 
                 this.sublist.addRefreshButton();
@@ -137,21 +138,43 @@ define([
                 const data = this.getRecords();
                 const sublist = this.form.getSublist({ id: "custpage_results_list" });
                 data.forEach((form, i) => {
-                    const { id, subsidiary, created, employee, whtType, process, state } = form;
-                    const tranUrl = url.resolveRecord({ recordType: "customrecord_lmry_co_head_wht_cal_log", recordId: id, isEditMode: false });
-                    const position = data.length - i ;
-                    const urlID = `<a class="dottedlink" href=${tranUrl} target="_blank">${position}</a>`;
-                    sublist.setSublistValue({ id: "internalid", line: i, value: urlID });
-                    sublist.setSublistValue({ id: "subsidiary", line: i, value: subsidiary });
-                    sublist.setSublistValue({ id: "datecreated", line: i, value: created });
-                    sublist.setSublistValue({ id: "created_by", line: i, value: employee });
-                    
-                    let whtTypeTemp = whtType == "header" ? this.translations.LMRY_HEADER : this.translations.LMRY_LINE;
-                    sublist.setSublistValue({ id: "wht_type", line: i, value: whtTypeTemp });
-                    
-                    let processTemp = process == "purchases" ? this.translations.LMRY_PURCHASES : this.translations.LMRY_SALES;
-                    sublist.setSublistValue({ id: "process", line: i, value: processTemp });
+                    const { id, subsidiary, created, employee, executionType, process, state } = form;
 
+                    const setStyle = (fieldId, fieldValue) => {
+                        fieldValue = `<div style ="display: flex; align-items: center; height:80%; padding-left:10px">
+                                    <span>${fieldValue}</span>
+                                </div>`;
+                        return sublist.setSublistValue({ id: fieldId, line: i, value: fieldValue });
+                    }
+
+                    const setStyleBold = (fieldId, fieldValue) => {
+                        fieldValue = `<div style ="display: flex; align-items: center; height:80%; font-weight: bold; padding-left:10px">
+                                    <span>${fieldValue}</span>
+                                </div>`;
+                        return sublist.setSublistValue({ id: fieldId, line: i, value: fieldValue });
+                    }
+                
+                    const setStyleBtn = (fieldId,fieldValue,label) => {
+                        fieldValue =  `<a href="${fieldValue}" target="_blank" style="text-decoration: none; color: inherit;">
+                        <div style="display: flex; justify-content:center; align-items: center; place-items: center; height: 35px; background: white; border-radius: 6px; transition: background-color 0.3s; border: 0.5px solid #bbd1e9;" onmouseover="this.style.backgroundColor='#bbd1e9'" onmouseout="this.style.backgroundColor='white';">
+                            <div style="display: flex; justify-content:center; align-items: center; color: color:#424950; font-size: 14px; height: 100%;">${label}</div>
+                        </div>
+                    </a>`;
+                        return sublist.setSublistValue({ id: fieldId, line: i, value: fieldValue});
+                    }
+
+                    const tranUrl = url.resolveRecord({ recordType: "customrecord_lmry_co_head_wht_cal_log", recordId: id, isEditMode: false });
+                    const position = data.length - i;
+                    const urlID = `<a class="dottedlink" href=${tranUrl} target="_blank">${position}</a>`;
+                    setStyle("internalid", position);
+                    setStyleBtn("details", tranUrl,this.translations.LMRY_DETAILS);
+                    setStyle("subsidiary", subsidiary)
+                    setStyle("datecreated", created)
+                    setStyle("created_by", employee)
+                    let executionTypeName = executionType == "UI" ? this.translations.LMRY_UI : this.translations.LMRY_SCHEDULE;
+                    setStyle("wht_type", executionTypeName)
+                    let processTemp = process == "purchases" ? this.translations.LMRY_PURCHASES : this.translations.LMRY_SALES;
+                    setStyle("process", processTemp)
                     let stateResult;
 
                     switch (state) {
@@ -170,7 +193,7 @@ define([
                         default:
                             stateResult = this.translations.LMRY_LOADING_DATA;
                     }
-                    sublist.setSublistValue({ id: "state", line: i, value: stateResult });
+                    setStyleBold("state", stateResult)
                 })
                 if (data.length) {
                     sublist.label = `${sublist.label} (${data.length})`;
@@ -187,7 +210,7 @@ define([
                 ]
                 //log.error("p","antes")
                 if (executionType != "ALL") {
-                    filters.push("AND",["custrecord_lmry_co_hwht_log_exect", "is", executionType]);
+                    filters.push("AND", ["custrecord_lmry_co_hwht_log_exect", "is", executionType]);
                     //log.error("p","dentro")
                 }
                 //log.error("p","despues")
@@ -202,7 +225,8 @@ define([
                             "custrecord_lmry_co_hwht_log_employee",
                             "custrecord_lmry_co_hwht_log_whttype",
                             "custrecord_lmry_co_hwht_log_process",
-                            "custrecord_lmry_co_hwht_log_state"
+                            "custrecord_lmry_co_hwht_log_state",
+                            "custrecord_lmry_co_hwht_log_exect"
                         ]
                 });
                 //log.error("search_log",search_log)
@@ -220,12 +244,13 @@ define([
                             formublist.whtType = result.getValue(columns[4]) || ' ';
                             formublist.process = result.getValue(columns[5]) || ' ';
                             formublist.state = result.getValue(columns[6]) || ' ';
+                            formublist.executionType = result.getValue(columns[7]) || ' ';
 
                             data.push(formublist);
                         });
                     });
                 }
-                log.error("data",data)
+                log.error("data", data)
                 return data;
             }
 
@@ -244,11 +269,11 @@ define([
                         "LMRY_TITLE_STLT": "LatamReady - CO Registro de Cálculo de Retención de cabecera",
                         "LMRY_BACK_TO_MAIN": "Volver a la página principal",
                         "LMRY_RESULTS_LABEL": "Resultados",
-                        "LMRY_INTERNAL_ID_LABEL": "Id interno",
+                        "LMRY_INTERNAL_ID_LABEL": "Posicion",
                         "LMRY_SUBSIDIARY_LABEL": "Subsidiaria",
                         "LMRY_CREATION_DATE_LABEL": "Fecha de Creación",
                         "LMRY_CREATED_BY_LABEL": "Creado por",
-                        "LMRY_WHT_TYPE_LABEL": "Tipo de retención",
+                        "LMRY_WHT_TYPE_LABEL": "Tipo de Ejecucion",
                         "LMRY_PROCESS_TYPE_LABEL": "Tipo de proceso",
                         "LMRY_STATUS_LABEL": "Estado",
                         "LMRY_LINE": "Linea",
@@ -261,7 +286,8 @@ define([
                         "LMRY_PROCESING": "Procesando",
                         "LMRY_UI": "Manual",
                         "LMRY_SCHEDULE": "Programado",
-                        "LMRY_ALL": "Todos"
+                        "LMRY_ALL": "Todos",
+                        "LMRY_DETAILS": "Detalles"
                     },
                     "en": {
                         "LMRY_NOTE": "Note: The payment is being generated and journal entries are being created. The [STATUS] column indicates the process status.",
@@ -269,11 +295,11 @@ define([
                         "LMRY_TITLE_STLT": "LatamReady - CO Header WHT calculation Log",
                         "LMRY_BACK_TO_MAIN": "Back to Main Page",
                         "LMRY_RESULTS_LABEL": "Results",
-                        "LMRY_INTERNAL_ID_LABEL": "Internal Id",
+                        "LMRY_INTERNAL_ID_LABEL": "Position",
                         "LMRY_SUBSIDIARY_LABEL": "Subsidiary",
                         "LMRY_CREATION_DATE_LABEL": "Creation Date",
                         "LMRY_CREATED_BY_LABEL": "Created By",
-                        "LMRY_WHT_TYPE_LABEL": "Withholding Type",
+                        "LMRY_WHT_TYPE_LABEL": "Execution Type",
                         "LMRY_PROCESS_TYPE_LABEL": "Process Type",
                         "LMRY_STATUS_LABEL": "Status",
                         "LMRY_LINE": "Line",
@@ -286,7 +312,8 @@ define([
                         "LMRY_PROCESING": "Processing",
                         "LMRY_UI": "Manual",
                         "LMRY_SCHEDULE": "Scheduled",
-                        "LMRY_ALL": "All"
+                        "LMRY_ALL": "All",
+                        "LMRY_DETAILS": "Details"
                     }
                 };
                 return translatedFields[country];
