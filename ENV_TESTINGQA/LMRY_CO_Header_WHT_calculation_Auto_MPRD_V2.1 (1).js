@@ -22,6 +22,7 @@ define([
             try {
                 const sales = getTransactions("sales");
                 const purchases = getTransactions("purchases");
+                log.error("transaction",sales.concat(purchases))
                 return sales.concat(purchases);
             } catch (error) {
                 log.error("Error [getInputData]", error);
@@ -46,8 +47,8 @@ define([
                 const { subsidiary, typeProcess } = transaction;
                 const key = `${subsidiary}-${typeProcess}`;
                 try {
-
                     lbryWHTHeader.calculateHeaderWHT(transaction.id);
+                    
                     transaction.state = "Procesada con exito";
                     mapContext.write({
                         key,
@@ -59,6 +60,7 @@ define([
 
                 } catch (error) {
                     log.error("Error [map]", error);
+                    log.error("Error [map] stack", error.stack);
                     transaction.state = "Error";
                     mapContext.write({
                         key,
@@ -78,6 +80,7 @@ define([
 
             const { values } = reduceContext;
             const transactions = values.map(transaction => JSON.parse(transaction));
+            
             try {
                 const errors = transactions.filter(transaction => transaction.code === "ERROR");
 
@@ -89,6 +92,7 @@ define([
                     }
 
                 } else {
+                    
                     createRecordLog(transactions, "Finalizado", 'Las transacciones han sido procesadas con exito')
                 }
 
@@ -106,8 +110,9 @@ define([
                 "AND",
                 ["formulatext: {custbody_lmry_reference_transaction}", "isnotempty", ""],
                 "AND",
-                ["subsidiary.country", "anyof", "CO"]
-
+                ["subsidiary.country", "anyof", "CO"],
+                "AND",
+                ["custbody_lmry_reference_transaction.internalid","anyof",["802111","801962"]]
             ];
 
             if (typeProcess == "sales") {
@@ -178,7 +183,7 @@ define([
 
             let endDate = new Date()
             let startDate;
-            
+            /*
             if (isFirstExecution(typeProcess)) {
                 startDate = getStartDate(endDate)
             } else {
@@ -195,7 +200,7 @@ define([
                 filters.push("AND", ["trandate", "onorbefore", endDate])
             }
             
-            
+            */
             
 
             let columns = [];

@@ -18,7 +18,6 @@ define([
     let features = {};
     const calculateHeaderWHT = (id) => {
         
-        getFeatures();
         const transaction = getTransaction(id);
         createTaxResults(transaction);
         
@@ -27,7 +26,9 @@ define([
 
 
     const getTransaction = (id) => {
+        getFeatures();
         deleteTaxResults(id);
+        log.error("id",id)
         let transaction = {
             id: id,
             wht: {
@@ -647,7 +648,7 @@ define([
             sumTaxtotal:0,
             sumTotal:0
         };
-        
+        const itemIDs = new Set();
         const itemsLines = recordObj.getLineCount({ sublistId: 'item' });
         for (let i = 0; i < itemsLines; i++) {
             const itemType = recordObj.getSublistValue({ sublistId: 'item', fieldId: "itemtype", line: i });
@@ -666,9 +667,10 @@ define([
                 total: total,
                 taxtotal: taxtotal,
                 lineuniquekey: lineuniquekey,
-                account: getItemAccount(id),
+                //account: getItemAccount(id),
                 itemType: itemType
             }
+
             if (items[lineuniquekey].itemType == "Discount" || items[lineuniquekey].itemType == "Descuento") {
                 items[lineuniquekey].subtotal *= -1;
                 items[lineuniquekey].taxtotal *= -1;
@@ -679,8 +681,16 @@ define([
             items.sumSubtotal += items[lineuniquekey].subtotal;
             items.sumTaxtotal += items[lineuniquekey].taxtotal;
             items.sumTotal += items[lineuniquekey].total;
-
+            itemIDs.add(id);
         }
+
+        const accountIDs = getItemAccount(itemIDs);
+
+        Object.keys(items).forEach(id => {
+            if (accountIDs[id]) {
+                items[id].account = accountIDs[id];
+            }
+        });
 
         return items;
     }
@@ -720,10 +730,12 @@ define([
      * @param {string|number} id - El ID interno del artículo a buscar.
      * @returns {string} El ID de la cuenta asociada al artículo.
      */
-    const getItemAccount = (id) => {
-        let accountItem = "";
+    const getItemAccount = (ids) => {
+        log.error("ids",ids)
+        let accountIDs = {};
+
         let searchFilters = [
-            ["internalid", "anyof", id]
+            ["internalid", "anyof", Array.from(ids)]
         ];
 
         let searchColumns = new Array();
@@ -733,9 +745,12 @@ define([
             filters: searchFilters,
             columns: searchColumns
         }).run().each(result => {
-            accountItem = result.getValue(result.columns[0]);
+            const itemID = result.id;
+            const accountID = result.getValue(result.columns[0])
+            accountIDs[itemID] = accountID;
+            return true;
         });
-        return accountItem;
+        return accountIDs;
     }
 
     const deleteTaxResults = (id) => {
@@ -760,5 +775,5 @@ define([
         });
     }
 
-    return { calculateHeaderWHT};
+    return { calculateHeaderWHT,getTransaction,createTaxResults};
 });
