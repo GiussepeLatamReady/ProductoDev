@@ -12,9 +12,10 @@
 + Create
 
     + LMRY_CO_Main_WHT_calculation_auto_MPRD_V2.1.js
-        + Name: LatamReady - CO Main WHT Calc auto MPRD
-        + scriptMapReduce: customscript_lmry_co_head_wht_calc_mprd
+        + Name: LatamReady - CO Header WHT Calc auto MPRD
+        + scriptMapReduce: customscript_lmry_co_head_wht_auto_mprd
         + deployMapReduce: customdeploy_lmry_co_head_wht_calc_mprd
+            log: custscript_lmry_co_head_wht_auto_file
 
 + Update
     + LMRY_CO_Header_WHT_calculation_URET_V2.1.js

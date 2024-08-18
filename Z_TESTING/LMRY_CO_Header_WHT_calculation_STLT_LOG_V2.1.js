@@ -219,9 +219,9 @@ define([
                     filters: filters,
                     columns:
                         [
-                            search.createColumn({ name: "internalid", sort: search.Sort.DESC }),
+                            "internalid",
                             "custrecord_lmry_co_hwht_log_subsi",
-                            "created",
+                            search.createColumn({ name: "created", sort: search.Sort.DESC }),
                             "custrecord_lmry_co_hwht_log_employee",
                             "custrecord_lmry_co_hwht_log_whttype",
                             "custrecord_lmry_co_hwht_log_process",

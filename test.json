@@ -1,23 +1,18 @@
 {
    type: "error.SuiteScriptError",
-   name: "SSS_USAGE_LIMIT_EXCEEDED",
-   message: "Script Execution Usage Limit Exceeded",
+   name: "SSS_INVALID_SRCH_OPERATOR",
+   message: "An nlobjSearchFilter contains an invalid operator, or is not in proper syntax: internalid.",
    id: "",
    stack: [
-      "Error\n    at RecordInvoker.save (suitescript/resources/javascript/record/serverRecordService.js:371:13)\n    
-      at NetSuiteObject.thenableFunction() (suitescript/resources/javascript/record/proxy.js:115:24)\n    
-      at createAndSaveRecord (/SuiteBundles/Bundle 91257/CO_Library_Mensual/LMRY_CO_Header_WHT_calculation_LBRY_V2.1.js:263:51)\n
-      at createTaxResults (/SuiteBundles/Bundle 91257/CO_Library_Mensual/LMRY_CO_Header_WHT_calculation_LBRY_V2.1.js:272:25)\n
-      at Object.calculateHeaderWHT (/SuiteBundles/Bundle 91257/CO_Library_Mensual/LMRY_CO_Header_WHT_calculation_LBRY_V2.1.js:23:9)\n    
-      at Object.map (/SuiteBundles/Bundle 91257/LMRY_CO_Header_WHT_calculation_Auto_MPRD_V2.1.js:50:35)"
+      "Error\n    at getItemAccount (/SuiteBundles/Bundle 91257/LMRY_CO_Header_WHT_calculation_LBRY_V2.1.js:866:18)\n    at getItemsData (/SuiteBundles/Bundle 91257/LMRY_CO_Header_WHT_calculation_LBRY_V2.1.js:807:28)\n    at Object.getTransaction (/SuiteBundles/Bundle 91257/LMRY_CO_Header_WHT_calculation_LBRY_V2.1.js:77:29)\n    at Object.map (/SuiteBundles/Bundle 91257/LMRY_CO_Header_WHT_calculation_Auto_MPRD_V2.1.js:50:55)"
    ],
    cause: {
       type: "internal error",
-      code: "SSS_USAGE_LIMIT_EXCEEDED",
-      details: "Script Execution Usage Limit Exceeded",
+      code: "SSS_INVALID_SRCH_OPERATOR",
+      details: "An nlobjSearchFilter contains an invalid operator, or is not in proper syntax: internalid.",
       userEvent: null,
       stackTrace: [
-         "Error\n    at RecordInvoker.save (suitescript/resources/javascript/record/serverRecordService.js:371:13)\n    at NetSuiteObject.thenableFunction() (suitescript/resources/javascript/record/proxy.js:115:24)\n    at createAndSaveRecord (/SuiteBundles/Bundle 91257/CO_Library_Mensual/LMRY_CO_Header_WHT_calculation_LBRY_V2.1.js:263:51)\n    at createTaxResults (/SuiteBundles/Bundle 91257/CO_Library_Mensual/LMRY_CO_Header_WHT_calculation_LBRY_V2.1.js:272:25)\n    at Object.calculateHeaderWHT (/SuiteBundles/Bundle 91257/CO_Library_Mensual/LMRY_CO_Header_WHT_calculation_LBRY_V2.1.js:23:9)\n    at Object.map (/SuiteBundles/Bundle 91257/LMRY_CO_Header_WHT_calculation_Auto_MPRD_V2.1.js:50:35)"
+         "Error\n    at getItemAccount (/SuiteBundles/Bundle 91257/LMRY_CO_Header_WHT_calculation_LBRY_V2.1.js:866:18)\n    at getItemsData (/SuiteBundles/Bundle 91257/LMRY_CO_Header_WHT_calculation_LBRY_V2.1.js:807:28)\n    at Object.getTransaction (/SuiteBundles/Bundle 91257/LMRY_CO_Header_WHT_calculation_LBRY_V2.1.js:77:29)\n    at Object.map (/SuiteBundles/Bundle 91257/LMRY_CO_Header_WHT_calculation_Auto_MPRD_V2.1.js:50:55)"
       ],
       notifyOff: false
    },

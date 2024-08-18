@@ -18,17 +18,20 @@ define([
     let features = {};
     const calculateHeaderWHT = (id) => {
         
-        const transaction = getTransaction(id);
+        
+        let remainingUsage = runtime.getCurrentScript().getRemainingUsage();
+        log.error("remainingUsage 1", remainingUsage);
+        const transaction = getTransaction(id); 
+        remainingUsage = runtime.getCurrentScript().getRemainingUsage();
+        log.error("remainingUsage 2", remainingUsage);
         createTaxResults(transaction);
-        
-        
     }
 
 
     const getTransaction = (id) => {
+        log.error("id",id)
         getFeatures();
         deleteTaxResults(id);
-        log.error("id",id)
         let transaction = {
             id: id,
             wht: {
@@ -79,7 +82,7 @@ define([
                 transaction.expense = expense;
             }
         }
-
+        
         if (transaction.items) {
             transaction.sumSubtotal = transaction.items.sumSubtotal;
             transaction.sumTotal = transaction.items.sumTotal;
@@ -89,8 +92,8 @@ define([
         
         if(transaction.expense) {
             transaction.sumSubtotal += transaction.expense.sumSubtotal;
-            transaction.sumTotal = transaction.expense.sumTotal;
-            transaction.sumTaxtotal = transaction.expense.sumTaxtotal;
+            transaction.sumTotal += transaction.expense.sumTotal;
+            transaction.sumTaxtotal += transaction.expense.sumTaxtotal;
         }
         transaction.discountRate = transaction.subtotal/transaction.sumSubtotal;
         deleteProperty(transaction);
@@ -237,7 +240,7 @@ define([
                 custrecord_lmry_tax_type: '1',
                 custrecord_lmry_lineuniquekey: item.lineuniquekey,
                 custrecord_lmry_co_wht_applied: retention.relatedTransaction.id,
-                custrecord_lmry_co_date_wht_applied: retention.relatedTransaction.trandate,
+                custrecord_lmry_co_date_wht_applied: formatDate(retention.relatedTransaction.trandate),
                 custrecord_lmry_co_acc_exo_concept: item.account,
             };
 
@@ -262,7 +265,7 @@ define([
 
             const idRecordSummary = recordSummary.save({ disableTriggers: true, ignoreMandatoryFields: true });
         };
-
+        let count = 0;
         if (transaction.items) {
             for (let item of Object.values(transaction.items)) {
                 for (let retention of Object.values(transaction.wht)) {
@@ -275,7 +278,7 @@ define([
             }
         }
         
-
+        log.error("coun  NN", count);
         if (transaction.expense) {
             for (let expense of Object.values(transaction.expense)) {
                 for (let retention of Object.values(transaction.wht)) {
@@ -290,6 +293,113 @@ define([
         }
     };
 
+
+    const buildTaxResults = (transaction) => {
+        const taxResults = [];
+        if (transaction.items) {
+            for (let item of Object.values(transaction.items)) {
+                for (let retention of Object.values(transaction.wht)) {
+                    const typeBase = transaction.recordtype == "vendorbill" ||transaction.recordtype == "vendorcredit" ? "puchasebase":"salesbase";
+                    const whtBase = retention[typeBase];
+                    if (item[whtBase]) {
+
+                        const taxResultObj = {
+                            amount:item[whtBase],
+                            itemType:'Item',
+                            retention, 
+                            item,
+                            transactionID: transaction.id,
+                            variableRate: transaction.variable,
+                            exchangeRate: transaction.exchangeRate
+                        }
+
+                        taxResults.push(taxResultObj);
+                    }
+                }
+            }
+        }
+        if (transaction.expense) {
+            for (let expense of Object.values(transaction.expense)) {
+                for (let retention of Object.values(transaction.wht)) {
+                    const typeBase=transaction.recordtype == "vendorbill" ||transaction.recordtype == "vendorcredit" ? "puchasebase":"salesbase";
+                    const whtBase = retention[typeBase];
+                    if (expense[whtBase]) {
+                        //createAndSaveRecord(expense[whtBase], 'Expense', retention, expense);
+                        const taxResultObj = {
+                            amount:expense[whtBase],
+                            itemType:'Expense',
+                            retention, 
+                            item: expense,
+                            transactionID: transaction.id,
+                            variableRate: transaction.variable,
+                            exchangeRate: transaction.exchangeRate
+                        }
+
+                        taxResults.push(taxResultObj);
+                    }
+                    
+                }
+            }
+        }
+        return taxResults;
+    }
+
+    const createTaxResult= ({amount, itemType, retention, item,exchangeRate,variableRate,transactionID}) => {
+        log.error("retention",retention)
+        if (Object.keys(retention).length === 0) return;
+
+        const recordSummary = record.create({ type: 'customrecord_lmry_br_transaction', isDynamic: false });
+
+        let baseAmount = parseFloat(amount);
+        let retentionAmount = parseFloat(amount * retention.rate);
+        let retentionAmounttLocal = parseFloat(item.factor[retention.key]*retention.amount);
+        
+        const commonValues = {
+            custrecord_lmry_br_related_id: String(transactionID),
+            custrecord_lmry_br_transaction: transactionID,
+            custrecord_lmry_br_type: retention.subtype,
+            custrecord_lmry_br_type_id: retention.subtypeId,
+            custrecord_lmry_total_item: `Line - ${itemType}`,
+            custrecord_lmry_item: itemType === 'Item' ? item.id : undefined,
+            custrecord_lmry_account: itemType === 'Expense' ? item.account : undefined,
+
+            custrecord_lmry_base_amount: round(baseAmount),
+            custrecord_lmry_br_total: round(retentionAmount),
+            custrecord_lmry_br_percent: parseFloat(retention.rate), 
+
+            custrecord_lmry_total_base_currency: round(retentionAmounttLocal).toFixed(4),
+
+            custrecord_lmry_base_amount_local_currc: round(baseAmount * exchangeRate),
+            custrecord_lmry_amount_local_currency: round(retentionAmounttLocal),
+
+            custrecord_lmry_tax_type: '1',
+            custrecord_lmry_lineuniquekey: item.lineuniquekey,
+            custrecord_lmry_co_wht_applied: retention.relatedTransaction.id,
+            custrecord_lmry_co_date_wht_applied: formatDate(retention.relatedTransaction.trandate),
+            custrecord_lmry_co_acc_exo_concept: item.account,
+        };
+
+        if (retention.variable && retention.amount && variableRate) {
+            retentionAmount = round(parseFloat(retention.amount) * item.factor[retention.key]);
+            baseAmount = round(parseFloat(retention.baseamount) * item.factor[retention.key]);
+
+
+            commonValues.custrecord_lmry_base_amount = (baseAmount / exchangeRate).toFixed(4);
+            commonValues.custrecord_lmry_br_total = (retentionAmount / exchangeRate).toFixed(4);
+
+            commonValues.custrecord_lmry_total_base_currency = retentionAmount;
+            commonValues.custrecord_lmry_base_amount_local_currc = baseAmount;
+            commonValues.custrecord_lmry_amount_local_currency = retentionAmount;
+        }
+
+        for (const fieldId in commonValues) {
+            if (commonValues[fieldId] !== undefined) {
+                recordSummary.setValue({ fieldId, value: commonValues[fieldId] });
+            }
+        }
+
+        const idRecordSummary = recordSummary.save({ disableTriggers: true, ignoreMandatoryFields: true });
+    };
 
     const setTransactionWht = transaction => {
         transaction.relatedRecords.forEach(record => {
@@ -422,7 +532,7 @@ define([
             transaction[transactionId] = {
                 id: result.getValue(result.columns[0]),
                 tranid: result.getValue(result.columns[1]),
-                trandate: formatDate(result.getValue(result.columns[2])),
+                trandate: result.getValue(result.columns[2]),
                 memo: result.getValue(result.columns[3]),
                 amount: result.getValue(result.columns[4]),
                 key: getKey(result.getValue(result.columns[3])),
@@ -472,7 +582,10 @@ define([
         }
     }
 
+
+    
     const formatDate = (dateString) => {
+        log.error("dateString",dateString)
         const [year, month, day] = dateString.split("-").map(Number);
         const date = new Date(year, month - 1, day);
         return format.parse({
@@ -481,6 +594,13 @@ define([
         });
     };
 
+    /*
+    const formatDate = (date) => {
+        let parseDate = format.parse({ value: date, type: format.Type.DATE });
+        parseDate = format.format({ type: format.Type.DATE, value: parseDate });
+        return parseDate;
+    }
+    */
     /**
      * Filtra las transacciones por la cabecera del memo, buscando primero por "Latam - WHT Reclasification"
      * y, si no se encuentra ninguno, busca por "Latam - WHT".
@@ -731,25 +851,28 @@ define([
      * @returns {string} El ID de la cuenta asociada al artículo.
      */
     const getItemAccount = (ids) => {
-        log.error("ids",ids)
         let accountIDs = {};
-
-        let searchFilters = [
-            ["internalid", "anyof", Array.from(ids)]
-        ];
-
-        let searchColumns = new Array();
-        searchColumns.push(search.createColumn({ name: 'formulatext', formula: "CASE WHEN {type}='Inventory Item' THEN {assetaccount.id} ELSE  NVL({expenseaccount.id},{incomeaccount.id}) END" }));
-        search.create({
-            type: 'item',
-            filters: searchFilters,
-            columns: searchColumns
-        }).run().each(result => {
-            const itemID = result.id;
-            const accountID = result.getValue(result.columns[0])
-            accountIDs[itemID] = accountID;
-            return true;
-        });
+        const idList = Array.from(ids);
+        log.error("Array.from(ids)",idList)
+        if (idList.length) {
+            let searchFilters = [
+                ["internalid", "anyof", idList]
+            ];
+    
+            let searchColumns = new Array();
+            searchColumns.push(search.createColumn({ name: 'formulatext', formula: "CASE WHEN {type}='Inventory Item' THEN {assetaccount.id} ELSE  NVL({expenseaccount.id},{incomeaccount.id}) END" }));
+            search.create({
+                type: 'item',
+                filters: searchFilters,
+                columns: searchColumns
+            }).run().each(result => {
+                const itemID = result.id;
+                const accountID = result.getValue(result.columns[0])
+                accountIDs[itemID] = accountID;
+                return true;
+            });
+        }
+        
         return accountIDs;
     }
 
@@ -775,5 +898,29 @@ define([
         });
     }
 
-    return { calculateHeaderWHT,getTransaction,createTaxResults};
+    const deleteTaxResultByLine = (lineuniquekey) => {
+        let searchRecordLog = search.create({
+            type: 'customrecord_lmry_br_transaction',
+            filters: [
+                ['custrecord_lmry_lineuniquekey', 'is', lineuniquekey],
+            ],
+            columns: [
+                'internalid'
+            ]
+        })
+        searchRecordLog.run().each(function (result) {
+            let idTax = result.getValue(result.columns[0]);
+
+            record.delete({
+                type: 'customrecord_lmry_br_transaction',
+                id: idTax,
+                isDynamic: true
+            });
+            log.error("deleta tax result",idTax)
+            return true;
+        });
+    }
+
+
+    return { calculateHeaderWHT,getTransaction,buildTaxResults,createTaxResult, deleteTaxResultByLine};
 });

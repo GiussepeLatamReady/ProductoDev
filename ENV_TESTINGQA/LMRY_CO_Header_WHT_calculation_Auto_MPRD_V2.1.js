@@ -11,18 +11,18 @@ define([
     "N/runtime",
     "N/search",
     "N/log",
-    "N/format",
-    "./CO_Library_Mensual/LMRY_CO_Header_WHT_calculation_LBRY_V2.1",
+    './LMRY_CO_Header_WHT_calculation_LBRY_V2.1',
+    "N/format"
 ],
 
-    (record, runtime, search, log, format, lbryWHTHeader) => {
+    (record, runtime, search, log, lbryWHTHeader, format) => {
 
 
         const getInputData = (inputContext) => {
             try {
                 const sales = getTransactions("sales");
                 const purchases = getTransactions("purchases");
-                log.error("transaction",sales.concat(purchases))
+                //log.error("transaction",sales.concat(purchases))
                 return sales.concat(purchases);
             } catch (error) {
                 log.error("Error [getInputData]", error);
@@ -43,31 +43,40 @@ define([
                 });
             } else {
 
-                const transaction = value;
-                const { subsidiary, typeProcess } = transaction;
+                const data = value;
+                const { subsidiary, typeProcess } = data;
                 const key = `${subsidiary}-${typeProcess}`;
                 try {
-                    lbryWHTHeader.calculateHeaderWHT(transaction.id);
-                    
-                    transaction.state = "Procesada con exito";
-                    mapContext.write({
-                        key,
-                        value: {
-                            code: "OK",
-                            transaction
-                        }
+                    const transaction = lbryWHTHeader.getTransaction(data.id);
+                    const taxResults = lbryWHTHeader.buildTaxResults(transaction);
+                    log.error("transaction",transaction)
+                    //lbryWHTHeader.calculateHeaderWHT(transaction.id);
+                    //log.error("Status","Procesada con exito")
+
+                    //data.state = "Procesada con exito";
+
+                    taxResults.forEach( taxResult => {
+                        mapContext.write({
+                            key: taxResult.item.lineuniquekey,
+                            value: {
+                                code: "OK",
+                                transaction: data,
+                                taxResult
+                            }
+                        });
                     });
 
                 } catch (error) {
                     log.error("Error [map]", error);
                     log.error("Error [map] stack", error.stack);
-                    transaction.state = "Error";
+                    
+                    data.state = "Error";
                     mapContext.write({
-                        key,
+                        key: mapContext.key,
                         value: {
                             code: "ERROR",
                             message: error.message,
-                            transaction
+                            transaction: data
                         }
                     });
                 }
@@ -78,31 +87,87 @@ define([
 
         const reduce = (reduceContext) => {
 
-            const { values } = reduceContext;
-            const transactions = values.map(transaction => JSON.parse(transaction));
-            
+            const { values,key } = reduceContext;
+            const data = values.map(value => JSON.parse(value));
+
             try {
-                const errors = transactions.filter(transaction => transaction.code === "ERROR");
-
-                if (errors.length) {
-
-                    if (transactions.length != errors.length) {
-                        const message = errors[0].message;
-                        createRecordLog(transactions, "Ocurrió un error", message)
+                data.forEach(({taxResult})=>{
+                    //lbryWHTHeader.deleteTaxResultByLine(taxResult.item.lineuniquekey)
+                    lbryWHTHeader.createTaxResult(taxResult);
+                    log.error("reduce tax","tax result creado")
+                });
+                data[0].transaction.state = "Procesada con exito";
+                reduceContext.write({
+                    key: data[0].transaction.id,
+                    value: {
+                        code: "OK",
+                        transaction: data[0].transaction
                     }
-
-                } else {
-                    
-                    createRecordLog(transactions, "Finalizado", 'Las transacciones han sido procesadas con exito')
-                }
-
-
+                });
             } catch (error) {
-                log.error("Error [reduce]", error);
-
+               log.error('Error [REDUCE]', error)
+               data[0].transaction.state = "Error";
+               reduceContext.write({
+                key: data[0].transaction.id,
+                value: {
+                    code: "ERROR",
+                    message: error.message,
+                    transaction: data[0].transaction
+                }
+            });
             }
         }
 
+        const summarize = (summarizeContext) => {
+            const data = [];
+            const transactionIDs = new Set();
+            summarizeContext.output.iterator().each(function (key, value) {
+                value = JSON.parse(value);
+                log.error("value",value)
+                const {id} = value.transaction;
+                
+                if (!transactionIDs.has(id)) {
+                    data.push(value);
+                    transactionIDs.add(id);
+                }
+                
+                return true;
+            });
+
+            try {
+                //const errors = data.filter(data => data.code === "ERROR");
+
+                //Agrupar transacciones
+                const groupedTransactions = data.reduce((transactions,element)=>{
+
+                    const {transaction} = element;
+                    const {subsidiary,typeProcess} = transaction;
+                    const key = `${subsidiary}-${typeProcess}`;
+                    if (!transactions[key]) transactions[key] = [];
+                    transactions[key].push(element);
+                    return transactions;
+                },{})
+
+                Object.values(groupedTransactions).forEach(transactions => {
+                    const errors = transactions.filter(transaction => transaction.code === "ERROR");
+                    log.error("errors",errors)
+                    if (errors.length) {
+                        log.error("errors entro","entrosss")
+                        //if (transactions.length != errors.length) {
+                            const message = errors[0].message;
+                            createRecordLog(transactions, "Ocurrió un error", message)
+                        //}
+                    } else {
+                        createRecordLog(transactions, "Finalizado", 'Las transacciones han sido procesadas con exito')
+                    }
+                });
+
+            } catch (error) {
+               log.error('Error [summarize]', error)
+               log.error('Error [summarize] stack', error.stack)
+            }
+
+        }
         const getTransactions = (typeProcess) => {
 
             let filters = [
@@ -112,7 +177,7 @@ define([
                 "AND",
                 ["subsidiary.country", "anyof", "CO"],
                 "AND",
-                ["custbody_lmry_reference_transaction.internalid","anyof",["802111","801962"]]
+                ["custbody_lmry_reference_transaction.internalid","anyof",["315979","259245","664514"]]
             ];
 
             if (typeProcess == "sales") {
@@ -308,6 +373,10 @@ define([
             return parseDate;
         }
 
-        return { getInputData, map, reduce }
+        
+
+
+
+        return { getInputData, map, reduce, summarize }
 
     });
