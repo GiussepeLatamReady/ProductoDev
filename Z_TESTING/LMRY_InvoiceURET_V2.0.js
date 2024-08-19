@@ -738,8 +738,7 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
               Library_Mail.getAuthorization(604, licenses) && 
               (
                 (scriptContext.type == 'create' && createdFrom) || 
-                scriptContext.type == 'copy'|| 
-                runtime.executionContext == 'CSVIMPORT'
+                scriptContext.type == 'copy'
               )
             ) {
             log.error("UF", "ENTRO");
@@ -1398,8 +1397,7 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
 
         if (
             LMRY_Result[0] == 'CL' && 
-            Library_Mail.getAuthorization(604, licenses) && 
-            scriptContext.type == "create" &&
+            Library_Mail.getAuthorization(604, licenses) &&
             runtime.executionContext == "CSVIMPORT"
         ) setUnitPriceUF(RCD);
         

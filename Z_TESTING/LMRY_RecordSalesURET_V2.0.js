@@ -487,8 +487,7 @@ define(['N/config', 'N/currency', 'N/record', 'N/runtime', 'N/search', 'N/ui/ser
               Library_Mail.getAuthorization(604, licenses) && 
               (
                 (isURET == 'create' && createdFrom) || 
-                isURET == 'copy'|| 
-                runtime.executionContext == 'CSVIMPORT'
+                isURET == 'copy'
               )
             ) {
 
@@ -727,7 +726,6 @@ define(['N/config', 'N/currency', 'N/record', 'N/runtime', 'N/search', 'N/ui/ser
         if (
           LMRY_countr[0] == 'CL' &&
           Library_Mail.getAuthorization(604, licenses) &&
-          scriptContext.type == "create" &&
           runtime.executionContext == "CSVIMPORT"
         ) setUnitPriceUF(RCD_OBJ);
 

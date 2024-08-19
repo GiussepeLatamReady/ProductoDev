@@ -730,8 +730,7 @@ define(['N/currency', 'N/log', 'N/config', 'N/ui/serverWidget', 'N/record', 'N/s
               libraryMail.getAuthorization(604, licenses) && 
               (
                 (scriptContext.type == 'create' && createdFrom) || 
-                scriptContext.type == 'copy' ||
-                runtime.executionContext == 'CSVIMPORT'
+                scriptContext.type == 'copy'
               )
             ) {
 
@@ -1348,7 +1347,6 @@ define(['N/currency', 'N/log', 'N/config', 'N/ui/serverWidget', 'N/record', 'N/s
         if (
           LMRY_Result[0] == 'CL' &&
           libraryMail.getAuthorization(604, licenses) &&
-          scriptContext.type == "create" &&
           runtime.executionContext == "CSVIMPORT"
         ) setUnitPriceUF(recordObj);
 
