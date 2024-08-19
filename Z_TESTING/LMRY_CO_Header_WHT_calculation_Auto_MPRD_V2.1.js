@@ -23,6 +23,11 @@ define([
                 const sales = getTransactions("sales");
                 const purchases = getTransactions("purchases");
                 const transactions = sales.concat(purchases);
+                log.error("transactions",transactions.map(({id})=> {
+                    if (id == "842030" || id =="842029") {
+                        return id;
+                    }
+                }))
                 return transactions;
             } catch (error) {
                 log.error("Error [getInputData]", error);
@@ -45,10 +50,18 @@ define([
 
                 const data = value;
                 try {
+                    if(data.id == "842030" || data.id =="842029"){
+                        log.error("data flag",data)
+                    }
+                    log.error("data id",data.id)
                     if (data.id) {
                         const transaction = lbryWHTHeader.getTransaction(data.id);
                         const taxResults = lbryWHTHeader.buildTaxResults(transaction);
-
+                        if(data.id == "842030" || data.id =="842029"){
+                            log.error("transactiona",transaction)
+                            log.error("taxresults",taxResults)
+                        }
+                        /*
                         taxResults.forEach(taxResult => {
                             mapContext.write({
                                 key: taxResult.item.lineuniquekey,
@@ -59,6 +72,7 @@ define([
                                 }
                             });
                         });
+                        */
                     }
                 } catch (error) {
                     log.error("Error [map]", error);
@@ -97,6 +111,9 @@ define([
                     data.forEach(({ taxResult }) => {
                         lbryWHTHeader.createTaxResult(taxResult);
                     });
+                    if(data[0].transaction.id == "842030" || data[0].transaction.id =="842029"){
+                        log.error("reduce","create tax result")
+                    }
                     data[0].transaction.state = "Procesada con exito";
                     reduceContext.write({
                         key: data[0].transaction.id,
