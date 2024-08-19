@@ -22,12 +22,9 @@ define([
             try {
                 const sales = getTransactions("sales");
                 const purchases = getTransactions("purchases");
+                log.error("purchases",purchases.map(({id})=> id))
                 const transactions = sales.concat(purchases);
-                log.error("transactions",transactions.map(({id})=> {
-                    if (id == "842030" || id =="842029") {
-                        return id;
-                    }
-                }))
+                log.error("transactions",transactions.map(({id})=> id))
                 return transactions;
             } catch (error) {
                 log.error("Error [getInputData]", error);
@@ -53,8 +50,9 @@ define([
                     if(data.id == "842030" || data.id =="842029"){
                         log.error("data flag",data)
                     }
-                    log.error("data id",data.id)
+                   
                     if (data.id) {
+                        log.error("data id",data.id)
                         const transaction = lbryWHTHeader.getTransaction(data.id);
                         const taxResults = lbryWHTHeader.buildTaxResults(transaction);
                         if(data.id == "842030" || data.id =="842029"){
