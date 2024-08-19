@@ -1290,7 +1290,10 @@ define(['N/currency', 'N/log', 'N/config', 'N/ui/serverWidget', 'N/record', 'N/s
         if (LMRY_Result[0] == "CO") {
           if (libraryMail.getAuthorization(721, licenses) == true) {
             if (scriptContext.type == 'edit') {
-              recordObj.setValue('custbody_lmry_scheduled_process', false);
+              var changeObj = Library_Duplicate.Verification_Duplicate('', '', scriptContext, '', '');
+              if (changeObj.state == false) {
+                recordObj.setValue('custbody_lmry_scheduled_process', false);
+              }
             }
             if (type_interface == 'USERINTERFACE') {
               setCOLineValueWTH(recordObj);

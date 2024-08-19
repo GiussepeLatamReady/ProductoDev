@@ -732,12 +732,7 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
           }
 
           //CL CHANGE CURRENCY UF: SOLO TRANSFORM Y MAKE COPY
-          log.error("UF scriptContext.type", scriptContext.type);
-          log.error("Country",LMRY_Result[0])
-          log.error("feature",Library_Mail.getAuthorization(604, licenses))
-          log.error("type context",scriptContext.type)
-          log.error("execution",runtime.executionContext)
-          log.error("createdFrom",createdFrom)
+          
           if (
               LMRY_Result[0] == 'CL' && 
               Library_Mail.getAuthorization(604, licenses) && 
@@ -798,8 +793,6 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
             
             var currencyTransaction = RCD_OBJ.getValue('currency');
             var tranDate = RCD_OBJ.getValue('trandate');
-            
-            log.error("UF fieldRateUF", fieldRateUF);
 
             if (jsonCurrencies[currencyTransaction]['symbol'] == 'CLP' && fieldRateUF && RCD_OBJ.getField(fieldRateUF)) {
 
@@ -808,8 +801,6 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
                 target: 'CLP',
                 date: tranDate
               });
-
-              log.error("UF setvalue", rateUF);
               RCD_OBJ.setValue({
                 fieldId: fieldRateUF,
                 value: parseFloat(rateUF),
@@ -835,7 +826,6 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
 
                   amountUF = parseFloat(amountUF) * parseFloat(rateUF);
                   amountUF = parseFloat(amountUF).toFixed(0);
-                  log.error("UF setvalue rate o precio unitario", amountUF);
                   RCD_OBJ.setSublistValue({
                     sublistId: 'item',
                     fieldId: 'rate',
@@ -1211,7 +1201,10 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
           if (LMRY_Result[0] == 'CO') {
             if (Library_Mail.getAuthorization(721, licenses) == true) {
               if (scriptContext.type == 'edit') {
-                RCD.setValue('custbody_lmry_scheduled_process', false);
+                var changeObj = Library_Duplicate.Verification_Duplicate('', '', scriptContext, '', '');
+                if (changeObj.state == false) {
+                  RCD.setValue('custbody_lmry_scheduled_process', false);
+                }
               }
               if (type_interface == 'USERINTERFACE') {
                 setCOLineValueWTH(RCD);
