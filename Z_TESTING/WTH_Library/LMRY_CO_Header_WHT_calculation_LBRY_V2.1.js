@@ -17,19 +17,12 @@ define([
 
     let features = {};
     const calculateHeaderWHT = (id) => {
-        
-        
-        let remainingUsage = runtime.getCurrentScript().getRemainingUsage();
-        log.error("remainingUsage 1", remainingUsage);
         const transaction = getTransaction(id); 
-        remainingUsage = runtime.getCurrentScript().getRemainingUsage();
-        log.error("remainingUsage 2", remainingUsage);
         createTaxResults(transaction);
     }
 
 
     const getTransaction = (id) => {
-        log.error("id",id)
         getFeatures();
         deleteTaxResults(id);
         let transaction = {
@@ -278,7 +271,6 @@ define([
             }
         }
         
-        log.error("coun  NN", count);
         if (transaction.expense) {
             for (let expense of Object.values(transaction.expense)) {
                 for (let retention of Object.values(transaction.wht)) {
@@ -344,8 +336,8 @@ define([
         return taxResults;
     }
 
-    const createTaxResult= ({amount, itemType, retention, item,exchangeRate,variableRate,transactionID}) => {
-        log.error("retention",retention)
+    const createTaxResult = ({amount, itemType, retention, item,exchangeRate,variableRate,transactionID}) => {
+
         if (Object.keys(retention).length === 0) return;
 
         const recordSummary = record.create({ type: 'customrecord_lmry_br_transaction', isDynamic: false });
@@ -570,22 +562,9 @@ define([
         }
         return subTypeKey ? subtypeToKey(subTypeKey): "";
     }
-
-    const setLinesItems = (transaction) => {
-        const recordObj = record.load({ type: transaction.recordtype, id: transaction.id });
-        const itemsLines = recordObj.getLineCount({ sublistId: 'item' });
-        transaction.memoLines = [];
-
-        const typeLine = transaction.recordType == "journalentry" ? "line": "item";
-        for (let i = 0; i < itemsLines; i++) {
-            transaction.memoLines.push(recordObj.getSublistValue({ sublistId: typeLine, fieldId: 'memo', line: i }));
-        }
-    }
-
-
     
     const formatDate = (dateString) => {
-        log.error("dateString",dateString)
+
         const [year, month, day] = dateString.split("-").map(Number);
         const date = new Date(year, month - 1, day);
         return format.parse({
@@ -594,13 +573,6 @@ define([
         });
     };
 
-    /*
-    const formatDate = (date) => {
-        let parseDate = format.parse({ value: date, type: format.Type.DATE });
-        parseDate = format.format({ type: format.Type.DATE, value: parseDate });
-        return parseDate;
-    }
-    */
     /**
      * Filtra las transacciones por la cabecera del memo, buscando primero por "Latam - WHT Reclasification"
      * y, si no se encuentra ninguno, busca por "Latam - WHT".
@@ -647,33 +619,6 @@ define([
         return filteredTransactions;
     
     };
-
-    /**
-     * Filtra las líneas de transacciones basadas en el memo específico relacionado con la reclasificación de WHT (Withholding Tax) en Latam - Colombia.
-     * La función primero intenta filtrar las transacciones que contienen el memo que comienza con "Latam - CO WHT (Lines) Reclasification".
-     * Si encuentra alguna transacción que cumpla con este criterio, las retorna; de lo contrario, busca transacciones con un memo que comience con "Latam - CO WHT (Lines)".
-     *
-     * @param {Object} transactions - Objeto que contiene las transacciones a filtrar. Se espera que cada transacción tenga una propiedad 'memo'.
-     * @returns {Array} - Un arreglo de transacciones filtradas basadas en el criterio del memo. Si no encuentra transacciones bajo el primer criterio, intenta con un segundo criterio más genérico.
-     */
-    const filterTransactionsLineByMemo = transactions => {
-        let filtered = transactions.filter(t => t.memo.startsWith("Latam - CO WHT (Lines) Reclasification"));
-        let filteredRetention = [];
-        if (filtered.length) {
-
-            const retentionV1 = transactions.filter(t => t.memo.startsWith("Latam - Country WHT (Lines)"));
-            if (retentionV1.length) {
-                filteredRetention = filteredRetention.concat(retentionV1);
-            }
-            const retentionV2 = transactions.filter(t => t.memo.startsWith("Latam - CO WHT (Lines)"));
-            if (retentionV2.length) {
-                filteredRetention = filteredRetention.concat(retentionV2);
-            }
-        
-        }
-        return filtered.length ? filtered : filteredRetention;
-    };
-
 
     const getExchangeRate = (recordObj) => {
         const exchangerateTran = recordObj.getValue({ fieldId: 'exchangerate' });
@@ -853,7 +798,7 @@ define([
     const getItemAccount = (ids) => {
         let accountIDs = {};
         const idList = Array.from(ids);
-        log.error("Array.from(ids)",idList)
+
         if (idList.length) {
             let searchFilters = [
                 ["internalid", "anyof", idList]
@@ -897,30 +842,5 @@ define([
             return true;
         });
     }
-
-    const deleteTaxResultByLine = (lineuniquekey) => {
-        let searchRecordLog = search.create({
-            type: 'customrecord_lmry_br_transaction',
-            filters: [
-                ['custrecord_lmry_lineuniquekey', 'is', lineuniquekey],
-            ],
-            columns: [
-                'internalid'
-            ]
-        })
-        searchRecordLog.run().each(function (result) {
-            let idTax = result.getValue(result.columns[0]);
-
-            record.delete({
-                type: 'customrecord_lmry_br_transaction',
-                id: idTax,
-                isDynamic: true
-            });
-            log.error("deleta tax result",idTax)
-            return true;
-        });
-    }
-
-
-    return { calculateHeaderWHT,getTransaction,buildTaxResults,createTaxResult, deleteTaxResultByLine};
+    return { calculateHeaderWHT,getTransaction,buildTaxResults,createTaxResult};
 });

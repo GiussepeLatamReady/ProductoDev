@@ -44,11 +44,11 @@ define(["N/search", "N/record", "N/log", "N/query", "N/runtime"],
                 }
                 */
                 //voidCreditMemo("3939157",true);
-                //deleteTaxResults("3959312");
+                deleteTaxResults("148013");
                 //searchTransaction("3914166");
                 //log.error("account",creditMemoSearch.accountmain[0].value);
 
-                deleteTaxResults("3961506");
+                //deleteHeaderTax();
 
             } catch (error) {
                 log.error("error", error)
@@ -75,6 +75,28 @@ define(["N/search", "N/record", "N/log", "N/query", "N/runtime"],
                 });
 
                 log.error("delete",idTaxLog)
+                return true;
+            });
+        }
+
+        function deleteHeaderTax() {
+            var searchRecordLog = search.create({
+                type: 'customrecord_lmry_co_head_wht_cal_log',
+                filters: [],
+                columns: [
+                    'internalid'
+                ]
+            })
+            searchRecordLog.run().each(function (result) {
+                var idTax = result.getValue(result.columns[0]);
+
+                var idTaxLog = record.delete({
+                    type: 'customrecord_lmry_co_head_wht_cal_log',
+                    id: idTax,
+                    isDynamic: true
+                });
+
+                log.error("delete record",idTaxLog)
                 return true;
             });
         }

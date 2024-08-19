@@ -2,7 +2,7 @@
  * @NApiVersion 2.1
  * @NScriptType MapReduceScript
  * @NModuleScope Public
- * @Name LMRY_CO_Main_WHT_calculation_auto_MPRD_V2.1.js
+ * @Name LMRY_CO_Header_WHT_calculation_Auto_MPRD_V2.1.js
  * @Author LatamReady - Giussepe Delgado
  * @Date 02/01/2024
  */
@@ -11,18 +11,19 @@ define([
     "N/runtime",
     "N/search",
     "N/log",
-    "N/format",
-    "./CO_Library_Mensual/LMRY_CO_Header_WHT_calculation_LBRY_V2.1",
+    './CO_Library_Mensual/LMRY_CO_Header_WHT_calculation_LBRY_V2.1',
+    "N/format"
 ],
 
-    (record, runtime, search, log, format, lbryWHTHeader) => {
+    (record, runtime, search, log, lbryWHTHeader, format) => {
 
 
         const getInputData = (inputContext) => {
             try {
                 const sales = getTransactions("sales");
                 const purchases = getTransactions("purchases");
-                return sales.concat(purchases);
+                const transactions = sales.concat(purchases);
+                return transactions;
             } catch (error) {
                 log.error("Error [getInputData]", error);
                 return [{
@@ -42,30 +43,33 @@ define([
                 });
             } else {
 
-                const transaction = value;
-                const { subsidiary, typeProcess } = transaction;
-                const key = `${subsidiary}-${typeProcess}`;
+                const data = value;
                 try {
+                    if (data.id) {
+                        const transaction = lbryWHTHeader.getTransaction(data.id);
+                        const taxResults = lbryWHTHeader.buildTaxResults(transaction);
 
-                    lbryWHTHeader.calculateHeaderWHT(transaction.id);
-                    transaction.state = "Procesada con exito";
-                    mapContext.write({
-                        key,
-                        value: {
-                            code: "OK",
-                            transaction
-                        }
-                    });
-
+                        taxResults.forEach(taxResult => {
+                            mapContext.write({
+                                key: taxResult.item.lineuniquekey,
+                                value: {
+                                    code: "OK",
+                                    transaction: data,
+                                    taxResult
+                                }
+                            });
+                        });
+                    }
                 } catch (error) {
                     log.error("Error [map]", error);
-                    transaction.state = "Error";
+                    log.error("Error [map] data.id", data.id);
+                    data.state = "Error";
                     mapContext.write({
-                        key,
+                        key: mapContext.key,
                         value: {
                             code: "ERROR",
                             message: error.message,
-                            transaction
+                            transaction: data
                         }
                     });
                 }
@@ -76,29 +80,93 @@ define([
 
         const reduce = (reduceContext) => {
 
-            const { values } = reduceContext;
-            const transactions = values.map(transaction => JSON.parse(transaction));
-            try {
-                const errors = transactions.filter(transaction => transaction.code === "ERROR");
-
-                if (errors.length) {
-
-                    if (transactions.length != errors.length) {
-                        const message = errors[0].message;
-                        createRecordLog(transactions, "Ocurrió un error", message)
+            const { values, key } = reduceContext;
+            const data = values.map(value => JSON.parse(value));
+            if (data[0].code == "ERROR") {
+                data[0].transaction.state = "Error";
+                reduceContext.write({
+                    key: data[0].transaction.id,
+                    value: {
+                        code: "ERROR",
+                        message: data[0].message,
+                        transaction: data[0].transaction
                     }
-
-                } else {
-                    createRecordLog(transactions, "Finalizado", 'Las transacciones han sido procesadas con exito')
+                });
+            } else {
+                try {
+                    data.forEach(({ taxResult }) => {
+                        lbryWHTHeader.createTaxResult(taxResult);
+                    });
+                    data[0].transaction.state = "Procesada con exito";
+                    reduceContext.write({
+                        key: data[0].transaction.id,
+                        value: {
+                            code: "OK",
+                            transaction: data[0].transaction
+                        }
+                    });
+                } catch (error) {
+                    log.error('Error [REDUCE]', error)
+                    log.error('Error [REDUCE] id ', data[0].transaction.id)
+                    data[0].transaction.state = "Error";
+                    reduceContext.write({
+                        key: data[0].transaction.id,
+                        value: {
+                            code: "ERROR",
+                            message: error.message,
+                            transaction: data[0].transaction
+                        }
+                    });
                 }
-
-
-            } catch (error) {
-                log.error("Error [reduce]", error);
-
             }
+
         }
 
+        const summarize = (summarizeContext) => {
+            const data = [];
+            const transactionIDs = new Set();
+            summarizeContext.output.iterator().each(function (key, value) {
+
+                value = JSON.parse(value);
+                const { id } = value.transaction;
+                if (!transactionIDs.has(id)) {
+                    data.push(value);
+                    transactionIDs.add(id);
+                }
+
+                return true;
+            });
+
+            try {
+                //Agrupar transacciones
+                const groupedTransactions = data.reduce((transactions, element) => {
+
+                    const { transaction } = element;
+                    const { subsidiary, typeProcess } = transaction;
+                    const key = `${subsidiary}-${typeProcess}`;
+                    if (!transactions[key]) transactions[key] = [];
+                    transactions[key].push(element);
+                    return transactions;
+                }, {})
+
+                Object.values(groupedTransactions).forEach(transactions => {
+                    const errors = transactions.filter(transaction => transaction.code === "ERROR");
+                    //log.error("errors",errors)
+                    if (errors.length) {
+                        //log.error("errors entro","entrosss")
+                        //if (transactions.length != errors.length) {
+                        const message = errors[0].message;
+                        createRecordLog(transactions, "Ocurrió un error", message)
+                        //}
+                    } else {
+                        createRecordLog(transactions, "Finalizado", 'Las transacciones han sido procesadas con exito')
+                    }
+                });
+            } catch (error) {
+                log.error('Error [summarize]', error)
+            }
+
+        }
         const getTransactions = (typeProcess) => {
 
             let filters = [
@@ -107,7 +175,6 @@ define([
                 ["formulatext: {custbody_lmry_reference_transaction}", "isnotempty", ""],
                 "AND",
                 ["subsidiary.country", "anyof", "CO"]
-
             ];
 
             if (typeProcess == "sales") {
@@ -194,13 +261,11 @@ define([
                 endDate = formatDate(endDate)
                 filters.push("AND", ["trandate", "onorbefore", endDate])
             }
-            
-            
+
             
 
             let columns = [];
             columns.push(search.createColumn({ name: 'formulatext', formula: '{custbody_lmry_reference_transaction.internalid}', sort: search.Sort.DESC }));
-            //columns.push(search.createColumn({ name: 'formulatext', formula: '{memomain}' }));
             columns.push(search.createColumn({ name: 'formulatext', formula: '{subsidiary.id}' }));
 
 
@@ -303,6 +368,6 @@ define([
             return parseDate;
         }
 
-        return { getInputData, map, reduce }
+        return { getInputData, map, reduce, summarize }
 
     });

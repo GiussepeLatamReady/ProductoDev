@@ -21,6 +21,12 @@
     + LMRY_CO_Header_WHT_calculation_URET_V2.1.js
     + LMRY_CO_Header_WHT_calculation_STLT_LOG_V2.1.js
     + LMRY_CO_Header_WHT_calculation_CLNT_V2.1.js
+
++ Update fix
+    + LMRY_CO_Header_WHT_calculation_STLT_LOG_V2.1.js
+    + LMRY_CO_Header_WHT_calculation_Auto_MPRD_V2.1.js
+    + LMRY_CO_Header_WHT_calculation_MPRD_V2.1.js
+    + LMRY_CO_Header_WHT_calculation_STLT_V2.1.js
         
 ## Scripts resumidos
     Librerias

@@ -654,7 +654,7 @@ define([
                 let reclasificationIds = ids.filter(id => jsonData[id]);
                 let retentionIds = ids.filter(id => !jsonData[id]);
 
-                reclasificationIds = this.getReclasificationIds(reclasificationIds)
+                //reclasificationIds = this.getReclasificationIds(reclasificationIds)
                 return [
                     ...this.getSearch(reclasificationIds,true),
                     ...this.getSearch(retentionIds,false)
@@ -972,9 +972,13 @@ define([
 
 
             toLogSuitelet() {
+                const params = {
+                    executionType: "UI"
+                }
                 redirect.toSuitelet({
                     scriptId: this.names.scriptid,
-                    deploymentId: this.names.deployid
+                    deploymentId: this.names.deployid,
+                    parameters:params
                 });
             }
 
