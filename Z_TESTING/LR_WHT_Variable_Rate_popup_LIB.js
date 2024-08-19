@@ -363,6 +363,7 @@ define(['N/search','N/runtime'],
             }
             return false;
         }
+        
 
 
         function getTranslations() {
@@ -399,9 +400,117 @@ define(['N/search','N/runtime'],
             return translatedFields[language];
         }
 
+        const createWhtUpdateButton = (context) => {
+            const { form, newRecord } = context;
+            const {type} = newRecord;
+            const fieldsToCheck = [
+              'custcol_lmry_co_autoretecree',
+              'custcol_lmry_co_retefte',
+              'custcol_lmry_co_reteica',
+              'custcol_lmry_co_reteiva'
+            ];
+          
+            const numTransaction = newRecord.getLineCount({ sublistId: 'item' });
+            let hasRetencion = false;
+          
+            for (let i = 0; i < numTransaction; i++) {
+              if (fieldsToCheck.some(fieldId => newRecord.getSublistValue({ sublistId: 'item', fieldId, line: i }))) {
+                hasRetencion = true;
+                break;
+              }
+            }
+          
+            form.addButton({
+              id: 'custpage_id_button_ud_whx',
+              label: 'UPDATE WHT',
+              functionName: `updateRetention('${type}')`
+            });
+          
+            const pathScript = {
+              "vendorbill" : "../../pluginImpl/vendorbill/LMRY_VendorBill_CO_CLNT_HNDL.js",
+              "vendorcredit" : "../../pluginImpl/vendorcredit/LMRY_VendorCredit_CO_CLNT_HNDL.js",
+              "invoice" : "../../pluginImpl/invoice/LMRY_Invoice_CO_CLNT_HNDL.js",
+              "creditmemo": "../../pluginImpl/creditmemo/LMRY_CreditMemo_CO_CLNT_HNDL.js"
+            }
+          
+            form.clientScriptModulePath = pathScript[type];
+          
+            if (hasRetencion) {
+              form.getButton({ id: 'custpage_id_button_ud_whx' }).isDisabled = true;
+            }
+          
+        };
+
+        const updateRetention = (type) => {
+            const {id} = currentRecord.get();
+            const transactionID = Number(id) || "";
+            const transactionRecord = record.load({ type, id: transactionID });
+            const entityId = transactionRecord.getValue("entity");
+
+            if (entityId) {
+                const transactionTypes = {
+                    "invoice": "1",
+                    "vendorbill": "4", 
+                    "vendorcredit": "7",
+                    "creditmemo": "8"
+                };
+
+                if (transactionTypes[type]) {
+                    const filters = [
+                        ["isinactive", "is", "F"],
+                        "AND",
+                        ["custrecord_lmry_co_entity", "anyof", entityId],
+                        "AND",
+                        ["custrecord_lmry_co_ent_trantype", "anyof", transactionTypes[type]]
+                    ];
+
+                    const FEAT_SUBS = runtime.isFeatureInEffect({ feature: "SUBSIDIARIES" });
+                    if (FEAT_SUBS) {
+                        const subsidiary = transactionRecord.getValue("subsidiary");
+                        filters.push("AND", ["custrecord_lmry_co_subsi_reten", "anyof", subsidiary]);
+                    }
+
+                    const columns = [
+                                        "custrecord_lmry_co_retefte", 
+                                        "custrecord_lmry_co_autoretecree", 
+                                        "custrecord_lmry_co_reteica", 
+                                        "custrecord_lmry_co_reteiva"
+                                    ];
+                    search.create({
+                        type: "customrecord_lmry_entity_fields",
+                        filters,
+                        columns
+                    }).run().each(result => {
+                        const [reteica, reteiva, retefte, retecree] = columns.map(col => result[0].getValue(col) || "");
+
+                        const updateSublistValues = (sublistId) => {
+                            const numLines = transactionRecord.getLineCount({ sublistId });
+                            for (let i = 0; i < numLines; i++) {
+                                const applyWht = transactionRecord.getSublistValue({ sublistId, fieldId: 'custcol_lmry_apply_wht_tax', line: i });
+                                if (applyWht === 'T' || applyWht === true) {
+                                    transactionRecord.setSublistValue({ sublistId, fieldId: 'custcol_lmry_co_autoretecree', line: i, value: retecree });
+                                    transactionRecord.setSublistValue({ sublistId, fieldId: 'custcol_lmry_co_retefte', line: i, value: retefte });
+                                    transactionRecord.setSublistValue({ sublistId, fieldId: 'custcol_lmry_co_reteica', line: i, value: reteica });
+                                    transactionRecord.setSublistValue({ sublistId, fieldId: 'custcol_lmry_co_reteiva', line: i, value: reteiva });
+                                }
+                            }
+                        };
+
+                        ['item', 'expense', 'expcost', 'itemcost', 'time'].forEach(updateSublistValues);
+
+                        transactionRecord.save({ disableTriggers: true }); // no se ejecutan los user events
+                        window.location.reload();
+                    });
+                }
+            }
+        }
+
+
         return {
             executePopup:executePopup,
             loadDataVariableRate:loadDataVariableRate,
-            getFeatureVariableRate:getFeatureVariableRate
+            getFeatureVariableRate:getFeatureVariableRate,
+            createWhtUpdateButton,
+            updateRetention
         };
     });

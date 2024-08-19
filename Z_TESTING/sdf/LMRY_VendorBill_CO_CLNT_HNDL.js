@@ -7,14 +7,12 @@
  */
 define([
     "SuiteApps/com.latamready.lmrylocalizationcore/lib/error/LR_Error_LIB",
-    "../../co_new_withholding_lines/lib/LR_CO_New_WithholdingLines_LIB.js",
     "SuiteApps/com.latamready.lmrylocalizationcore/lib/licenses/LR_Licenses_LIB",
     "../../constants/LR_CO_FEATURES_CONST",
     "../../co_new_withholding_lines/lib/LR_WHT_Variable_Rate_popup_LIB"
 ]
 , (
     Lib_Error,
-    Lib_WhtLines_v2,
     Lib_Licenses,
     CO_FEAT,
     Lib_variableRate
@@ -43,7 +41,7 @@ define([
             if(FEAT_SUBS && !subsidiary) return ;
 
             const featureManager = new FeatureManager(subsidiary);
-            const isVariableRate = Lib_WhtLines_v2.getFeatureVariableRate(subsidiary);
+            const isVariableRate = Lib_variableRate.getFeatureVariableRate(subsidiary);
             if (
                 featureManager.isActive(CO_FEAT.LOCALIZATION) && 
                 featureManager.isActive(CO_FEAT.WHT_NEW_LINES_PURCHASE) &&
@@ -195,7 +193,7 @@ define([
     };
 
     const updateRetention = (type) => {
-        Lib_WhtLines_v2.updateRetention(type);
+        Lib_variableRate.updateRetention(type);
     }
 
     return {
