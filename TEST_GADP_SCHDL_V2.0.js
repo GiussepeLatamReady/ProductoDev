@@ -44,11 +44,11 @@ define(["N/search", "N/record", "N/log", "N/query", "N/runtime"],
                 }
                 */
                 //voidCreditMemo("3939157",true);
-                deleteTaxResults("148013");
+                //deleteTaxResults("148013");
                 //searchTransaction("3914166");
                 //log.error("account",creditMemoSearch.accountmain[0].value);
 
-                //deleteHeaderTax();
+                deleteHeaderTax();
 
             } catch (error) {
                 log.error("error", error)
@@ -59,7 +59,8 @@ define(["N/search", "N/record", "N/log", "N/query", "N/runtime"],
             var searchRecordLog = search.create({
                 type: 'customrecord_lmry_br_transaction',
                 filters: [
-                    ['custrecord_lmry_br_transaction', 'is', id]
+                    ['custrecord_lmry_br_transaction', 'is', id],
+                    
                 ],
                 columns: [
                     'internalid'
@@ -82,7 +83,9 @@ define(["N/search", "N/record", "N/log", "N/query", "N/runtime"],
         function deleteHeaderTax() {
             var searchRecordLog = search.create({
                 type: 'customrecord_lmry_co_head_wht_cal_log',
-                filters: [],
+                filters: [
+                    ["custrecord_lmry_co_hwht_log_exect", "is", "SCHEDULE"]
+                ],
                 columns: [
                     'internalid'
                 ]

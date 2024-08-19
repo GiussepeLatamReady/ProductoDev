@@ -44,7 +44,6 @@ define([
 
         class SuiteletFormLogManager {
             constructor(options) {
-                log.error("options", options)
                 this.params = options.params || {};
                 this.method = options.method;
                 let language = runtime.getCurrentScript().getParameter({ name: "LANGUAGE" }).substring(0, 2);
@@ -66,7 +65,6 @@ define([
                     label: 'Execution Type',
                     type: serverWidget.FieldType.SELECT
                 });
-                log.error("this.params.executionType", this.params.executionType)
                 executionType.addSelectOption({ value: "ALL", text: this.translations.LMRY_ALL });
                 executionType.addSelectOption({ value: "UI", text: this.translations.LMRY_UI });
                 executionType.addSelectOption({ value: "SCHEDULE", text: this.translations.LMRY_SCHEDULE });
@@ -250,7 +248,6 @@ define([
                         });
                     });
                 }
-                log.error("data", data)
                 return data;
             }
 
