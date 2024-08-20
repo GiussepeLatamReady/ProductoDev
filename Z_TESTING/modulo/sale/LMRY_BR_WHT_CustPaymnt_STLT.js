@@ -71,15 +71,11 @@ define(['N/log', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/error', 'N/red
                     var status = context.request.parameters.status;
                     
                     if (!status) {
-                        var subsi = context.request.parameters.idS;
                         var idEnt = context.request.parameters.idE;
                         if (idEnt) {
-                            
-                            form.getField({ id: "custpage_idsubsi" }).defaultValue = subsi;
                             addCustomer(form, idEnt);
-                        }else{
-                            form.getField({ id: "custpage_idsubsi" }).defaultValue = "-1";
-                        }                         
+                        } 
+                                                
                         form.getField({ id: "custpage_currency" }).defaultValue = localCurrency;
                         form.getField({ id: "custpage_exchangerate" }).defaultValue = 1.0;
                         form.getField({ id: 'custpage_memo' }).updateDisplayType({ displayType: serverWidget.FieldDisplayType.DISABLED });
@@ -137,8 +133,9 @@ define(['N/log', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/error', 'N/red
                     for (var i = 0; i < fieldNames.length; i++) {
                         params[fieldNames[i]] = context.request.parameters['custpage_' + fieldNames[i]];
                     }
-
-                    params["idS"] = context.request.parameters['custpage_idsubsi'];
+                    if (context.request.parameters['idS']) {
+                        params["idS"] = context.request.parameters['idS'];
+                    }
                     if (!params['status']) {
                         params['status'] = '1';
                         redirect.toSuitelet({
@@ -347,12 +344,6 @@ define(['N/log', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/error', 'N/red
                 id: 'custpage_idlog',
                 type: serverWidget.FieldType.TEXT,
                 label: 'ID Log'
-            }).updateDisplayType({ displayType: serverWidget.FieldDisplayType.HIDDEN });
-
-            form.addField({
-                id: 'custpage_idsubsi',
-                type: serverWidget.FieldType.TEXT,
-                label: 'ID Subsi'
             }).updateDisplayType({ displayType: serverWidget.FieldDisplayType.HIDDEN });
 
             return form;
@@ -796,7 +787,7 @@ define(['N/log', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/error', 'N/red
                     ['custrecord_lmry_tipo_transaccion', 'anyof', TYPE_TRANSACTION]
                 ]
                 var subsidiaryId = context.request.parameters.idS;
-                if (subsidiaryId=="-1") {
+                if (!subsidiaryId) {
                     filters.push('AND',['custrecord_lmry_document_apply_wht', 'is', 'T'])
                 }
                 
@@ -808,7 +799,7 @@ define(['N/log', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/error', 'N/red
                         sort: search.Sort.ASC
                     })]
                 });
-                log.error("search_documents",search_documents)
+
                 var results = search_documents.run().getRange(0, 1000);
 
                 if (results) {
