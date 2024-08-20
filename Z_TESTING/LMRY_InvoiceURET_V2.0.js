@@ -98,23 +98,24 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
           fieldId: 'subsidiary'
         });
 
-        if (scriptContext.type != 'print' && scriptContext.type != 'email') {
-          licenses = Library_Mail.getLicenses(subsidiary);
-          if (licenses == null || licenses == '') {
-            licenses = [];
-            library_hideview3.PxHide(OBJ_FORM, '', RCD_OBJ.type);
-            if (scriptContext.type != "create") {
-              library_hideview3.PxHideSubTab(OBJ_FORM, '', RCD_OBJ.type);
-            }
-            library_hideview3.PxHideColumn(OBJ_FORM, '', RCD_OBJ.type);
-          }
-        }
-
-        // Obtiene la interface que se esta ejecutando
-        var type_interface = runtime.executionContext;
-        var LMRY_Result = ValidateAccessInv(RCD_OBJ.getValue({
-          fieldId: 'subsidiary'
-        }), OBJ_FORM, true, scriptContext.type);
+         // Obtiene la interface que se esta ejecutando
+         var type_interface = runtime.executionContext;
+         var LMRY_Result = ValidateAccessInv(RCD_OBJ.getValue({
+           fieldId: 'subsidiary'
+         }), OBJ_FORM, true, scriptContext.type);
+         
+         log.debug("LMRY_Result[0]", subsidiary)
+         if (scriptContext.type != 'print' && scriptContext.type != 'email') {
+           licenses = Library_Mail.getLicenses(subsidiary);          
+           if ((licenses == null || licenses == '') && !validateAdvanceHV(LMRY_Result[0], licenses)) {
+             licenses = [];
+             library_hideview3.PxHide(OBJ_FORM, '', RCD_OBJ.type);
+             if (scriptContext.type != "create") {
+               library_hideview3.PxHideSubTab(OBJ_FORM, '', RCD_OBJ.type);
+             }
+             library_hideview3.PxHideColumn(OBJ_FORM, '', RCD_OBJ.type);
+           }
+         }       
 
         if (scriptContext.type == 'create' || scriptContext.type == 'copy' || scriptContext.type == 'edit' || scriptContext.type == 'view') {
           if (LMRY_Result[0] === "MX" && Library_Mail.getAuthorization(30, licenses)) {
@@ -256,7 +257,7 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
             });
           }
 
-          if (OBJ_FORM != '' && OBJ_FORM != null) {
+          if ((OBJ_FORM != '' && OBJ_FORM != null) && !validateAdvanceHV(country[0], licenses)) {
             var hide_transaction = Library_Mail.getHideView(country, 2, licenses);
             var hide_sublist = Library_Mail.getHideView(country, 5, licenses);
             var hide_column = Library_Mail.getHideView(country, 3, licenses);
@@ -741,7 +742,6 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
                 scriptContext.type == 'copy'
               )
             ) {
-            log.error("UF", "ENTRO");
             var searchCurrencies = search.create({
               type: 'currency',
               columns: ['symbol', 'internalid', 'name'],
@@ -2589,6 +2589,19 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
 
     }
 
+    function validateAdvanceHV(country, licenses) {
+      var result = false;
+      var feature_hv = {
+        'CO' : 1107,
+        'CL' : 1108
+      }
+      if (country && feature_hv[country] && Library_Mail.getAuthorization(feature_hv[country], licenses)) {
+        result = true;
+      }
+      
+      return result;      
+    }
+    
 
     /* ------------------------------------------------------------------------------------------------------
      * A la variable featureId se le asigna el valore que le corresponde
