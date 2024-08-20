@@ -738,10 +738,11 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
               LMRY_Result[0] == 'CL' && 
               Library_Mail.getAuthorization(604, licenses) && 
               (
-                (scriptContext.type == 'create' && createdFrom) || 
+                (scriptContext.type == 'create') || 
                 scriptContext.type == 'copy'
               )
             ) {
+              log.error("entro",runtime.executionContext)
             var searchCurrencies = search.create({
               type: 'currency',
               columns: ['symbol', 'internalid', 'name'],
@@ -825,6 +826,7 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
 
                   amountUF = parseFloat(amountUF) * parseFloat(rateUF);
                   amountUF = parseFloat(amountUF).toFixed(0);
+                  log.error("setear0,",amountUF)
                   RCD_OBJ.setSublistValue({
                     sublistId: 'item',
                     fieldId: 'rate',
@@ -2950,7 +2952,7 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
     }
 
     function setUnitPriceUF(currentRCD) {
-
+      log.error("setUnit","setUnit")
       var subsidiary = currentRCD.getValue('subsidiary');
       var currencyTransaction = currentRCD.getValue('currency');
       var jsonCurrencies = {};

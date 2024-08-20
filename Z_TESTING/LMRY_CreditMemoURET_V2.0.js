@@ -729,7 +729,7 @@ define(['N/currency', 'N/log', 'N/config', 'N/ui/serverWidget', 'N/record', 'N/s
               LMRY_Result[0] == 'CL' && 
               libraryMail.getAuthorization(604, licenses) && 
               (
-                (scriptContext.type == 'create' && createdFrom) || 
+                (scriptContext.type == 'create') || 
                 scriptContext.type == 'copy'
               )
             ) {
