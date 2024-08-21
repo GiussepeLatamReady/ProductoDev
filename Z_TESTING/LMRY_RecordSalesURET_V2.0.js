@@ -486,8 +486,9 @@ define(['N/config', 'N/currency', 'N/record', 'N/runtime', 'N/search', 'N/ui/ser
               LMRY_countr[0] == 'CL' && 
               Library_Mail.getAuthorization(604, licenses) && 
               (
-                (isURET == 'create') || 
-                isURET == 'copy'
+                (isURET == 'create' && createdFrom) || 
+                isURET == 'copy'||
+                runtime.executionContext == "CSVIMPORT"
               )
             ) {
 
