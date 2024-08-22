@@ -3019,12 +3019,16 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
 
             for (var i = 0; i < countItems; i++) {
               var amountUF = currentRCD.getSublistValue('item', 'custcol_lmry_prec_unit_so', i);
+              var itemType = currentRCD.getSublistValue('item', 'itemType', i);
 
-              if (parseFloat(exchangeRateUF) > 0 && parseFloat(amountUF) > 0) {
-                var rate = parseFloat(exchangeRateUF) * parseFloat(amountUF);
-                rate = parseFloat(rate).toFixed(0);
-                currentRCD.setSublistValue('item', 'rate', i, rate);
-              }
+              if (itemType != "Group" && itemType != "EndGroup") {
+                if (parseFloat(exchangeRateUF) > 0 && parseFloat(amountUF) > 0) {
+                  var rate = parseFloat(exchangeRateUF) * parseFloat(amountUF);
+                  rate = parseFloat(rate).toFixed(0);
+                  currentRCD.setSublistValue('item', 'rate', i, rate);
+                }
+              };
+             
             }
 
           } else {
