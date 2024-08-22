@@ -54,7 +54,7 @@ define(['N/log', 'N/runtime', 'N/search', 'N/record', 'N/format', './Latam_Libra
                 var results = search_credits.run().getRange(0, 1000);
                 for (var i = 0; i < results.length; i++) {
                     var internalid = results[i].getValue("internalid");
-                    transactions[internalid] = { type: "vendorcredit" };
+                    transactions[internalid] = { type: "vendorcredit",dateCancellation:dateCancellation };
                 }
 
                 log.error('transactions', JSON.stringify(transactions));
@@ -74,6 +74,7 @@ define(['N/log', 'N/runtime', 'N/search', 'N/record', 'N/format', './Latam_Libra
                 log.error('mapValues', context.value);
 
                 var typeRecord = mapValues["type"];
+                var dateCancellation = mapValues["dateCancellation"];
 
                 var lines = getTransactionLines(idTransaction);
                 log.error('lines', JSON.stringify(lines));
@@ -91,6 +92,7 @@ define(['N/log', 'N/runtime', 'N/search', 'N/record', 'N/format', './Latam_Libra
                     //Issue: Para Bill Credits con moneda en dolares la primera vez no se aplica el journal
                     applyJournal(typeRecord, idTransaction, idJournal);
                     updateWHTRecords(idTransaction);
+                    createTransactionFields(idTransaction,dateCancellation)
                 }
 
                 for (var i = 0; i < oldJournals.length; i++) {
@@ -653,6 +655,62 @@ define(['N/log', 'N/runtime', 'N/search', 'N/record', 'N/format', './Latam_Libra
 
             return journals;
         }
+
+        //Verifica si la retencion es de Honorarios
+        function isfeeBased(vendorCreditID){
+            var isIncomeType = false;
+            search.create({
+                type: "customrecord_lmry_wht_details",
+                filters: [
+                    ["custrecord_lmry_wht_bill_credit", "anyof", vendorCreditID]
+                ],
+                columns: ["custrecord_lmry_whtdet_is_incometype"]
+            }).run().each(function(result){
+                isIncomeType = result.getValue("custrecord_lmry_whtdet_is_incometype");
+            });
+
+            return isIncomeType === "T" || isIncomeType === true;
+        }
+
+        function createTransactionFields(vendorCreditID, dateSICORE) {
+
+            if (!isfeeBased(vendorCreditID)) return false;
+            var recordID
+            search.create({
+                type: "customrecord_lmry_ar_transaction_fields",
+                filters:
+                    [
+                        ["custrecord_lmry_ar_transaction_related.internalid", "anyof", vendorCreditID]
+                    ],
+                columns:
+                    [
+                        "internalid"
+                    ]
+            }).run().each(function (result) {
+                recordID = result.getValue("internalid") || "";
+            });
+
+            if (recordID) {
+                record.submitFields({
+                    type: "customrecord_lmry_ar_transaction_fields",
+                    id: recordID,
+                    values: {
+                        "custrecord_lmry_ar_date_report": dateSICORE
+                    },
+                    options: {
+                        disableTriggers: true
+                    }
+                });
+            } else {
+                var rec_transField = record.create({ type: 'customrecord_lmry_ar_transaction_fields' });
+                rec_transField.setValue({ fieldId: 'custrecord_lmry_ar_date_report', value: dateSICORE })
+                rec_transField.save({
+                    enableSourcing: true,
+                    ignoreMandatoryFields: true
+                });
+            }
+        }
+          
 
         return {
             getInputData: getInputData,

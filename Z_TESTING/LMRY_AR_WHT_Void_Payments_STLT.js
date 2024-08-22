@@ -40,7 +40,7 @@ define(['N/log', 'N/ui/serverWidget', 'N/runtime', 'N/search', 'N/url', 'N/redir
             } else {
                 try {
                     var idLog = context.request.parameters.custpage_idlog;
-                    var cancellationDate = context.request.parameters.custpage_date_void;
+                    //var cancellationDate = context.request.parameters.custpage_date_void;
                     log.error('idLog', idLog);
 
                     if (idLog) {
@@ -57,12 +57,14 @@ define(['N/log', 'N/ui/serverWidget', 'N/runtime', 'N/search', 'N/url', 'N/redir
                             }
                         });
 
+                        var parameters =  JSON.stringify({idLog:idLog,cancellationDate:cancellationDate})
+
                         var task_mr = task.create({
                             taskType: task.TaskType.MAP_REDUCE,
                             scriptId: MR_SCRIPT_ID,
                             deploymentId: MR_DEPLOY_ID,
                             params: {
-                                'custscript_lmry_ar_wht_void_idlog': JSON.stringify({idLog,cancellationDate})
+                                'custscript_lmry_ar_wht_void_idlog': parameters
                             }
                         });
 
@@ -98,7 +100,8 @@ define(['N/log', 'N/ui/serverWidget', 'N/runtime', 'N/search', 'N/url', 'N/redir
                 label: getText('date_void'),
                 type: serverWidget.FieldType.DATE,
                 container: 'main_group'
-            }).defaultValue = new Date();
+            });
+            fieldDate.defaultValue = new Date();
 
             fieldIdLog.isMandatory = true;
             fieldIdLog.updateBreakType({ breakType: serverWidget.FieldBreakType.STARTCOL });
