@@ -3641,7 +3641,7 @@ define(['N/currency', 'N/log', 'N/config', 'N/ui/serverWidget', 'N/record', 'N/s
     }
 
     function setUnitPriceUF(currentRCD) {
-
+      var priceUnitList = getPriceUnitList(currentRCD);
       var subsidiary = currentRCD.getValue('subsidiary');
       var currencyTransaction = currentRCD.getValue('currency');
       var jsonCurrencies = {};
@@ -3709,13 +3709,17 @@ define(['N/currency', 'N/log', 'N/config', 'N/ui/serverWidget', 'N/record', 'N/s
             });
 
             for (var i = 0; i < countItems; i++) {
-              var amountUF = currentRCD.getSublistValue('item', 'custcol_lmry_prec_unit_so', i);
-
-              if (parseFloat(exchangeRateUF) > 0 && parseFloat(amountUF) > 0) {
-                var rate = parseFloat(exchangeRateUF) * parseFloat(amountUF);
-                rate = parseFloat(rate).toFixed(0);
-                currentRCD.setSublistValue('item', 'rate', i, rate);
-              }
+              var amountUF = priceUnitList[i];
+              var itemType = currentRCD.getSublistValue('item', 'itemtype', i);
+              if (itemType != "Group" && itemType != "EndGroup") {
+                
+                if (parseFloat(exchangeRateUF) > 0 && parseFloat(amountUF) > 0) {
+                  var rate = parseFloat(exchangeRateUF) * parseFloat(amountUF);
+                  rate = parseFloat(rate).toFixed(0);
+                  currentRCD.setSublistValue('item', 'rate', i, rate);       
+                }
+                currentRCD.setSublistValue('item', 'custcol_lmry_prec_unit_so', i, amountUF);
+              };
             }
 
           } else {
@@ -3728,6 +3732,30 @@ define(['N/currency', 'N/log', 'N/config', 'N/ui/serverWidget', 'N/record', 'N/s
         } //SOLO SI EL CAMPO EXISTE
       }
       // FIN SOLO SI ES PESO CHILENO
+    }
+
+    function getPriceUnitList(RCD_OBJ){
+      var priceUnitList = [];
+      var isChildren = false;
+      var priceUnitGroup;
+      for (var i = 0; i < RCD_OBJ.getLineCount({
+        sublistId: 'item'
+      }); i++) {
+        var itemType = RCD_OBJ.getSublistValue('item', 'itemtype', i);
+        if (isChildren && priceUnitGroup) {
+          priceUnitList.push(priceUnitGroup)
+        }else if(itemType!="Group"|| itemType != "EndGroup"){
+          priceUnitList.push(RCD_OBJ.getSublistValue('item', 'custcol_lmry_prec_unit_so', i));
+        }
+        if (itemType=="Group") {
+          priceUnitGroup = RCD_OBJ.getSublistValue('item', 'custcol_lmry_prec_unit_so', i);
+          isChildren = true;
+        }
+        if (itemType=="EndGroup") {
+          isChildren = false;
+        }
+      }
+      return priceUnitList;
     }
 
     return {

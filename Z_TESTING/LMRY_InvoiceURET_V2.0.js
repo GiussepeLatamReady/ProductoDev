@@ -807,41 +807,48 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
                 ignoreFieldChange: true
               });
 
+              
+
               for (var i = 0; i < RCD_OBJ.getLineCount({
                 sublistId: 'item'
               }); i++) {
+                log.error("enro before","hay items")
+                var itemType = RCD_OBJ.getSublistValue('item', 'itemtype', i);
 
-                var amountUF = RCD_OBJ.getSublistValue({
-                  sublistId: 'item',
-                  fieldId: 'custcol_lmry_prec_unit_so',
-                  line: i
-                });
-                var quantity = RCD_OBJ.getSublistValue({
-                  sublistId: 'item',
-                  fieldId: 'quantity',
-                  line: i
-                });
+                if (itemType !="Group" && itemType != "EndGroup") {
 
-                if (parseFloat(amountUF) > 0 && parseFloat(rateUF) > 0) {
-
-                  amountUF = parseFloat(amountUF) * parseFloat(rateUF);
-                  amountUF = parseFloat(amountUF).toFixed(0);
-                  RCD_OBJ.setSublistValue({
+                  var amountUF = RCD_OBJ.getSublistValue({
                     sublistId: 'item',
-                    fieldId: 'rate',
-                    line: i,
-                    value: amountUF
+                    fieldId: 'custcol_lmry_prec_unit_so',
+                    line: i
+                  });
+                  var quantity = RCD_OBJ.getSublistValue({
+                    sublistId: 'item',
+                    fieldId: 'quantity',
+                    line: i
                   });
 
-                  amountUF = parseFloat(quantity) * parseFloat(amountUF);
+                  if (parseFloat(amountUF) > 0 && parseFloat(rateUF) > 0) {
 
-                  RCD_OBJ.setSublistValue({
-                    sublistId: 'item',
-                    fieldId: 'amount',
-                    line: i,
-                    value: amountUF
-                  });
+                    amountUF = parseFloat(amountUF) * parseFloat(rateUF);
+                    amountUF = parseFloat(amountUF).toFixed(0);
+                    RCD_OBJ.setSublistValue({
+                      sublistId: 'item',
+                      fieldId: 'rate',
+                      line: i,
+                      value: amountUF
+                    });
 
+                    amountUF = parseFloat(quantity) * parseFloat(amountUF);
+
+                    RCD_OBJ.setSublistValue({
+                      sublistId: 'item',
+                      fieldId: 'amount',
+                      line: i,
+                      value: amountUF
+                    });
+
+                  }
                 }
 
               }
@@ -1400,7 +1407,10 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
             LMRY_Result[0] == 'CL' && 
             Library_Mail.getAuthorization(604, licenses) &&
             runtime.executionContext == "CSVIMPORT"
-        ) setUnitPriceUF(RCD);
+        ) {
+          
+          setUnitPriceUF(RCD);
+        }
         
       } catch (err) {
         RCD_OBJ = scriptContext.newRecord;
@@ -2950,7 +2960,9 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
       }
     }
 
-    function setUnitPriceUF(currentRCD) {
+    function setUnitPriceUF(currentRCD) { 
+
+      var priceUnitList = getPriceUnitList(currentRCD);
       var subsidiary = currentRCD.getValue('subsidiary');
       var currencyTransaction = currentRCD.getValue('currency');
       var jsonCurrencies = {};
@@ -3018,15 +3030,18 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
             });
 
             for (var i = 0; i < countItems; i++) {
-              var amountUF = currentRCD.getSublistValue('item', 'custcol_lmry_prec_unit_so', i);
-              var itemType = currentRCD.getSublistValue('item', 'itemType', i);
+              var amountUF = priceUnitList[i];
+              var itemType = currentRCD.getSublistValue('item', 'itemtype', i);
 
               if (itemType != "Group" && itemType != "EndGroup") {
+                
                 if (parseFloat(exchangeRateUF) > 0 && parseFloat(amountUF) > 0) {
                   var rate = parseFloat(exchangeRateUF) * parseFloat(amountUF);
                   rate = parseFloat(rate).toFixed(0);
                   currentRCD.setSublistValue('item', 'rate', i, rate);
+                  
                 }
+                currentRCD.setSublistValue('item', 'custcol_lmry_prec_unit_so', i, amountUF);
               };
              
             }
@@ -3890,6 +3905,33 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
         log.error('setCOLineValueWTH', error);
       }
     }
+
+    function getPriceUnitList(RCD_OBJ){
+      var priceUnitList = [];
+      var isChildren = false;
+      var priceUnitGroup;
+      for (var i = 0; i < RCD_OBJ.getLineCount({
+        sublistId: 'item'
+      }); i++) {
+
+        var itemType = RCD_OBJ.getSublistValue('item', 'itemtype', i);
+        if (isChildren && priceUnitGroup) {
+          priceUnitList.push(priceUnitGroup)
+        }else if(itemType!="Group"|| itemType != "EndGroup"){
+          priceUnitList.push(RCD_OBJ.getSublistValue('item', 'custcol_lmry_prec_unit_so', i));
+        }
+        if (itemType=="Group") {
+          priceUnitGroup = RCD_OBJ.getSublistValue('item', 'custcol_lmry_prec_unit_so', i);
+          isChildren = true;
+        }
+        if (itemType=="EndGroup") {
+          isChildren = false;
+        }
+      }
+      return priceUnitList;
+    }
+
+
 
     return {
       beforeLoad: beforeLoad,
