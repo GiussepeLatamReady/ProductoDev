@@ -19,13 +19,11 @@ define(['N/log', 'N/runtime', 'N/search', 'N/record', 'N/format', './Latam_Libra
 
         function getInputData() {
             try {
-                var params = runtime.getCurrentScript().getParameter({ name: 'custscript_lmry_ar_wht_void_idlog' });
-                params = JSON.parse(params);
-                var idLog = params.idLog;
-                var dateCancellation = params.dateCancellation;
+                var idLog = runtime.getCurrentScript().getParameter({ name: 'custscript_lmry_ar_wht_void_idlog' });
+                
+                var cancellationDate = runtime.getCurrentScript().getParameter({ name: 'custscript_lmry_ar_wht_void_date' });
                 log.error('idLog', idLog);
-                log.error('dateCancellation', dateCancellation);
-                return [];
+                log.error('cancellationDate', cancellationDate);
                 var idPayment = search.lookupFields({
                     type: "customrecord_lmry_wht_payments_log",
                     id: idLog,
@@ -54,7 +52,7 @@ define(['N/log', 'N/runtime', 'N/search', 'N/record', 'N/format', './Latam_Libra
                 var results = search_credits.run().getRange(0, 1000);
                 for (var i = 0; i < results.length; i++) {
                     var internalid = results[i].getValue("internalid");
-                    transactions[internalid] = { type: "vendorcredit",dateCancellation:dateCancellation };
+                    transactions[internalid] = { type: "vendorcredit",cancellationDate:cancellationDate };
                 }
 
                 log.error('transactions', JSON.stringify(transactions));
@@ -64,6 +62,8 @@ define(['N/log', 'N/runtime', 'N/search', 'N/record', 'N/format', './Latam_Libra
             }
             catch (err) {
                 library_mail.sendemail('[ getInputData ]' + err, LMRY_script);
+                log.error("err getinput data", err)
+                log.error("err getinput data stack", err.stack)
             }
         }
 
@@ -74,7 +74,7 @@ define(['N/log', 'N/runtime', 'N/search', 'N/record', 'N/format', './Latam_Libra
                 log.error('mapValues', context.value);
 
                 var typeRecord = mapValues["type"];
-                var dateCancellation = mapValues["dateCancellation"];
+                var cancellationDate = mapValues["cancellationDate"];
 
                 var lines = getTransactionLines(idTransaction);
                 log.error('lines', JSON.stringify(lines));
@@ -92,7 +92,7 @@ define(['N/log', 'N/runtime', 'N/search', 'N/record', 'N/format', './Latam_Libra
                     //Issue: Para Bill Credits con moneda en dolares la primera vez no se aplica el journal
                     applyJournal(typeRecord, idTransaction, idJournal);
                     updateWHTRecords(idTransaction);
-                    createTransactionFields(idTransaction,dateCancellation)
+                    createTransactionFields(idTransaction,cancellationDate)
                 }
 
                 for (var i = 0; i < oldJournals.length; i++) {
@@ -689,7 +689,10 @@ define(['N/log', 'N/runtime', 'N/search', 'N/record', 'N/format', './Latam_Libra
             }).run().each(function (result) {
                 recordID = result.getValue("internalid") || "";
             });
-
+            dateSICORE = format.parse({
+                value: dateSICORE,
+                type: format.Type.DATE // Especifica que el valor es de tipo fecha
+            });
             if (recordID) {
                 record.submitFields({
                     type: "customrecord_lmry_ar_transaction_fields",
@@ -704,11 +707,13 @@ define(['N/log', 'N/runtime', 'N/search', 'N/record', 'N/format', './Latam_Libra
             } else {
                 var rec_transField = record.create({ type: 'customrecord_lmry_ar_transaction_fields' });
                 rec_transField.setValue({ fieldId: 'custrecord_lmry_ar_date_report', value: dateSICORE })
+                rec_transField.setValue({ fieldId: 'custrecord_lmry_ar_transaction_related', value: vendorCreditID })
                 rec_transField.save({
                     enableSourcing: true,
                     ignoreMandatoryFields: true
                 });
             }
+            log.error("createTransactionFields","END")
         }
           
 

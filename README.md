@@ -47,19 +47,20 @@ Colombia
 
 + Descripcion:
 
-    + 
+    + Se ha agregado en el proceso de anulación de pagos la opción para que el cliente seleccione la fecha del voided de una retención, permitiéndole elegir si afecta la primera o segunda quincena. Además, se añadió un campo de fecha en el módulo de anulación y se incluye la identificación de retenciones de Honorarios.
 
 + Scripts modificados:
 
-    + 
+    + LMRY_AR_WHT_Void_Payments_STLT.js
+    + LMRY_AR_WHT_Void_Payments_MPRD.js
 
 + Documento funcional ( LatamReady - BR WHT Reclass Customer Payment)
 
-    + []()
+    + [LatamTax - AR Payment Void](https://docs.google.com/presentation/d/1h4HD8uGnY2kmtgWPwbhUOmcRz0o787GTQJaFxKZSlw8/edit#slide=id.g2f6245a453e_0_1)
 
 + Pruebas Internas:
 
-    + []()
+    + [Diseño Técnico ](https://docs.google.com/document/d/1Atlmrtk2ZbV-xpHtNrkIv1ZFsMRZ3XbFRst0bozUdy8/edit)
 
 + Bundles:
 

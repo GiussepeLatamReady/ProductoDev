@@ -40,9 +40,9 @@ define(['N/log', 'N/ui/serverWidget', 'N/runtime', 'N/search', 'N/url', 'N/redir
             } else {
                 try {
                     var idLog = context.request.parameters.custpage_idlog;
-                    //var cancellationDate = context.request.parameters.custpage_date_void;
+                    var cancellationDate = context.request.parameters.custpage_date_void.toString();
                     log.error('idLog', idLog);
-
+                    log.error('cancellationDate', cancellationDate);
                     if (idLog) {
 
 
@@ -57,14 +57,13 @@ define(['N/log', 'N/ui/serverWidget', 'N/runtime', 'N/search', 'N/url', 'N/redir
                             }
                         });
 
-                        var parameters =  JSON.stringify({idLog:idLog,cancellationDate:cancellationDate})
-
                         var task_mr = task.create({
                             taskType: task.TaskType.MAP_REDUCE,
                             scriptId: MR_SCRIPT_ID,
                             deploymentId: MR_DEPLOY_ID,
                             params: {
-                                'custscript_lmry_ar_wht_void_idlog': parameters
+                                'custscript_lmry_ar_wht_void_idlog': idLog,
+                                'custscript_lmry_ar_wht_void_date' : cancellationDate
                             }
                         });
 
