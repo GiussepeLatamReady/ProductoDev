@@ -41,8 +41,6 @@ define(['N/log', 'N/ui/serverWidget', 'N/runtime', 'N/search', 'N/url', 'N/redir
                 try {
                     var idLog = context.request.parameters.custpage_idlog;
                     var cancellationDate = context.request.parameters.custpage_date_void.toString();
-                    log.error('idLog', idLog);
-                    log.error('cancellationDate', cancellationDate);
                     if (idLog) {
 
 

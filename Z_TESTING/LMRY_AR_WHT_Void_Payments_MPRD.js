@@ -22,8 +22,6 @@ define(['N/log', 'N/runtime', 'N/search', 'N/record', 'N/format', './Latam_Libra
                 var idLog = runtime.getCurrentScript().getParameter({ name: 'custscript_lmry_ar_wht_void_idlog' });
                 
                 var cancellationDate = runtime.getCurrentScript().getParameter({ name: 'custscript_lmry_ar_wht_void_date' });
-                log.error('idLog', idLog);
-                log.error('cancellationDate', cancellationDate);
                 var idPayment = search.lookupFields({
                     type: "customrecord_lmry_wht_payments_log",
                     id: idLog,
@@ -63,7 +61,6 @@ define(['N/log', 'N/runtime', 'N/search', 'N/record', 'N/format', './Latam_Libra
             catch (err) {
                 library_mail.sendemail('[ getInputData ]' + err, LMRY_script);
                 log.error("err getinput data", err)
-                log.error("err getinput data stack", err.stack)
             }
         }
 
@@ -713,7 +710,7 @@ define(['N/log', 'N/runtime', 'N/search', 'N/record', 'N/format', './Latam_Libra
                     ignoreMandatoryFields: true
                 });
             }
-            log.error("createTransactionFields","END")
+
         }
           
 
