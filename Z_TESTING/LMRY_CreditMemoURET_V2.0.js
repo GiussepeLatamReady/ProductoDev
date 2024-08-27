@@ -789,7 +789,7 @@ define(['N/currency', 'N/log', 'N/config', 'N/ui/serverWidget', 'N/record', 'N/s
             if (jsonCurrencies[currencyTransaction]['symbol'] == 'CLP' && fieldRateUF && recordObj.getField(fieldRateUF)) {
 
               var rateUF = currency.exchangeRate({
-                source: 'CLF',
+                source: '18',
                 target: 'CLP',
                 date: tranDate
               });
