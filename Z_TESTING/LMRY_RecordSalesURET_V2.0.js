@@ -546,7 +546,7 @@ define(['N/config', 'N/currency', 'N/record', 'N/runtime', 'N/search', 'N/ui/ser
             if (jsonCurrencies[currencyTransaction]['symbol'] == 'CLP' && fieldRateUF && RCD_OBJ.getField(fieldRateUF)) {
 
               var rateUF = currencyModule.exchangeRate({
-                source: 'CLF',
+                source: '18',
                 target: 'CLP',
                 date: tranDate
               });

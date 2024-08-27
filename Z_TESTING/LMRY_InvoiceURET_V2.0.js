@@ -770,6 +770,7 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
               };
 
             }
+            log.error("jsonCurrencies",jsonCurrencies);
 
             var searchSetupTax = search.create({
               type: 'customrecord_lmry_setup_tax_subsidiary',
@@ -789,15 +790,16 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
 
             if (searchSetupTax && searchSetupTax.length && searchSetupTax[0].getValue('custrecord_lmry_setuptax_cl_rate_uf')) {
               fieldRateUF = searchSetupTax[0].getValue('custrecord_lmry_setuptax_cl_rate_uf');
+              log.error("fieldRateUF",fieldRateUF);
             }
             
             var currencyTransaction = RCD_OBJ.getValue('currency');
             var tranDate = RCD_OBJ.getValue('trandate');
-
+            log.error("currencyTransaction",currencyTransaction);
             if (jsonCurrencies[currencyTransaction]['symbol'] == 'CLP' && fieldRateUF && RCD_OBJ.getField(fieldRateUF)) {
 
               var rateUF = currency.exchangeRate({
-                source: 'CLF',
+                source: '18',
                 target: 'CLP',
                 date: tranDate
               });
@@ -807,7 +809,7 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
                 ignoreFieldChange: true
               });
 
-              
+              log.error("rateUF",rateUF);
 
               for (var i = 0; i < RCD_OBJ.getLineCount({
                 sublistId: 'item'
