@@ -797,6 +797,8 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
             var currencyTransaction = RCD_OBJ.getValue('currency');
             var tranDate = RCD_OBJ.getValue('trandate');
             log.error("currencyTransaction",currencyTransaction);
+            log.error("currencyUF",currencyUF);
+            log.error("RCD_OBJ.getField(fieldRateUF)",RCD_OBJ.getField(fieldRateUF));
             if (jsonCurrencies[currencyTransaction]['symbol'] == 'CLP' && fieldRateUF && RCD_OBJ.getField(fieldRateUF) && currencyUF) {
 
               var rateUF = currency.exchangeRate({
@@ -2970,6 +2972,7 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
       var currencyTransaction = currentRCD.getValue('currency');
       var jsonCurrencies = {};
       var fieldRateUF;
+      var currencyUF = '';
       var searchCurrencies = search.create({
         type: 'currency',
         columns: ['symbol', 'internalid', 'name'],
@@ -3002,7 +3005,7 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
 
         var searchSetupTax = search.create({
           type: 'customrecord_lmry_setup_tax_subsidiary',
-          columns: ['custrecord_lmry_setuptax_cl_rate_uf'],
+          columns: ['custrecord_lmry_setuptax_cl_rate_uf','custrecord_lmry_cl_currency_uf'],
           filters: [{
             name: 'isinactive',
             operator: 'is',
@@ -3018,16 +3021,30 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
 
         if (searchSetupTax && searchSetupTax.length && searchSetupTax[0].getValue('custrecord_lmry_setuptax_cl_rate_uf')) {
           fieldRateUF = searchSetupTax[0].getValue('custrecord_lmry_setuptax_cl_rate_uf');
+          currencyUF = searchSetupTax[0].getValue('custrecord_lmry_cl_currency_uf');
         }
 
         if (fieldRateUF && currentRCD.getField(fieldRateUF)) {
           
           //SOLO PARA PESO CHILENO
-          if (jsonCurrencies[currencyTransaction]['symbol'] == 'CLP') {
+          if (jsonCurrencies[currencyTransaction]['symbol'] == 'CLP' && fieldRateUF) {
 
             //SETEO DE COLUMNA
 
-            var exchangeRateUF = currentRCD.getValue(fieldRateUF);
+            //var exchangeRateUF = currentRCD.getValue(fieldRateUF);
+            var tranDate = currentRCD.getValue('trandate');
+            var exchangeRateUF = currency.exchangeRate({
+              source: currencyUF,
+              target: 'CLP',
+              date: tranDate
+            });
+
+            currentRCD.setValue({
+              fieldId: fieldRateUF,
+              value: parseFloat(exchangeRateUF),
+              ignoreFieldChange: true
+            });
+
             var countItems = currentRCD.getLineCount({
               sublistId: 'item'
             });
