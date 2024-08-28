@@ -15,8 +15,9 @@ Colombia
 
 
 + Update
-    + LMRY_AR_Withholding_Certificate_LBRY.js
-    + LMRY_AR_Withholding_Certificate_PDF_LBRY.js
+    + LMRY_AR_WHT_Void_Payments_STLT.js
+    + LMRY_AR_WHT_Void_Payments_MPRD.js
+        + LATAM - ID WHT PAYMENT DATE (custscript_lmry_ar_wht_void_date)
 + Delete
 
 
