@@ -506,7 +506,7 @@ define(['N/config', 'N/currency', 'N/record', 'N/runtime', 'N/search', 'N/ui/ser
 
             var jsonCurrencies = {};
             var fieldRateUF = '';
-
+            var currencyUF = '';
             for (var i = 0; i < searchCurrencies.length; i++) {
               var idCurrency = searchCurrencies[i].getValue('internalid');
               var name = searchCurrencies[i].getValue('name');
@@ -522,7 +522,7 @@ define(['N/config', 'N/currency', 'N/record', 'N/runtime', 'N/search', 'N/ui/ser
 
             var searchSetupTax = search.create({
               type: 'customrecord_lmry_setup_tax_subsidiary',
-              columns: ['custrecord_lmry_setuptax_cl_rate_uf'],
+              columns: ['custrecord_lmry_setuptax_cl_rate_uf','custrecord_lmry_cl_currency_uf'],
               filters: [{
                 name: 'isinactive',
                 operator: 'is',
@@ -538,15 +538,16 @@ define(['N/config', 'N/currency', 'N/record', 'N/runtime', 'N/search', 'N/ui/ser
 
             if (searchSetupTax && searchSetupTax.length && searchSetupTax[0].getValue('custrecord_lmry_setuptax_cl_rate_uf')) {
               fieldRateUF = searchSetupTax[0].getValue('custrecord_lmry_setuptax_cl_rate_uf');
+              currencyUF = searchSetupTax[0].getValue('custrecord_lmry_cl_currency_uf');
             }
 
             var currencyTransaction = RCD_OBJ.getValue('currency');
             var tranDate = RCD_OBJ.getValue('trandate');
 
-            if (jsonCurrencies[currencyTransaction]['symbol'] == 'CLP' && fieldRateUF && RCD_OBJ.getField(fieldRateUF)) {
+            if (jsonCurrencies[currencyTransaction]['symbol'] == 'CLP' && fieldRateUF && RCD_OBJ.getField(fieldRateUF)&& currencyUF) {
 
               var rateUF = currencyModule.exchangeRate({
-                source: '18',
+                source: currencyUF,
                 target: 'CLP',
                 date: tranDate
               });

@@ -53,6 +53,7 @@
         //CL CHANGE CURRENCY UF
         var jsonCurrencies = {};
         var fieldRateUF = '';
+        var currencyUF;
 
         // SUITETAX
         var ST_FEATURE = false;
@@ -436,7 +437,7 @@
                     console.log("jsonCurrencies: ",jsonCurrencies);
                     var searchSetupTax = search.create({
                         type: 'customrecord_lmry_setup_tax_subsidiary',
-                        columns: ['custrecord_lmry_setuptax_cl_rate_uf'],
+                        columns: ['custrecord_lmry_setuptax_cl_rate_uf','custrecord_lmry_cl_currency_uf'],
                         filters: [{
                             name: 'isinactive',
                             operator: 'is',
@@ -449,9 +450,10 @@
                     });
 
                     searchSetupTax = searchSetupTax.run().getRange(0, 1);
-
+                    
                     if (searchSetupTax && searchSetupTax.length && searchSetupTax[0].getValue('custrecord_lmry_setuptax_cl_rate_uf')) {
                         fieldRateUF = searchSetupTax[0].getValue('custrecord_lmry_setuptax_cl_rate_uf');
+                        currencyUF = searchSetupTax[0].getValue('custrecord_lmry_cl_currency_uf');
                         console.log("fieldRateUF: ",fieldRateUF);
                     }
 
@@ -463,25 +465,21 @@
                         var rateUF = currentRCD.getValue(fieldRateUF);
                         var createdFrom = currentRCD.getValue('createdfrom');
                         var tranDate = currentRCD.getValue('trandate');
-                        console.log("rateUF: ",rateUF);
-                        console.log("flag: ",!(parseFloat(rateUF) > 0));
-                        if (!(parseFloat(rateUF) > 0)) {
-                            try {
-                                var rateUF = currency.exchangeRate({
-                                    source: '18',
-                                    target: 'CLP',
-                                    date: tranDate
-                                });
-                                
-                                currentRCD.setValue({
-                                    fieldId: fieldRateUF,
-                                    value: parseFloat(rateUF),
-                                    ignoreFieldChange: true
-                                });
-                            } catch (error) {
-                               console.error('Error', error)
-                            }
-                           
+                        if ((!(parseFloat(rateUF) > 0)) && currencyUF) {
+
+                            var rateUF = currency.exchangeRate({
+                                source: currencyUF,
+                                target: 'CLP',
+                                date: tranDate
+                            });
+
+                            currentRCD.setValue({
+                                fieldId: fieldRateUF,
+                                value: parseFloat(rateUF),
+                                ignoreFieldChange: true
+                            });
+
+
 
                         }
 
@@ -951,19 +949,19 @@
 
                             //SETEO DEL TIPO DE CAMBIO AL CAMBIAR FECHA Y/O MONEDA
                             if ((name == 'currency' || name == 'trandate') && tranDate) {
-
-                                var rateUF = currency.exchangeRate({
-                                    source: '18',
-                                    target: 'CLP',
-                                    date: tranDate
-                                });
-
-                                currentRCD.setValue({
-                                    fieldId: fieldRateUF,
-                                    value: parseFloat(rateUF),
-                                    ignoreFieldChange: true
-                                });
-
+                                if (currencyUF) {
+                                    var rateUF = currency.exchangeRate({
+                                        source: currencyUF,
+                                        target: 'CLP',
+                                        date: tranDate
+                                    });
+                                    console.log("rateUF validate",rateUF)
+                                    currentRCD.setValue({
+                                        fieldId: fieldRateUF,
+                                        value: parseFloat(rateUF),
+                                        ignoreFieldChange: true
+                                    });
+                                }
                             }
 
                         } else {

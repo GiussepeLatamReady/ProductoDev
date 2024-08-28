@@ -18,12 +18,21 @@ Chile
     + LMRY_InvoiceURET_V2.0.js
     + LMRY_RecordSalesURET_V2.0.js
 
+    + LMRY_CreditMemoCLNT_V2.0.js
+    + LMRY_InvoiceCLNT_V2.0.js
+    + LMRY_RecordSalesCLNT_V2.0.js
+
 + Delete
 
 
 ## Records Configuration
 + Create
-    
+    + LatamReady - Setup Tax Subsidiary
+        Crear campo en tab CHILE
+        + Latam - CL currency UF
+            + custrecord_lmry_cl_currency_uf
+            + List/Record
+            + Currency
 + Update
     
 

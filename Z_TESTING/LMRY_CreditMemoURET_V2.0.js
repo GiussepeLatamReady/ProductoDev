@@ -749,7 +749,7 @@ define(['N/currency', 'N/log', 'N/config', 'N/ui/serverWidget', 'N/record', 'N/s
 
             var jsonCurrencies = {};
             var fieldRateUF = '';
-
+            var currencyUF = '';
             for (var i = 0; i < searchCurrencies.length; i++) {
               var idCurrency = searchCurrencies[i].getValue('internalid');
               var name = searchCurrencies[i].getValue('name');
@@ -765,7 +765,7 @@ define(['N/currency', 'N/log', 'N/config', 'N/ui/serverWidget', 'N/record', 'N/s
 
             var searchSetupTax = search.create({
               type: 'customrecord_lmry_setup_tax_subsidiary',
-              columns: ['custrecord_lmry_setuptax_cl_rate_uf'],
+              columns: ['custrecord_lmry_setuptax_cl_rate_uf','custrecord_lmry_cl_currency_uf'],
               filters: [{
                 name: 'isinactive',
                 operator: 'is',
@@ -781,15 +781,16 @@ define(['N/currency', 'N/log', 'N/config', 'N/ui/serverWidget', 'N/record', 'N/s
 
             if (searchSetupTax && searchSetupTax.length && searchSetupTax[0].getValue('custrecord_lmry_setuptax_cl_rate_uf')) {
               fieldRateUF = searchSetupTax[0].getValue('custrecord_lmry_setuptax_cl_rate_uf');
+              currencyUF = searchSetupTax[0].getValue('custrecord_lmry_cl_currency_uf');
             }
 
             var currencyTransaction = recordObj.getValue('currency');
             var tranDate = recordObj.getValue('trandate');
 
-            if (jsonCurrencies[currencyTransaction]['symbol'] == 'CLP' && fieldRateUF && recordObj.getField(fieldRateUF)) {
+            if (jsonCurrencies[currencyTransaction]['symbol'] == 'CLP' && fieldRateUF && recordObj.getField(fieldRateUF) && currencyUF) {
 
               var rateUF = currency.exchangeRate({
-                source: '18',
+                source: currencyUF,
                 target: 'CLP',
                 date: tranDate
               });
