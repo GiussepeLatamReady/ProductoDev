@@ -104,7 +104,7 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
            fieldId: 'subsidiary'
          }), OBJ_FORM, true, scriptContext.type);
          
-         log.debug("LMRY_Result[0]", subsidiary)
+         //log.debug("LMRY_Result[0]", subsidiary)
          if (scriptContext.type != 'print' && scriptContext.type != 'email') {
            licenses = Library_Mail.getLicenses(subsidiary);          
            if ((licenses == null || licenses == '') && !validateAdvanceHV(LMRY_Result[0], licenses)) {
@@ -1062,7 +1062,7 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
         // Diferente de Eliminacion
         if (scriptContext.type != 'delete') {
           // Para todos los paises que tengan acceso
-          log.debug('LMRY_Result', LMRY_Result);
+          //log.debug('LMRY_Result', LMRY_Result);
           if (LMRY_Result[2] == true && LMRY_Result[3] == true && RCD.getValue({
             fieldId: 'memo'
           }) != 'VOID') {
@@ -1929,7 +1929,7 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
             name: 'CUSTOMAPPROVALCUSTINVC'
           });
 
-          log.debug('featureApprovalInvoice', featureApprovalInvoice);
+          //log.debug('featureApprovalInvoice', featureApprovalInvoice);
 
           //si esta activo el feature Approval Routing,
           if (featureApprovalInvoice == 'T') {
@@ -1940,7 +1940,7 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
               fieldId: 'approvalstatus'
             });
 
-            log.debug('approvalStatus : ' + approvalStatus, 'swAccess : ' + swAccess);
+            //log.debug('approvalStatus : ' + approvalStatus, 'swAccess : ' + swAccess);
 
             // Si hay acceso y el Invoice esta aprobado, procesa
             if (swAccess == true && approvalStatus == 2) {
@@ -2873,7 +2873,7 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
         var whtAppliesTo = recordObj.getValue({
           fieldId: 'custbody_4601_appliesto'
         }) || "";
-        log.debug("whtAppliesTo", whtAppliesTo);
+        //log.debug("whtAppliesTo", whtAppliesTo);
         var whtBaseAmount = 0.00;
         var whtTaxAmount = 0.00;
 
@@ -2954,7 +2954,7 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
           })["custrecord_4601_wtc_witaxtype.custrecord_4601_wtt_name"];
         }
 
-        log.debug("[whtTaxCode,whtTaxName,whtTaxRate,whtTaxAmount,whtBaseAmount]", [whtTaxRateGlobal, whtTaxName, whtTaxRateGlobal, whtTaxAmount, whtBaseAmount].join(","));
+        //log.debug("[whtTaxCode,whtTaxName,whtTaxRate,whtTaxAmount,whtBaseAmount]", [whtTaxRateGlobal, whtTaxName, whtTaxRateGlobal, whtTaxAmount, whtBaseAmount].join(","));
 
         recordObj.setValue('custbody_lmry_wtax_code', whtTaxCodeGlobal);
         recordObj.setValue('custbody_lmry_wtax_code_des', whtTaxName);
@@ -3005,7 +3005,7 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
 
         var searchSetupTax = search.create({
           type: 'customrecord_lmry_setup_tax_subsidiary',
-          columns: ['custrecord_lmry_setuptax_cl_rate_uf','custrecord_lmry_cl_currency_uf'],
+          columns: ['custrecord_lmry_setuptax_cl_rate_uf'],
           filters: [{
             name: 'isinactive',
             operator: 'is',
@@ -3021,7 +3021,7 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
 
         if (searchSetupTax && searchSetupTax.length && searchSetupTax[0].getValue('custrecord_lmry_setuptax_cl_rate_uf')) {
           fieldRateUF = searchSetupTax[0].getValue('custrecord_lmry_setuptax_cl_rate_uf');
-          currencyUF = searchSetupTax[0].getValue('custrecord_lmry_cl_currency_uf');
+          
         }
 
         if (fieldRateUF && currentRCD.getField(fieldRateUF)) {
@@ -3031,20 +3031,7 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
 
             //SETEO DE COLUMNA
 
-            //var exchangeRateUF = currentRCD.getValue(fieldRateUF);
-            var tranDate = currentRCD.getValue('trandate');
-            var exchangeRateUF = currency.exchangeRate({
-              source: currencyUF,
-              target: 'CLP',
-              date: tranDate
-            });
-
-            currentRCD.setValue({
-              fieldId: fieldRateUF,
-              value: parseFloat(exchangeRateUF),
-              ignoreFieldChange: true
-            });
-
+            var exchangeRateUF = currentRCD.getValue(fieldRateUF);
             var countItems = currentRCD.getLineCount({
               sublistId: 'item'
             });
@@ -3150,11 +3137,6 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
           record_custpage.addSelectOption({
             value: idRS,
             text: nameRS
-          });
-
-          log.debug({
-            title: idRS,
-            details: nameRS
           });
         }
 
