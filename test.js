@@ -1,40 +1,16 @@
-function createTransactionFields(vendorCreditID,dateSICORE) {
-
-  if (!isfeeBased(vendorCreditID)) return false;
-  var recordID
-  search.create({
-      type: "customrecord_lmry_ar_transaction_fields",
-      filters:
-      [
-         ["custrecord_lmry_ar_transaction_related.internalid","anyof",vendorCreditID]
-      ],
-      columns:
-      [
-         "internalid"
-      ]
-   }).run().each(function(result){
-      recordID = result.getValue("internalid") || "";
-   });
-
-  if (recordID) {
-      record.submitFields({
-          type: "customrecord_lmry_ar_transaction_fields",
-          id: recordID,
-          values: {
-              "custrecord_lmry_ar_voided": "1"
-          },
-          options: {
-              disableTriggers: true
-          }
-      });
-  }else{
-      var rec_transField = record.create({ type: 'customrecord_lmry_ar_transaction_fields' });
-      rec_transField.setValue({ fieldId: 'custrecord_lmry_ar_date_report', value: dateSICORE })
-      rec_transField.save({
-          enableSourcing: true,
-          ignoreMandatoryFields: true
-      });
-  }
-  
-
+const params = {
+    token:"hiv-u-Sblr2a9WPlW3FfLj308ITEQafc1xihB_yjs0qUBnYjIsja-U1sDUqGb7rs",
+    cnpj:"00636794001075",
+    codigo:"0108",
+    uf:"SP",
+    descricao:"",
+    unidadeMedida:"",
+    valor:0
 }
+
+const url = `https://apidoni.ibpt.org.br/api/v1/servicos?${new URLSearchParams(params).toString()}`;
+
+fetch(url)
+    .then(response => response.json())
+    .then(data => console.log("Response :",data))
+    .catch(error => console.error("Error",error))
