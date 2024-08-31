@@ -1,0 +1,9 @@
+{
+    "type": "error.SuiteScriptModuleLoaderError",
+    "name": "MODULE_DOES_NOT_EXIST",
+    "message": "Module does not exist: /SuiteApps/com.latamready.lmrylocalizationcore/lib/hideAndView/LR_HideView_LIB.js",
+    "stack": [
+        "at Object.getImplementationByCountry (/SuiteApps/com.latamready.lmrylocalizationcore/lib/pluginHandler/LR_PluginHandler_LIB.js:25:39)",
+        "at Object.beforeLoad (/SuiteApps/com.latamready.lmrylocalizationcore/transactions/invoice/LR_Invoice_URET.js:14:39)"
+    ]
+}

@@ -487,8 +487,7 @@ define(['N/config', 'N/currency', 'N/record', 'N/runtime', 'N/search', 'N/ui/ser
               Library_Mail.getAuthorization(604, licenses) && 
               (
                 (isURET == 'create' && createdFrom) || 
-                isURET == 'copy'||
-                runtime.executionContext == "CSVIMPORT"
+                isURET == 'copy'
               )
             ) {
 
@@ -932,6 +931,7 @@ define(['N/config', 'N/currency', 'N/record', 'N/runtime', 'N/search', 'N/ui/ser
       var currencyTransaction = currentRCD.getValue('currency');
       var jsonCurrencies = {};
       var fieldRateUF;
+      var currencyUF = '';
       var searchCurrencies = search.create({
         type: 'currency',
         columns: ['symbol', 'internalid', 'name'],
@@ -964,7 +964,7 @@ define(['N/config', 'N/currency', 'N/record', 'N/runtime', 'N/search', 'N/ui/ser
 
         var searchSetupTax = search.create({
           type: 'customrecord_lmry_setup_tax_subsidiary',
-          columns: ['custrecord_lmry_setuptax_cl_rate_uf'],
+          columns: ['custrecord_lmry_setuptax_cl_rate_uf','custrecord_lmry_cl_currency_uf'],
           filters: [{
             name: 'isinactive',
             operator: 'is',
@@ -980,16 +980,34 @@ define(['N/config', 'N/currency', 'N/record', 'N/runtime', 'N/search', 'N/ui/ser
 
         if (searchSetupTax && searchSetupTax.length && searchSetupTax[0].getValue('custrecord_lmry_setuptax_cl_rate_uf')) {
           fieldRateUF = searchSetupTax[0].getValue('custrecord_lmry_setuptax_cl_rate_uf');
+          currencyUF = searchSetupTax[0].getValue('custrecord_lmry_cl_currency_uf');
         }
-
-        if (fieldRateUF && currentRCD.getField(fieldRateUF)) {
+        log.error("currencyUF",currencyUF);
+        log.error("currentRCD.getField(fieldRateUF)",currentRCD.getField(fieldRateUF));
+        log.error("fieldRateUF",fieldRateUF);
+        log.error("currencyTransaction",currencyTransaction)
+        log.error("jsonCurrencies",jsonCurrencies)
+        log.error("flag",fieldRateUF && currentRCD.getField(fieldRateUF) && currencyUF)
+        if (fieldRateUF && currentRCD.getField(fieldRateUF) && currencyUF) {
           
           //SOLO PARA PESO CHILENO
-          if (jsonCurrencies[currencyTransaction]['symbol'] == 'CLP') {
-
+          log.error("jsonCurrencies[currencyTransaction]['symbol']",jsonCurrencies[currencyTransaction]['symbol'])
+          if (jsonCurrencies[currencyTransaction]['symbol'] == 'CLP' && fieldRateUF) {
+            var tranDate = currentRCD.getValue('trandate');
             //SETEO DE COLUMNA
 
-            var exchangeRateUF = currentRCD.getValue(fieldRateUF);
+            //var exchangeRateUF = currentRCD.getValue(fieldRateUF);
+            var exchangeRateUF = currency.exchangeRate({
+              source: currencyUF,
+              target: 'CLP',
+              date: tranDate
+            });
+            log.error("exchangeRateUF",exchangeRateUF);
+            currentRCD.setValue({
+              fieldId: fieldRateUF,
+              value: parseFloat(exchangeRateUF)
+            });
+
             var countItems = currentRCD.getLineCount({
               sublistId: 'item'
             });
