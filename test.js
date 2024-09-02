@@ -1,7 +1,7 @@
 const params = {
     token:"hiv-u-Sblr2a9WPlW3FfLj308ITEQafc1xihB_yjs0qUBnYjIsja-U1sDUqGb7rs",
     cnpj:"00636794001075",
-    codigo:"0108",
+    codigo:"0102228",
     uf:"SP",
     descricao:"",
     unidadeMedida:"",

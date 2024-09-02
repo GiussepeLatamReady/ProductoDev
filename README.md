@@ -1,30 +1,60 @@
-# [c1126 L-  AR - Diseño AR-SICORE Retenciones y percepciones Efectuadas](https://docs.google.com/document/d/18zOqLgFNN5Bp8_b4UDvvsRBt9YQQyD6k/edit)
+# [D1518 - Latam BR: Cálculo de IBPT para Facturación Electrónica](https://docs.google.com/document/d/1Qw94he6Rmw8414nKDeC3etqcm0UqhcgZYmek5I9fJqI/edit#heading=h.1mllta7bdj39)
+
 ## Description of the Requirement
 
-El propósito de este requerimiento es que el sistema dé al cliente la opción de elegir, cuando aún no haya presentado la DDJJ correspondiente, con qué fecha hacer el voided de una retención, es decir a qué quincena afectar, si a la primera o a la segunda, para el caso de las retenciones.
-
-
-Colombia
+Realizar conexión API con portal de De Olho No Imposto a fin de obtener el valor de IBPT.
+BRAZIL
 
 ## Description of the solution
 
 
 ## Scripts
 + Create
-   
+   + Title: LR - BR Import IBPT STLT | LR - BR Importar IBPT STLT
+        + Name: LR - BR Import IBPT STLT
+        + id: _lr_br_import_ibpt_stlt
+        + File: LR_BR_Import_IBPT_STLT.js
+
+    + File: LR_BR_Import_IBPT_CLNT.js
+
+    + Title: LR - BR Import IBPT MPRD | LR - BR Importar IBPT MPRD
+        + Name: LR - BR Import IBPT MPRD
+        + id: _lr_br_import_ibpt_mprd
+        + File: LR_BR_Import_IBPT_MPRD.js
+
+        + Parametros:
+            + custscript_lr_br_import_ibpt_user
+            + custscript_lr_br_import_ibpt_status
+
+    + File: LR_BR_Import_IBPT_URET.js
+        + Name: LR - BR Import IBPT URET
+        + id: _lr_br_import_ibpt_uret
+        + File: LR_BR_Import_IBPT_URET.js
+            + LR - Import Log IBPT
 
 
 + Update
-    + LMRY_AR_WHT_Void_Payments_STLT.js
-    + LMRY_AR_WHT_Void_Payments_MPRD.js
-        + LATAM - ID WHT PAYMENT DATE (custscript_lmry_ar_wht_void_date)
+
 + Delete
 
 
 ## Records Configuration
 + Create
-    
-        
+    LR - Import Log IBPT
+    customrecord_lr_import_log_ibpt
+                Subsidiary	        custrecord_lr_import_log_subsidiary	        List/Record	Subsidiary
+                UF                  custrecord_lr_import_log_uf	                Free-Form Text
+                CNPJ                custrecord_lr_import_log_cnpj	            Free-Form Text
+                Item Type	        custrecord_lr_import_log_type	            Free-Form Text
+                token               custrecord_lr_import_log_token              Free-Form Text	 	 	
+                Date Created	    custrecord_lr_import_log_date	            Date	 	
+                User Responsible	custrecord_lr_import_log_user	            List/Record	Employee	 	
+                Process details	    custrecord_lr_import_log_details	        Free-Form Text	 	 	
+                Catalogs IDs	    custrecord_lr_import_log_taxes	            Long Text	 	 	
+                Summary	            custrecord_lr_import_log_summary	        Free-Form Text	 	 	
+                Status	            custrecord_lr_import_log_status	            Free-Form Text
+
+
     
 + Update
     
@@ -48,25 +78,20 @@ Colombia
 
 + Descripcion:
 
-    + Se ha agregado en el proceso de anulación de pagos la opción para que el cliente seleccione la fecha del voided de una retención, permitiéndole elegir si afecta la primera o segunda quincena. Además, se añadió un campo de fecha en el módulo de anulación y se incluye la identificación de retenciones de Honorarios.
+    + Se ha implementado una integración automática con la API del portal "De Olho No Imposto" para obtener continuamente los valores actualizados del IBPT
 
-+ Scripts modificados:
 
-    + LMRY_AR_WHT_Void_Payments_STLT.js
-    + LMRY_AR_WHT_Void_Payments_MPRD.js
++ Documento funcional ( LatamReady - BR Import IBPT D1518)
 
-+ Documento funcional ( LatamReady - BR WHT Reclass Customer Payment)
+    + [LatamReady - BR Import IBPT D1518](https://docs.google.com/presentation/d/1UOykIUyeAT3_Drt-wbyijA6yAAkXUlny/edit#slide=id.g28b9f62f476_2_23)
 
-    + [LatamTax - AR Payment Void](https://docs.google.com/presentation/d/1h4HD8uGnY2kmtgWPwbhUOmcRz0o787GTQJaFxKZSlw8/edit#slide=id.g2f6245a453e_0_1)
++ Documento Tecnico:
 
-+ Pruebas Internas:
+    + [LatamReady - BR Import IBPT D1518 (Documento Técnico) ](https://docs.google.com/document/d/1azwkTlh9vdHVBf0G26PsN9EPUuGweKfFR7adNtxajdI/edit)
 
-    + [Diseño Técnico ](https://docs.google.com/document/d/1Atlmrtk2ZbV-xpHtNrkIv1ZFsMRZ3XbFRst0bozUdy8/edit)
++ ¨Proyecto:
 
-+ Bundles:
-
-    + 35754 (Development)
-    + 37714 (Production)
+    + com.latamready.lmrybrlocalization
 
 
 
