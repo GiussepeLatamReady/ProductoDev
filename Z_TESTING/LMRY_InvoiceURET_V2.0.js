@@ -98,24 +98,23 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
           fieldId: 'subsidiary'
         });
 
-         // Obtiene la interface que se esta ejecutando
-         var type_interface = runtime.executionContext;
-         var LMRY_Result = ValidateAccessInv(RCD_OBJ.getValue({
-           fieldId: 'subsidiary'
-         }), OBJ_FORM, true, scriptContext.type);
-         
-         //log.debug("LMRY_Result[0]", subsidiary)
-         if (scriptContext.type != 'print' && scriptContext.type != 'email') {
-           licenses = Library_Mail.getLicenses(subsidiary);          
-           if ((licenses == null || licenses == '') && !validateAdvanceHV(LMRY_Result[0], licenses)) {
-             licenses = [];
-             library_hideview3.PxHide(OBJ_FORM, '', RCD_OBJ.type);
-             if (scriptContext.type != "create") {
-               library_hideview3.PxHideSubTab(OBJ_FORM, '', RCD_OBJ.type);
-             }
-             library_hideview3.PxHideColumn(OBJ_FORM, '', RCD_OBJ.type);
-           }
-         }       
+        if (scriptContext.type != 'print' && scriptContext.type != 'email') {
+          licenses = Library_Mail.getLicenses(subsidiary);
+          if (licenses == null || licenses == '') {
+            licenses = [];
+            library_hideview3.PxHide(OBJ_FORM, '', RCD_OBJ.type);
+            if (scriptContext.type != "create") {
+              library_hideview3.PxHideSubTab(OBJ_FORM, '', RCD_OBJ.type);
+            }
+            library_hideview3.PxHideColumn(OBJ_FORM, '', RCD_OBJ.type);
+          }
+        }
+
+        // Obtiene la interface que se esta ejecutando
+        var type_interface = runtime.executionContext;
+        var LMRY_Result = ValidateAccessInv(RCD_OBJ.getValue({
+          fieldId: 'subsidiary'
+        }), OBJ_FORM, true, scriptContext.type);
 
         if (scriptContext.type == 'create' || scriptContext.type == 'copy' || scriptContext.type == 'edit' || scriptContext.type == 'view') {
           if (LMRY_Result[0] === "MX" && Library_Mail.getAuthorization(30, licenses)) {
@@ -257,7 +256,7 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
             });
           }
 
-          if ((OBJ_FORM != '' && OBJ_FORM != null) && !validateAdvanceHV(country[0], licenses)) {
+          if (OBJ_FORM != '' && OBJ_FORM != null) {
             var hide_transaction = Library_Mail.getHideView(country, 2, licenses);
             var hide_sublist = Library_Mail.getHideView(country, 5, licenses);
             var hide_column = Library_Mail.getHideView(country, 3, licenses);
@@ -769,7 +768,6 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
               };
 
             }
-            log.error("jsonCurrencies",jsonCurrencies);
 
             var searchSetupTax = search.create({
               type: 'customrecord_lmry_setup_tax_subsidiary',
@@ -790,14 +788,11 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
             if (searchSetupTax && searchSetupTax.length && searchSetupTax[0].getValue('custrecord_lmry_setuptax_cl_rate_uf')) {
               fieldRateUF = searchSetupTax[0].getValue('custrecord_lmry_setuptax_cl_rate_uf');
               currencyUF = searchSetupTax[0].getValue('custrecord_lmry_cl_currency_uf');
-              log.error("fieldRateUF",fieldRateUF);
             }
             
             var currencyTransaction = RCD_OBJ.getValue('currency');
             var tranDate = RCD_OBJ.getValue('trandate');
-            log.error("currencyTransaction",currencyTransaction);
-            log.error("currencyUF",currencyUF);
-            log.error("RCD_OBJ.getField(fieldRateUF)",RCD_OBJ.getField(fieldRateUF));
+
             if (jsonCurrencies[currencyTransaction]['symbol'] == 'CLP' && fieldRateUF && RCD_OBJ.getField(fieldRateUF) && currencyUF) {
 
               var rateUF = currency.exchangeRate({
@@ -811,12 +806,10 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
                 ignoreFieldChange: true
               });
 
-              log.error("rateUF",rateUF);
 
               for (var i = 0; i < RCD_OBJ.getLineCount({
                 sublistId: 'item'
               }); i++) {
-                log.error("enro before","hay items")
                 var itemType = RCD_OBJ.getSublistValue('item', 'itemtype', i);
 
                 if (itemType !="Group" && itemType != "EndGroup") {
@@ -1010,7 +1003,7 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
             return true;
           }
         } // Sale del proceso si es MAP/REDUCE
-
+        var setuptaxObj = getSetupTaxSubsidiary(subsidiary);
         // Tipo de evento del users events
         var type_event = scriptContext.type;
         //Universal Setting se realiza solo al momento de crear
@@ -1055,6 +1048,14 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
             }
             //Seteo de campos perteneciente a record anexado
             library_Uni_Setting.set_inv_identifier(RCD);
+          }
+        }
+        if (type_event == 'edit') {
+          if (Object.keys(setuptaxObj).length > 0) {
+            if (library_Uni_Setting.auto_universal_setting(licenses, false) && (setuptaxObj['setInvId'] == true || setuptaxObj['setInvId'] == 'T')) {
+              //Seteo de campos perteneciente a record anexado
+              library_Uni_Setting.set_inv_identifier(RCD);
+            }
           }
         }
 
@@ -2604,19 +2605,6 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
 
     }
 
-    function validateAdvanceHV(country, licenses) {
-      var result = false;
-      var feature_hv = {
-        'CO' : 1107,
-        'CL' : 1108
-      }
-      if (country && feature_hv[country] && Library_Mail.getAuthorization(feature_hv[country], licenses)) {
-        result = true;
-      }
-      
-      return result;      
-    }
-    
 
     /* ------------------------------------------------------------------------------------------------------
      * A la variable featureId se le asigna el valore que le corresponde
@@ -3022,16 +3010,11 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
           fieldRateUF = searchSetupTax[0].getValue('custrecord_lmry_setuptax_cl_rate_uf');
           currencyUF = searchSetupTax[0].getValue('custrecord_lmry_cl_currency_uf');
         }
-        log.error("currencyUF",currencyUF);
-        log.error("currentRCD.getField(fieldRateUF)",currentRCD.getField(fieldRateUF));
-        log.error("fieldRateUF",fieldRateUF);
-        log.error("currencyTransaction",currencyTransaction)
-        log.error("jsonCurrencies",jsonCurrencies)
-        log.error("flag",fieldRateUF && currentRCD.getField(fieldRateUF) && currencyUF)
+
         if (fieldRateUF && currentRCD.getField(fieldRateUF) && currencyUF) {
           
           //SOLO PARA PESO CHILENO
-          log.error("jsonCurrencies[currencyTransaction]['symbol']",jsonCurrencies[currencyTransaction]['symbol'])
+
           if (jsonCurrencies[currencyTransaction]['symbol'] == 'CLP' && fieldRateUF) {
             var tranDate = currentRCD.getValue('trandate');
             //SETEO DE COLUMNA
@@ -3042,7 +3025,7 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
               target: 'CLP',
               date: tranDate
             });
-            log.error("exchangeRateUF",exchangeRateUF);
+
             currentRCD.setValue({
               fieldId: fieldRateUF,
               value: parseFloat(exchangeRateUF)
@@ -3922,6 +3905,26 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
       } catch (error) {
         log.error('setCOLineValueWTH', error);
       }
+    }
+
+    function getSetupTaxSubsidiary(subsidiary) {
+      var FEATURE_SUBSIDIARY = runtime.isFeatureInEffect({ feature: "SUBSIDIARIES" });
+      var dataObj = {};
+      var searchSetupTax = search.create({
+        type: 'customrecord_lmry_setup_tax_subsidiary',
+        columns: ['custrecord_lmry_setuptax_set_inv_id_ed'],
+        filters: [{ name: 'isinactive', operator: 'is', values: 'F' }]
+      });
+      if (FEATURE_SUBSIDIARY) {
+        searchSetupTax.filters.push(search.createFilter({ name: 'custrecord_lmry_setuptax_subsidiary', operator: 'is', values: subsidiary }));
+      }
+      var result = searchSetupTax.run().getRange(0, 1);
+      if (result.length > 0) {
+        dataObj = {
+          setInvId: result[0].getValue('custrecord_lmry_setuptax_set_inv_id_ed')
+        }
+      }
+      return dataObj;
     }
 
     function getPriceUnitList(RCD_OBJ){

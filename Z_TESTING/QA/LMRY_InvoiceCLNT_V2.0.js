@@ -434,7 +434,7 @@
                         };
 
                     }
-                    console.log("jsonCurrencies: ",jsonCurrencies);
+
                     var searchSetupTax = search.create({
                         type: 'customrecord_lmry_setup_tax_subsidiary',
                         columns: ['custrecord_lmry_setuptax_cl_rate_uf','custrecord_lmry_cl_currency_uf'],
@@ -454,11 +454,11 @@
                     if (searchSetupTax && searchSetupTax.length && searchSetupTax[0].getValue('custrecord_lmry_setuptax_cl_rate_uf')) {
                         fieldRateUF = searchSetupTax[0].getValue('custrecord_lmry_setuptax_cl_rate_uf');
                         currencyUF = searchSetupTax[0].getValue('custrecord_lmry_cl_currency_uf');
-                        console.log("fieldRateUF: ",fieldRateUF);
+
                     }
 
                     var currencyTransaction = currentRCD.getValue('currency');
-                    console.log("currencyTransaction: ",currencyTransaction);
+
                     //SOLO SI ES PESO CHILENO: CLP Y EXISTE EL CAMPO
                     if (jsonCurrencies[currencyTransaction]['symbol'] == 'CLP' && fieldRateUF && currentRCD.getField(fieldRateUF) && type != 'copy') {
 
@@ -555,7 +555,6 @@
                 return true;
             }
 
-          if (!validateAdvanceHV(LMRY_countr[0], licenses)) {
             if (subsi_OW == 'T' || subsi_OW == true) {
                 /* ************************************************ *
                     * 2024.05.10 Se activo la validacion por entidad
@@ -611,7 +610,6 @@
                     return true;
                 }
             }
-          }
 
             //SETEO DE CFOP AUTOMATICO CUANDO ESTA LLENO EN EL ITEM
             if (LMRY_countr[0] == 'BR' && LMRY_countr[2] == true) {
@@ -801,7 +799,6 @@
                     // Retorna el cuero del SuiteLet
                     var closedPeriod = getStlt.body;
 
-                    log.error('closedPeriod', closedPeriod);
                     if (closedPeriod == 'T') {
                         currentRCD.setValue('custpage_lockedperiod', true);
                     } else {
@@ -956,7 +953,7 @@
                                         target: 'CLP',
                                         date: tranDate
                                     });
-                                    console.log("rateUF validate",rateUF)
+
                                     currentRCD.setValue({
                                         fieldId: fieldRateUF,
                                         value: parseFloat(rateUF),
@@ -1038,7 +1035,7 @@
 
                 /* Validacion 04/02/22 */
                 var lockedPeriod = currentRCD.getValue("custpage_lockedperiod");
-                log.error('lockedPeriod', lockedPeriod);
+
                 if (lockedPeriod == true || lockedPeriod == 'T') {
                     return true;
                 }
@@ -2914,18 +2911,6 @@
 
             }
 
-        }
-        function validateAdvanceHV(country, licenses) {
-          var result = false;
-          var feature_hv = {
-            'CO' : 1107,
-            'CL' : 1108
-          }
-          if (country && feature_hv[country] && Library_Mail.getAuthorization(feature_hv[country], licenses)) {
-            result = true;
-          }
-
-          return result;      
         }
 
         function sleep(milliseconds) {

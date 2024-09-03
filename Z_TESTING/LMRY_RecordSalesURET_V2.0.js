@@ -982,16 +982,11 @@ define(['N/config', 'N/currency', 'N/record', 'N/runtime', 'N/search', 'N/ui/ser
           fieldRateUF = searchSetupTax[0].getValue('custrecord_lmry_setuptax_cl_rate_uf');
           currencyUF = searchSetupTax[0].getValue('custrecord_lmry_cl_currency_uf');
         }
-        log.error("currencyUF",currencyUF);
-        log.error("currentRCD.getField(fieldRateUF)",currentRCD.getField(fieldRateUF));
-        log.error("fieldRateUF",fieldRateUF);
-        log.error("currencyTransaction",currencyTransaction)
-        log.error("jsonCurrencies",jsonCurrencies)
-        log.error("flag",fieldRateUF && currentRCD.getField(fieldRateUF) && currencyUF)
+        
         if (fieldRateUF && currentRCD.getField(fieldRateUF) && currencyUF) {
           
           //SOLO PARA PESO CHILENO
-          log.error("jsonCurrencies[currencyTransaction]['symbol']",jsonCurrencies[currencyTransaction]['symbol'])
+
           if (jsonCurrencies[currencyTransaction]['symbol'] == 'CLP' && fieldRateUF) {
             var tranDate = currentRCD.getValue('trandate');
             //SETEO DE COLUMNA
@@ -1002,7 +997,7 @@ define(['N/config', 'N/currency', 'N/record', 'N/runtime', 'N/search', 'N/ui/ser
               target: 'CLP',
               date: tranDate
             });
-            log.error("exchangeRateUF",exchangeRateUF);
+
             currentRCD.setValue({
               fieldId: fieldRateUF,
               value: parseFloat(exchangeRateUF)

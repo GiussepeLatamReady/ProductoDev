@@ -956,7 +956,7 @@ define(['N/currency', 'N/log', 'N/config', 'N/ui/serverWidget', 'N/record', 'N/s
         // Libreria - Valida Periodo cerrado
         if (LibraryValidatePeriod.validatePeriod(recordObj.getValue('postingperiod'), licenses, LMRY_Result[0], 'sales')) return true;
         /* Fin validacion 04/02/22 */
-
+        var setuptaxObj = getSetupTaxSubsidiary(subsidiary);
         //Universal Setting se realiza solo al momento de crear
         if (type_event == 'create' && (["USERINTERFACE", "USEREVENT", "CSVIMPORT", "RESTWEBSERVICES", "RESTLET", "WEBSERVICES"].indexOf(type_interface) != -1) && (ST_FEATURE == false || ST_FEATURE == "F")) {
           var al_country = recordObj.getValue('custbody_lmry_subsidiary_country');
@@ -1051,6 +1051,14 @@ define(['N/currency', 'N/log', 'N/config', 'N/ui/serverWidget', 'N/record', 'N/s
             setearDatosRef(recordObj);
           } else if (band && id_country == 48) {
             setearFolioCO(recordObj);
+          }
+        }
+        if (type_event == 'edit') {
+          if (Object.keys(setuptaxObj).length > 0) {
+            if (library_Uni_Setting.auto_universal_setting(licenses, false) && (setuptaxObj['setInvId'] == true || setuptaxObj['setInvId'] == 'T')) {
+              //Seteo de campos perteneciente a record anexado
+              library_Uni_Setting.set_inv_identifier(recordObj);
+            }
           }
         }
 
@@ -3698,16 +3706,11 @@ define(['N/currency', 'N/log', 'N/config', 'N/ui/serverWidget', 'N/record', 'N/s
           fieldRateUF = searchSetupTax[0].getValue('custrecord_lmry_setuptax_cl_rate_uf');
           currencyUF = searchSetupTax[0].getValue('custrecord_lmry_cl_currency_uf');
         }
-        log.error("currencyUF",currencyUF);
-        log.error("currentRCD.getField(fieldRateUF)",currentRCD.getField(fieldRateUF));
-        log.error("fieldRateUF",fieldRateUF);
-        log.error("currencyTransaction",currencyTransaction)
-        log.error("jsonCurrencies",jsonCurrencies)
-        log.error("flag",fieldRateUF && currentRCD.getField(fieldRateUF) && currencyUF)
+      
         if (fieldRateUF && currentRCD.getField(fieldRateUF) && currencyUF) {
           
           //SOLO PARA PESO CHILENO
-          log.error("jsonCurrencies[currencyTransaction]['symbol']",jsonCurrencies[currencyTransaction]['symbol'])
+
           if (jsonCurrencies[currencyTransaction]['symbol'] == 'CLP' && fieldRateUF) {
             var tranDate = currentRCD.getValue('trandate');
             //SETEO DE COLUMNA
@@ -3718,7 +3721,7 @@ define(['N/currency', 'N/log', 'N/config', 'N/ui/serverWidget', 'N/record', 'N/s
               target: 'CLP',
               date: tranDate
             });
-            log.error("exchangeRateUF",exchangeRateUF);
+
             currentRCD.setValue({
               fieldId: fieldRateUF,
               value: parseFloat(exchangeRateUF)
@@ -3755,6 +3758,26 @@ define(['N/currency', 'N/log', 'N/config', 'N/ui/serverWidget', 'N/record', 'N/s
         } //SOLO SI EL CAMPO EXISTE
       }
       // FIN SOLO SI ES PESO CHILENO
+    }
+
+    function getSetupTaxSubsidiary(subsidiary) {
+      var FEATURE_SUBSIDIARY = runtime.isFeatureInEffect({ feature: "SUBSIDIARIES" });
+      var dataObj = {};
+      var searchSetupTax = search.create({
+        type: 'customrecord_lmry_setup_tax_subsidiary',
+        columns: ['custrecord_lmry_setuptax_set_inv_id_ed'],
+        filters: [{ name: 'isinactive', operator: 'is', values: 'F' }]
+      });
+      if (FEATURE_SUBSIDIARY) {
+        searchSetupTax.filters.push(search.createFilter({ name: 'custrecord_lmry_setuptax_subsidiary', operator: 'is', values: subsidiary }));
+      }
+      var result = searchSetupTax.run().getRange(0, 1);
+      if (result.length > 0) {
+        dataObj = {
+          setInvId: result[0].getValue('custrecord_lmry_setuptax_set_inv_id_ed')
+        }
+      }
+      return dataObj;
     }
 
     function getPriceUnitList(RCD_OBJ){
