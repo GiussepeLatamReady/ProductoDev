@@ -1587,12 +1587,16 @@ define(['require', './Latam_Library/LMRY_UniversalSetting_Purchase_LBRY', 'N/rec
           }
         }
 
-        if (LMRY_Result[0] == "CO") {
+        var isSuiteAppInstalledCO = suiteAppInfo.isSuiteAppInstalled({
+          suiteAppId: "com.latamready.lmrycolocalization"
+        });
+
+        if (LMRY_Result[0] == "CO" ) {
           if (library.getAuthorization(720, licenses) == true) {
             if (context.type == 'edit') {
               recordObj.setValue('custbody_lmry_scheduled_process', false);
             }
-            if (type_interface == 'USERINTERFACE') {
+            if (type_interface == 'USERINTERFACE' && !isSuiteAppInstalledCO) {
               setCOLineValueWTH(recordObj);
             }
           }

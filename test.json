@@ -1,21 +1,30 @@
 {
-   "type": "error.SuiteScriptError",
-   "name": "SSS_INVALID_FORM_ELEMENT_NAME",
-   "message": "You have entered an invalid form element name. It must be prefixed with \"custpage\", unique, lowercase, and cannot contain any non-alphanumeric characters (except for the underscore character) in order to be added to the form or sublist.",
-   "id": "",
-   "stack": [
-      "Error\n at fillFieldCustpage (/SuiteApps/com.latamready.lmrycolocalization/co_new_withholding_lines/lib/LR_CO_New_WithholdingLines_LIB.js:1579:57)\n at setLineFields (/SuiteApps/com.latamready.lmrycolocalization/co_new_withholding_lines/lib/LR_CO_New_WithholdingLines_LIB.js:1659:17)\n at Object.manageRetentionFields (/SuiteApps/com.latamready.lmrycolocalization/co_new_withholding_lines/lib/LR_CO_New_WithholdingLines_LIB.js:1563:17)\n at Object.beforeLoad (/SuiteApps/com.latamready.lmrycolocalization/pluginImpl/vendorbill/LMRY_Vendorbill_CO_URET_IMPLT.js:44:35)\n at Object.beforeLoad (/SuiteApps/com.latamready.lmrylocalizationcore/transactions/vendorbill/LR_Vendorbill_URET.js:14:100)"
-   ],
-   "cause": {
-      "type": "internal error",
-      "code": "SSS_INVALID_FORM_ELEMENT_NAME",
-      "details": "You have entered an invalid form element name. It must be prefixed with \"custpage\", unique, lowercase, and cannot contain any non-alphanumeric characters (except for the underscore character) in order to be added to the form or sublist.",
-      "userEvent": null,
-      "stackTrace": [
-         "Error\n at fillFieldCustpage (/SuiteApps/com.latamready.lmrycolocalization/co_new_withholding_lines/lib/LR_CO_New_WithholdingLines_LIB.js:1579:57)\n at setLineFields (/SuiteApps/com.latamready.lmrycolocalization/co_new_withholding_lines/lib/LR_CO_New_WithholdingLines_LIB.js:1659:17)\n at Object.manageRetentionFields (/SuiteApps/com.latamready.lmrycolocalization/co_new_withholding_lines/lib/LR_CO_New_WithholdingLines_LIB.js:1563:17)\n at Object.beforeLoad (/SuiteApps/com.latamready.lmrycolocalization/pluginImpl/vendorbill/LMRY_Vendorbill_CO_URET_IMPLT.js:44:35)\n at Object.beforeLoad (/SuiteApps/com.latamready.lmrylocalizationcore/transactions/vendorbill/LR_Vendorbill_URET.js:14:100)"
-      ],
-      "notifyOff": false
+   "cree": {
+      "nationalTax": "3462",
+      "newBasis": 100,
+      "newRate": 10,
+      "amount": 10,
+      "key": "cree"
    },
-   "notifyOff": false,
-   "userFacing": true
+   "fte": {
+      "nationalTax": "3544",
+      "newBasis": 100,
+      "newRate": 10,
+      "amount": 10,
+      "key": "fte"
+   },
+   "ica": {
+      "nationalTax": "3260",
+      "newBasis": 100,
+      "newRate": 10,
+      "amount": 10,
+      "key": "ica"
+   },
+   "iva": {
+      "nationalTax": "3545",
+      "newBasis": 100,
+      "newRate": 10,
+      "amount": 10,
+      "key": "iva"
+   }
 }

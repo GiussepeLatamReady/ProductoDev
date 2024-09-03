@@ -26,7 +26,7 @@ define(['N/record', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/log', 'N/co
   './Latam_Library/LMRY_PA_ST_Purchases_Tax_Transaction_LBRY_V2.0', './WTH_Library/LMRY_TransferIva_LBRY', './Latam_Library/LMRY_MX_Withholding_Purchase_LBRY_V2.0',
   './WTH_Library/LMRY_BO_Taxes_LBRY_V2.0', './WTH_Library/LMRY_MX_STE_BillCredit_WHT_Total_LBRY_V2.0', './Latam_Library/LMRY_PE_STE_Purchases_Tax_Transaction_LBRY_V2.0', './Latam_Library/LMRY_MX_CREATE_JsonTaxResult_LBRY_V2.0',
   './WTH_Library/LMRY_CR_STE_WhtTransactionOnPurchaseByTotal_LBRY_V2.0', './Latam_Library/LMRY_BO_libWhtLines_LMRY_V2.0', './Latam_Library/LMRY_Custom_ExchangeRate_Field_LBRY_V2.0.js',
-  './Latam_Library/LMRY_KofaxIntegrations_LBRY_V2.0', './Latam_Library/LMRY_Custom_ExchangeRate_LBRY_V2.0.js', './Latam_Library/LMRY_RenameFields_LBRY'
+  './Latam_Library/LMRY_KofaxIntegrations_LBRY_V2.0', './Latam_Library/LMRY_Custom_ExchangeRate_LBRY_V2.0.js', './Latam_Library/LMRY_RenameFields_LBRY',"N/suiteAppInfo"
 ],
 
   function (record, serverWidget, search, runtime, log, config, library, library1, libraryDIOT,
@@ -34,7 +34,8 @@ define(['N/record', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/log', 'N/co
     MX_ST_TaxLibrary, ST_Library_DIOT, libraryEcBaseAmounts, Library_BRDup, CO_STE_TaxLibrary,
     CO_STE_WhtLibrary_Total, libraryTranIdCSV, AR_ST_TaxLibrary, AR_ST_Perception, AR_ST_TransFields, LibraryValidatePeriod, library_UY_Retencion,
     CO_STE_WhtLibrary_Lines, errorAPI, library_Uni_Setting, CL_ST_TaxLibrary, CL_ST_WhtLibrary_Total, MX_TaxLibrary, PA_ST_TaxLibrary, libraryTransferIva, MX_WhtLibrary, libBoTaxes,
-    MX_STE_WhtLibrary_Total, PE_STE_TaxLibrary, libraryMxJsonResult, CR_STE_WhtLibrary_Total, BO_libWHTLines, Library_ExchangeRate_Field, kofaxModule, Library_ExchangeRate, Library_RenameFields) {
+    MX_STE_WhtLibrary_Total, PE_STE_TaxLibrary, libraryMxJsonResult, CR_STE_WhtLibrary_Total, BO_libWHTLines, Library_ExchangeRate_Field, kofaxModule, Library_ExchangeRate, Library_RenameFields
+    ,suiteAppInfo) {
 
     var LMRY_script = 'LatamReady - Vendor Credit URET V2.0';
     var type = '';
@@ -341,10 +342,14 @@ define(['N/record', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/log', 'N/co
 
           }
 
+          var isSuiteAppInstalledCO = suiteAppInfo.isSuiteAppInstalled({
+            suiteAppId: "com.latamready.lmrycolocalization"
+          });
+
           // Solo localizacion CO
           if (LMRY_Result[0] == 'CO') {
             //Issue CP2400094 - 03/06/2024: Se hizo la modificación de validar la existencia de la sublista y campos antes de ocultarlos.
-            if (library.getAuthorization(340, licenses) || library.getAuthorization(720, licenses)) {
+            if ((library.getAuthorization(340, licenses) || library.getAuthorization(720, licenses)) && !isSuiteAppInstalledCO) {
               var formObj = context.form;
               var reteica = formObj.getField('custbody_lmry_co_reteica');
               if (reteica) {
@@ -375,7 +380,7 @@ define(['N/record', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/log', 'N/co
               }
             }
 
-            if (!library.getAuthorization(720, licenses)) {
+            if (!library.getAuthorization(720, licenses) && !isSuiteAppInstalledCO) {
               var formObj = context.form;
               var sublistItem = formObj.getSublist({
                 id: 'item'
@@ -522,7 +527,7 @@ define(['N/record', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/log', 'N/co
               }
             }
 
-            if (LMRY_Result[0] == 'CO' && library.getAuthorization(720, licenses)) {
+            if (LMRY_Result[0] == 'CO' && library.getAuthorization(720, licenses) && !isSuiteAppInstalledCO) {
               createCoButtonUpDateWhx(context);
             }
 
@@ -1317,12 +1322,15 @@ define(['N/record', 'N/ui/serverWidget', 'N/search', 'N/runtime', 'N/log', 'N/co
           }
         }
 
+        var isSuiteAppInstalledCO = suiteAppInfo.isSuiteAppInstalled({
+          suiteAppId: "com.latamready.lmrycolocalization"
+        });
         if (LMRY_Result[0] == "CO") {
           if (library.getAuthorization(720, licenses) == true) {
             if (context.type == 'edit') {
               recordObj.setValue('custbody_lmry_scheduled_process', false);
             }
-            if (type_interface == 'USERINTERFACE') {
+            if (type_interface == 'USERINTERFACE' && !isSuiteAppInstalledCO) {
               setCOLineValueWTH(recordObj);
             }
           }
