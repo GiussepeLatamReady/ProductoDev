@@ -59,6 +59,9 @@ Chile
     + Se modificó el proceso para que el desarrollo soporte ejecucion por csv.
 
 + Scripts modificados:
+    + LMRY_CreditMemoCLNT_V2.0.js
+    + LMRY_InvoiceCLNT_V2.0.js
+    + LMRY_RecordSalesCLNT_V2.0.js
 
     + LMRY_CreditMemoURET_V2.0.js
     + LMRY_InvoiceURET_V2.0.js

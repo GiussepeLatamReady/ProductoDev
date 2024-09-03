@@ -514,6 +514,7 @@
                 LMRY_swinit = false;
 
             } catch (err) {
+                console.error("error: ",err)
                 Library_Mail.sendemail2(' [ INVClnt_PageInit ] ' + err, LMRY_script, currentRCD, 'tranid', 'entity');
             }
 

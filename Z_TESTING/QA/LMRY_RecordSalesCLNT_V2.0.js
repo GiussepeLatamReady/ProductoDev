@@ -259,7 +259,7 @@ define(['./Latam_Library/LMRY_Custom_ExchangeRate_LBRY_V2.0', './Latam_Library/L
               };
   
             }
-  
+            console.log("jsonCurrencies",jsonCurrencies)
             var searchSetupTax = search.create({
               type: 'customrecord_lmry_setup_tax_subsidiary',
               columns: ['custrecord_lmry_setuptax_cl_rate_uf','custrecord_lmry_cl_currency_uf'],
@@ -280,9 +280,10 @@ define(['./Latam_Library/LMRY_Custom_ExchangeRate_LBRY_V2.0', './Latam_Library/L
               fieldRateUF = searchSetupTax[0].getValue('custrecord_lmry_setuptax_cl_rate_uf');
               currencyUF = searchSetupTax[0].getValue('custrecord_lmry_cl_currency_uf');
             }
-  
+            console.log("currencyUF",currencyUF)
             var currencyTransaction = currentRCD.getValue('currency');
-  
+            console.log("currencyTransaction",currencyTransaction)
+            console.log("jsonCurrencies[currencyTransaction]['symbol']",jsonCurrencies[currencyTransaction]['symbol'])
             //SOLO SI ES PESO CHILENO: CLP Y EXISTE EL CAMPO
             if (jsonCurrencies[currencyTransaction]['symbol'] == 'CLP' && fieldRateUF && currentRCD.getField(fieldRateUF) && mode_type != 'copy') {
   
@@ -297,6 +298,7 @@ define(['./Latam_Library/LMRY_Custom_ExchangeRate_LBRY_V2.0', './Latam_Library/L
                   target: 'CLP',
                   date: tranDate
                 });
+                console.log("rateUF",rateUF)
                 currentRCD.setValue({
                   fieldId: fieldRateUF,
                   value: parseFloat(rateUF),
