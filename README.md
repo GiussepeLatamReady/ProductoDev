@@ -73,7 +73,7 @@ Solo aplica a Colombia
                 LATAM - RECORD TAX
                     National Tax
                 LATAM - GENERATED TRANSACTION
-                    Journal
+                    WHT by Transaction
                 LATAM - TAX TYPE
                     Retencion
                 LATAM - WHT TYPE
