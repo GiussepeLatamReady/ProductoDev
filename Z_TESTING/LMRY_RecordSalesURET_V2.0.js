@@ -21,13 +21,13 @@ define(['N/config', 'N/currency', 'N/record', 'N/runtime', 'N/search', 'N/ui/ser
   './Latam_Library/LMRY_MX_STE_Sales_Tax_Transaction_LBRY_V2.0',
   './Latam_Library/LMRY_Custom_ExchangeRate_Field_LBRY_V2.0.js', './WTH_Library/LMRY_AutoPercepcionDesc_LBRY_V2.0',
   './Latam_Library/LMRY_second_Entity_LBRY_V2.0', './Latam_Library/LMRY_Custom_ExchangeRate_LBRY_V2.0.js',
-  './Latam_Library/LMRY_AR_Unit_Price_LBRY_V2.0'
+  './Latam_Library/LMRY_AR_Unit_Price_LBRY_V2.0','N/currency'
 ],
 
   function (config, currencyModule, record, runtime, search, serverWidget, log,
     Library_Mail, Library_HideView, Library_WHT_Transaction, library_hideview3,
     library_SalesOrder, libraryGLImpact, PE_libMapTransactions, libraryTaxWithholding, libraryFleteGlobales,
-    MX_STE_TaxLibrary, Library_ExchangeRate_Field, Library_AutoPercepcionDesc, librarySecondClient, Library_ExchangeRate,libraryUnitPrice) {
+    MX_STE_TaxLibrary, Library_ExchangeRate_Field, Library_AutoPercepcionDesc, librarySecondClient, Library_ExchangeRate,libraryUnitPrice,currency) {
 
     var LMRY_script = 'LMRY Record Sales URET V2.0';
     var OBJ_FORM = '';
@@ -982,11 +982,14 @@ define(['N/config', 'N/currency', 'N/record', 'N/runtime', 'N/search', 'N/ui/ser
           fieldRateUF = searchSetupTax[0].getValue('custrecord_lmry_setuptax_cl_rate_uf');
           currencyUF = searchSetupTax[0].getValue('custrecord_lmry_cl_currency_uf');
         }
-        
+        log.error("currencyUF :",currencyUF)
+        log.error("fieldRateUF :",fieldRateUF)
         if (fieldRateUF && currentRCD.getField(fieldRateUF) && currencyUF) {
           
           //SOLO PARA PESO CHILENO
-
+          log.error("jsonCurrencies :",jsonCurrencies)
+          log.error("currencyTransaction :",currencyTransaction)
+          log.error("jsonCurrencies[currencyTransaction]['symbol'] :",jsonCurrencies[currencyTransaction]['symbol'])
           if (jsonCurrencies[currencyTransaction]['symbol'] == 'CLP' && fieldRateUF) {
             var tranDate = currentRCD.getValue('trandate');
             //SETEO DE COLUMNA
@@ -997,7 +1000,7 @@ define(['N/config', 'N/currency', 'N/record', 'N/runtime', 'N/search', 'N/ui/ser
               target: 'CLP',
               date: tranDate
             });
-
+            log.error("exchangeRateUF :",exchangeRateUF)
             currentRCD.setValue({
               fieldId: fieldRateUF,
               value: parseFloat(exchangeRateUF)
