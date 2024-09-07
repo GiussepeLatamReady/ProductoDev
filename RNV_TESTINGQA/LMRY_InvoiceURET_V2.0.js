@@ -1334,7 +1334,12 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
         }
 
 
-        
+        if (LMRY_Result[0] == "CO" && ["create", "edit", "copy"].indexOf(scriptContext.type) != -1) {
+          var percentageDiscount = Library_Mail.getAuthorization(1026, licenses);
+          if (percentageDiscount) {
+            setLineDiscount(RCD);
+          }
+        }
 
         //SETEO DE CAMPOS BASE 0%, 12% Y 14%
         var eventsEC = ['create', 'copy', 'edit'];
@@ -1596,7 +1601,7 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
 
         // Solo si la transaccion es Eliminada
         if (scriptContext.type == 'delete') {
-           afterSubmit_delete(LMRY_Result, LMRY_Intern);
+          afterSubmit_delete(LMRY_Result, LMRY_Intern);
         }
 
         // Solo si la transaccion es Creada y/o Editada
@@ -1869,12 +1874,6 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
           if (Library_Mail.getAuthorization(142, licenses)) {
             Library_AutoPercepcionDesc.processPerception(scriptContext, LMRY_Result[0], scriptContext.type);
           }
-        }
-
-        if (LMRY_Result[0] == "CO" && ["create", "edit", "copy"].indexOf(scriptContext.type) != -1) {
-          
-          setLineDiscount(RCD);
-          
         }
         /*****************************************************/
       } catch (err) {
@@ -3239,62 +3238,32 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
      * Function that establishes the value of the unit price applied the discount and the percentage of this discount.
      */
 
-    function setLineDiscount(newRecord) {
+    function setLineDiscount(recordObj) {
       try {
-        var recordObj = record.load({ type: 'invoice', id: newRecord.id });
+        var GroupTypeItems = ["Group", "EndGroup"];
         var numberItems = recordObj.getLineCount({ sublistId: "item" });
-    
+        var totalDiscountPercentage = 0;
         if (numberItems) {
-          var rateDiscount = 0, amountDiscount = 0, isChildrenGroup = false, amountGroup = 0;
-    
           for (var i = numberItems - 1; i >= 0; i--) {
             var itemType = recordObj.getSublistValue({ sublistId: "item", fieldId: "itemtype", line: i });
-            var rate = Number(recordObj.getSublistValue({ sublistId: "item", fieldId: "rate", line: i }) || 0);
-    
-            if (itemType === 'Discount') {
-              var amountParent = Number(recordObj.getSublistValue({ sublistId: "item", fieldId: "amount", line: i - 1 }));
-              var amount = Number(recordObj.getSublistValue({ sublistId: "item", fieldId: "amount", line: i }));
-              rateDiscount = Number((amount / amountParent).toFixed(2));
-              amountDiscount = amount;
+            var rate = recordObj.getSublistValue({ sublistId: "item", fieldId: "rate", line: i });
+            if (GroupTypeItems.indexOf(itemType) != -1) continue;
+            if (itemType == 'Discount') {
+              totalDiscountPercentage += rate;
             } else {
-              if (itemType === "Group") isChildrenGroup = false;
-              if (itemType === "EndGroup") {
-                isChildrenGroup = true;
-                amountGroup = Number(recordObj.getSublistValue({ sublistId: "item", fieldId: "amount", line: i }));
-              }
-              if (isChildrenGroup) continue;
-    
-              recordObj.setSublistValue({
-                sublistId: "item",
-                fieldId: "custcol_lmry_sales_discount_percentag",
-                value: Math.abs(rateDiscount * 100),
-                line: i
-              });
-    
-              if (!rate) {
-                var quantity = Number(recordObj.getSublistValue({ sublistId: "item", fieldId: "quantity", line: i }) || 1);
-                var amount = Number(recordObj.getSublistValue({ sublistId: "item", fieldId: "amount", line: i }));
-                rate = (itemType === "Group" ? amountGroup : amount) / quantity;
-              }
-    
-              rate *= (1 - Math.abs(rateDiscount));
-    
+              recordObj.setSublistValue({ sublistId: "item", fieldId: "custcol_lmry_sales_discount_percentag", value: Math.abs(totalDiscountPercentage), line: i });
+              rate *= (1 - Math.abs(totalDiscountPercentage) / 100);
               recordObj.setSublistValue({ sublistId: "item", fieldId: "custcol_lmry_sales_discount_unit_real", value: Math.abs(rate), line: i });
-              recordObj.setSublistValue({ sublistId: "item", fieldId: "custcol_lmry_col_sales_discount", value: Math.abs(amountDiscount), line: i });
-    
-              rateDiscount = 0;
-              amountDiscount = 0;
+
+              totalDiscountPercentage = 0;
             }
           }
         }
-    
-        recordObj.save({ disableTriggers: true, ignoreMandatoryFields: true });
       } catch (err) {
         log.error('Error [setLineDiscount]', err);
         Library_Mail.sendemail2(' [ setLineDiscount ] ' + err, LMRY_script, RCD_OBJ, 'tranid', 'entity');
       }
     }
-    
 
     function hideAddendaSubtabs(context) {
       try {
