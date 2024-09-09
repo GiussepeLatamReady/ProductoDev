@@ -24,12 +24,12 @@ const deleteFiles = (fileNames) => {
 
 const executeDelete = () => {
     const filesToDelete = [
-        'custcollection_lmry_ste_ar_registry_en_en_GB.xlf', 
-        'custcollection_lmry_ste_ar_registry_en_en_US.xlf', 
-        'custcollection_lmry_ste_ar_registry_en_es_AR.xlf',
-        'custcollection_lmry_ste_ar_registry_en_es_ES.xlf',
-        'custcollection_lmry_ste_ar_registry_en_pt_BR.xlf',
-        'custcollection_lmry_ste_ar_registry.xml'
+        'custcollection_lmry_ste_ar_send_email_en_en_GB.xlf', 
+        'custcollection_lmry_ste_ar_send_email_en_en_US.xlf', 
+        'custcollection_lmry_ste_ar_send_email_en_es_AR.xlf',
+        'custcollection_lmry_ste_ar_send_email_en_es_ES.xlf',
+        'custcollection_lmry_ste_ar_send_email_en_pt_BR.xlf',
+        'custcollection_lmry_ste_ar_send_email.xml'
     ];
     deleteFiles(filesToDelete);
   };

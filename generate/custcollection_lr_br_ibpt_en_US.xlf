@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<xliff xmlns:ns="netsuite" xmlns:ns3="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file original="netsuite-database" source-language="en" datatype="database" target-language="en-US">
+    <body>
+      <group ns:collection="custcollection_lr_br_ibpt">
+        <trans-unit id="BR_ALERT_TITLE">
+          <source>Alert</source>
+          <target>Alert</target>
+        </trans-unit>
+        <trans-unit id="BR_ALERT_MESSAGE">
+          <source>Please wait a moment, the process is in progress.</source>
+          <target>Please wait a moment, the process is in progress.</target>
+        </trans-unit>
+        <trans-unit id="BR_INPUT_DATA">
+          <source>Enter a value for </source>
+          <target>Enter a value for </target>
+        </trans-unit>
+        <trans-unit id="BR_COMPLETE_MPRD">
+          <source>Completed</source>
+          <target>Completed</target>
+        </trans-unit>
+        <trans-unit id="BR_PROCESSING_MPRD">
+          <source>Processing</source>
+          <target>Processing</target>
+        </trans-unit>
+        <trans-unit id="BR_ERROR_MPRD">
+          <source>An error has occurred</source>
+          <target>An error has occurred</target>
+        </trans-unit>
+        <trans-unit id="BR_COMPLETE_MSG_MPRD">
+          <source>The process has finished</source>
+          <target>The process has finished</target>
+        </trans-unit>
+        <trans-unit id="BR_PROCESSING_MSG_MPRD">
+          <source>Processing of items has started...</source>
+          <target>Processing of items has started...</target>
+        </trans-unit>
+        <trans-unit id="BR_MESSAGE">
+          <source>Message</source>
+          <target>Message</target>
+        </trans-unit>
+        <trans-unit id="BR_MESSAGE_LICENSE">
+          <source>NOTICE: Currently the license for this module is expired, please contact the LatamReady sales team.</source>
+          <target>NOTICE: Currently the license for this module is expired, please contact the LatamReady sales team.</target>
+        </trans-unit>
+        <trans-unit id="BR_MESSAGE_CONTACT">
+          <source>You can also contact us through</source>
+          <target>You can also contact us through</target>
+        </trans-unit>
+        <trans-unit id="BR_PRIMARY_INFO">
+          <source>Primary information</source>
+          <target>Primary information</target>
+        </trans-unit>
+        <trans-unit id="BR_SUBSIDIARY">
+          <source>Subsidiary</source>
+          <target>Subsidiary</target>
+        </trans-unit>
+        <trans-unit id="BR_SERVICES">
+          <source>Services</source>
+          <target>Services</target>
+        </trans-unit>
+        <trans-unit id="BR_PRODUCT">
+          <source>Product</source>
+          <target>Product</target>
+        </trans-unit>
+        <trans-unit id="BR_TITLE_FORM">
+          <source>LR - BR Import IBPT</source>
+          <target>LR - BR Import IBPT</target>
+        </trans-unit>
+        <trans-unit id="BR_RESTART">
+          <source>Restart</source>
+          <target>Restart</target>
+        </trans-unit>
+        <trans-unit id="BR_GENERATE">
+          <source>Generate</source>
+          <target>Generate</target>
+        </trans-unit>
+        <trans-unit id="BR_RESULTS">
+          <source>Results</source>
+          <target>Results</target>
+        </trans-unit>
+        <trans-unit id="BR_RESULT">
+          <source>Result</source>
+          <target>Result</target>
+        </trans-unit>
+        <trans-unit id="BR_INTERNALID">
+          <source>Internal ID</source>
+          <target>Internal ID</target>
+        </trans-unit>
+        <trans-unit id="BR_CREATION_DATE_LABEL">
+          <source>Creation Date</source>
+          <target>Creation Date</target>
+        </trans-unit>
+        <trans-unit id="BR_CREATED_BY_LABEL">
+          <source>Created By</source>
+          <target>Created By</target>
+        </trans-unit>
+        <trans-unit id="BR_TYPE">
+          <source>Type</source>
+          <target>Type</target>
+        </trans-unit>
+        <trans-unit id="BR_SUMMARY">
+          <source>Summary</source>
+          <target>Summary</target>
+        </trans-unit>
+        <trans-unit id="BR_STATUS">
+          <source>Status</source>
+          <target>Status</target>
+        </trans-unit>
+        <trans-unit id="BR_REFRESH">
+          <source>Refresh</source>
+          <target>Refresh</target>
+        </trans-unit>
+        <trans-unit id="BR_FINISH">
+          <source>Finished</source>
+          <target>Finished</target>
+        </trans-unit>
+        <trans-unit id="BR_LOADING_DATA">
+          <source>Loading Data</source>
+          <target>Loading Data</target>
+        </trans-unit>
+        <trans-unit id="BR_ERROR">
+          <source>An Error Occurred</source>
+          <target>An Error Occurred</target>
+        </trans-unit>
+        <trans-unit id="BR_PROCESING">
+          <source>Processing</source>
+          <target>Processing</target>
+        </trans-unit>
+        <trans-unit id="BR_DETAILS">
+          <source>Details</source>
+          <target>Details</target>
+        </trans-unit>
+        <trans-unit id="BR_NUMBER">
+          <source>Position</source>
+          <target>Position</target>
+        </trans-unit>
+        <trans-unit id="BR_SUCESS">
+          <source>successful</source>
+          <target>successful</target>
+        </trans-unit>
+        <trans-unit id="BR_RAW">
+          <source>unprocessed</source>
+          <target>unprocessed</target>
+        </trans-unit>
+        <trans-unit id="BR_WITH_ERROR">
+          <source>with error</source>
+          <target>with error</target>
+        </trans-unit>
+        <trans-unit id="BR_CODE_FOUND">
+          <source>Processed catalog item</source>
+          <target>Processed catalog item</target>
+        </trans-unit>
+        <trans-unit id="BR_CATALOGS">
+          <source>Catalog</source>
+          <target>Catalog</target>
+        </trans-unit>
+        <trans-unit id="BR_CODE">
+          <source>code</source>
+          <target>code</target>
+        </trans-unit>
+        <trans-unit id="BR_NOT_PROCESING">
+          <source>Not Processed</source>
+          <target>Not Processed</target>
+        </trans-unit>
+        <trans-unit id="BR_PROCESING_CHECK">
+          <source>Successfully Processed</source>
+          <target>Successfully Processed</target>
+        </trans-unit>
+        <trans-unit id="BR_CALCULO_IBPT">
+          <source>IBPT calculation</source>
+          <target>IBPT calculation</target>
+        </trans-unit>
+        <trans-unit id="BR_EXIST">
+          <source>The time period is interfering with another.</source>
+          <target>The time period is interfering with another.</target>
+        </trans-unit>
+        <trans-unit id="BR_CREDENTIALS">
+          <source>The credentials de the application are wrong.</source>
+          <target>The credentials de the application are wrong.</target>
+        </trans-unit>
+        <trans-unit id="BR_CODE_EXIST">
+          <source>The catalog item does not have Latam - BR Law Item</source>
+          <target>The catalog item does not have Latam - BR Law Item</target>
+        </trans-unit>
+      </group>
+    </body>
+  </file>
+</xliff>
