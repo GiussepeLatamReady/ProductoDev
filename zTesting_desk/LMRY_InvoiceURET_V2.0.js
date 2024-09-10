@@ -3245,24 +3245,28 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
         var numberItems = recordObj.getLineCount({ sublistId: "item" });
     
         if (numberItems) {
-          var rateDiscount = 0, amountDiscount = 0, isChildrenGroup = false, amountGroup = 0;
-    
+          var rateDiscount = 0, amountDiscount = 0, isChildrenGroup = false, amountGroup = 0, existDiscount= false;
           for (var i = numberItems - 1; i >= 0; i--) {
             var itemType = recordObj.getSublistValue({ sublistId: "item", fieldId: "itemtype", line: i });
             var rate = Number(recordObj.getSublistValue({ sublistId: "item", fieldId: "rate", line: i }) || 0);
     
             if (itemType === 'Discount') {
+              var identifier = recordObj.getSublistValue({ sublistId: "item", fieldId: "custcol_lmry_invoicing_id_code", line: i });
+              var taxrate = Number(recordObj.getSublistValue({ sublistId: "item", fieldId: "taxrate1", line: i }));
+              if (taxrate === 0 && (identifier !== '' && identifier !== null)) continue;
+
               var amountParent = Number(recordObj.getSublistValue({ sublistId: "item", fieldId: "amount", line: i - 1 }));
               var amount = Number(recordObj.getSublistValue({ sublistId: "item", fieldId: "amount", line: i }));
               rateDiscount = Number((amount / amountParent).toFixed(2));
               amountDiscount = amount;
+              existDiscount = true;
             } else {
               if (itemType === "Group") isChildrenGroup = false;
               if (itemType === "EndGroup") {
                 isChildrenGroup = true;
                 amountGroup = Number(recordObj.getSublistValue({ sublistId: "item", fieldId: "amount", line: i }));
               }
-              if (isChildrenGroup) continue;
+              if (isChildrenGroup || !existDiscount) continue;
     
               recordObj.setSublistValue({
                 sublistId: "item",
@@ -3284,6 +3288,7 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
     
               rateDiscount = 0;
               amountDiscount = 0;
+              existDiscount = false;
             }
           }
         }
