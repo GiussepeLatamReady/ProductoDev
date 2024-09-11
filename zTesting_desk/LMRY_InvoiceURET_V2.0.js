@@ -3296,7 +3296,7 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
         recordObj.save({ disableTriggers: true, ignoreMandatoryFields: true });
       } catch (err) {
         log.error('Error [setLineDiscount]', err);
-        Library_Mail.sendemail2(' [ setLineDiscount ] ' + err, LMRY_script, RCD_OBJ, 'tranid', 'entity');
+        Library_Mail.sendemail2(' [ setLineDiscount ] ' + err, LMRY_script, RCD_OBJ, 'discount', 'transaction');
       }
     }
     
