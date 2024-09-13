@@ -1334,7 +1334,6 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
         }
 
 
-        
 
         //SETEO DE CAMPOS BASE 0%, 12% Y 14%
         var eventsEC = ['create', 'copy', 'edit'];
@@ -3241,7 +3240,7 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
 
     function setLineDiscount(newRecord) {
       try {
-        var recordObj = record.load({ type: 'invoice', id: newRecord.id });
+        var recordObj = record.load({ type: newRecord.type, id: newRecord.id });
         var numberItems = recordObj.getLineCount({ sublistId: "item" });
     
         if (numberItems) {

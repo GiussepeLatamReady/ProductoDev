@@ -868,15 +868,15 @@ define(['N/currency', 'N/log', 'N/config', 'N/ui/serverWidget', 'N/record', 'N/s
               libraryTaxWithholding.resetLines(recordObj);
             }
           }
-          log.debug("gadp", "flag 1")
+
           if (LMRY_Result[0] == 'AR') {
             if (type_interface == 'USERINTERFACE') {
               Library_AutoPercepcionDesc.disabledSalesDiscount(form);
             }
           }
-          log.debug("gadp", "flag 2")
 
         } // Fin if (type != 'print' && type != 'email')
+
 
       } catch (err) {
         log.error("error BeforeLoad", err);
@@ -2249,7 +2249,7 @@ define(['N/currency', 'N/log', 'N/config', 'N/ui/serverWidget', 'N/record', 'N/s
 
     function setLineDiscount(newRecord) {
       try {
-        var recordObj = record.load({ type: 'invoice', id: newRecord.id });
+        var recordObj = record.load({ type: newRecord.type, id: newRecord.id });
         var numberItems = recordObj.getLineCount({ sublistId: "item" });
     
         if (numberItems) {
