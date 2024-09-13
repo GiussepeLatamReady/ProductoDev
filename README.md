@@ -1,58 +1,29 @@
-# [D1518 - Latam BR: Cálculo de IBPT para Facturación Electrónica](https://docs.google.com/document/d/1Qw94he6Rmw8414nKDeC3etqcm0UqhcgZYmek5I9fJqI/edit#heading=h.1mllta7bdj39)
+# [D1639 - Documento Diseño CO Name GL Impact ajuste  DIAN](https://docs.google.com/document/d/1VgY94IcqjxbkoDOWSpe9WSMmMqTZOMSM1im8ALemxfM/edit)
 
 ## Description of the Requirement
 
-Realizar conexión API con portal de De Olho No Imposto a fin de obtener el valor de IBPT.
-BRAZIL
+El presente desarrollo realizará la reclasificación del VAT el GL Impact de la transacción.
+
 
 ## Description of the solution
 
 
 ## Scripts
 + Create
-   + Title: LR - BR Import IBPT STLT | LR - BR Importar IBPT STLT
-        + Name: LR - BR Import IBPT STLT
-        + id: _lr_br_import_ibpt_stlt
-        + File: LR_BR_Import_IBPT_STLT.js
-
-    + File: LR_BR_Import_IBPT_CLNT.js
-
-    + Title: LR - BR Import IBPT MPRD | LR - BR Importar IBPT MPRD
-        + Name: LR - BR Import IBPT MPRD
-        + id: _lr_br_import_ibpt_mprd
-        + File: LR_BR_Import_IBPT_MPRD.js
-
-        + Parametros:
-            + custscript_lr_br_import_ibpt_user
-            + custscript_lr_br_import_ibpt_status
-
-    + File: LR_BR_Import_IBPT_URET.js
-        + Name: LR - BR Import IBPT URET
-        + id: _lr_br_import_ibpt_uret
-        + File: LR_BR_Import_IBPT_URET.js
-            + LR - Import Log IBPT
-
 
 + Update
+    + LMRY_CO_VAT_Reclass_PLGN.js
 
 + Delete
 
 
 ## Records Configuration
 + Create
-    LR - Import Log IBPT
-    customrecord_lr_import_log_ibpt
-                Subsidiary	        custrecord_lr_import_log_subsidiary	        List/Record	Subsidiary
-                UF                  custrecord_lr_import_log_uf	                Free-Form Text
-                CNPJ                custrecord_lr_import_log_cnpj	            Free-Form Text
-                Item Type	        custrecord_lr_import_log_type	            Free-Form Text
-                token               custrecord_lr_import_log_token              Free-Form Text	 	 	
-                Date Created	    custrecord_lr_import_log_date	            Date	 	
-                User Responsible	custrecord_lr_import_log_user	            List/Record	Employee	 	
-                Process details	    custrecord_lr_import_log_details	        Free-Form Text	 	 	
-                Catalogs IDs	    custrecord_lr_import_log_taxes	            Long Text	 	 	
-                Summary	            custrecord_lr_import_log_summary	        Free-Form Text	 	 	
-                Status	            custrecord_lr_import_log_status	            Free-Form Text
+    + LatamReady - Setup Tax Subsidiary
+        + Field: Latam - CO Name GL Impact Reclass VAT
+            + id: custrecord_lmry_setuptax_co_set_name_gl
+            + type: CHECKBOX
+            + Subtab: Colombia
 
 
     
