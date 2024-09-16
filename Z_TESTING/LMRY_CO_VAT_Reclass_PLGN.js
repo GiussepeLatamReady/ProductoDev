@@ -124,7 +124,12 @@ function customizeGlImpact(transactionRecord, standardLines, customLines, book) 
 
                         lineVat.setAccountId(parseInt(standardLinesInfo.vatAccount));
                         lineVat.setMemo(memo);
-                        lineVat.setEntityId(parseInt(entity));
+
+                        if (setupTax.isEntitySet ==="T" || setupTax.isEntitySet === true) {
+                            nlapiLogExecution("DEBUG", "Setear el valor", "entidad seteada");
+                            lineVat.setEntityId(parseInt(entity));
+                        }
+                        
 
                         if (standardLinesInfo.department && (FEAT_DEPT == "T" || FEAT_DEPT == true)) {
                             lineVat.setDepartmentId(parseInt(standardLinesInfo.department));
@@ -197,14 +202,16 @@ function getSetupTaxSubsidiary(transactionRecord) {
         }
     }
 
-    var columns = [new nlobjSearchColumn("internalid"), new nlobjSearchColumn("custrecord_lmry_setuptax_currency")]
+    var columns = [new nlobjSearchColumn("internalid"), new nlobjSearchColumn("custrecord_lmry_setuptax_currency"), new nlobjSearchColumn("custrecord_lmry_setuptax_co_set_name_gl")]
 
     var searchSetupTaxSubsidiary = nlapiCreateSearch("customrecord_lmry_setup_tax_subsidiary", filters, columns);
     var results = searchSetupTaxSubsidiary.runSearch().getResults(0, 10);
     if (results && results.length) {
         var localCurrency = results[0].getValue("custrecord_lmry_setuptax_currency") || "";
+        var isEntitySet = results[0].getValue("custrecord_lmry_setuptax_co_set_name_gl");
         return {
-            localCurrency: localCurrency
+            localCurrency: localCurrency,
+            isEntitySet: isEntitySet
         }
     }
     return null;

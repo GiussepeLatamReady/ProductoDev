@@ -49,12 +49,12 @@ El presente desarrollo realizará la reclasificación del VAT el GL Impact de la
 
 + Descripcion:
 
-    + Se ha implementado una integración automática con la API del portal "De Olho No Imposto" para obtener continuamente los valores actualizados del IBPT
+    + Este desarrollo responde a la necesidad de mostrar la entidad de la cabecera de la transacción en el campo "Name" del GL Impact. Para ello, se implementó la función "Latam - CO Name GL Impact Reclass VAT" en el registro "LatamReady - Setup Tax Subsidiary", que asigna la entidad a las líneas del impacto contable cuando está activada. Si está desactivada, la columna de entidad permanece vacía.
 
 
-+ Documento funcional ( LatamReady - BR Import IBPT D1518)
++ Documento funcional ( CO - Calculo de impuestos | Reclasificacion de VAT D1639)
 
-    + [LatamReady - BR Import IBPT D1518](https://docs.google.com/presentation/d/1UOykIUyeAT3_Drt-wbyijA6yAAkXUlny/edit#slide=id.g28b9f62f476_2_23)
+    + [CO - Calculo de impuestos | Reclasificacion de VAT](https://docs.google.com/presentation/d/17bQ78lTi3ho71-XOJuZ1c7vPSzz4U6naqaDVbm6nhN0/edit#slide=id.g2fff4e12215_1_0)
 
 + Documento Tecnico:
 
