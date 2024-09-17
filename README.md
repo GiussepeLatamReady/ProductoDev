@@ -19,7 +19,7 @@ El presente desarrollo realizará la reclasificación del VAT el GL Impact de la
 
 ## Records Configuration
 + Create
-    + LatamReady - Setup Tax Subsidiary
+    + LatamReady - Setup Tax Subsidiary (customrecord_lmry_setup_tax_subsidiary)
         + Field: Latam - CO Name GL Impact Reclass VAT
             + id: custrecord_lmry_setuptax_co_set_name_gl
             + type: CHECKBOX

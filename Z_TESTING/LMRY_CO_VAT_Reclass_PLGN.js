@@ -163,7 +163,7 @@ function customizeGlImpact(transactionRecord, standardLines, customLines, book) 
 
                             lineDiscount.setAccountId(parseInt(standardLinesInfo.discountAccount));
                             lineDiscount.setMemo(memo);
-                            //lineVat.setEntityId(parseInt(vatInfo.entity));
+                            // lineVat.setEntityId(parseInt(vatInfo.entity));
     
                             if (standardLinesInfo.department && (FEAT_DEPT == "T" || FEAT_DEPT == true)) {
                                 lineDiscount.setDepartmentId(parseInt(standardLinesInfo.department));
