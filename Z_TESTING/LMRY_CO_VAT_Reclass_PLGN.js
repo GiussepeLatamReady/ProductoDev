@@ -29,6 +29,7 @@ function customizeGlImpact(transactionRecord, standardLines, customLines, book) 
         if (nexus_country == "CO" && (FEAT_FOREIGN_CURRENCY == true || FEAT_FOREIGN_CURRENCY == "T") && ["invoice", "creditmemo"].indexOf(transactionType) != -1) {
 
             var standardLinesInfo = getStandardLinesInfo(transactionRecord, standardLines);
+            nlapiLogExecution("DEBUG", "standardLines", standardLines);
             nlapiLogExecution("DEBUG", "standardLineInfo", JSON.stringify(standardLinesInfo));
 
 
@@ -46,7 +47,7 @@ function customizeGlImpact(transactionRecord, standardLines, customLines, book) 
                 if (bookInfo.currency == setupTax.localCurrency) {
                     var discountItem = transactionRecord.getFieldValue("discountitem");
                     var hasDiscountGlobal = !!Number(discountItem);
-
+                    nlapiLogExecution("DEBUG", "discountItem", discountItem);
                     nlapiLogExecution("DEBUG", "hasDiscountGlobal", hasDiscountGlobal);
 
                     var localAmounts = getLocalCurrencyAmounts(transactionRecord, bookInfo);
@@ -89,10 +90,12 @@ function customizeGlImpact(transactionRecord, standardLines, customLines, book) 
 
                         lineMain.setAccountId(parseInt(account));
                         lineMain.setMemo(memo);
-                        nlapiLogExecution("DEBUG", "entity", entity);
-                        
-                        
-
+                        //nlapiLogExecution("DEBUG", "entity", entity);
+                        /*
+                        if (setupTax.isEntitySet ==="T" || setupTax.isEntitySet === true) {
+                            lineMain.setEntityId(parseInt(entity));
+                        }
+                        */
                         if (standardLinesInfo.department && (FEAT_DEPT == "T" || FEAT_DEPT == true)) {
                             lineMain.setDepartmentId(parseInt(standardLinesInfo.department));
                         }
@@ -126,7 +129,6 @@ function customizeGlImpact(transactionRecord, standardLines, customLines, book) 
                         lineVat.setMemo(memo);
 
                         if (setupTax.isEntitySet ==="T" || setupTax.isEntitySet === true) {
-                            nlapiLogExecution("DEBUG", "Setear el valor", "entidad seteada");
                             lineVat.setEntityId(parseInt(entity));
                         }
                         
@@ -164,7 +166,9 @@ function customizeGlImpact(transactionRecord, standardLines, customLines, book) 
                             lineDiscount.setAccountId(parseInt(standardLinesInfo.discountAccount));
                             lineDiscount.setMemo(memo);
                             // lineVat.setEntityId(parseInt(vatInfo.entity));
-    
+                            if (setupTax.isEntitySet ==="T" || setupTax.isEntitySet === true) {
+                                lineDiscount.setEntityId(parseInt(entity));
+                            }
                             if (standardLinesInfo.department && (FEAT_DEPT == "T" || FEAT_DEPT == true)) {
                                 lineDiscount.setDepartmentId(parseInt(standardLinesInfo.department));
                             }
@@ -311,7 +315,7 @@ function getStandardLinesInfo(transactionRecord, standardLines) {
     var transactionType = transactionRecord.getRecordType();
 
     var standardLinesInfo = {
-        vatAccount: null, vatAmount: 0.00, subTotal: 0.00, discountAccount: null, department: null, class_: null, location: null
+        vatAccountvatAccount: null, vatAmount: 0.00, subTotal: 0.00, discountAccount: null, department: null, class_: null, location: null
     };
 
     for (var i = 0; i < standardLines.getCount(); i++) {
