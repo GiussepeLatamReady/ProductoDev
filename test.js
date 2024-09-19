@@ -1,16 +1,19 @@
-const params = {
-    token:"hiv-u-Sblr2a9WPlW3FfLj308ITEQafc1xihB_yjs0qUBnYjIsja-U1sDUqGb7rs",
-    cnpj:"00636794001075",
-    codigo:"0102228",
-    uf:"SP",
-    descricao:"",
-    unidadeMedida:"",
-    valor:0
+function validateLocalized(newRecord) {
+    if (!runtime.isFeatureInEffect({ feature: 'SUBSIDIARIES' })) return false;
+
+    const { href, searchParams } = new URL(document.referrer);
+    const subsidiaryID = searchParams.get(href.includes("subsidiarytype") ? "id" : "subsidiary");
+
+    if (subsidiaryID && !isLocalized(subsidiaryID)) {
+        hideLatamFields();
+    } else if (href.includes("entity")) {
+        const entityID = searchParams.get("id");
+        const subsidiaryID = search.lookupFields({
+            type: search.Type.ENTITY,
+            id: entityID,
+            columns: ['subsidiary']
+        }).subsidiary?.[0]?.value;
+
+        if (subsidiaryID && !isLocalized(subsidiaryID)) hideLatamFields();
+    }
 }
-
-const url = `https://apidoni.ibpt.org.br/api/v1/servicos?${new URLSearchParams(params).toString()}`;
-
-fetch(url)
-    .then(response => response.json())
-    .then(data => console.log("Response :",data))
-    .catch(error => console.error("Error",error))

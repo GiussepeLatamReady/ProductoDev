@@ -1,8 +1,8 @@
-# [D1639 - Documento Diseño CO Name GL Impact ajuste  DIAN](https://docs.google.com/document/d/1VgY94IcqjxbkoDOWSpe9WSMmMqTZOMSM1im8ALemxfM/edit)
+# [D1652 - ALL Formulario Address]()
 
 ## Description of the Requirement
 
-El presente desarrollo realizará la reclasificación del VAT el GL Impact de la transacción.
+En el script cliente que actualmente existe, realizar la siguiente validación, si la subsidiaria de la entidad no se encuentra localizadad, no mostras los campos LatamReady en el Address.
 
 
 ## Description of the solution
