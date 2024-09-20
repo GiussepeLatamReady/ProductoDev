@@ -129,13 +129,12 @@ define(['N/runtime',
 
             saveRecord(context) {
                 try {
-
-                    const urlDomain = new URL(window.location.href);
-                    const executionType = urlDomain.searchParams.get("executionType");
-                    if (executionType) return true;
-
                     this.currentRecord = context.currentRecord;
                     let recordObj = context.currentRecord;
+                    const whtType = recordObj.getValue({ fieldId: 'custpage_wht_type' });
+
+                    if(!whtType) return true;
+
                     let status = recordObj.getValue({ fieldId: 'custpage_status' });
                     status = Number(status);
                     if (!status) {

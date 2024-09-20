@@ -15,6 +15,7 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/url'], (runtime, server
             let mainUIManager = new UIManager(scriptContext);
             if (mainUIManager.isUserInterface()) {
                 mainUIManager.hiddenFields();
+                mainUIManager.replaceButtonback();
                 mainUIManager.buildTable();
                 mainUIManager.loadTable();
             }
@@ -170,26 +171,26 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/url'], (runtime, server
                 };
                 return true;
             });
-            log.error("state",state)
-            log.error("recordLogState",recordLogState)
+           
+           
             if (!state) {
                 transactionsState.forEach(({ id, state }) => {
                     Object.assign(transactions[id], { state: state });
                 });
             } else if (!["Finalizado", "Procesando", "Cargando datos"].includes(recordLogState)) {
-                log.error("entro","entro")
+               
                 transactionIds.forEach(id => {
                     transactions[id].state = "No procesada";
                 });
             }
 
-            log.error("validacion",["Finalizado", "Procesando", "Cargando datos"].includes(recordLogState))
             return transactions;
         }
 
         hiddenFields() {
             let jsonTransactions = this.form.getField('custrecord_lmry_co_hwht_log_transactions');
             jsonTransactions.updateDisplayType({ displayType: 'hidden' });
+            
         }
 
 
@@ -242,8 +243,23 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/url'], (runtime, server
         isValid(bool) {
             return (bool === "T" || bool === true);
         }
+        replaceButtonback(){
+            this.form.addField({
+                id: "custpage_lmry_script",
+                label: "LatamReady - Scrript",
+                type: "inlinehtml"
+            }).defaultValue = ` <script>
+                                    console.log(" Start")
+                                    const btnback = document.getElementById("tbl__back");
+                                    btnback.style.display = "none";
+                                    
+                                </script>`;
+            
+           
+        }
 
     }
+   
 
     return { beforeLoad };
 });

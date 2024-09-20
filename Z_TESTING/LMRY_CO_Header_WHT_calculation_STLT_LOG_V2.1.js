@@ -118,6 +118,7 @@ define([
                     { id: "created_by", label: this.translations.LMRY_CREATED_BY_LABEL, type: serverWidget.FieldType.TEXT },
                     { id: "wht_type", label: this.translations.LMRY_WHT_TYPE_LABEL, type: serverWidget.FieldType.TEXT },
                     { id: "process", label: this.translations.LMRY_PROCESS_TYPE_LABEL, type: serverWidget.FieldType.TEXT },
+                    { id: "summary", label: "Summary", type: serverWidget.FieldType.TEXTAREA },
                     { id: "state", label: this.translations.LMRY_STATUS_LABEL, type: serverWidget.FieldType.TEXT }
                 ];
 
@@ -135,8 +136,10 @@ define([
             loadSublist() {
                 const data = this.getRecords();
                 const sublist = this.form.getSublist({ id: "custpage_results_list" });
+
+
                 data.forEach((form, i) => {
-                    const { id, subsidiary, created, employee, executionType, process, state } = form;
+                    const { id, subsidiary, created, employee, executionType, process, state, transactionsObj } = form;
 
                     const setStyle = (fieldId, fieldValue) => {
                         fieldValue = `<div style ="display: flex; align-items: center; height:80%; padding-left:10px">
@@ -183,13 +186,32 @@ define([
                             stateResult = this.translations.LMRY_LOADING_DATA;
                             break;
                         case "Ocurrió un error":
-                            stateResult = this.translations.LMRY_ERROR;
+                            stateResult = this.translations.LMRY_FINISH;
                             break;
                         case "Procesando":
                             stateResult = this.translations.LMRY_PROCESING;
                             break;
                         default:
                             stateResult = this.translations.LMRY_LOADING_DATA;
+                    }
+
+                    if (state == "Finalizado" || state == "Ocurrió un error") {
+                        const ids = JSON.parse(transactionsObj);
+                        const totalIDs = ids.length;
+                        const incorrects = ids.filter(trans => trans.state == "Error" ).length;
+
+                        const getLi = (count, text, color) => count === 0 ? '' : `<li style="color: ${color};" margin: 5px 0>${count} ${text}</li>`;
+
+                        const html = `
+                        <div style="display:flex; flex-direction: column; justify-content: center;  height: 80%; font-family: Arial, sans-serif;">
+                            <h3 style="margin-top: 20px;">${totalIDs} ${this.translations.LMRY_TOTALES}</h3>
+                            <ul style="margin-top: 10px; padding-left: 0px;">
+                            ${getLi(totalIDs -incorrects, this.translations.LMRY_CORRECTS, 'rgb(18, 179, 18)') }
+                            ${getLi(incorrects, this.translations.LMRY_INCORRECTS, 'red')}
+                            </ul>
+                        </div>
+                        `.trim().replace(/\s+/g, ' ');
+                        setStyle("summary", html)
                     }
                     setStyleBold("state", stateResult)
                 })
@@ -224,7 +246,8 @@ define([
                             "custrecord_lmry_co_hwht_log_whttype",
                             "custrecord_lmry_co_hwht_log_process",
                             "custrecord_lmry_co_hwht_log_state",
-                            "custrecord_lmry_co_hwht_log_exect"
+                            "custrecord_lmry_co_hwht_log_exect",
+                            "custrecord_lmry_co_hwht_log_transactions"
                         ]
                 });
                 //log.error("search_log",search_log)
@@ -243,7 +266,7 @@ define([
                             formublist.process = result.getValue(columns[5]) || ' ';
                             formublist.state = result.getValue(columns[6]) || ' ';
                             formublist.executionType = result.getValue(columns[7]) || ' ';
-
+                            formublist.transactionsObj = result.getValue(columns[8])
                             data.push(formublist);
                         });
                     });
@@ -284,7 +307,11 @@ define([
                         "LMRY_UI": "Manual",
                         "LMRY_SCHEDULE": "Programado",
                         "LMRY_ALL": "Todos",
-                        "LMRY_DETAILS": "Detalles"
+                        "LMRY_DETAILS": "Detalles",
+                        "LMRY_TOTALES": "Totales",
+                        "LMRY_CORRECTS": "Correctas",
+                        "LMRY_INCORRECTS": "Incorrectas",
+
                     },
                     "en": {
                         "LMRY_NOTE": "Note: The payment is being generated and journal entries are being created. The [STATUS] column indicates the process status.",
@@ -310,7 +337,10 @@ define([
                         "LMRY_UI": "Manual",
                         "LMRY_SCHEDULE": "Scheduled",
                         "LMRY_ALL": "All",
-                        "LMRY_DETAILS": "Details"
+                        "LMRY_DETAILS": "Details",
+                        "LMRY_TOTALES": "Total",
+                        "LMRY_CORRECTS": "Correct",
+                        "LMRY_INCORRECTS": "Incorrect",
                     }
                 };
                 return translatedFields[country];
