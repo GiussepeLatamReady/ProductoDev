@@ -12,18 +12,13 @@ En el script cliente que actualmente existe, realizar la siguiente validación, 
 + Create
 
 + Update
-    + LMRY_CO_VAT_Reclass_PLGN.js
+    + LMRY_CustomAddress_CLNT.js
 
 + Delete
 
 
 ## Records Configuration
 + Create
-    + LatamReady - Setup Tax Subsidiary (customrecord_lmry_setup_tax_subsidiary)
-        + Field: Latam - CO Name GL Impact Reclass VAT
-            + id: custrecord_lmry_setuptax_co_set_name_gl
-            + type: CHECKBOX
-            + Subtab: Colombia
 
 
     
@@ -49,18 +44,18 @@ En el script cliente que actualmente existe, realizar la siguiente validación, 
 
 + Descripcion:
 
-    + Este desarrollo responde a la necesidad de mostrar la entidad de la cabecera de la transacción en el campo "Name" del GL Impact. Para ello, se implementó la función "Latam - CO Name GL Impact Reclass VAT" en el registro "LatamReady - Setup Tax Subsidiary", que asigna la entidad a las líneas del impacto contable cuando está activada. Si está desactivada, la columna de entidad permanece vacía.
+    + Se oculta los campos Latam de la direccion de la subsidiaria o Entidad si es que no esta localizada.
 
 
 + Documento funcional ( CO - Calculo de impuestos | Reclasificacion de VAT D1639)
 
-    + [CO - Calculo de impuestos | Reclasificacion de VAT](https://docs.google.com/presentation/d/17bQ78lTi3ho71-XOJuZ1c7vPSzz4U6naqaDVbm6nhN0/edit#slide=id.g2fff4e12215_1_0)
+    + []()
 
 + Documento Tecnico:
 
-    + [LatamReady - BR Import IBPT D1518 (Documento Técnico) ](https://docs.google.com/document/d/1azwkTlh9vdHVBf0G26PsN9EPUuGweKfFR7adNtxajdI/edit)
+    + [) ]()
 
-+ ¨Proyecto:
++ Bundle:
 
     + com.latamready.lmrybrlocalization
 
