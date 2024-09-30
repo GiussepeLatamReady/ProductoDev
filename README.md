@@ -1,8 +1,9 @@
-# [D1652 - ALL Formulario Address]()
+# [D1653 - CO Automatic Set by Subsidiary]()
 
 ## Description of the Requirement
 
-En el script cliente que actualmente existe, realizar la siguiente validación, si la subsidiaria de la entidad no se encuentra localizadad, no mostras los campos LatamReady en el Address.
+En el siguiente requerimiento se solicita la creación de un Automatic Set a nivel general, es decir, que no funcione por entidad, si no que se haga una configuración general y que rija para las transacciones indicadas en la configuración.
+
 
 
 ## Description of the solution
@@ -12,7 +13,7 @@ En el script cliente que actualmente existe, realizar la siguiente validación, 
 + Create
 
 + Update
-    + LMRY_CustomAddress_CLNT.js
+
 
 + Delete
 
@@ -39,6 +40,7 @@ En el script cliente que actualmente existe, realizar la siguiente validación, 
 
 ## Observations
  
++ Verificar si en el record LatamReady - Setup Automatic Set Fiel (customrecord_lmry_setup_universal_set_v2) estan todos los campos de colombia que se desan setear.
 
 ## SmartReady
 
