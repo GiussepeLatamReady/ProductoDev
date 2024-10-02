@@ -119,7 +119,11 @@ define(["N/search", "N/ui/serverWidget", './Latam_Library/LMRY_libSendingEmailsL
                         let setupTaxSubCountry = ObjRecord.getValue('custrecord_lmry_setuptax_sub_country');
                         log.error("setupTaxSubCountry",setupTaxSubCountry)
                         log.error("setupTaxSubCountry",setupTaxSubCountry)
-                        if (((setupTaxSubCountry != 157 && setupTaxSubCountry != 48) || false/*!Library_Mail.getAuthorization(975, licenses)*/) && (setupTaxSubCountry != 11 || !Library_Mail.getAuthorization(323, licenses))) {
+                        if (
+                                (setupTaxSubCountry != 157 || !Library_Mail.getAuthorization(975, licenses)) && 
+                                (setupTaxSubCountry != 11 || !Library_Mail.getAuthorization(323, licenses)) &&
+                                (setupTaxSubCountry != 48 || !Library_Mail.getAuthorization(1110, licenses))
+                            ) {
                             log.error("formulario","entramossss")
                             let sublist = formulario.getSublist({
                                 id: 'recmachcustrecord_lmry_us_setuptax'

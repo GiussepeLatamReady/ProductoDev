@@ -271,7 +271,10 @@ define(['N/log', 'N/record', 'N/runtime', 'N/search', './Latam_Library/LMRY_libS
                     var licenses = Library_Mail.getLicenses(subsidiary);
 
                     // Card : D1653 - Automatic Set CO Genérico
-                    if ((country == 157 || country == 48) && false/*!Library_Mail.getAuthorization(975, licenses)*/) {
+                    if (
+                        (country == 157 && !Library_Mail.getAuthorization(975, licenses)) ||
+                        (country == 48 && !Library_Mail.getAuthorization(1110, licenses))
+                    ) {
                         alert('AUTOMATIC FIELDS BY SUBSIDIARY (A/R) feature is disabled');
                         return false;
                     }

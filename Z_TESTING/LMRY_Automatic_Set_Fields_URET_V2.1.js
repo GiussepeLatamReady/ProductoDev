@@ -568,7 +568,10 @@ define(['N/error', 'N/record', 'N/log', 'N/runtime', 'N/search', 'N/ui/serverWid
             let setupTaxSubsid = recordObj.getValue('custrecord_lmry_us_setuptax');
             let country = recordObj.getValue('custrecord_lmry_us_country');
             if (setupTaxSubsid) {
-                if ((country == 157 || country == 48) && false/*!Library_Mail.getAuthorization(975, licenses)*/) {
+                if (
+                    (country == 157 && !Library_Mail.getAuthorization(975, licenses)) ||
+                    (country == 48 && !Library_Mail.getAuthorization(1110, licenses))
+                ) {
                     throw error.create({
                         name: 'ERROR_AUTHOMATIC_SET_SUBSIDIARY',
                         message: 'Disabled feature',

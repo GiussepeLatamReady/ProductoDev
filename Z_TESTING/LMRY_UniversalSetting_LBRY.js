@@ -539,8 +539,13 @@
           /*C0665 - Features Automatic Set Field Subsidiary
           'MX': 975
           */
-          var arrayFeatSubsid = [975];
-          if((id_country == 157 || id_country == 48) && true/*returnFeature(arrayFeatSubsid, licenses)*/) {
+          var arrayFeatSubsid = [975,1110];
+          log.error("US Valid","antes de la validacion")
+          if(
+              (id_country == 157 && returnFeature(arrayFeatSubsid, licenses)) ||
+              (id_country == 48 && returnFeature(arrayFeatSubsid, licenses))
+            ) {
+              log.error("US Valid","entro a la validacion")
             var setupTaxSubsidiarySearch = search.create({
               type: "customrecord_lmry_setup_tax_subsidiary",
               filters: [
