@@ -62,6 +62,16 @@ En el siguiente requerimiento se solicita la creación de un Automatic Set a niv
     + com.latamready.lmrybrlocalization
 
 
+    Input
+https://tstdrv1774174.app.netsuite.com/app/accounting/transactions/purchord.nl?id=4211286&whence=
+https://tstdrv1774174.app.netsuite.com/app/accounting/transactions/itemrcpt.nl?id=4211287&compid=TSTDRV1774174
+
+output
+
+https://tstdrv1774174.app.netsuite.com/app/accounting/transactions/salesord.nl?id=4211289
+https://tstdrv1774174.app.netsuite.com/app/accounting/transactions/itemship.nl?id=4211290&whence=&cmid=1728919266050_2242
+
+
 
 
 
