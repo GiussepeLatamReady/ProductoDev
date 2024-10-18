@@ -89,6 +89,7 @@ define(["N/query", "N/search", "N/record", "N/log"], function (query, search, re
         return false;
     }
     function showMXTransactionbyPedimentFields(form, id, type) {
+        log.error("showMXTransactionbyPedimentFields","start")
         var fieldPedimento;
         var fieldAduana;
         if (type === 'transferorder' || type === 'purchaseorder') {
@@ -129,7 +130,7 @@ define(["N/query", "N/search", "N/record", "N/log"], function (query, search, re
 
             // fifoFiedl.defaultValue = 'T';
         }
-
+        log.error("type",type)
         if (type === 'returnauthorization' || type === 'vendorreturnauthorization') {
             var lifoFiedl = form.addField({
                 label: "Latam - Pedimento automático LIFO",

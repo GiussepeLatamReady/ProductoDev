@@ -425,8 +425,11 @@ define(['N/runtime', 'N/log','N/https', 'N/query', 'N/search', 'N/record', 'N/ui
           * ****************************************** */
           updateSalesOrder(RCD, OLDRCD);
         }
-        if (LMRY_Result[0] == 'MX' && (type == 'create' || type == 'edit') && RCD.getValue('status') == "Shipped") {
+        log.error("status",RCD.getValue('status'));
+        if (LMRY_Result[0] == 'MX' && (type == 'create' || type == 'edit') /*&& RCD.getValue('status') == "Shipped"*/) {
+          log.error("search",libtools.searchPediments(RCD.id));
           if (libtools.searchPediments(RCD.id)) {
+            log.error("search","lib entra");
             const lifoInfo = search.create({
               type: 'customrecord_lmry_mx_transaction_fields',
               filters: [
@@ -449,6 +452,7 @@ define(['N/runtime', 'N/log','N/https', 'N/query', 'N/search', 'N/record', 'N/ui
                     idRecord: RCD.id
                   }
                 });
+                log.error("mensaje",mensaje);
                 if (mensaje.indexOf('Error')) {
                   throw mensaje;
                 }

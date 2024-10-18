@@ -106,12 +106,16 @@ define(['N/log', 'N/ui/serverWidget', 'N/record', 'N/search', 'N/runtime', './La
           }
         }
 
+
+        if (subsi_OW == true || subsi_OW == 'T') {
+          LMRY_Result = ValidAccessVRAU(recordObj.getValue({
+            fieldId: 'subsidiary'
+          }), scriptContext.form, isUret, type, LICENSES);
+        }
+
+        
         if (type == 'view' || type == 'edit') {
-          if (subsi_OW == true || subsi_OW == 'T') {
-            LMRY_Result = ValidAccessVRAU(recordObj.getValue({
-              fieldId: 'subsidiary'
-            }), scriptContext.form, isUret, type, LICENSES);
-          }
+          
 
           if (type == 'view') {
             var featurelang = runtime.isFeatureInEffect({
@@ -148,6 +152,7 @@ define(['N/log', 'N/ui/serverWidget', 'N/record', 'N/search', 'N/runtime', './La
           }
 
         }
+        log.error("LMRY_Result",LMRY_Result)
         if (LMRY_Result[0] == "MX" && (runtime.executionContext == 'USERINTERFACE' && (scriptContext.type == "create" || scriptContext.type == "edit" || scriptContext.type == "copy" || scriptContext.type == "view"))) {
           MXPedimentos.showMXTransactionbyPedimentFields(form, recordObj.id, recordObj.type);
         }

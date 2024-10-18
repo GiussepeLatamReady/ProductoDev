@@ -20,6 +20,7 @@ define(["N/record", "N/search", "N/log",'./Latam_Library/LMRY_libSendingEmailsLB
 
         const LMRY_script = "LMRY_InboundURET_V2.1.js";
         function beforeLoad(scriptContext) {
+            log.error("slg","start")
             const currentRecord = scriptContext.newRecord;
             try {
                 log.error("beforeLoad","start")
