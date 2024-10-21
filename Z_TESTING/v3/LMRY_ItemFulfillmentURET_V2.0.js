@@ -453,7 +453,7 @@ define(['N/runtime', 'N/log','N/https', 'N/query', 'N/search', 'N/record', 'N/ui
                   }
                 });
                 log.error("mensaje",mensaje);
-                if (mensaje.indexOf('Error')) {
+                if (typeof mensaje != "object" && mensaje.indexOf('Error')) {
                   throw mensaje;
                 }
               }
