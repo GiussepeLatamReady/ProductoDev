@@ -12,12 +12,12 @@
  * @NScriptType UserEventScript
  * @NModuleScope Public
  */
-define(["N/search", "N/ui/serverWidget", './Latam_Library/LMRY_libSendingEmailsLBRY_V2.0'],
+define(["N/log","N/search", "N/ui/serverWidget", './Latam_Library/LMRY_libSendingEmailsLBRY_V2.0'],
     /* ******************************************************************** * 
     * Automatización entidad de cliente (Mejoras Imprimible Factura Exterior)
     * Requerimiento C0586
     * ******************************************************************** */
-    function (search, serverWidget, Library_Mail) {
+    function (log, search, serverWidget, Library_Mail) {
 
         function beforeLoad(scriptContext) {
             try {
@@ -119,10 +119,11 @@ define(["N/search", "N/ui/serverWidget", './Latam_Library/LMRY_libSendingEmailsL
                         let setupTaxSubCountry = ObjRecord.getValue('custrecord_lmry_setuptax_sub_country');
                         log.error("setupTaxSubCountry",setupTaxSubCountry)
                         log.error("setupTaxSubCountry",setupTaxSubCountry)
+                        
                         if (
                                 (setupTaxSubCountry != 157 || !Library_Mail.getAuthorization(975, licenses)) && 
                                 (setupTaxSubCountry != 11 || !Library_Mail.getAuthorization(323, licenses)) &&
-                                (setupTaxSubCountry != 48 || !Library_Mail.getAuthorization(1110, licenses))
+                                (setupTaxSubCountry != 48 || !Library_Mail.getAuthorization(1110, licenses))//CO D1653
                             ) {
                             log.error("formulario","entramossss")
                             let sublist = formulario.getSublist({

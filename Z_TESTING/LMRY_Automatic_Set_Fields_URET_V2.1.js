@@ -569,7 +569,7 @@ define(['N/error', 'N/record', 'N/log', 'N/runtime', 'N/search', 'N/ui/serverWid
             let country = recordObj.getValue('custrecord_lmry_us_country');
             if (setupTaxSubsid) {
                 if (
-                    (country == 157 && !Library_Mail.getAuthorization(975, licenses)) ||
+                    (country == 157 && !Library_Mail.getAuthorization(975, licenses)) || //CO D1653
                     (country == 48 && !Library_Mail.getAuthorization(1110, licenses))
                 ) {
                     throw error.create({

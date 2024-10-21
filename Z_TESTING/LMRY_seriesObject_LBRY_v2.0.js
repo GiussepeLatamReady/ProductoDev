@@ -410,11 +410,11 @@ define(["N/search", "N/record", "N/runtime", "N/format", "N/log", "./LMRY_EI_lib
     var country = ei_library.getCountryID(subsidiary).code;
     var serieBySubsidiaria = {};
     /*C0665 - Features Automatic Set Field Subsidiary
-    'MX': 975
+    'MX': 975 
     */
     if (
           (country == 'MX' && ei_library.getAuthorization(975, licenses)) ||
-          (country == 'CO' && ei_library.getAuthorization(1110, licenses))
+          (country == 'CO' && ei_library.getAuthorization(1110, licenses)) //CO D1653
         ) {
       var setupTaxSubsidiarySearch = search.create({
         type: "customrecord_lmry_setup_tax_subsidiary",

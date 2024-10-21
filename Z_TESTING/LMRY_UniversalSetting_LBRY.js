@@ -539,7 +539,7 @@
           /*C0665 - Features Automatic Set Field Subsidiary
           'MX': 975
           */
-          var arrayFeatSubsid = [975,1110];
+          var arrayFeatSubsid = [975,1110]; //CO D1653
           log.error("US Valid","antes de la validacion")
           if(
               (id_country == 157 && returnFeature(arrayFeatSubsid, licenses)) ||
