@@ -4,9 +4,9 @@
  * @NModuleScope Public
  * @Name LMRY_InboundURET_V2.1.js
  */
-define(["N/record", "N/search", "N/log",'./Latam_Library/LMRY_libSendingEmailsLBRY_V2.0'],
+define(["N/record", "N/search", "N/log", "N/runtime",'./Latam_Library/LMRY_libSendingEmailsLBRY_V2.0'],
 
-    function (record, search, log,library_mail) {
+    function (record, search,runtime, log,library_mail) {
 
         /**
          * Function definition to be triggered before record is loaded.
@@ -22,19 +22,28 @@ define(["N/record", "N/search", "N/log",'./Latam_Library/LMRY_libSendingEmailsLB
         function beforeLoad(scriptContext) {
             log.error("slg","start")
             const currentRecord = scriptContext.newRecord;
+            const idSubsidiary =  currentRecord.getValue("")
             try {
+                var featPedimentos = getSetup()
                 log.error("beforeLoad","start")
                 const Form = scriptContext.form;
-
+                var translations = getTranslations();
+                //Form.addFieldGroup('mainGroupPedimentos', "Registro de Pedimentos");
+                Form.addFieldGroup({
+                    id: 'mainGroupPedimentos',
+                    label: translations.LMRY_PEDIMENTOS
+                  });
                 const fieldPedimento = Form.addField({
                     id: "custpage_pedimento",
-                    label: "MX Pedimento",
+                    label: "MX N° Pedimento",
                     type: "text",
+                    container: "mainGroupPedimentos"
                 });
                 const fieldAduana = Form.addField({
                     id: "custpage_aduana",
-                    label: "MX Aduana",
+                    label: translations.LMRY_CUSTOMS,
                     type: "select",
+                    container: "mainGroupPedimentos"
                 });
                 const aduanaSearch = search.create({
                     type: 'customrecord_lmry_mx_aduana',
@@ -191,6 +200,67 @@ define(["N/record", "N/search", "N/log",'./Latam_Library/LMRY_libSendingEmailsLB
             if (inboundPedimentoRecords.length === 0) return false;
 
             return true;
+        }
+
+        function getTranslations(){
+            var language = runtime.getCurrentScript().getParameter({ name: "LANGUAGE" }).substring(0, 2);
+            language = ["es", "pt"].indexOf(language)!=-1 ? language : "en";
+
+
+            var translatedFields = {
+                "es":{
+                    "LMRY_PEDIMENTOS": "Registro de Pedimentos",
+                    "LMRY_CUSTOMS": "MX Aduana",
+                },
+                "en":{
+                    "LMRY_PEDIMENTOS": "Register of pedimentos",
+                    "LMRY_CUSTOMS": "MX Customs",
+                },
+                "pt":{
+                    "LMRY_PEDIMENTOS": "Registro de pedimentos",
+                    "LMRY_CUSTOMS": "MX Alfândega",
+                }
+            }
+
+            return translatedFields;
+        }
+
+
+        function isActiveSubsidiary() {
+
+            var searchOW = search.create({
+              type: 'customrecord_lmry_features_by_subsi',
+              columns: [
+                'internalid'
+              ],
+              filters: [
+                ['isinactive', 'is', 'F'],
+                "AND",
+                ['custrecord_lmry_features_subsidiary.country', 'is', "MX"],
+                "AND",
+                ['custrecord_lmry_features_subsidiary.isinactive', 'is', "F"]
+              ]
+            });
+            return searchOW.runPaged().count;
+        }
+
+        function getSetup(idSubsidiary){
+            var featPedimentos = false;
+            var featureSubs = runtime.isFeatureInEffect({ feature: 'SUBSIDIARIES' });
+            if (featureSubs == true || featureSubs == 'T') {   
+                var setupSearch = search.create({
+                    type: 'customrecord_lmry_setup_tax_subsidiary',
+                    columns: ['custrecord_lmry_setuptax_pediment_automa'],
+                    filters: [
+                            ['custrecord_lmry_setuptax_subsidiary','anyof',idSubsidiary]    
+                    ]
+                });
+                setupSearch.run().each(function(result){
+                    featPedimentos = result.getValue('custrecord_lmry_setuptax_pediment_automa');
+                    featPedimentos = featPedimentos === "T" || featPedimentos === true;
+                });
+            }
+            return featPedimentos;
         }
         return {
             beforeLoad: beforeLoad,
