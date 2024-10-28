@@ -43,7 +43,6 @@ define(['N/log', 'N/ui/serverWidget', 'N/record', 'N/search', 'N/runtime', './La
         recordObj = scriptContext.newRecord;
         var LMRY_Result = new Array();
 
-        //log.error('type', type);
         var LMRY_countr = new Array();
         var country = new Array();
         country[0] = '';
@@ -124,7 +123,6 @@ define(['N/log', 'N/ui/serverWidget', 'N/record', 'N/search', 'N/runtime', './La
 
             // Lógica GL Impact
             var btnGl = libraryGLImpact.featureGLImpact(recordObj, 'vendorreturnauthorization');
-            //log.error('btnGl', btnGl);
             if (btnGl == 1) {
               if (featurelang == 'es') {
                 form.addButton({
@@ -152,7 +150,6 @@ define(['N/log', 'N/ui/serverWidget', 'N/record', 'N/search', 'N/runtime', './La
           }
 
         }
-        log.error("LMRY_Result",LMRY_Result)
         var featPedimentos = isAutomaticPedimentos(subsidiary)
         if (LMRY_Result[0] == "MX" && featPedimentos && (runtime.executionContext == 'USERINTERFACE' && (scriptContext.type == "create" || scriptContext.type == "edit" || scriptContext.type == "copy" || scriptContext.type == "view"))) {
           MXPedimentos.showMXTransactionbyPedimentFields(form, recordObj.id, recordObj.type);
@@ -252,7 +249,9 @@ define(['N/log', 'N/ui/serverWidget', 'N/record', 'N/search', 'N/runtime', './La
                   type: 'customrecord_lmry_setup_tax_subsidiary',
                   columns: ['custrecord_lmry_setuptax_pediment_automa'],
                   filters: [
-                      ['custrecord_lmry_setuptax_subsidiary', 'anyof', idSubsidiary]
+                      ['custrecord_lmry_setuptax_subsidiary', 'anyof', idSubsidiary],
+                      "AND",
+                      ["isinactive","is","F"]
                   ]
               }).run().each(function(result){
                   featPedimentos = result.getValue('custrecord_lmry_setuptax_pediment_automa');
@@ -260,7 +259,6 @@ define(['N/log', 'N/ui/serverWidget', 'N/record', 'N/search', 'N/runtime', './La
               });
           }
       }
-      log.error("featPedimentos",featPedimentos)
       return featPedimentos;
     }
     return {

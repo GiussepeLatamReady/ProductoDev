@@ -686,7 +686,6 @@
 
         if (scriptContext.type == "delete" && LMRY_countr[0] == "MX" && Library_Mail.getAuthorization(672, licenses) == true) {
           var id_delete = RCD_OBJ.id;
-          log.debug("id_delete", id_delete);
           libraryTaxWithholding._inactiveRelatedRecord(id_delete);
         }
         var type = RCD_OBJ.getValue('baserecordtype');
@@ -830,7 +829,6 @@
                   var Crear_TaxResult = Library_Mail.getAuthorization(969, licenses) || false;
                   var Global_Disc = Library_Mail.getAuthorization(898, licenses) || false;
                   if (Library_Mail.getAuthorization(672, licenses) == true) {
-                    log.debug("Crear_TaxResult", Crear_TaxResult);
                     libraryTaxWithholding.LatamTaxWithHoldingMX(currentRCD, Crear_TaxResult, actionType, Global_Disc);
                   }
                   break;
@@ -1087,7 +1085,9 @@
                   type: 'customrecord_lmry_setup_tax_subsidiary',
                   columns: ['custrecord_lmry_setuptax_pediment_automa'],
                   filters: [
-                      ['custrecord_lmry_setuptax_subsidiary', 'anyof', idSubsidiary]
+                      ['custrecord_lmry_setuptax_subsidiary', 'anyof', idSubsidiary],
+                      "AND",
+                      ["isinactive","is","F"]
                   ]
               }).run().each(function(result){
                   featPedimentos = result.getValue('custrecord_lmry_setuptax_pediment_automa');
@@ -1095,7 +1095,6 @@
               });
           }
       }
-      log.error("featPedimentos",featPedimentos)
       return featPedimentos;
     }
     

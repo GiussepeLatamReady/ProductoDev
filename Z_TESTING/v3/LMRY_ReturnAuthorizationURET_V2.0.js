@@ -151,7 +151,9 @@ define(['N/search', 'N/runtime', 'N/log', './Latam_Library/LMRY_libSendingEmails
                         type: 'customrecord_lmry_setup_tax_subsidiary',
                         columns: ['custrecord_lmry_setuptax_pediment_automa'],
                         filters: [
-                            ['custrecord_lmry_setuptax_subsidiary', 'anyof', idSubsidiary]
+                            ['custrecord_lmry_setuptax_subsidiary', 'anyof', idSubsidiary],
+                            "AND",
+                            ["isinactive","is","F"]
                         ]
                     }).run().each(function(result){
                         featPedimentos = result.getValue('custrecord_lmry_setuptax_pediment_automa');
@@ -159,7 +161,6 @@ define(['N/search', 'N/runtime', 'N/log', './Latam_Library/LMRY_libSendingEmails
                     });
                 }
             }
-            log.error("featPedimentos",featPedimentos)
             return featPedimentos;
         }
         return {

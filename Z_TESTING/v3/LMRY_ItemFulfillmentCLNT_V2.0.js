@@ -182,8 +182,6 @@ define(['N/log', 'N/search', 'N/query', 'N/url', 'N/https', 'N/runtime', 'N/reco
 
                         if (location != '' && location != null) {
 
-                            log.debug('entro');
-
                             recordObj.setValue({
                                 fieldId: 'custbody_lmry_guia_localidad_origen',
                                 value: location
@@ -349,7 +347,6 @@ define(['N/log', 'N/search', 'N/query', 'N/url', 'N/https', 'N/runtime', 'N/reco
                     // Retorna el cuero del SuiteLet
                     var closedPeriod = getStlt.body;
 
-                    log.error('closedPeriod', closedPeriod);
                     if (closedPeriod == 'T') {
                         recordObj.setValue('custpage_lockedperiod', true);
                     } else {
@@ -493,7 +490,6 @@ define(['N/log', 'N/search', 'N/query', 'N/url', 'N/https', 'N/runtime', 'N/reco
 
                 /* Validacion 04/02/22 */
                 var lockedPeriod = recordObj.getValue("custpage_lockedperiod");
-                log.error('lockedPeriod', lockedPeriod);
                 if (lockedPeriod == true || lockedPeriod == 'T') {
                     return true;
                 }
@@ -663,7 +659,9 @@ define(['N/log', 'N/search', 'N/query', 'N/url', 'N/https', 'N/runtime', 'N/reco
                         type: 'customrecord_lmry_setup_tax_subsidiary',
                         columns: ['custrecord_lmry_setuptax_pediment_automa'],
                         filters: [
-                            ['custrecord_lmry_setuptax_subsidiary', 'anyof', idSubsidiary]
+                            ['custrecord_lmry_setuptax_subsidiary', 'anyof', idSubsidiary],
+                            "AND",
+                            ["isinactive","is","F"]
                         ]
                     }).run().each(function(result){
                         featPedimentos = result.getValue('custrecord_lmry_setuptax_pediment_automa');
@@ -671,7 +669,6 @@ define(['N/log', 'N/search', 'N/query', 'N/url', 'N/https', 'N/runtime', 'N/reco
                     });
                 }
             }
-            console.log("featPedimentos",featPedimentos)
             return featPedimentos;
         }
 

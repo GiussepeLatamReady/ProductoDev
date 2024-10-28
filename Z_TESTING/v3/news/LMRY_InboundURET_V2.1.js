@@ -22,7 +22,6 @@ define(["N/record", "N/search", "N/log", "N/runtime", 'N/ui/serverWidget', './La
         function beforeLoad(scriptContext) {
             const { newRecord: currentRecord, form: Form } = scriptContext;
             try {
-                log.error("beforeLoad","start")
                 const translations = getTranslations();
                 const isActivePedimentos = isAutomaticPedimentos(getLocalizedSubsidiaries());
                 
@@ -83,7 +82,6 @@ define(["N/record", "N/search", "N/log", "N/runtime", 'N/ui/serverWidget', './La
         function afterSubmit(scriptContext) {
             const currentRecord = scriptContext.newRecord;
             try {
-                log.error("afterSubmit","start")
                 const isActivePedimentos = isAutomaticPedimentos(getLocalizedSubsidiaries());
 
                 if (isActivePedimentos) {
@@ -119,7 +117,6 @@ define(["N/record", "N/search", "N/log", "N/runtime", 'N/ui/serverWidget', './La
          * @param {Array<number>} InboundPedimentoRecord.pos
          */
         function createInboundPedimentoRecord(InboundPedimentoRecord) {
-            log.debug("datos", JSON.stringify(InboundPedimentoRecord));
             if (validateInboundPedimentoRecord(InboundPedimentoRecord.idRecord)) {
                 updateInboundPedimentoRecord(InboundPedimentoRecord);
 
@@ -223,7 +220,6 @@ define(["N/record", "N/search", "N/log", "N/runtime", 'N/ui/serverWidget', './La
                 localizedSubsidiaries.push(idSubsidiary);
                 return true;
             });
-            log.error("localizedSubsidiaries",localizedSubsidiaries)
             return localizedSubsidiaries;
         }
 
@@ -236,7 +232,9 @@ define(["N/record", "N/search", "N/log", "N/runtime", 'N/ui/serverWidget', './La
                         type: 'customrecord_lmry_setup_tax_subsidiary',
                         columns: ['custrecord_lmry_setuptax_pediment_automa'],
                         filters: [
-                            ['custrecord_lmry_setuptax_subsidiary', 'anyof', localizedSubsidiaries]
+                            ['custrecord_lmry_setuptax_subsidiary', 'anyof', localizedSubsidiaries],
+                            "AND",
+                            ["isinactive","is","F"]
                         ]
                     }).run().each(result => {
                         featPedimentos = result.getValue('custrecord_lmry_setuptax_pediment_automa');
@@ -245,7 +243,6 @@ define(["N/record", "N/search", "N/log", "N/runtime", 'N/ui/serverWidget', './La
                     });
                 }
             }
-            log.error("featPedimentos",featPedimentos)
             return featPedimentos;
         }
         return {

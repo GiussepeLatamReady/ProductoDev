@@ -77,15 +77,12 @@
 		   if (scriptContext.form != '' && scriptContext.form != null) {
 			 // Solo cuando es View
 			 if (scriptContext.type == 'view') {
-			   log.debug('library_mail', 'onFieldsHide');
 			   library_mail.onFieldsHide([2], scriptContext.form, true);
 			   if (LMRY_Result[2]) {
 				 library_mail.onFieldsDisplayBody(scriptContext.form, LMRY_Result[1], 'custrecord_lmry_on_transfer_order', true);
 			   }
 			 }
-			 log.debug('library_HideView', 'HideSubTab');
 			 library_HideView.HideSubTab(scriptContext.form, LMRY_Result[1], recordObj.type, licenses);
-			 log.debug('library_HideView', 'HideColumn');
 			 library_HideView.HideColumn(scriptContext.form, LMRY_Result[1], recordObj.type, licenses);
 		   } // Hide and View en formulario
 		 }
@@ -200,7 +197,9 @@
 				type: 'customrecord_lmry_setup_tax_subsidiary',
 				columns: ['custrecord_lmry_setuptax_pediment_automa'],
 				filters: [
-					['custrecord_lmry_setuptax_subsidiary', 'anyof', idSubsidiary]
+					['custrecord_lmry_setuptax_subsidiary', 'anyof', idSubsidiary],
+					"AND",
+                    ["isinactive","is","F"]
 				]
 			}).run().each(function(result){
 				featPedimentos = result.getValue('custrecord_lmry_setuptax_pediment_automa');
@@ -208,7 +207,6 @@
 			});
 		}
 	}
-	log.error("featPedimentos",featPedimentos)
 	return featPedimentos;
    }
 

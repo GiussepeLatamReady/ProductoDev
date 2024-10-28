@@ -427,12 +427,9 @@ define(['N/runtime', 'N/log','N/https', 'N/query', 'N/search', 'N/record', 'N/ui
           * ****************************************** */
           updateSalesOrder(RCD, OLDRCD);
         }
-        log.error("status",RCD.getValue('status'));
         var featPedimentos = isAutomaticPedimentos(subsidiary)
         if (LMRY_Result[0] == 'MX' && featPedimentos && (type == 'create' || type == 'edit') /*&& RCD.getValue('status') == "Shipped"*/) {
-          log.error("search",libtools.searchPediments(RCD.id));
           if (libtools.searchPediments(RCD.id)) {
-            log.error("search","lib entra");
             const lifoInfo = search.create({
               type: 'customrecord_lmry_mx_transaction_fields',
               filters: [
@@ -440,9 +437,7 @@ define(['N/runtime', 'N/log','N/https', 'N/query', 'N/search', 'N/record', 'N/ui
               ],
               columns: ['custrecord_lmry_mx_pedimento_lifo', 'custrecord_lmry_mx_pedimento_fifo', 'custrecord_lmry_mx_pedimento']
             }).run().getRange(0, 1);
-            log.debug('mxt', lifoInfo);
             if (lifoInfo.length > 0) {
-              log.debug('mxdata', lifoInfo[0].getValue('custrecord_lmry_mx_pedimento_lifo'));
               if (lifoInfo[0].getValue('custrecord_lmry_mx_pedimento_lifo') == true || lifoInfo[0].getValue('custrecord_lmry_mx_pedimento_fifo') == true || lifoInfo[0].getValue('custrecord_lmry_mx_pedimento') != null) {
                 const mensaje = https.requestRestlet({
                   deploymentId: "customdeploy_lmry_pedimentos_rlt",
@@ -455,7 +450,6 @@ define(['N/runtime', 'N/log','N/https', 'N/query', 'N/search', 'N/record', 'N/ui
                     idRecord: RCD.id
                   }
                 });
-                log.error("mensaje",mensaje);
                 if (typeof mensaje != "object" && mensaje.indexOf('Error')) {
                   throw mensaje;
                 }
@@ -479,7 +473,9 @@ define(['N/runtime', 'N/log','N/https', 'N/query', 'N/search', 'N/record', 'N/ui
                   type: 'customrecord_lmry_setup_tax_subsidiary',
                   columns: ['custrecord_lmry_setuptax_pediment_automa'],
                   filters: [
-                      ['custrecord_lmry_setuptax_subsidiary', 'anyof', idSubsidiary]
+                      ['custrecord_lmry_setuptax_subsidiary', 'anyof', idSubsidiary],
+                      "AND",
+                      ["isinactive","is","F"]
                   ]
               }).run().each(function(result){
                   featPedimentos = result.getValue('custrecord_lmry_setuptax_pediment_automa');
@@ -487,7 +483,6 @@ define(['N/runtime', 'N/log','N/https', 'N/query', 'N/search', 'N/record', 'N/ui
               });
           }
       }
-      log.error("featPedimentos",featPedimentos)
       return featPedimentos;
      }
 
@@ -662,11 +657,9 @@ define(['N/runtime', 'N/log','N/https', 'N/query', 'N/search', 'N/record', 'N/ui
     }
 
     function getPedimentoMXtransaction(idPO) {
-      log.debug("idpo", idPO);
       if (Number(idPO) === 0 || idPO === undefined) return [];
       var consulta = 'SELECT TOP 1 CUSTOMRECORD_LMRY_MX_TRANSACTION_FIELDS.custrecord_lmry_mx_pedimento, CUSTOMRECORD_LMRY_MX_TRANSACTION_FIELDS.custrecord_lmry_mx_pedimento_aduana, CUSTOMRECORD_LMRY_MX_TRANSACTION_FIELDS.custrecord_lmry_mx_pedimento_fifo, CUSTOMRECORD_LMRY_MX_TRANSACTION_FIELDS.custrecord_lmry_mx_pedimento_lifo     FROM         CUSTOMRECORD_LMRY_MX_TRANSACTION_FIELDS        WHERE          CUSTOMRECORD_LMRY_MX_TRANSACTION_FIELDS.custrecord_lmry_mx_transaction_related = ' + idPO + ' and       (CUSTOMRECORD_LMRY_MX_TRANSACTION_FIELDS.custrecord_lmry_mx_pedimento IS NOT NULL OR CUSTOMRECORD_LMRY_MX_TRANSACTION_FIELDS.custrecord_lmry_mx_pedimento_fifo IS NOT NULL OR CUSTOMRECORD_LMRY_MX_TRANSACTION_FIELDS.custrecord_lmry_mx_pedimento_lifo IS NOT NULL)';
 
-      log.debug("consulta", consulta);
       var nroPedimentoandAduana = query.runSuiteQL({
         query: consulta,
       }).asMappedResults();

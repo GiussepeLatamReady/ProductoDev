@@ -17,7 +17,6 @@ define(["N/log", "N/search", "N/record", 'N/runtime', 'N/format', 'N/query', './
                     id: idRecord,
                     columns: ['type']
                 }).type[0].value;
-                log.debug('type', type);
                 const isReceipt = type === "ItemRcpt" ? true : false;
 
                 const dataTransaction = search.lookupFields({
@@ -29,13 +28,11 @@ define(["N/log", "N/search", "N/record", 'N/runtime', 'N/format', 'N/query', './
                         'trandate'
                     ]
                 });
-                log.debug('dataTransaction', dataTransaction);
                 const transactionOgirinType = search.lookupFields({
                     type: 'transaction',
                     id: dataTransaction['createdfrom'][0]?.value,
                     columns: ['type']
                 }).type[0].value;
-                log.debug('transactionOgirinType', transactionOgirinType);
                 let flagTransfer = false;
                 if (transactionOgirinType == 'TrnfrOrd') flagTransfer = true;
 
@@ -48,10 +45,8 @@ define(["N/log", "N/search", "N/record", 'N/runtime', 'N/format', 'N/query', './
                     let listCreated = [];
                     items.forEach((itemLine) => {
                         const listPediment = getPedimentos(itemLine.itemid, itemLine.location, itemLine.lote, (automaticType === 1 ? true : false));
-                        log.debug('listPediment', listPediment);
                         let sumQuantityDisp = 0;
                         let quantitytotal = itemLine.quantity;
-                        log.debug('quantitytotal', quantitytotal);
                         for (let i = 0; i < listPediment.length; i++) {
                             const jsonPediment = JSON.parse(JSON.stringify(listPediment[i]));
                             let ped_quantity = Number(jsonPediment.values["SUM(custrecord_lmry_mx_ped_quantity)"]);
@@ -60,8 +55,6 @@ define(["N/log", "N/search", "N/record", 'N/runtime', 'N/format', 'N/query', './
                                 sumQuantityDisp += ped_quantity;
                             }
                         }
-                        log.debug('sumQuantityDisp', sumQuantityDisp);
-                        log.debug('validate', quantitytotal > sumQuantityDisp);
                         if (quantitytotal > sumQuantityDisp) {
                             throw translation.INSUFFICIENT_STOCK;
                         } else {
@@ -94,15 +87,12 @@ define(["N/log", "N/search", "N/record", 'N/runtime', 'N/format', 'N/query', './
                             if (quantitytotal > 0) throw translation.INSUFFICIENT_STOCK;
                         };
                     });
-                    log.debug('listSelected1', listSelected);
                     if (flagTransfer && isReceipt == true) {
                         const jsonPedimentos = getInfoMXtransaction(dataTransaction['createdfrom'][0]?.value)[0].custrecord_lmry_mx_pedimento_transfer;
                         const auxJson = JSON.parse(jsonPedimentos);
-                        log.debug('json', auxJson);
                         if (typeof auxJson === 'object')
                             listSelected = auxJson;
                     }
-                    log.debug('listSelected2', listSelected);
                     listCreated = createPedimenetByList(listSelected, dataTransaction, idRecord, isReceipt);
 
                     if (flagTransfer && isReceipt == false) {
@@ -425,7 +415,6 @@ define(["N/log", "N/search", "N/record", 'N/runtime', 'N/format', 'N/query', './
             if (!existPediments(idRecord)) return translation.PEDIMENTO_EXISTS;
 
             let purchaseOrder = getInfoMXtransaction(idPurchaseOrder);
-            log.debug("datos pedimento", purchaseOrder);
             if (purchaseOrder.length > 0) {
                 let idSubsidiary = dataTransaction['subsidiary'][0].value;
                 let idItemReciept = idRecord;
@@ -499,7 +488,6 @@ define(["N/log", "N/search", "N/record", 'N/runtime', 'N/format', 'N/query', './
 
                     // Graba record Latam - MX Pedimento Details
                     let ped_id = ped_details.save();
-                    log.debug("id pedimento detail", ped_id);
                 }
                 if (flagTransfer && !isReceipt) {
                     const jsonPedimentos = getInfoMXtransaction(dataTransaction['createdfrom'][0]?.value);

@@ -29,7 +29,6 @@ define(["N/query", "N/search", "N/record", "N/log"], function (query, search, re
         var lifo = recordObj.getValue('custpage_mx_pedimento_au_lifo');
         if (fifo === 'T' || lifo === 'T' || isValid) {
             var recordMxtransaction = searchMxtransaction(recordObj.id);
-            log.debug('entro a create', recordMxtransaction);
             if (recordMxtransaction.length > 0) {
                 recordMxtransaction.forEach(function (Mxtransaction) {
                     updateMxTransaction(nroPedimento, pedimentoAduana, Mxtransaction.id, fifo, lifo);
@@ -71,12 +70,10 @@ define(["N/query", "N/search", "N/record", "N/log"], function (query, search, re
                     fieldId: "custrecord_lmry_mx_pedimento_lifo",
                     value: true
                 });
-                log.debug('entro a create', mxTransaction);
                 try {
                     var mxID = mxTransaction.save();
-                    log.debug('mx transaction creado', mxID);
                 } catch (error) {
-                    log.debug('error', error);
+                    log.debug('error [createMXTransactionbyPediment]', error);
                 }
             }
         }
@@ -90,7 +87,6 @@ define(["N/query", "N/search", "N/record", "N/log"], function (query, search, re
         return false;
     }
     function showMXTransactionbyPedimentFields(form, id, type) {
-        log.error("showMXTransactionbyPedimentFields","start")
         var fieldPedimento;
         var fieldAduana;
         if (type === 'transferorder' || type === 'purchaseorder') {
@@ -131,7 +127,6 @@ define(["N/query", "N/search", "N/record", "N/log"], function (query, search, re
 
             // fifoFiedl.defaultValue = 'T';
         }
-        log.error("type",type)
         if (type === 'returnauthorization' || type === 'vendorreturnauthorization') {
             var lifoFiedl = form.addField({
                 label: "Latam - Pedimento automático LIFO",
@@ -185,12 +180,10 @@ define(["N/query", "N/search", "N/record", "N/log"], function (query, search, re
     function isValidItemsTransaction(recordObj) {
         var message = 'ok';
         var items = getItems(recordObj);
-        console.log(items);
         if (items.length === 0) message = 'Error no hay lineas seleccionadas';
 
         items.forEach(function (itemLine) {
             var listPediment = getPedimentos(itemLine.itemid, itemLine.location, itemLine.lote, false);
-            console.log(listPediment);
             var sumQuantityDisp = 0;
             var quantitytotal = itemLine.quantity;
 

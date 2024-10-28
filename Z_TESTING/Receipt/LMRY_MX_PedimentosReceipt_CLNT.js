@@ -55,35 +55,6 @@ define(['N/log', 'N/record', 'N/runtime', 'N/currentRecord', 'N/url', './Latam_L
                 }
             })
         }
-
-        function setAduanaLine(recordObj) {
-            console.log("setAduanaLine start");
-        
-            // Intentar obtener el campo principal sin el prefijo "inpt_"
-            var aduana = document.querySelector("[name='custpage_nro_aduana']");
-            if (!aduana) {
-                console.log("Error: Campo 'aduana' no encontrado.");
-                return;
-            }
-        
-            console.log("Campo aduana encontrado:", aduana);
-        
-            // Listener de cambio en el campo principal
-            aduana.addEventListener("change", function (e) {
-                console.log("Cambio detectado");
-                console.log("Valor seleccionado:", e.target.value);
-        
-                var itemCount = recordObj.getLineCount({ sublistId: "custpage_id_sublista" });
-                for (var i = 0; i < itemCount; i++) {
-                    recordObj.selectLine({ sublistId: 'custpage_id_sublista', line: i });
-                    recordObj.setCurrentSublistValue({
-                        sublistId: 'custpage_id_sublista',
-                        fieldId: 'id_aduana',
-                        value: e.target.value
-                    });
-                }
-            });
-        }
         
         
         function validateField(scriptContext) {

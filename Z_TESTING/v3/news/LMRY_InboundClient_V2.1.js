@@ -20,7 +20,6 @@ define(["require", "N/search", "N/http", "N/url", "N/record", "N/query",'./Latam
                         type: "customrecord_mx_pedimento_inbound",
                         filters: ["custrecord_mx_pedimento_inbound_id", "is", currentRecord.id]
                     });
-                    console.log("holi clnt")
                 } catch (error) {
                     console.error("error asda",error)
                     library_mail.sendemail2(' [ pageInit ] ' + error, "LMRY_InboundClient_V2.1.js", currentRecord, 'tranid', 'entity');
@@ -82,12 +81,9 @@ define(["require", "N/search", "N/http", "N/url", "N/record", "N/query",'./Latam
                         return false;
                     }
                     const [idsPurchaseOrderWhithinMxTransaction, idMxTransactionExist] = getMxTransactionsNull(arregloPurchaseOrders);
-                    console.log([idsPurchaseOrderWhithinMxTransaction, idMxTransactionExist]);
 
                     const idMxTransactionCreate = createMXTransaction(getTransactionsData(idsPurchaseOrderWhithinMxTransaction), numberPedimento, idAduana);
                     updateMxTransaction(idMxTransactionExist, numberPedimento, idAduana);
-                    console.log([idMxTransactionCreate, idMxTransactionExist]);
-                    console.log("termino");
 
                     return true;
                 } catch (error) {
@@ -107,7 +103,6 @@ define(["require", "N/search", "N/http", "N/url", "N/record", "N/query",'./Latam
         function createMXTransaction(listaDatosTransacciones, nroPedimento, idAduana) {
             const idsMxTransactionCreadas = [];
             listaDatosTransacciones.forEach(transaction => {
-                console.log(transaction, nroPedimento);
                 const mxTransaction = record.create({
                     type: "customrecord_lmry_mx_transaction_fields",
                     isDynamic: true
