@@ -38,7 +38,6 @@ define(['N/config', 'N/ui/serverWidget', 'N/format', 'N/runtime', 'N/log', 'N/re
           var subsidiary = recordObj.getValue({
             fieldId: 'subsidiary'
           });
-          log.error("subsidiary ss",subsidiary)
           if (!subsidiary) {
             subsidiary = runtime.getCurrentUser().subsidiary;
           }
@@ -807,7 +806,6 @@ define(['N/config', 'N/ui/serverWidget', 'N/format', 'N/runtime', 'N/log', 'N/re
       var featureSubs = runtime.isFeatureInEffect({ feature: 'SUBSIDIARIES' });
       if (featureSubs == true || featureSubs == 'T') {
           if (idSubsidiary) {
-              log.error("busqueda","enro")
               search.create({
                   type: 'customrecord_lmry_setup_tax_subsidiary',
                   columns: ['custrecord_lmry_setuptax_pediment_automa'],
@@ -817,14 +815,11 @@ define(['N/config', 'N/ui/serverWidget', 'N/format', 'N/runtime', 'N/log', 'N/re
                       ["isinactive","is","F"]
                   ]
               }).run().each(function(result){
-                log.error("result",result)
                   featPedimentos = result.getValue('custrecord_lmry_setuptax_pediment_automa');
-                  log.error("custrecord_lmry_setuptax_pediment_automa",result.getValue('custrecord_lmry_setuptax_pediment_automa'))
                   featPedimentos = featPedimentos === "T" || featPedimentos === true;
               });
           }
       }
-      log.error("featPedimentos",featPedimentos)
       return featPedimentos;
     }
     return {

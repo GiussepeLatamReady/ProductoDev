@@ -21,7 +21,7 @@ define(["require", "N/search", "N/http", "N/url", "N/record", "N/query",'./Latam
                         filters: ["custrecord_mx_pedimento_inbound_id", "is", currentRecord.id]
                     });
                 } catch (error) {
-                    console.error("error asda",error)
+                    console.error("error",error)
                     library_mail.sendemail2(' [ pageInit ] ' + error, "LMRY_InboundClient_V2.1.js", currentRecord, 'tranid', 'entity');
                 }
 

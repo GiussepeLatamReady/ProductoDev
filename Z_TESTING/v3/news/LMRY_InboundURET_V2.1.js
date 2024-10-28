@@ -188,7 +188,7 @@ define(["N/record", "N/search", "N/log", "N/runtime", 'N/ui/serverWidget', './La
                 },
                 "en": {
                     "LMRY_PEDIMENTOS": "Register of pedimentos",
-                    "LMRY_CUSTOMS": "Latam - MX Customs",
+                    "LMRY_CUSTOMS": "Latam - MX Aduana",
                 },
                 "pt": {
                     "LMRY_PEDIMENTOS": "Registro de pedimentos",

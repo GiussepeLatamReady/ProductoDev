@@ -1,21 +1,37 @@
 {
-    type: "error.SuiteScriptError",
-    name: "TRANS_DEPT_UNBALNCD",
-    message: "Transacción descuadrada para departamento 1 total = -2760.0.",
-    id: "",
-    stack: [
-       "Error\n    at suitescript/resources/javascript/record/recordImpl.js:156:24\n    at Object.submitFields (suitescript/resources/javascript/record/recordImpl.js:154:30)\n    at updateBill (/SuiteApps/com.latamready.lmrypelocalization/pe_detractions/LMRY_PE_Detraction_Purchases_MR.js:708:28)\n    at Object.summarize (/SuiteApps/com.latamready.lmrypelocalization/pe_detractions/LMRY_PE_Detraction_Purchases_MR.js:269:21)"
-    ],
-    cause: {
-       type: "internal error",
-       code: "TRANS_DEPT_UNBALNCD",
-       details: "Transacción descuadrada para departamento 1 total = -2760.0.",
-       userEvent: null,
-       stackTrace: [
-          "Error\n    at suitescript/resources/javascript/record/recordImpl.js:156:24\n    at Object.submitFields (suitescript/resources/javascript/record/recordImpl.js:154:30)\n    at updateBill (/SuiteApps/com.latamready.lmrypelocalization/pe_detractions/LMRY_PE_Detraction_Purchases_MR.js:708:28)\n    at Object.summarize (/SuiteApps/com.latamready.lmrypelocalization/pe_detractions/LMRY_PE_Detraction_Purchases_MR.js:269:21)"
-       ],
-       notifyOff: false
-    },
-    notifyOff: false,
-    userFacing: true
- }
+   "41": {
+      "4213047": {
+         "total": 80,
+         "whts": {
+            "NT-3558;14674035": {
+               "local": 80,
+               "foreing": 80
+            }
+         },
+         "created": true,
+         "taxresult": {
+            "NT-3558;14674035": 465199
+         }
+      }
+   },
+   "39;58;59": {
+      "4213047": {
+         "total": 160,
+         "whts": {
+            "NT-3321;14674035": {
+               "local": 60,
+               "foreing": 60
+            },
+            "NT-3363;14674035": {
+               "local": 100,
+               "foreing": 100
+            }
+         },
+         "created": true,
+         "taxresult": {
+            "NT-3321;14674035": 465200,
+            "NT-3363;14674035": 465201
+         }
+      }
+   }
+}
