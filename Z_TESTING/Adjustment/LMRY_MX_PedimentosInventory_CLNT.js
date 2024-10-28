@@ -46,6 +46,27 @@ define(['N/log', 'N/record', 'N/runtime', 'N/currentRecord', 'N/url', './Latam_L
             setPedimentoLine(RCD_OBJ);
         }
 
+        function validateField(scriptContext) {
+            var recordObj = scriptContext.currentRecord;
+            var name = scriptContext.fieldId;
+            if (name == 'custpage_nro_aduana') {
+                var aduanaValue = recordObj.getValue({
+                    fieldId: 'custpage_nro_aduana'
+                });
+                var itemCount = recordObj.getLineCount({ sublistId: "custpage_id_sublista" });
+                for (var i = 0; i < itemCount; i++) {
+                    recordObj.selectLine({ sublistId: 'custpage_id_sublista', line: i });
+                    recordObj.setCurrentSublistValue({
+                        sublistId: 'custpage_id_sublista',
+                        fieldId: 'id_aduana',
+                        value: aduanaValue
+                    });
+                }
+            }
+            return true;
+            
+        }
+
         function setPedimentoLine(recordObj) {
             var pedimento = document.getElementById("custpage_nro_pedimento");
             pedimento.addEventListener("keyup", function (e) {
@@ -192,6 +213,7 @@ define(['N/log', 'N/record', 'N/runtime', 'N/currentRecord', 'N/url', './Latam_L
         return {
             pageInit: pageInit,
             funcionCancel: funcionCancel,
+            validateField:validateField,
             saveRecord: saveRecord
         };
 
