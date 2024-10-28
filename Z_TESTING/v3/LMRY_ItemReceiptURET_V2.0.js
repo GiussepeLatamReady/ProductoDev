@@ -13,8 +13,8 @@
  */
 define(['N/search', 'N/record', 'N/https', 'N/runtime', 'N/query', 'N/log', './Latam_Library/LMRY_libSendingEmailsLBRY_V2.0',
   './Latam_Library/LMRY_HideView3LBRY_V2.0', './Latam_Library/LMRY_GLImpact_LBRY_V2.0', "./Latam_Library/LMRY_Log_LBRY_V2.0", './Latam_Library/LMRY_UniversalSetting_Fulfillment_Receipt_LBRY', 'N/ui/serverWidget', "./WTH_Library/LMRY_ItemReceiptTaxResults_LBRY_v2.0",
-  './Latam_Library/LMRY_libToolsFunctionsLBRY_V2.0'],
-  function (search, record, https, runtime, query, log, library_mail, library_HideView, libraryGLImpact, lbryLog, library_Uni_Setting, serverWidget, libTaxResult, libtools) {
+  './Latam_Library/LMRY_libToolsFunctionsLBRY_V2.0','./Latam_Library/LMRY_MX_Pedimentos_LBRY_2.0'],
+  function (search, record, https, runtime, query, log, library_mail, library_HideView, libraryGLImpact, lbryLog, library_Uni_Setting, serverWidget, libTaxResult, libtools, MXPedimentos) {
     var LMRY_script = 'LatamReady - Item Receipt URET V2.0';
     function beforeLoad(context) {
       var type = context.type;
@@ -56,6 +56,12 @@ define(['N/search', 'N/record', 'N/https', 'N/runtime', 'N/query', 'N/log', './L
               label: 'Set Estatus',
               type: serverWidget.FieldType.CHECKBOX
             }).defaultValue = 'F';
+          }
+
+          var featPedimentos = isAutomaticPedimentos(subsidiary);
+          if (runtime.executionContext == 'USERINTERFACE' && featPedimentos && (type === "create" || type === "edit" || type === "copy" || type === "view")) {
+            var idPurchaseOrder = recordObj.getValue("createdfrom");
+            MXPedimentos.showMXTransactionbyPedimentFields(OBJ_FORM, idPurchaseOrder, "purchaseorder");
           }
         }
         // Lógica GL Impact
@@ -193,7 +199,8 @@ define(['N/search', 'N/record', 'N/https', 'N/runtime', 'N/query', 'N/log', './L
             }
           }
         }
-        if (LMRY_Result[0] == "MX" && (eventType == "create" || eventType == "edit") /*&& type_interface !== 'USERINTERFACE'*/) {
+        var featPedimentos = isAutomaticPedimentos(subsidiary)
+        if (LMRY_Result[0] == "MX" && featPedimentos && (eventType == "create" || eventType == "edit") && type_interface !== 'USERINTERFACE') {
           var idPurchaseOrder = recordObj.getValue("createdfrom");
           var linesItems = getPedimentoMXtransaction(idPurchaseOrder);
           if (linesItems.length > 0) {
@@ -298,8 +305,11 @@ define(['N/search', 'N/record', 'N/https', 'N/runtime', 'N/query', 'N/log', './L
             libTaxResult.createItemReceiptTaxResults(recordObj);
           }
         }
-
-        if (LMRY_Result[0] == 'MX' && (eventType == 'create' || eventType == 'edit')) {
+        var featPedimentos = isAutomaticPedimentos(subsidiary)
+        if ((eventType === "create" || eventType === "edit" || eventType === "copy" || eventType === "view") && LMRY_Result[0] === 'MX' && featPedimentos) {
+          MXPedimentos.createMXTransactionbyPediment(recordObj,true,recordObj.getValue('createdfrom'));
+        }
+        if (LMRY_Result[0] == 'MX' && featPedimentos && (eventType == 'create' || eventType == 'edit')) {
           if (libtools.searchPediments(recordObj.id)) {
             const lifoInfo = search.create({
               type: 'customrecord_lmry_mx_transaction_fields',
@@ -716,6 +726,26 @@ define(['N/search', 'N/record', 'N/https', 'N/runtime', 'N/query', 'N/log', './L
       return nroPedimentoandAduana;
     }
 
+    function isAutomaticPedimentos(idSubsidiary) {
+      var featPedimentos = false;
+      var featureSubs = runtime.isFeatureInEffect({ feature: 'SUBSIDIARIES' });
+      if (featureSubs == true || featureSubs == 'T') {
+          if (idSubsidiary) {
+              search.create({
+                  type: 'customrecord_lmry_setup_tax_subsidiary',
+                  columns: ['custrecord_lmry_setuptax_pediment_automa'],
+                  filters: [
+                      ['custrecord_lmry_setuptax_subsidiary', 'anyof', idSubsidiary]
+                  ]
+              }).run().each(function(result){
+                  featPedimentos = result.getValue('custrecord_lmry_setuptax_pediment_automa');
+                  featPedimentos = featPedimentos === "T" || featPedimentos === true;
+              });
+          }
+      }
+      log.error("featPedimentos",featPedimentos)
+      return featPedimentos;
+    }
     return {
       beforeLoad: beforeLoad,
       beforeSubmit: beforeSubmit,

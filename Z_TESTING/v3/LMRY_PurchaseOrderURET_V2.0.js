@@ -206,7 +206,8 @@ define(['N/config', 'N/ui/serverWidget', 'N/format', 'N/runtime', 'N/log', 'N/re
               title: "tipo",
               details: type
             });
-            if (runtime.executionContext == 'USERINTERFACE' && (type === "create" || type === "edit" || type === "copy" || type === "view")) {
+            var featPedimentos = isAutomaticPedimentos(subsidiary);
+            if (runtime.executionContext == 'USERINTERFACE' && featPedimentos && (type === "create" || type === "edit" || type === "copy" || type === "view")) {
               MXPedimentos.showMXTransactionbyPedimentFields(form, recordID, recordObj.type);
             }
           }
@@ -503,7 +504,8 @@ define(['N/config', 'N/ui/serverWidget', 'N/format', 'N/runtime', 'N/log', 'N/re
         }
 
         // C0624 - L: Pedimentos v3
-        if ((type === "create" || type === "edit" || type === "copy" || type === "view") && LMRY_Result[0] === 'MX') {
+        var featPedimentos = isAutomaticPedimentos(subsidiary);
+        if ((type === "create" || type === "edit" || type === "copy" || type === "view") && LMRY_Result[0] === 'MX' && featPedimentos) {
           MXPedimentos.createMXTransactionbyPediment(recordObj);
         }
 
@@ -803,7 +805,26 @@ define(['N/config', 'N/ui/serverWidget', 'N/format', 'N/runtime', 'N/log', 'N/re
       return parseFloat(Math.round(parseFloat(num) * 1e2 + 1e-14) / 1e2);
     }
 
-
+    function isAutomaticPedimentos(idSubsidiary) {
+      var featPedimentos = false;
+      var featureSubs = runtime.isFeatureInEffect({ feature: 'SUBSIDIARIES' });
+      if (featureSubs == true || featureSubs == 'T') {
+          if (idSubsidiary) {
+              search.create({
+                  type: 'customrecord_lmry_setup_tax_subsidiary',
+                  columns: ['custrecord_lmry_setuptax_pediment_automa'],
+                  filters: [
+                      ['custrecord_lmry_setuptax_subsidiary', 'anyof', idSubsidiary]
+                  ]
+              }).run().each(function(result){
+                  featPedimentos = result.getValue('custrecord_lmry_setuptax_pediment_automa');
+                  featPedimentos = featPedimentos === "T" || featPedimentos === true;
+              });
+          }
+      }
+      log.error("featPedimentos",featPedimentos)
+      return featPedimentos;
+    }
     return {
       beforeLoad: beforeLoad,
       beforeSubmit: beforeSubmit,

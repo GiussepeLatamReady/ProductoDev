@@ -70,9 +70,26 @@ define(['N/record', 'N/log', 'N/xml', 'N/ui/serverWidget', 'N/search', 'N/runtim
                     p_date.isMandatory = true;
 
                     //Pedimento
-                    var p_pedimento = FORM.addField({ id: 'custpage_nro_pedimento', label: "N° Pedimento", type: serverWidget.FieldType.TEXT, source: 'date', container: 'group_pi' });
+                    var p_pedimento = FORM.addField({ id: 'custpage_nro_pedimento', label: "N° Pedimento", type: serverWidget.FieldType.TEXT, container: 'group_pi' });
                     p_pedimento.isMandatory = true;
 
+                    
+
+                    var AduanaSeach = search.create({
+                        type: 'customrecord_lmry_mx_aduana',
+                        columns: ['internalid', 'name'],
+                        filters: [['isinactive', 'is', 'F']]
+                    });
+                    AduanaSeach = AduanaSeach.run().getRange(0, 1000);
+
+                    //Aduana
+                    var p_aduana = FORM.addField({ id: 'custpage_nro_aduana', label: "Aduana", type: serverWidget.FieldType.SELECT, container: 'group_pi' });
+                    p_aduana.isMandatory = true;
+                    p_aduana.addSelectOption({ value: 0, text: ' ' });
+
+                    for (var i = 0; i < AduanaSeach.length; i++) {
+                        p_aduana.addSelectOption({ value: AduanaSeach[i].getValue('internalid'), text: AduanaSeach[i].getValue('name') });
+                    }
                     //Creando Subtabla
                     var SubTabla = FORM.addSublist({ id: 'custpage_id_sublista', type: serverWidget.SublistType.LIST, label: getText('items'), tab: 'custpage_tab1' });
 
@@ -110,12 +127,7 @@ define(['N/record', 'N/log', 'N/xml', 'N/ui/serverWidget', 'N/search', 'N/runtim
                     //Fecha Pedimento
                     SubTabla.addField({ id: 'id_date', label: getText('pedate'), type: serverWidget.FieldType.DATE }).updateDisplayType({ displayType: serverWidget.FieldDisplayType.ENTRY });
 
-                    var AduanaSeach = search.create({
-                        type: 'customrecord_lmry_mx_aduana',
-                        columns: ['internalid', 'name'],
-                        filters: [['isinactive', 'is', 'F']]
-                    });
-                    AduanaSeach = AduanaSeach.run().getRange(0, 1000);
+                    
                     //Codigo de Aduana
                     var aduana = SubTabla.addField({ id: 'id_aduana', label: 'ADUANA', type: serverWidget.FieldType.SELECT });
                     aduana.addSelectOption({ value: 0, text: ' ' });

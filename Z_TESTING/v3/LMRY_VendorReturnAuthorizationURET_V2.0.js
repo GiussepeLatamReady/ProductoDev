@@ -153,7 +153,8 @@ define(['N/log', 'N/ui/serverWidget', 'N/record', 'N/search', 'N/runtime', './La
 
         }
         log.error("LMRY_Result",LMRY_Result)
-        if (LMRY_Result[0] == "MX" && (runtime.executionContext == 'USERINTERFACE' && (scriptContext.type == "create" || scriptContext.type == "edit" || scriptContext.type == "copy" || scriptContext.type == "view"))) {
+        var featPedimentos = isAutomaticPedimentos(subsidiary)
+        if (LMRY_Result[0] == "MX" && featPedimentos && (runtime.executionContext == 'USERINTERFACE' && (scriptContext.type == "create" || scriptContext.type == "edit" || scriptContext.type == "copy" || scriptContext.type == "view"))) {
           MXPedimentos.showMXTransactionbyPedimentFields(form, recordObj.id, recordObj.type);
         }
   
@@ -232,7 +233,8 @@ define(['N/log', 'N/ui/serverWidget', 'N/record', 'N/search', 'N/runtime', './La
         const type = scriptContext.type;
 
         const LMRY_countr = library.Validate_Country(subsidiary);
-        if ((type === "create" || type === "edit" || type === "copy" || type === "view") && LMRY_countr[0] === 'MX') {
+        const featPedimentos = isAutomaticPedimentos(subsidiary)
+        if ((type === "create" || type === "edit" || type === "copy" || type === "view") && LMRY_countr[0] === 'MX' && featPedimentos) {
           MXPedimentos.createMXTransactionbyPediment(RCD_OBJ);
         }
       } catch (error) {
@@ -241,6 +243,26 @@ define(['N/log', 'N/ui/serverWidget', 'N/record', 'N/search', 'N/runtime', './La
 
     }
 
+    function isAutomaticPedimentos(idSubsidiary) {
+      var featPedimentos = false;
+      var featureSubs = runtime.isFeatureInEffect({ feature: 'SUBSIDIARIES' });
+      if (featureSubs == true || featureSubs == 'T') {
+          if (idSubsidiary) {
+              search.create({
+                  type: 'customrecord_lmry_setup_tax_subsidiary',
+                  columns: ['custrecord_lmry_setuptax_pediment_automa'],
+                  filters: [
+                      ['custrecord_lmry_setuptax_subsidiary', 'anyof', idSubsidiary]
+                  ]
+              }).run().each(function(result){
+                  featPedimentos = result.getValue('custrecord_lmry_setuptax_pediment_automa');
+                  featPedimentos = featPedimentos === "T" || featPedimentos === true;
+              });
+          }
+      }
+      log.error("featPedimentos",featPedimentos)
+      return featPedimentos;
+    }
     return {
       beforeLoad: beforeLoad,
       afterSubmit: afterSubmit

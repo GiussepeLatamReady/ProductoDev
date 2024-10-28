@@ -9,8 +9,8 @@ define(["N/log", "N/search", "N/record", 'N/runtime', 'N/format', 'N/query', './
     function (log, search, record, runtime, format, query, library_mail) {
 
         function get(parameters) {
-            try {
-
+            const translation = getTranslations();
+            try {'0'
                 const idRecord = parameters.idRecord;
                 const type = search.lookupFields({
                     type: 'transaction',
@@ -19,7 +19,6 @@ define(["N/log", "N/search", "N/record", 'N/runtime', 'N/format', 'N/query', './
                 }).type[0].value;
                 log.debug('type', type);
                 const isReceipt = type === "ItemRcpt" ? true : false;
-
 
                 const dataTransaction = search.lookupFields({
                     type: !isReceipt ? search.Type.ITEM_FULFILLMENT : search.Type.ITEM_RECEIPT,
@@ -40,13 +39,11 @@ define(["N/log", "N/search", "N/record", 'N/runtime', 'N/format', 'N/query', './
                 let flagTransfer = false;
                 if (transactionOgirinType == 'TrnfrOrd') flagTransfer = true;
 
-
-
                 const { isAutomatic, automaticType } = getAutomaticType(dataTransaction['createdfrom'][0]?.value);
 
                 if (isAutomatic) {
                     const items = getItems(idRecord, isReceipt);
-                    if (items.length === 0) return 'No hay lineas seleccionadas';
+                    if (items.length === 0) return translation.NO_LINES_SELECTED;
                     let listSelected = [];
                     let listCreated = [];
                     items.forEach((itemLine) => {
@@ -66,7 +63,7 @@ define(["N/log", "N/search", "N/record", 'N/runtime', 'N/format', 'N/query', './
                         log.debug('sumQuantityDisp', sumQuantityDisp);
                         log.debug('validate', quantitytotal > sumQuantityDisp);
                         if (quantitytotal > sumQuantityDisp) {
-                            throw 'Error no hay suficiente stock ';
+                            throw translation.INSUFFICIENT_STOCK;
                         } else {
                             for (let i = 0; i < listPediment.length; i++) {
                                 const jsonPediment = JSON.parse(JSON.stringify(listPediment[i]));
@@ -94,7 +91,7 @@ define(["N/log", "N/search", "N/record", 'N/runtime', 'N/format', 'N/query', './
                                     continue;
                                 }
                             }
-                            if (quantitytotal > 0) throw ' Error no hay suficiente stock';
+                            if (quantitytotal > 0) throw translation.INSUFFICIENT_STOCK;
                         };
                     });
                     log.debug('listSelected1', listSelected);
@@ -120,16 +117,15 @@ define(["N/log", "N/search", "N/record", 'N/runtime', 'N/format', 'N/query', './
                             });
                     }
 
-                    return 'Ok';
+                    return translation.PEDIMENTO_SUCCESS;
                 } else {
                     let respuesta;
                     if (flagTransfer && isReceipt) {
                         const jsonPedimentos = getInfoMXtransaction(dataTransaction['createdfrom'][0]?.value).custrecord_lmry_mx_pedimento_transfer;
-                        respuesta = createPedimentoDetailRecord(dataTransaction, idRecord, isReceipt, flagTransfer, jsonPedimentos);
+                        respuesta = createPedimentoDetailRecord(dataTransaction, idRecord, isReceipt, flagTransfer, jsonPedimentos,translation);
                     } else {
-                        respuesta = createPedimentoDetailRecord(dataTransaction, idRecord, isReceipt, flagTransfer, null);
+                        respuesta = createPedimentoDetailRecord(dataTransaction, idRecord, isReceipt, flagTransfer, null,translation);
                     }
-
                     return respuesta;
                 }
 
@@ -140,13 +136,44 @@ define(["N/log", "N/search", "N/record", 'N/runtime', 'N/format', 'N/query', './
                 });
                 if (typeof error == 'string') return error;
                 library_mail.sendemail2(' [ pedimentosReslet ] ' + error, 'lmry_MX_pedimentos_resltet', null, 'tranid', 'entity');
-                return 'Error al crear el pedimento Detail';
+                return translation.PEDIMENTO_ERROR_DETAIL;
             }
-
-
-
-
         }
+
+        function getTranslations() {
+            var language = runtime.getCurrentScript().getParameter({ name: "LANGUAGE" }).substring(0, 2);
+            language = ["es", "pt"].indexOf(language) != -1 ? language : "en";
+        
+            var translatedFields = {
+                "es": {
+                    "NO_LINES_SELECTED": "No hay líneas seleccionadas",
+                    "INSUFFICIENT_STOCK": "Error no hay suficiente stock",
+                    "PEDIMENTO_SUCCESS": "Pedimento creado con éxito",
+                    "PEDIMENTO_ERROR_DETAIL": "Error al crear el pedimento Detail",
+                    "PEDIMENTO_EXISTS": "Ya existen pedimentos",
+                    "NO_MX_TRANSACTION": "No hay Mx Transaction"
+                },
+                "en": {
+                    "NO_LINES_SELECTED": "No lines selected",
+                    "INSUFFICIENT_STOCK": "Error not enough stock",
+                    "PEDIMENTO_SUCCESS": "Pedimento created successfully",
+                    "PEDIMENTO_ERROR_DETAIL": "Error creating pedimento Detail",
+                    "PEDIMENTO_EXISTS": "Pedimentos already exist",
+                    "NO_MX_TRANSACTION": "No Mx Transaction"
+                },
+                "pt": {
+                    "NO_LINES_SELECTED": "Nenhuma linha selecionada",
+                    "INSUFFICIENT_STOCK": "Erro não há estoque suficiente",
+                    "PEDIMENTO_SUCCESS": "Pedimento criado com sucesso",
+                    "PEDIMENTO_ERROR_DETAIL": "Erro ao criar o pedimento Detalhe",
+                    "PEDIMENTO_EXISTS": "Já existem pedimentos",
+                    "NO_MX_TRANSACTION": "Não há Transação Mx"
+                }
+            };
+        
+            return translatedFields[language];
+        }
+        
         function getItems(shipmentID, isReceipt) {
             let FEAT_INVENTORY = runtime.isFeatureInEffect({ feature: "advbinseriallotmgmt" });
             const listItems = [];
@@ -392,10 +419,10 @@ define(["N/log", "N/search", "N/record", 'N/runtime', 'N/format', 'N/query', './
          * @param {number} idRecord 
          * @param {boolean} isReceipt 
          */
-        function createPedimentoDetailRecord(dataTransaction, idRecord, isReceipt, flagTransfer, resultItems) {
+        function createPedimentoDetailRecord(dataTransaction, idRecord, isReceipt, flagTransfer, resultItems,translation) {
             let idPurchaseOrder = dataTransaction['createdfrom'][0]?.value;
             if (Number(idPurchaseOrder) === 0) return 'Error falta ID';
-            if (!existPediments(idRecord)) return 'Ya existen pedimentos';
+            if (!existPediments(idRecord)) return translation.PEDIMENTO_EXISTS;
 
             let purchaseOrder = getInfoMXtransaction(idPurchaseOrder);
             log.debug("datos pedimento", purchaseOrder);
@@ -412,7 +439,7 @@ define(["N/log", "N/search", "N/record", 'N/runtime', 'N/format', 'N/query', './
                 search_items_ped.filters.push(Filter_Trans);
 
                 let result_items_ped = search_items_ped.run().getRange(0, 1000);
-                if (result_items_ped.length === 0) return 'No hay lineas seleccionadas';
+                if (result_items_ped.length === 0) return translation.NO_LINES_SELECTED;
                 if (flagTransfer && isReceipt) {
                     if (typeof resultItems === 'object')
                         result_items_ped = resultItems;
@@ -487,9 +514,9 @@ define(["N/log", "N/search", "N/record", 'N/runtime', 'N/format', 'N/query', './
 
                         });
                 }
-                return 'ok';
+                return translation.PEDIMENTO_SUCCESS;
             }
-            return 'no hay Mx Transaction';
+            return translation.NO_MX_TRANSACTION;
 
         }
 

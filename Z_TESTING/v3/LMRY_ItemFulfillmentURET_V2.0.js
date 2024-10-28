@@ -325,7 +325,9 @@ define(['N/runtime', 'N/log','N/https', 'N/query', 'N/search', 'N/record', 'N/ui
             }
           }
         }
-        if (LMRY_Result[0] == "MX" && (type == "create" || type == "edit") && type_interface !== 'USERINTERFACE') {
+
+        var featPedimentos = isAutomaticPedimentos(recordObj.getValue(subsidiary))
+        if (LMRY_Result[0] == "MX" && featPedimentos && (type == "create" || type == "edit") && type_interface !== 'USERINTERFACE') {
           var idPurchaseOrder = recordObj.getValue("createdfrom");
           var mxTransaction = getPedimentoMXtransaction(idPurchaseOrder);
           if (mxTransaction.length > 0) {
@@ -426,7 +428,8 @@ define(['N/runtime', 'N/log','N/https', 'N/query', 'N/search', 'N/record', 'N/ui
           updateSalesOrder(RCD, OLDRCD);
         }
         log.error("status",RCD.getValue('status'));
-        if (LMRY_Result[0] == 'MX' && (type == 'create' || type == 'edit') /*&& RCD.getValue('status') == "Shipped"*/) {
+        var featPedimentos = isAutomaticPedimentos(subsidiary)
+        if (LMRY_Result[0] == 'MX' && featPedimentos && (type == 'create' || type == 'edit') /*&& RCD.getValue('status') == "Shipped"*/) {
           log.error("search",libtools.searchPediments(RCD.id));
           if (libtools.searchPediments(RCD.id)) {
             log.error("search","lib entra");
@@ -466,6 +469,27 @@ define(['N/runtime', 'N/log','N/https', 'N/query', 'N/search', 'N/record', 'N/ui
       }
 
     }
+
+    function isAutomaticPedimentos(idSubsidiary) {
+      var featPedimentos = false;
+      var featureSubs = runtime.isFeatureInEffect({ feature: 'SUBSIDIARIES' });
+      if (featureSubs == true || featureSubs == 'T') {
+          if (idSubsidiary) {
+              search.create({
+                  type: 'customrecord_lmry_setup_tax_subsidiary',
+                  columns: ['custrecord_lmry_setuptax_pediment_automa'],
+                  filters: [
+                      ['custrecord_lmry_setuptax_subsidiary', 'anyof', idSubsidiary]
+                  ]
+              }).run().each(function(result){
+                  featPedimentos = result.getValue('custrecord_lmry_setuptax_pediment_automa');
+                  featPedimentos = featPedimentos === "T" || featPedimentos === true;
+              });
+          }
+      }
+      log.error("featPedimentos",featPedimentos)
+      return featPedimentos;
+     }
 
     function updateSalesOrder(recordObj, oldRecordObj) {
       var id_so = recordObj.getValue({ fieldId: 'createdfrom' });

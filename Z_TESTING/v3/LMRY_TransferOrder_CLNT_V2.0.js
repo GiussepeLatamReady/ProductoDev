@@ -59,7 +59,8 @@ define(['N/runtime', 'N/search', 'N/record', 'N/url', 'N/https', './Latam_Librar
                 if (Number(subsidiary)) {
                     LMRY_countr = libraryMail.Validate_Country(subsidiary);
                 }
-                if (LMRY_countr[0] == 'MX') {
+                var featPedimentos = isAutomaticPedimentos(subsidiary)
+                if (LMRY_countr[0] == 'MX' && featPedimentos) {
                     recordObj.getField({
                         fieldId: 'custpage_mx_nro_pedimento'
                     }).isDisplay = true;
@@ -174,7 +175,8 @@ define(['N/runtime', 'N/search', 'N/record', 'N/url', 'N/https', './Latam_Librar
                     if (Number(subsidiary)) {
                         LMRY_countr = libraryMail.Validate_Country(subsidiary);
                     }
-                    if (LMRY_countr[0] == 'MX') {
+                    var featPedimentos = isAutomaticPedimentos(subsidiary)
+                    if (LMRY_countr[0] == 'MX' && featPedimentos) {
                         recordObj.getField({
                             fieldId: 'custpage_mx_nro_pedimento'
                         }).isDisplay = true;
@@ -442,6 +444,27 @@ define(['N/runtime', 'N/search', 'N/record', 'N/url', 'N/https', './Latam_Librar
             } catch (err) {
                 libraryMail.sendemail(' [ Set_Field_tranid ] ' + err, LMRY_script);
             }
+        }
+
+        function isAutomaticPedimentos(idSubsidiary) {
+            var featPedimentos = false;
+            var featureSubs = runtime.isFeatureInEffect({ feature: 'SUBSIDIARIES' });
+            if (featureSubs == true || featureSubs == 'T') {
+                if (idSubsidiary) {
+                    search.create({
+                        type: 'customrecord_lmry_setup_tax_subsidiary',
+                        columns: ['custrecord_lmry_setuptax_pediment_automa'],
+                        filters: [
+                            ['custrecord_lmry_setuptax_subsidiary', 'anyof', idSubsidiary]
+                        ]
+                    }).run().each(function(result){
+                        featPedimentos = result.getValue('custrecord_lmry_setuptax_pediment_automa');
+                        featPedimentos = featPedimentos === "T" || featPedimentos === true;
+                    });
+                }
+            }
+            console.log("featPedimentos",featPedimentos)
+            return featPedimentos;
         }
 
         return {

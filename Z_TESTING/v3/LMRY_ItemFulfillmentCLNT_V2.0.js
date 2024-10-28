@@ -623,8 +623,8 @@ define(['N/log', 'N/search', 'N/query', 'N/url', 'N/https', 'N/runtime', 'N/reco
                     updateBRBaseAmount(recordObj);
                 }
                 //C0624 - L :Pedimentos
-
-                if (LMRY_countr[0] == "MX" && (type == "create" || type == 'edit' || type == 'copy')) {
+                var featPedimentos = isAutomaticPedimentos(recordObj.getValue("subsidiary"))
+                if (LMRY_countr[0] == "MX" && featPedimentos && (type == "create" || type == 'edit' || type == 'copy')) {
                     var idPurchaseOrder = recordObj.getValue("createdfrom");
                     // if (libtools.searchPediments(recordObj.id)) {
                     var mxTransaction = getPedimentoMXtransaction(idPurchaseOrder);
@@ -653,6 +653,27 @@ define(['N/log', 'N/search', 'N/query', 'N/url', 'N/https', 'N/runtime', 'N/reco
             return true;
         }
 
+
+        function isAutomaticPedimentos(idSubsidiary) {
+            var featPedimentos = false;
+            var featureSubs = runtime.isFeatureInEffect({ feature: 'SUBSIDIARIES' });
+            if (featureSubs == true || featureSubs == 'T') {
+                if (idSubsidiary) {
+                    search.create({
+                        type: 'customrecord_lmry_setup_tax_subsidiary',
+                        columns: ['custrecord_lmry_setuptax_pediment_automa'],
+                        filters: [
+                            ['custrecord_lmry_setuptax_subsidiary', 'anyof', idSubsidiary]
+                        ]
+                    }).run().each(function(result){
+                        featPedimentos = result.getValue('custrecord_lmry_setuptax_pediment_automa');
+                        featPedimentos = featPedimentos === "T" || featPedimentos === true;
+                    });
+                }
+            }
+            console.log("featPedimentos",featPedimentos)
+            return featPedimentos;
+        }
 
         function correlativoChile(option) {
             var document_type = recordObj.getValue({ fieldId: 'custbody_lmry_document_type' });
