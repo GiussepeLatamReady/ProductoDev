@@ -81,34 +81,6 @@ define(["N/query", "N/search", "N/record", "N/log"], function (query, search, re
             }
         }
     }
-
-    function getTranslations() {
-        var language = runtime.getCurrentScript().getParameter({ name: "LANGUAGE" }).substring(0, 2);
-        language = ["es", "pt"].indexOf(language) != -1 ? language : "en";
-    
-        var translatedFields = {
-            "es": {
-                "NO_LINES_SELECTED": "No hay líneas seleccionadas",
-                "INSUFFICIENT_STOCK": "Error no hay suficiente stock",
-                "PEDIMENTO_SUCCESS": "Pedimento creado con éxito",
-                "PEDIMENTO_ERROR_DETAIL": "Error al crear el pedimento Detail"
-            },
-            "en": {
-                "NO_LINES_SELECTED": "No lines selected",
-                "INSUFFICIENT_STOCK": "Error not enough stock",
-                "PEDIMENTO_SUCCESS": "Pedimento created successfully",
-                "PEDIMENTO_ERROR_DETAIL": "Error creating pedimento Detail"
-            },
-            "pt": {
-                "NO_LINES_SELECTED": "Nenhuma linha selecionada",
-                "INSUFFICIENT_STOCK": "Erro não há estoque suficiente",
-                "PEDIMENTO_SUCCESS": "Pedimento criado com sucesso",
-                "PEDIMENTO_ERROR_DETAIL": "Erro ao criar o pedimento Detalhe"
-            }
-        };
-    
-        return translatedFields[language];
-    }
     
     function validateLinesxPedimento(numberPedimento) {
         if (numberPedimento == null || numberPedimento == '') return false;
