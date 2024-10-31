@@ -54,7 +54,7 @@ define(['N/currentRecord', 'N/url', 'N/search', 'N/format'],
 
                 var lines = objRecord.getLineCount('custpage_id_sublista');
 
-                var dataPreview = updateDataPediments(dataPediments, lines, lineID);
+                var dataPreview = updateDataPediments(dataPediments, lineID);
                 console.log("pageInit dataPreview", JSON.stringify(dataPreview));
                 for (var i = 0; i < lines; i++) {
                     objRecord.selectLine({sublistId: 'custpage_id_sublista', line: i});
@@ -239,8 +239,9 @@ define(['N/currentRecord', 'N/url', 'N/search', 'N/format'],
             }
         }
 
-        function updateDataPediments(dataPediments, lines, lineID) {
+        function updateDataPediments(dataPediments, lineID) {
             var dataPreview = [];
+            var lines = window.opener.nlapiGetLineItemCount('custpage_id_sublista')
             for (var i = 0; i < lines; i++) {
                 if (i == lineID) {
                     var dataLine = window.opener.nlapiGetLineItemValue('custpage_id_sublista', 'custpage_popup_data_detail', parseInt(i) + 1);

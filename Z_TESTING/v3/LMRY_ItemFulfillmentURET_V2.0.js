@@ -326,8 +326,11 @@ define(['N/runtime', 'N/log','N/https', 'N/query', 'N/search', 'N/record', 'N/ui
           }
         }
 
-        var featPedimentos = isAutomaticPedimentos(recordObj.getValue(subsidiary))
+        var featPedimentos = isAutomaticPedimentos(recordObj.getValue("subsidiary"))
+        log.error("featPedimentos",featPedimentos)
+        log.error("antes","antes")
         if (LMRY_Result[0] == "MX" && featPedimentos && (type == "create" || type == "edit") && type_interface !== 'USERINTERFACE') {
+          log.error("entro","entro")
           var idPurchaseOrder = recordObj.getValue("createdfrom");
           var mxTransaction = getPedimentoMXtransaction(idPurchaseOrder);
           if (mxTransaction.length > 0) {
@@ -343,7 +346,10 @@ define(['N/runtime', 'N/log','N/https', 'N/query', 'N/search', 'N/record', 'N/ui
               });
             };
           }
+          
         }
+
+        log.error("despues","depues")
 
 
 
@@ -427,7 +433,7 @@ define(['N/runtime', 'N/log','N/https', 'N/query', 'N/search', 'N/record', 'N/ui
           * ****************************************** */
           updateSalesOrder(RCD, OLDRCD);
         }
-        var featPedimentos = isAutomaticPedimentos(subsidiary)
+        var featPedimentos = isAutomaticPedimentos(RCD.getValue('subsidiary'))
         if (LMRY_Result[0] == 'MX' && featPedimentos && (type == 'create' || type == 'edit') /*&& RCD.getValue('status') == "Shipped"*/) {
           if (libtools.searchPediments(RCD.id)) {
             const lifoInfo = search.create({
