@@ -4,9 +4,9 @@
  * @NModuleScope Public
  * @Name LMRY_InboundURET_V2.1.js
  */
-define(["N/record", "N/search", "N/log", "N/runtime", 'N/ui/serverWidget', './Latam_Library/LMRY_libSendingEmailsLBRY_V2.0'],
+define(["N/record", "N/search", "N/log", "N/runtime", 'N/ui/serverWidget', "N/format", './Latam_Library/LMRY_libSendingEmailsLBRY_V2.0'],
 
-    function (record, search, log, runtime, serverWidget, library_mail) {
+    function (record, search, log, runtime, serverWidget,format, library_mail) {
 
         /**
          * Function definition to be triggered before record is loaded.
@@ -21,6 +21,7 @@ define(["N/record", "N/search", "N/log", "N/runtime", 'N/ui/serverWidget', './La
         const LMRY_script = "LMRY_InboundURET_V2.1.js";
         function beforeLoad(scriptContext) {
             const { newRecord: currentRecord, form: Form } = scriptContext;
+            const eventType = runtime.executionContext;
             try {
                 const translations = getTranslations();
                 const isActivePedimentos = isAutomaticPedimentos(getLocalizedSubsidiaries());
@@ -29,6 +30,9 @@ define(["N/record", "N/search", "N/log", "N/runtime", 'N/ui/serverWidget', './La
                     Form.addFieldGroup({ id: 'mainGroupPedimentos', label: translations.LMRY_PEDIMENTOS });
                     const fieldPedimento = Form.addField({ id: "custpage_pedimento", label: "Latam - MX N° Pedimento", type: "text", container: "mainGroupPedimentos" });
                     const fieldAduana = Form.addField({ id: "custpage_aduana", label: translations.LMRY_CUSTOMS, type: "select", container: "mainGroupPedimentos" });
+                    const fieldDate = Form.addField({ id: "custpage_pedimento_date", label: translations.LMRY_DATE, type: "date", container: "mainGroupPedimentos" });
+
+                    if (eventType && eventType !== "view") fieldDate.defaultValue = new Date();
                     
                     search.create({ type: 'customrecord_lmry_mx_aduana', columns: ['internalid', 'name'], filters: [['isinactive', 'is', 'F']] })
                         .run().getRange.promise(0, 1000).then(aduanas => {
@@ -38,12 +42,19 @@ define(["N/record", "N/search", "N/log", "N/runtime", 'N/ui/serverWidget', './La
                                 const pedimentoRecord = search.create({
                                     type: "customrecord_mx_pedimento_inbound",
                                     filters: ["custrecord_mx_pedimento_inbound_id", "is", currentRecord.id],
-                                    columns: ["internalid", "custrecord_nro_pedimento_inbound", "custrecord_lmry_mx_aduana_inbound"]
+                                    columns: [
+                                        "internalid", 
+                                        "custrecord_nro_pedimento_inbound", 
+                                        "custrecord_lmry_mx_aduana_inbound",
+                                        "custrecord_lmry_mx_pedimento_date"
+                                    ]
                                 }).run().getRange(0, 1)[0];
                                 
                                 if (pedimentoRecord) {
                                     fieldPedimento.defaultValue = pedimentoRecord.getValue("custrecord_nro_pedimento_inbound") || "";
                                     fieldAduana.defaultValue = pedimentoRecord.getValue("custrecord_lmry_mx_aduana_inbound") || "";
+                                    var pedimentoDate = pedimentoRecord.getValue("custrecord_lmry_mx_pedimento_date");
+                                    fieldDate.defaultValue = format.parse({ value: pedimentoDate, type: format.Type.DATE });
                                 }
                             }
                         });
@@ -99,11 +110,19 @@ define(["N/record", "N/search", "N/log", "N/runtime", 'N/ui/serverWidget', './La
                         if (!arregloPurchaseOrders.includes(idPO))
                             arregloPurchaseOrders.push(idPO);
                     };
-                    createInboundPedimentoRecord({ idRecord: currentRecord.id, nroPedimento: currentRecord.getValue("custpage_pedimento"), idAduana: currentRecord.getValue("custpage_aduana"), pos: arregloPurchaseOrders });
+                    createInboundPedimentoRecord(
+                        { 
+                            idRecord: currentRecord.id, 
+                            nroPedimento: currentRecord.getValue("custpage_pedimento"), 
+                            idAduana: currentRecord.getValue("custpage_aduana"), 
+                            pos: arregloPurchaseOrders,
+                            pedimentoDate: currentRecord.getValue("custpage_pedimento_date")
+                        });
                 }
 
 
             } catch (error) {
+                log.error("aftersubmit error",error)
                 library_mail.sendemail2(' [ afterSubmit ] ' + error, LMRY_script, currentRecord, 'tranid', 'entity');
             }
 
@@ -117,9 +136,13 @@ define(["N/record", "N/search", "N/log", "N/runtime", 'N/ui/serverWidget', './La
          * @param {Array<number>} InboundPedimentoRecord.pos
          */
         function createInboundPedimentoRecord(InboundPedimentoRecord) {
-            if (validateInboundPedimentoRecord(InboundPedimentoRecord.idRecord)) {
+            const {recordInboundID,exist} = validateInboundPedimentoRecord(InboundPedimentoRecord.idRecord);
+            InboundPedimentoRecord.recordInboundID = recordInboundID;
+            log.error("recordInboundID",recordInboundID)
+            log.error("InboundPedimentoRecord",InboundPedimentoRecord);
+            log.error("exist",exist);
+            if (exist) {
                 updateInboundPedimentoRecord(InboundPedimentoRecord);
-
             } else {
                 const inboundPedimentoRecord = record.create({
                     type: "customrecord_mx_pedimento_inbound",
@@ -129,6 +152,8 @@ define(["N/record", "N/search", "N/log", "N/runtime", 'N/ui/serverWidget', './La
                 inboundPedimentoRecord.setValue({ fieldId: "custrecord_mx_pedimento_inbound_id", value: InboundPedimentoRecord.idRecord });
                 inboundPedimentoRecord.setValue({ fieldId: "custrecord_nro_pedimento_inbound", value: InboundPedimentoRecord.nroPedimento });
                 inboundPedimentoRecord.setValue({ fieldId: "custrecord_lmry_mx_aduana_inbound", value: InboundPedimentoRecord.idAduana });
+                var pedimentoDate = format.parse({ value: InboundPedimentoRecord.pedimentoDate, type: format.Type.DATE });
+                inboundPedimentoRecord.setValue({ fieldId: "custrecord_lmry_mx_pedimento_date", value: pedimentoDate });
                 inboundPedimentoRecord.setValue({ fieldId: "custrecord_lmry_mx_purchase_order", value: InboundPedimentoRecord.pos.join("|") });
 
                 inboundPedimentoRecord.save();
@@ -146,13 +171,14 @@ define(["N/record", "N/search", "N/log", "N/runtime", 'N/ui/serverWidget', './La
         function updateInboundPedimentoRecord(InboundPedimentoRecord) {
             const inboundPedimentoRecord = record.load({
                 type: "customrecord_mx_pedimento_inbound",
-                id: InboundPedimentoRecord.idRecord,
+                id: InboundPedimentoRecord.recordInboundID,
                 isDynamic: false,
             });
-
             inboundPedimentoRecord.setValue({ fieldId: "custrecord_mx_pedimento_inbound_id", value: InboundPedimentoRecord.idRecord });
             inboundPedimentoRecord.setValue({ fieldId: "custrecord_nro_pedimento_inbound", value: InboundPedimentoRecord.nroPedimento });
             inboundPedimentoRecord.setValue({ fieldId: "custrecord_lmry_mx_aduana_inbound", value: InboundPedimentoRecord.idAduana });
+            var pedimentoDate = format.parse({ value: InboundPedimentoRecord.pedimentoDate, type: format.Type.DATE });
+            inboundPedimentoRecord.setValue({ fieldId: "custrecord_lmry_mx_pedimento_date", value: pedimentoDate });
             inboundPedimentoRecord.setValue({ fieldId: "custrecord_lmry_mx_purchase_order", value: InboundPedimentoRecord.pos.join("|") });
 
             inboundPedimentoRecord.save();
@@ -170,10 +196,11 @@ define(["N/record", "N/search", "N/log", "N/runtime", 'N/ui/serverWidget', './La
                 filters: ["custrecord_mx_pedimento_inbound_id", "is", inboundId],
                 columns: ["internalid"],
             }).run().getRange(0, 1);
-
-            if (inboundPedimentoRecords.length === 0) return false;
-
-            return true;
+            let recordInboundID;
+            if (inboundPedimentoRecords.length === 0) return {recordInboundID,exist: false};
+            recordInboundID = inboundPedimentoRecords[0].getValue("internalid");
+            
+            return {recordInboundID,exist: true};
         }
 
         function getTranslations() {
@@ -185,14 +212,17 @@ define(["N/record", "N/search", "N/log", "N/runtime", 'N/ui/serverWidget', './La
                 "es": {
                     "LMRY_PEDIMENTOS": "Registro de Pedimentos",
                     "LMRY_CUSTOMS": "Latam - MX Aduana",
+                    "LMRY_DATE":"Latam - MX Fecha"
                 },
                 "en": {
                     "LMRY_PEDIMENTOS": "Register of pedimentos",
                     "LMRY_CUSTOMS": "Latam - MX Aduana",
+                    "LMRY_DATE":"Latam - MX Date"
                 },
                 "pt": {
                     "LMRY_PEDIMENTOS": "Registro de pedimentos",
                     "LMRY_CUSTOMS": "Latam - MX Alfândega",
+                    "LMRY_DATE":"Latam - MX Data"
                 }
             }
 

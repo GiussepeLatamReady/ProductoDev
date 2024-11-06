@@ -58,11 +58,17 @@ define(['N/search', 'N/record', 'N/https', 'N/runtime', 'N/query', 'N/log', './L
             }).defaultValue = 'F';
           }
 
-          var featPedimentos = isAutomaticPedimentos(subsidiary);
-          if (runtime.executionContext == 'USERINTERFACE' && featPedimentos && (type === "create" || type === "edit" || type === "copy" || type === "view")) {
-            var idPurchaseOrder = recordObj.getValue("createdfrom");
-            MXPedimentos.showMXTransactionbyPedimentFields(OBJ_FORM, idPurchaseOrder, "purchaseorder");
+          if (LMRY_Result[0] == "MX") {
+            var featPedimentos = MXPedimentos.isAutomaticPedimentos(recordObj.getValue({ fieldId: 'subsidiary' }));
+            if (runtime.executionContext == 'USERINTERFACE' && featPedimentos && (type === "create" || type === "edit" || type === "copy" || type === "view")) {
+              var idPurchaseOrder = recordObj.getValue("createdfrom");
+              MXPedimentos.showMXTransactionbyPedimentFields(OBJ_FORM, idPurchaseOrder, "purchaseorder", type);
+            }
+            if (featPedimentos && (type == "create" || type == "edit")) {
+              MXPedimentos.updateLinesUsePedimentos(recordObj);
+            }
           }
+          
         }
         // Lógica GL Impact
         if (context.type == 'view') {
@@ -136,8 +142,6 @@ define(['N/search', 'N/record', 'N/https', 'N/runtime', 'N/query', 'N/log', './L
             recordObj.setValue("custbody_lmry_num_preimpreso", "");
           }
         }
-
-
       }
       catch (err) {
         log.error('BeforeLoad', err);
@@ -199,24 +203,7 @@ define(['N/search', 'N/record', 'N/https', 'N/runtime', 'N/query', 'N/log', './L
             }
           }
         }
-        var featPedimentos = isAutomaticPedimentos(subsidiary)
-        if (LMRY_Result[0] == "MX" && featPedimentos && (eventType == "create" || eventType == "edit") && type_interface !== 'USERINTERFACE') {
-          var idPurchaseOrder = recordObj.getValue("createdfrom");
-          var linesItems = getPedimentoMXtransaction(idPurchaseOrder);
-          if (linesItems.length > 0) {
-            var nLines = recordObj.getLineCount({
-              sublistId: "item"
-            });
-            for (var index = 0; index < nLines; index++) {
-              recordObj.setSublistValue({
-                sublistId: "item",
-                fieldId: "custcol_lmry_mx_pediment",
-                line: index,
-                value: true
-              });
-            };
-          }
-        }
+        
 
       } catch (err) {
         log.error("[ beforeSubmit ]", err);
@@ -304,40 +291,46 @@ define(['N/search', 'N/record', 'N/https', 'N/runtime', 'N/query', 'N/log', './L
             libTaxResult.createItemReceiptTaxResults(recordObj);
           }
         }
-        var featPedimentos = isAutomaticPedimentos(subsidiary)
-        if ((eventType === "create" || eventType === "edit" || eventType === "copy" || eventType === "view") && LMRY_Result[0] === 'MX' && featPedimentos) {
-          MXPedimentos.createMXTransactionbyPediment(recordObj,true,recordObj.getValue('createdfrom'));
-        }
-        if (LMRY_Result[0] == 'MX' && featPedimentos && (eventType == 'create' || eventType == 'edit')) {
-          if (libtools.searchPediments(recordObj.id)) {
-            const lifoInfo = search.create({
-              type: 'customrecord_lmry_mx_transaction_fields',
-              filters: [
-                'custrecord_lmry_mx_transaction_related', 'anyof', recordObj.getValue('createdfrom')
-              ],
-              columns: ['custrecord_lmry_mx_pedimento_lifo', 'custrecord_lmry_mx_pedimento_fifo', 'custrecord_lmry_mx_pedimento']
-            }).run().getRange(0, 1);
-            if (lifoInfo.length > 0) {
-              if (lifoInfo[0].getValue('custrecord_lmry_mx_pedimento_lifo') == true || lifoInfo[0].getValue('custrecord_lmry_mx_pedimento_fifo') == true || lifoInfo[0].getValue('custrecord_lmry_mx_pedimento') != null) {
-                var mensaje = https.requestRestlet({
-                  deploymentId: "customdeploy_lmry_pedimentos_rlt",
-                  scriptId: "customscript_lmry_pedimentos_rlt",
-                  method: "GET",
-                  headers: {
-                    "Content-Type": "application/json"
-                  },
-                  urlParams: {
-                    idRecord: recordObj.id
-                  }
-                });
 
-                if (typeof mensaje != "object" && mensaje.indexOf('Error')) {
-                  throw mensaje;
+        
+        if (LMRY_Result[0] === 'MX') {
+          var featPedimentos = MXPedimentos.isAutomaticPedimentos(subsidiary)
+          if ((eventType === "create" || eventType === "edit" || eventType === "copy" || eventType === "view") && featPedimentos) {
+            MXPedimentos.createMXTransactionbyPediment(recordObj, true, recordObj.getValue('createdfrom'));
+          }
+          if (featPedimentos && (eventType == 'create' || eventType == 'edit')) {
+            if (libtools.searchPediments(recordObj.id)) {
+              const lifoInfo = search.create({
+                type: 'customrecord_lmry_mx_transaction_fields',
+                filters: [
+                  'custrecord_lmry_mx_transaction_related', 'anyof', recordObj.getValue('createdfrom')
+                ],
+                columns: ['custrecord_lmry_mx_pedimento_lifo', 'custrecord_lmry_mx_pedimento_fifo', 'custrecord_lmry_mx_pedimento']
+              }).run().getRange(0, 1);
+              if (lifoInfo.length > 0) {
+                if (lifoInfo[0].getValue('custrecord_lmry_mx_pedimento_lifo') == true || lifoInfo[0].getValue('custrecord_lmry_mx_pedimento_fifo') == true || lifoInfo[0].getValue('custrecord_lmry_mx_pedimento') != null) {
+                  var mensaje = https.requestRestlet({
+                    deploymentId: "customdeploy_lmry_pedimentos_rlt",
+                    scriptId: "customscript_lmry_pedimentos_rlt",
+                    method: "GET",
+                    headers: {
+                      "Content-Type": "application/json"
+                    },
+                    urlParams: {
+                      idRecord: recordObj.id
+                    }
+                  });
+  
+                  if (typeof mensaje != "object" && mensaje.indexOf('Error')) {
+                    throw mensaje;
+                  }
                 }
               }
             }
           }
         }
+        
+        
 
       } catch (err) {
         log.error("[ afterSubmit ]", err);
@@ -709,37 +702,6 @@ define(['N/search', 'N/record', 'N/https', 'N/runtime', 'N/query', 'N/log', './L
         valuesBRTransaction.push(vendorImport);
       }
       return valuesBRTransaction;
-    }
-
-    function getPedimentoMXtransaction(idPO) {
-      if (Number(idPO) === 0 || idPO === undefined) return [];
-      var consulta = "SELECT       CUSTOMRECORD_LMRY_MX_TRANSACTION_FIELDS.custrecord_lmry_mx_pedimento,        CUSTOMRECORD_LMRY_MX_TRANSACTION_FIELDS.custrecord_lmry_mx_pedimento_aduana      FROM        CUSTOMRECORD_LMRY_MX_TRANSACTION_FIELDS       WHERE         CUSTOMRECORD_LMRY_MX_TRANSACTION_FIELDS.custrecord_lmry_mx_transaction_related = " + idPO + "   and      CUSTOMRECORD_LMRY_MX_TRANSACTION_FIELDS.custrecord_lmry_mx_pedimento IS NOT NULL";
-      var nroPedimentoandAduana = query.runSuiteQL({
-        query: consulta,
-      }).asMappedResults();
-      return nroPedimentoandAduana;
-    }
-
-    function isAutomaticPedimentos(idSubsidiary) {
-      var featPedimentos = false;
-      var featureSubs = runtime.isFeatureInEffect({ feature: 'SUBSIDIARIES' });
-      if (featureSubs == true || featureSubs == 'T') {
-          if (idSubsidiary) {
-              search.create({
-                  type: 'customrecord_lmry_setup_tax_subsidiary',
-                  columns: ['custrecord_lmry_setuptax_pediment_automa'],
-                  filters: [
-                      ['custrecord_lmry_setuptax_subsidiary', 'anyof', idSubsidiary],
-                      "AND",
-                      ["isinactive","is","F"]
-                  ]
-              }).run().each(function(result){
-                  featPedimentos = result.getValue('custrecord_lmry_setuptax_pediment_automa');
-                  featPedimentos = featPedimentos === "T" || featPedimentos === true;
-              });
-          }
-      }
-      return featPedimentos;
     }
     return {
       beforeLoad: beforeLoad,

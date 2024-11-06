@@ -17,28 +17,48 @@ define(["N/log", "N/search", "N/record", 'N/runtime', 'N/format', 'N/query', './
                     id: idRecord,
                     columns: ['type']
                 }).type[0].value;
-                const isReceipt = type === "ItemRcpt" ? true : false;
-
-                const dataTransaction = search.lookupFields({
-                    type: !isReceipt ? search.Type.ITEM_FULFILLMENT : search.Type.ITEM_RECEIPT,
-                    id: idRecord,
-                    columns: [
-                        'subsidiary',
-                        'createdfrom',
-                        'trandate'
-                    ]
-                });
-                const transactionOgirinType = search.lookupFields({
-                    type: 'transaction',
-                    id: dataTransaction['createdfrom'][0]?.value,
-                    columns: ['type']
-                }).type[0].value;
+                log.error("type: ",type)
+                let dataTransaction;
+                let isReceipt = true;
                 let flagTransfer = false;
-                if (transactionOgirinType == 'TrnfrOrd') flagTransfer = true;
+                if (type == "InvAdjst") {
+                    dataTransaction = search.lookupFields({
+                        type: search.Type.INVENTORY_ADJUSTMENT,
+                        id: "4233076",
+                        columns: [
+                            'subsidiary',
+                            'createdfrom',
+                            'trandate'
+                        ]
+                    });
+                    log.error("dataTransaction: ",dataTransaction)
+                    dataTransaction['createdfrom']= [{value:idRecord}];
+                } else {
+                    isReceipt = type === "ItemRcpt" ? true : false;
+                    //INVENTORY_ADJUSTMENT
+                    dataTransaction = search.lookupFields({
+                        type: !isReceipt ? search.Type.ITEM_FULFILLMENT : search.Type.ITEM_RECEIPT,
+                        id: idRecord,
+                        columns: [
+                            'subsidiary',
+                            'createdfrom',
+                            'trandate'
+                        ]
+                    });
+                    const transactionOgirinType = search.lookupFields({
+                        type: 'transaction',
+                        id: dataTransaction['createdfrom'][0]?.value,
+                        columns: ['type']
+                    }).type[0].value;
+                    if (transactionOgirinType == 'TrnfrOrd') flagTransfer = true;
+                }
+                
+
 
                 const { isAutomatic, automaticType } = getAutomaticType(dataTransaction['createdfrom'][0]?.value);
 
                 if (isAutomatic) {
+                    log.error("isAutomatic: ",isAutomatic)
                     const items = getItems(idRecord, isReceipt);
                     if (items.length === 0) return translation.NO_LINES_SELECTED;
                     let listSelected = [];
@@ -109,6 +129,7 @@ define(["N/log", "N/search", "N/record", 'N/runtime', 'N/format', 'N/query', './
 
                     return translation.PEDIMENTO_SUCCESS;
                 } else {
+                    log.error("isAutomatic: ","no automatico")
                     let respuesta;
                     if (flagTransfer && isReceipt) {
                         const jsonPedimentos = getInfoMXtransaction(dataTransaction['createdfrom'][0]?.value).custrecord_lmry_mx_pedimento_transfer;
@@ -400,6 +421,8 @@ define(["N/log", "N/search", "N/record", 'N/runtime', 'N/format', 'N/query', './
                     typeAutomatic.isAutomatic = false;
                 }
             });
+
+            log.error("typeAutomatic",typeAutomatic)
             return typeAutomatic;
         }
 
@@ -410,6 +433,7 @@ define(["N/log", "N/search", "N/record", 'N/runtime', 'N/format', 'N/query', './
          * @param {boolean} isReceipt 
          */
         function createPedimentoDetailRecord(dataTransaction, idRecord, isReceipt, flagTransfer, resultItems,translation) {
+            log.error("dataTransaction",dataTransaction)
             let idPurchaseOrder = dataTransaction['createdfrom'][0]?.value;
             if (Number(idPurchaseOrder) === 0) return 'Error falta ID';
             if (!existPediments(idRecord)) return translation.PEDIMENTO_EXISTS;
@@ -461,14 +485,17 @@ define(["N/log", "N/search", "N/record", 'N/runtime', 'N/format', 'N/query', './
                     });
 
                     ped_details.setValue({ fieldId: 'custrecord_lmry_mx_ped_item', value: ITEM_ID });
-
+                    /*
                     ped_details.setValue({
-                        fieldId: 'custrecord_lmry_mx_ped_date', value: format.parse({
+                        fieldId: 'custrecord_lmry_mx_ped_date', 
+                        value: format.parse({
                             value: dateLine,
                             type: "date"
                         })
                     });
-
+                    */
+                    var pedimentoDate = purchaseOrder[0].custrecord_lmry_mx_tf_pedimento_date;
+                    ped_details.setValue({ fieldId: 'custrecord_lmry_mx_ped_date', value: format.parse({value: pedimentoDate,type: "date"})});
                     ped_details.setValue({ fieldId: 'custrecord_lmry_mx_ped_num', value: purchaseOrder[0].custrecord_lmry_mx_pedimento });
 
                     ped_details.setValue({ fieldId: 'custrecord_lmry_mx_ped_location', value: locationLine });
@@ -540,7 +567,8 @@ define(["N/log", "N/search", "N/record", 'N/runtime', 'N/format', 'N/query', './
             CUSTOMRECORD_LMRY_MX_TRANSACTION_FIELDS.custrecord_lmry_mx_pedimento_aduana,
             CUSTOMRECORD_LMRY_MX_TRANSACTION_FIELDS.custrecord_lmry_mx_pedimento_fifo,
             CUSTOMRECORD_LMRY_MX_TRANSACTION_FIELDS.custrecord_lmry_mx_pedimento_lifo,
-            CUSTOMRECORD_LMRY_MX_TRANSACTION_FIELDS.custrecord_lmry_mx_pedimento_transfer
+            CUSTOMRECORD_LMRY_MX_TRANSACTION_FIELDS.custrecord_lmry_mx_pedimento_transfer,
+            CUSTOMRECORD_LMRY_MX_TRANSACTION_FIELDS.custrecord_lmry_mx_tf_pedimento_date
             FROM        
             CUSTOMRECORD_LMRY_MX_TRANSACTION_FIELDS       
             WHERE         

@@ -452,10 +452,13 @@
           }
         }
 
-        var featPedimentos = isAutomaticPedimentos(subsidiary);
-        if (featPedimentos && LMRY_countr[0] == "MX" && (runtime.executionContext == 'USERINTERFACE' && (scriptContext.type == "create" || scriptContext.type == "edit" || scriptContext.type == "copy" || scriptContext.type == "view"))) {
-          MXPedimentos.showMXTransactionbyPedimentFields(OBJ_FORM, RCD_OBJ.id, RCD_OBJ.type);
+        if (LMRY_countr[0] == "MX") {
+          var featPedimentos = MXPedimentos.isAutomaticPedimentos(RCD_OBJ.getValue({ fieldId: 'subsidiary' }));
+          if (featPedimentos && (runtime.executionContext == 'USERINTERFACE' && (scriptContext.type == "create" || scriptContext.type == "edit" || scriptContext.type == "copy" || scriptContext.type == "view"))) {
+            MXPedimentos.showMXTransactionbyPedimentFields(OBJ_FORM, RCD_OBJ.id, RCD_OBJ.type, scriptContext.type);
+          }
         }
+        
 
         if (isURET != 'print' && isURET != 'email') {
 
@@ -847,10 +850,13 @@
 
         }
 
-        var featPedimentos = isAutomaticPedimentos(subsidiary);
-        if ((scriptContext.type === "create" || scriptContext.type === "edit" || scriptContext.type === "copy") && LMRY_countr[0] === 'MX' && featPedimentos) {
-          MXPedimentos.createMXTransactionbyPediment(RCD_OBJ);
+        if (LMRY_countr[0] === 'MX') {
+          var featPedimentos = MXPedimentos.isAutomaticPedimentos(subsidiary);
+          if ((scriptContext.type === "create" || scriptContext.type === "edit" || scriptContext.type === "copy") && featPedimentos) {
+            MXPedimentos.createMXTransactionbyPediment(RCD_OBJ);
+          }
         }
+        
 
 
 
@@ -1074,28 +1080,6 @@
         }
       }
       return priceUnitList;
-    }
-
-    function isAutomaticPedimentos(idSubsidiary) {
-      var featPedimentos = false;
-      var featureSubs = runtime.isFeatureInEffect({ feature: 'SUBSIDIARIES' });
-      if (featureSubs == true || featureSubs == 'T') {
-          if (idSubsidiary) {
-              search.create({
-                  type: 'customrecord_lmry_setup_tax_subsidiary',
-                  columns: ['custrecord_lmry_setuptax_pediment_automa'],
-                  filters: [
-                      ['custrecord_lmry_setuptax_subsidiary', 'anyof', idSubsidiary],
-                      "AND",
-                      ["isinactive","is","F"]
-                  ]
-              }).run().each(function(result){
-                  featPedimentos = result.getValue('custrecord_lmry_setuptax_pediment_automa');
-                  featPedimentos = featPedimentos === "T" || featPedimentos === true;
-              });
-          }
-      }
-      return featPedimentos;
     }
     
     return {

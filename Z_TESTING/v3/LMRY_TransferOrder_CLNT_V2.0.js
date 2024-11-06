@@ -67,9 +67,11 @@ define(['N/runtime', 'N/search', 'N/record', 'N/url', 'N/https', './Latam_Librar
                     recordObj.getField({
                         fieldId: 'custpage_mx_pedimento_aduana'
                     }).isDisplay = true;
+                    /*
                     recordObj.getField({
                         fieldId: 'custpage_mx_pedimento_au_fifo'
-                    }).isDisplay = true;
+                    }).isDisplay = false;
+                    */
                 } else {
                     recordObj.getField({
                         fieldId: 'custpage_mx_nro_pedimento'
@@ -77,9 +79,11 @@ define(['N/runtime', 'N/search', 'N/record', 'N/url', 'N/https', './Latam_Librar
                     recordObj.getField({
                         fieldId: 'custpage_mx_pedimento_aduana'
                     }).isDisplay = false;
+                    /*
                     recordObj.getField({
                         fieldId: 'custpage_mx_pedimento_au_fifo'
                     }).isDisplay = false;
+                    */
                 }
 
             } catch (error) {
@@ -183,9 +187,11 @@ define(['N/runtime', 'N/search', 'N/record', 'N/url', 'N/https', './Latam_Librar
                         recordObj.getField({
                             fieldId: 'custpage_mx_pedimento_aduana'
                         }).isDisplay = true;
+                        /*
                         recordObj.getField({
                             fieldId: 'custpage_mx_pedimento_au_fifo'
                         }).isDisplay = true;
+                        */
                     } else {
                         recordObj.getField({
                             fieldId: 'custpage_mx_nro_pedimento'
@@ -193,9 +199,11 @@ define(['N/runtime', 'N/search', 'N/record', 'N/url', 'N/https', './Latam_Librar
                         recordObj.getField({
                             fieldId: 'custpage_mx_pedimento_aduana'
                         }).isDisplay = false;
+                        /*
                         recordObj.getField({
                             fieldId: 'custpage_mx_pedimento_au_fifo'
                         }).isDisplay = false;
+                        */
                     }
                 }
 

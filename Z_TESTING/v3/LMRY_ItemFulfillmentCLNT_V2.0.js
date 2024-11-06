@@ -619,7 +619,7 @@ define(['N/log', 'N/search', 'N/query', 'N/url', 'N/https', 'N/runtime', 'N/reco
                     updateBRBaseAmount(recordObj);
                 }
                 //C0624 - L :Pedimentos
-                var featPedimentos = isAutomaticPedimentos(recordObj.getValue("subsidiary"))
+                var featPedimentos = MXPedimentos.isAutomaticPedimentos(recordObj.getValue("subsidiary"))
                 if (LMRY_countr[0] == "MX" && featPedimentos && (type == "create" || type == 'edit' || type == 'copy')) {
                     var idPurchaseOrder = recordObj.getValue("createdfrom");
                     // if (libtools.searchPediments(recordObj.id)) {
@@ -647,29 +647,6 @@ define(['N/log', 'N/search', 'N/query', 'N/url', 'N/https', 'N/runtime', 'N/reco
                 library_mail.sendemail2(' [ saveRecord ] ' + err, LMRY_script, recordObj, 'tranid', 'entity');
             }
             return true;
-        }
-
-
-        function isAutomaticPedimentos(idSubsidiary) {
-            var featPedimentos = false;
-            var featureSubs = runtime.isFeatureInEffect({ feature: 'SUBSIDIARIES' });
-            if (featureSubs == true || featureSubs == 'T') {
-                if (idSubsidiary) {
-                    search.create({
-                        type: 'customrecord_lmry_setup_tax_subsidiary',
-                        columns: ['custrecord_lmry_setuptax_pediment_automa'],
-                        filters: [
-                            ['custrecord_lmry_setuptax_subsidiary', 'anyof', idSubsidiary],
-                            "AND",
-                            ["isinactive","is","F"]
-                        ]
-                    }).run().each(function(result){
-                        featPedimentos = result.getValue('custrecord_lmry_setuptax_pediment_automa');
-                        featPedimentos = featPedimentos === "T" || featPedimentos === true;
-                    });
-                }
-            }
-            return featPedimentos;
         }
 
         function correlativoChile(option) {

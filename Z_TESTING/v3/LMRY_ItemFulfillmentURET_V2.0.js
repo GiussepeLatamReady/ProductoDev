@@ -13,8 +13,9 @@
  */
 define(['N/runtime', 'N/log','N/https', 'N/query', 'N/search', 'N/record', 'N/ui/serverWidget', './Latam_Library/LMRY_libSendingEmailsLBRY_V2.0',
   './Latam_Library/LMRY_HideViewLBRY_V2.0', './Latam_Library/LMRY_GLImpact_LBRY_V2.0', './Latam_Library/LMRY_UniversalSetting_Fulfillment_Receipt_LBRY',
-  './Latam_Library/LMRY_BR_LatamTax_Purchase_LBRY_V2.0', './Latam_Library/LMRY_BR_ValidateDuplicate_LBRY_V2.0', './Latam_Library/LMRY_ValidateClosePeriod_LBRY_V2.0', './Latam_Library/LMRY_libToolsFunctionsLBRY_V2.0','./Latam_Library/LMRY_second_Entity_LBRY_V2.0', 'N/format','./Latam_Library/LMRY_AR_Unit_Price_LBRY_V2.0'],
-  function (runtime, log, https, query, search, record, serverWidget, library_mail, library_HideView, libraryGLImpact, library_Uni_Setting, library_taxPurchase, Library_BRDup, LibraryValidatePeriod, libtools,librarySecondClient, format,libraryUnitPrice) {
+  './Latam_Library/LMRY_BR_LatamTax_Purchase_LBRY_V2.0', './Latam_Library/LMRY_BR_ValidateDuplicate_LBRY_V2.0', './Latam_Library/LMRY_ValidateClosePeriod_LBRY_V2.0', './Latam_Library/LMRY_libToolsFunctionsLBRY_V2.0','./Latam_Library/LMRY_second_Entity_LBRY_V2.0', 'N/format','./Latam_Library/LMRY_AR_Unit_Price_LBRY_V2.0',
+  './Latam_Library/LMRY_MX_Pedimentos_LBRY_2.0'],
+  function (runtime, log, https, query, search, record, serverWidget, library_mail, library_HideView, libraryGLImpact, library_Uni_Setting, library_taxPurchase, Library_BRDup, LibraryValidatePeriod, libtools,librarySecondClient, format,libraryUnitPrice,MXPedimentos) {
     var LMRY_script = 'LatamReady - Item Fulfillment URET V2.0';
     var licenses = [];
 
@@ -134,6 +135,10 @@ define(['N/runtime', 'N/log','N/https', 'N/query', 'N/search', 'N/record', 'N/ui
             }
 
           }
+        }
+        var featPedimentos = isAutomaticPedimentos(recordObj.getValue("subsidiary"))
+        if (LMRY_Result[0] == "MX" && featPedimentos && (context.type == "create" || context.type == "edit")) {
+          MXPedimentos.updateLinesUsePedimentos(recordObj);
         }
 
         if (LMRY_Result[0]=='BR' && (context.type=="create"||context.type=="edit"||context.type=="view"||context.type=="copy")) {
@@ -325,32 +330,6 @@ define(['N/runtime', 'N/log','N/https', 'N/query', 'N/search', 'N/record', 'N/ui
             }
           }
         }
-
-        var featPedimentos = isAutomaticPedimentos(recordObj.getValue("subsidiary"))
-        log.error("featPedimentos",featPedimentos)
-        log.error("antes","antes")
-        if (LMRY_Result[0] == "MX" && featPedimentos && (type == "create" || type == "edit") && type_interface !== 'USERINTERFACE') {
-          log.error("entro","entro")
-          var idPurchaseOrder = recordObj.getValue("createdfrom");
-          var mxTransaction = getPedimentoMXtransaction(idPurchaseOrder);
-          if (mxTransaction.length > 0) {
-            var nLines = recordObj.getLineCount({
-              sublistId: "item"
-            });
-            for (var index = 0; index < nLines; index++) {
-              recordObj.setSublistValue({
-                sublistId: "item",
-                fieldId: "custcol_lmry_mx_pediment",
-                line: index,
-                value: true
-              });
-            };
-          }
-          
-        }
-
-        log.error("despues","depues")
-
 
 
       } catch (err) {

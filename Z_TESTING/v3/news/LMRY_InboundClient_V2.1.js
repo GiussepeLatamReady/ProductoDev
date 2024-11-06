@@ -4,9 +4,9 @@
  * @NModuleScope Public
  * @Name LMRY_InboundClient_V2.1.js
  */
-define(["require", "N/search", "N/http", "N/url", "N/record", "N/query",'./Latam_Library/LMRY_libSendingEmailsLBRY_V2.0'],
+define(["require", "N/search", "N/http", "N/url", "N/record","N/format", "N/query",'./Latam_Library/LMRY_libSendingEmailsLBRY_V2.0'],
 
-    function (require, search, http, url, record, query,library_mail) {
+    function (require, search, http, url, record,format, query,library_mail) {
         /**
                * Script Cliente, de la transaccion Inbound
                * @exports InboundClient
@@ -14,17 +14,7 @@ define(["require", "N/search", "N/http", "N/url", "N/record", "N/query",'./Latam
         let ClientModule;
         ClientModule = {
             pageInit(scriptContext) {
-                const currentRecord = scriptContext.currentRecord;
-                try {
-                    search.create({
-                        type: "customrecord_mx_pedimento_inbound",
-                        filters: ["custrecord_mx_pedimento_inbound_id", "is", currentRecord.id]
-                    });
-                } catch (error) {
-                    console.error("error",error)
-                    library_mail.sendemail2(' [ pageInit ] ' + error, "LMRY_InboundClient_V2.1.js", currentRecord, 'tranid', 'entity');
-                }
-
+            
             },
             /**
              * Validation function to be executed when record is saved.
@@ -39,6 +29,7 @@ define(["require", "N/search", "N/http", "N/url", "N/record", "N/query",'./Latam
                 const currentRecord = scriptContext.currentRecord;
                 const numberPedimento = currentRecord.getValue("custpage_pedimento");
                 const idAduana = currentRecord.getValue("custpage_aduana");
+                const pedimentoDate = currentRecord.getValue("custpage_pedimento_date");
                 const arregloPurchaseOrders = [];
                 try {
 
@@ -82,12 +73,13 @@ define(["require", "N/search", "N/http", "N/url", "N/record", "N/query",'./Latam
                     }
                     const [idsPurchaseOrderWhithinMxTransaction, idMxTransactionExist] = getMxTransactionsNull(arregloPurchaseOrders);
 
-                    const idMxTransactionCreate = createMXTransaction(getTransactionsData(idsPurchaseOrderWhithinMxTransaction), numberPedimento, idAduana);
-                    updateMxTransaction(idMxTransactionExist, numberPedimento, idAduana);
+                    const idMxTransactionCreate = createMXTransaction(getTransactionsData(idsPurchaseOrderWhithinMxTransaction), numberPedimento, idAduana, pedimentoDate);
+                    updateMxTransaction(idMxTransactionExist, numberPedimento, idAduana, pedimentoDate);
 
                     return true;
                 } catch (error) {
                     library_mail.sendemail2(' [ saveRecord ] ' + error, "LMRY_InboundClient_V2.1.js", currentRecord, 'tranid', 'entity');
+                    console.log("  saverecord error",error)
                     return false;
                 }
 
@@ -100,7 +92,7 @@ define(["require", "N/search", "N/http", "N/url", "N/record", "N/query",'./Latam
             return false;
         }
 
-        function createMXTransaction(listaDatosTransacciones, nroPedimento, idAduana) {
+        function createMXTransaction(listaDatosTransacciones, nroPedimento, idAduana,pedimentoDate) {
             const idsMxTransactionCreadas = [];
             listaDatosTransacciones.forEach(transaction => {
                 const mxTransaction = record.create({
@@ -112,6 +104,9 @@ define(["require", "N/search", "N/http", "N/url", "N/record", "N/query",'./Latam
                 mxTransaction.setValue({ fieldId: "custrecord_lmry_mx_currency", value: transaction.currency });
                 mxTransaction.setValue({ fieldId: "custrecord_lmry_mx_exchange_rate", value: transaction.exchangerate });
                 mxTransaction.setValue({ fieldId: "custrecord_lmry_mx_pedimento", value: nroPedimento });
+                //pedimentoDate = format.parse({ value: pedimentoDate, type: format.Type.DATE });
+                console.log("pedimentoDate",pedimentoDate);
+                mxTransaction.setValue({ fieldId: "custrecord_lmry_mx_tf_pedimento_date", value: pedimentoDate });
                 if (Number(idAduana) !== 0) mxTransaction.setValue({ fieldId: "custrecord_lmry_mx_pedimento_aduana", value: idAduana });
                 idsMxTransactionCreadas.push(mxTransaction.save());
             });
@@ -171,10 +166,12 @@ define(["require", "N/search", "N/http", "N/url", "N/record", "N/query",'./Latam
             return dataTransactions;
         }
 
-        function updateMxTransaction(listaMxTransactions, nroPedimento, idAduana) {
+        function updateMxTransaction(listaMxTransactions, nroPedimento, idAduana,pedimentoDate) {
             listaMxTransactions.forEach((idTransaction) => {
+                pedimentoDate = format.parse({ value: pedimentoDate, type: format.Type.DATE });
                 const values = {
-                    custrecord_lmry_mx_pedimento: nroPedimento
+                    custrecord_lmry_mx_pedimento: nroPedimento,
+                    custrecord_lmry_mx_tf_pedimento_date: pedimentoDate
                 };
                 if (Number(idAduana) !== 0) values["custrecord_lmry_mx_pedimento_aduana"] = idAduana;
 

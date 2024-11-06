@@ -14,7 +14,7 @@
  */
 //@ts-check
 // @ts-ignore
-define(["N/query", "N/search", "N/record", "N/log"], function (query, search, record, log) {
+define(["N/query", "N/search", "N/record", "N/log","N/runtime","N/format"], function (query, search, record, log, runtime, format) {
     /**
      * 
      * @param {Object} recordObj 
@@ -22,8 +22,9 @@ define(["N/query", "N/search", "N/record", "N/log"], function (query, search, re
     function createMXTransactionbyPediment(recordObj,isReceiptDeferral,idPurchaseOrder) {
         var nroPedimento = recordObj.getValue("custpage_mx_nro_pedimento");
         var pedimentoAduana = recordObj.getValue("custpage_mx_pedimento_aduana");
+        var pedimentoDate = recordObj.getValue("custpage_mx_pedimento_date");
         var isValid = validateLinesxPedimento(nroPedimento);
-
+        log.error("isValid",isValid)
         //automatico
         var fifo = recordObj.getValue('custpage_mx_pedimento_au_fifo');
         var lifo = recordObj.getValue('custpage_mx_pedimento_au_lifo');
@@ -31,7 +32,7 @@ define(["N/query", "N/search", "N/record", "N/log"], function (query, search, re
             var recordMxtransaction = searchMxtransaction(recordObj.id);
             if (recordMxtransaction.length > 0) {
                 recordMxtransaction.forEach(function (Mxtransaction) {
-                    updateMxTransaction(nroPedimento, pedimentoAduana, Mxtransaction.id, fifo, lifo);
+                    updateMxTransaction(nroPedimento, pedimentoAduana, Mxtransaction.id, fifo, lifo,pedimentoDate);
                 });
             } else {
                 var mxTransaction = record.create({
@@ -62,6 +63,14 @@ define(["N/query", "N/search", "N/record", "N/log"], function (query, search, re
                     fieldId: "custrecord_lmry_mx_pedimento_aduana",
                     value: pedimentoAduana
                 });
+                log.error("pedimentoDate",pedimentoDate)
+                //format.parse({ value: pedimentoDate, type: format.Type.DATE });
+                var dateFormat = format.parse({ value: pedimentoDate, type: format.Type.DATE });
+                log.error("dateFormat",dateFormat);
+                mxTransaction.setValue({
+                    fieldId: "custrecord_lmry_mx_tf_pedimento_date",
+                    value: dateFormat
+                });
                 if (fifo === 'T') mxTransaction.setValue({
                     fieldId: "custrecord_lmry_mx_pedimento_fifo",
                     value: true
@@ -86,10 +95,22 @@ define(["N/query", "N/search", "N/record", "N/log"], function (query, search, re
         if (patron.test(numberPedimento) && numberPedimento.length === 18) return true;
         return false;
     }
-    function showMXTransactionbyPedimentFields(form, id, type) {
+
+    function pedimentoIsValid(numberPedimento){
+        if (!numberPedimento || !numberPedimento.trim()) return true;
+        if (!validateLinesxPedimento(numberPedimento)) {
+            alert("Numero de pedimento invalido");
+            return false;
+        }else{
+            return true;
+        }
+    }
+
+    function showMXTransactionbyPedimentFields(form, id, type, eventType) {
         var fieldPedimento;
         var fieldAduana;
-        if (type === 'transferorder' || type === 'purchaseorder') {
+        var fieldDate;
+        if (type === 'transferorder' || type === 'purchaseorder' || type == 'inventoryadjustment') {
             var aduanaSearch = search.create({
                 type: 'customrecord_lmry_mx_aduana',
                 columns: ['internalid', 'name'],
@@ -117,7 +138,16 @@ define(["N/query", "N/search", "N/record", "N/log"], function (query, search, re
                 });
             });
 
+            fieldDate = form.addField({
+                label: "Latam - MX Pedimento Date",
+                id: "custpage_mx_pedimento_date",
+                type: "date"
+            });
+
+            if (eventType && eventType !== "view") fieldDate.defaultValue = new Date();
         }
+
+
         if (type === 'transferorder' || type === 'salesorder') {
             var fifoFiedl = form.addField({
                 label: "Latam - Pedimento automático FIFO",
@@ -125,7 +155,13 @@ define(["N/query", "N/search", "N/record", "N/log"], function (query, search, re
                 type: 'checkbox'
             });
 
-            // fifoFiedl.defaultValue = 'T';
+            fifoFiedl.defaultValue = 'T';
+            require(['N/ui/serverWidget'], function (serverWidget) {
+                fifoFiedl.updateDisplayType({
+                    displayType: serverWidget.FieldDisplayType.HIDDEN
+                });
+            });
+            
         }
         if (type === 'returnauthorization' || type === 'vendorreturnauthorization') {
             var lifoFiedl = form.addField({
@@ -133,7 +169,14 @@ define(["N/query", "N/search", "N/record", "N/log"], function (query, search, re
                 id: "custpage_mx_pedimento_au_lifo",
                 type: 'checkbox'
             });
-            // lifoFiedl.defaultValue = 'T';
+            lifoFiedl.defaultValue = 'T';
+
+            require(['N/ui/serverWidget'], function (serverWidget) {
+                lifoFiedl.updateDisplayType({
+                    displayType: serverWidget.FieldDisplayType.HIDDEN
+                });
+            });
+            
         }
 
         var valuesMxTransaction = searchMxtransaction(id);
@@ -146,6 +189,11 @@ define(["N/query", "N/search", "N/record", "N/log"], function (query, search, re
             if (type === 'returnauthorization' || type === 'vendorreturnauthorization') {
                 lifoFiedl.defaultValue = valuesMxTransaction[0].custrecord_lmry_mx_pedimento_lifo;
             }
+            var pedimentoDate = valuesMxTransaction[0].custrecord_lmry_mx_tf_pedimento_date;
+            if (pedimentoDate) {
+                fieldDate.defaultValue = format.parse({ value: pedimentoDate, type: format.Type.DATE });
+            }
+            
         }
     }
     /**
@@ -153,12 +201,13 @@ define(["N/query", "N/search", "N/record", "N/log"], function (query, search, re
      * @param {number} nroPedimento 
      * @param {number} idAduana 
      */
-    function updateMxTransaction(nroPedimento, idAduana, idMxTransactionFields, fifo, lifo) {
+    function updateMxTransaction(nroPedimento, idAduana, idMxTransactionFields, fifo, lifo,pedimentoDate) {
         var values = {};
         if (nroPedimento) values['custrecord_lmry_mx_pedimento'] = nroPedimento;
         if (Number(idAduana) !== 0) values["custrecord_lmry_mx_pedimento_aduana"] = idAduana;
         if (fifo === 'T') values["custrecord_lmry_mx_pedimento_fifo"] = fifo;
         if (lifo === 'T') values["custrecord_lmry_mx_pedimento_lifo"] = lifo;
+        if (pedimentoDate) values["custrecord_lmry_mx_tf_pedimento_date"] = pedimentoDate;
         record.submitFields({
             type: "customrecord_lmry_mx_transaction_fields",
             id: idMxTransactionFields,
@@ -173,7 +222,7 @@ define(["N/query", "N/search", "N/record", "N/log"], function (query, search, re
     function searchMxtransaction(IdPurchaseOrder) {
         if (!Number(IdPurchaseOrder)) return [];
         var MxTransactions = query.runSuiteQL({
-            query: "\n SELECT\n id,\n custrecord_lmry_mx_transaction_related,\n custrecord_lmry_mx_pedimento_aduana,\n custrecord_lmry_mx_pedimento\n ,\n custrecord_lmry_mx_pedimento_fifo ,\n custrecord_lmry_mx_pedimento_lifo \n FROM\n CUSTOMRECORD_LMRY_MX_TRANSACTION_FIELDS\n  WHERE\n custrecord_lmry_mx_transaction_related = " + IdPurchaseOrder + "\n"
+            query: "\n SELECT\n id,\n custrecord_lmry_mx_transaction_related,\n custrecord_lmry_mx_pedimento_aduana,\n custrecord_lmry_mx_pedimento\n ,\n custrecord_lmry_mx_pedimento_fifo ,\n custrecord_lmry_mx_pedimento_lifo ,\n custrecord_lmry_mx_tf_pedimento_date \n FROM\n CUSTOMRECORD_LMRY_MX_TRANSACTION_FIELDS\n  WHERE\n custrecord_lmry_mx_transaction_related = " + IdPurchaseOrder + "\n"
         }).asMappedResults();
         return MxTransactions;
     }
@@ -471,9 +520,127 @@ define(["N/query", "N/search", "N/record", "N/log"], function (query, search, re
             .getRange(0, 1000);
         return result_pedimento_details;
     }
+
+    function updateLinesUsePedimentos(recordObj) {
+        var nLines = recordObj.getLineCount({
+            sublistId: "item"
+        });
+
+        var listItems = [];
+        for (var index = 0; index < nLines; index++) {
+            listItems.push(recordObj.getSublistValue({
+                sublistId: "item",
+                fieldId: "item",
+                line: index
+            }));
+        };
+
+        var listUsePedimentos = {};
+        log.error("listItems",listItems)
+        if (listItems.length) {
+            search.create({
+                type: "item",
+                filters:
+                    [
+                        ["internalid", "anyof", listItems]
+                    ],
+                columns:
+                    ["internalid", "custitem_lmry_mx_pediment"]
+            }).run().each(function (result) {
+                var internalid = result.getValue("internalid");
+                var usePedimento = result.getValue("custitem_lmry_mx_pediment");
+                listUsePedimentos[internalid] = usePedimento === "T" || usePedimento === true;
+                return true;
+            });
+    
+            for (var index = 0; index < nLines; index++) {
+                var itemID = recordObj.getSublistValue({
+                    sublistId: "item",
+                    fieldId: "item",
+                    line: index
+                });
+    
+                if (listUsePedimentos[itemID]) {
+                    recordObj.setSublistValue({
+                        sublistId: "item",
+                        fieldId: "custcol_lmry_mx_pediment",
+                        line: index,
+                        value: true
+                    });
+                }
+            };
+        }
+        
+    }
+
+    function getTranslations() {
+        var language = runtime.getCurrentScript().getParameter({ name: "LANGUAGE" }).substring(0, 2);
+        language = ["es", "pt"].indexOf(language) != -1 ? language : "en";
+    
+        var translatedFields = {
+            "es": {
+                "NO_LINES_SELECTED": "No hay líneas seleccionadas",
+                "INSUFFICIENT_STOCK": "Error no hay suficiente stock",
+                "PEDIMENTO_SUCCESS": "Pedimento creado con éxito",
+                "PEDIMENTO_ERROR_DETAIL": "Error al crear el pedimento Detail",
+                "PEDIMENTO_EXISTS": "Ya existen pedimentos",
+                "NO_MX_TRANSACTION": "No hay Mx Transaction"
+            },
+            "en": {
+                "NO_LINES_SELECTED": "No lines selected",
+                "INSUFFICIENT_STOCK": "Error not enough stock",
+                "PEDIMENTO_SUCCESS": "Pedimento created successfully",
+                "PEDIMENTO_ERROR_DETAIL": "Error creating pedimento Detail",
+                "PEDIMENTO_EXISTS": "Pedimentos already exist",
+                "NO_MX_TRANSACTION": "No Mx Transaction"
+            },
+            "pt": {
+                "NO_LINES_SELECTED": "Nenhuma linha selecionada",
+                "INSUFFICIENT_STOCK": "Erro não há estoque suficiente",
+                "PEDIMENTO_SUCCESS": "Pedimento criado com sucesso",
+                "PEDIMENTO_ERROR_DETAIL": "Erro ao criar o pedimento Detalhe",
+                "PEDIMENTO_EXISTS": "Já existem pedimentos",
+                "NO_MX_TRANSACTION": "Não há Transação Mx"
+            }
+        };
+    
+        return translatedFields[language];
+    }
+
+    function isAutomaticPedimentos(idSubsidiary) {
+        var featPedimentos = false;
+        var featureSubs = runtime.isFeatureInEffect({ feature: 'SUBSIDIARIES' });
+        if (featureSubs == true || featureSubs == 'T') {
+            if (idSubsidiary) {
+                search.create({
+                    type: 'customrecord_lmry_setup_tax_subsidiary',
+                    columns: ['custrecord_lmry_setuptax_pediment_automa'],
+                    filters: [
+                        ['custrecord_lmry_setuptax_subsidiary', 'anyof', idSubsidiary],
+                        "AND",
+                        ["isinactive", "is", "F"]
+                    ]
+                }).run().each(function (result) {
+                    featPedimentos = result.getValue('custrecord_lmry_setuptax_pediment_automa');
+                    featPedimentos = featPedimentos === "T" || featPedimentos === true;
+                });
+            }
+        }
+        return featPedimentos;
+    }
+
+    function formatDate(date) {
+        var parseDate = format.parse({ value: date, type: format.Type.DATE });
+        parseDate = format.format({ type: format.Type.DATE, value: parseDate });
+
+        return parseDate;
+    }
     return {
         showMXTransactionbyPedimentFields: showMXTransactionbyPedimentFields,
         createMXTransactionbyPediment: createMXTransactionbyPediment,
-        isValidItemsTransaction: isValidItemsTransaction
+        isValidItemsTransaction: isValidItemsTransaction,
+        updateLinesUsePedimentos:updateLinesUsePedimentos,
+        pedimentoIsValid:pedimentoIsValid,
+        isAutomaticPedimentos: isAutomaticPedimentos
     };
 });

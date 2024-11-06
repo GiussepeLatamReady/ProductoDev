@@ -49,10 +49,13 @@ define(['N/search', 'N/runtime', 'N/log', './Latam_Library/LMRY_libSendingEmails
                         }
                     }
                     var LMRY_country = library_mail.Validate_Country(subsidiary);
-                    var featPedimentos = isAutomaticPedimentos(subsidiary)
-                    if (LMRY_country[0] === "MX" && featPedimentos &&(runtime.executionContext == 'USERINTERFACE' && (context.type === "create" || context.type === "edit" || context.type === "copy" || context.type === "view"))) {
-                        MXPedimentos.showMXTransactionbyPedimentFields(form, recordObj.id, recordObj.type);
+                    if (LMRY_country[0] === "MX") {
+                        var featPedimentos = MXPedimentos.isAutomaticPedimentos(subsidiary)
+                        if (featPedimentos && (runtime.executionContext == 'USERINTERFACE' && (context.type === "create" || context.type === "edit" || context.type === "copy" || context.type === "view"))) {
+                            MXPedimentos.showMXTransactionbyPedimentFields(form, recordObj.id, recordObj.type, type);
+                        }
                     }
+                    
                 }
                 
             }
@@ -69,10 +72,13 @@ define(['N/search', 'N/runtime', 'N/log', './Latam_Library/LMRY_libSendingEmails
                 const type = scriptContext.type;
 
                 const LMRY_countr = library_mail.Validate_Country(subsidiary);
-                const featPedimentos = isAutomaticPedimentos(subsidiary)
-                if ((type === "create" || type === "edit" || type === "copy" || type === "view") && LMRY_countr[0] === 'MX'&& featPedimentos) {
-                    MXPedimentos.createMXTransactionbyPediment(RCD_OBJ);
+                if (LMRY_countr[0] === 'MX') {
+                    const featPedimentos = MXPedimentos.isAutomaticPedimentos(subsidiary)
+                    if ((type === "create" || type === "edit" || type === "copy" || type === "view") && featPedimentos) {
+                        MXPedimentos.createMXTransactionbyPediment(RCD_OBJ);
+                    }
                 }
+                
             } catch (error) {
                 log.error('afterSubmit', error);
                 library_mail.sendemail2(' [ afterSubmit ] ' + error, LMRY_script, recordObj, 'transactionnumber', 'customer');
@@ -141,28 +147,6 @@ define(['N/search', 'N/runtime', 'N/log', './Latam_Library/LMRY_libSendingEmails
             }
         }
         
-        
-        function isAutomaticPedimentos(idSubsidiary) {
-            var featPedimentos = false;
-            var featureSubs = runtime.isFeatureInEffect({ feature: 'SUBSIDIARIES' });
-            if (featureSubs == true || featureSubs == 'T') {
-                if (idSubsidiary) {
-                    search.create({
-                        type: 'customrecord_lmry_setup_tax_subsidiary',
-                        columns: ['custrecord_lmry_setuptax_pediment_automa'],
-                        filters: [
-                            ['custrecord_lmry_setuptax_subsidiary', 'anyof', idSubsidiary],
-                            "AND",
-                            ["isinactive","is","F"]
-                        ]
-                    }).run().each(function(result){
-                        featPedimentos = result.getValue('custrecord_lmry_setuptax_pediment_automa');
-                        featPedimentos = featPedimentos === "T" || featPedimentos === true;
-                    });
-                }
-            }
-            return featPedimentos;
-        }
         return {
             beforeLoad: beforeLoad,
             afterSubmit: afterSubmit

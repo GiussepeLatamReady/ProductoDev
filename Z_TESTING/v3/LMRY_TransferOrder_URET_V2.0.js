@@ -86,10 +86,13 @@
 			 library_HideView.HideColumn(scriptContext.form, LMRY_Result[1], recordObj.type, licenses);
 		   } // Hide and View en formulario
 		 }
-		 var featPedimentos = isAutomaticPedimentos(subsidiary)
-		 if ((runtime.executionContext == 'USERINTERFACE' && featPedimentos && (scriptContext.type === "create" || scriptContext.type === "edit" || scriptContext.type === "copy" || scriptContext.type === "view"))) {
-            MXPedimentos.showMXTransactionbyPedimentFields(OBJ_FORM, RCD_OBJ.id, RCD_OBJ.type);
-         }
+		   if (LMRY_Result[0] == "MX") {
+			   var featPedimentos = MXPedimentos.isAutomaticPedimentos(subsidiary)
+			   if ((runtime.executionContext == 'USERINTERFACE' && featPedimentos && (scriptContext.type === "create" || scriptContext.type === "edit" || scriptContext.type === "copy" || scriptContext.type === "view"))) {
+				   MXPedimentos.showMXTransactionbyPedimentFields(OBJ_FORM, RCD_OBJ.id, RCD_OBJ.type, scriptContext.type);
+			   }
+		   }
+		 
 	   }
 
 	 } catch (err) {
@@ -130,38 +133,41 @@
 	* @param {string} scriptContext.type - Trigger type
 	* @Since 2015.2
 	*/
-   function afterSubmit(scriptContext) {
-	 var recordObj = scriptContext.newRecord;
-	 try {
+	 function afterSubmit(scriptContext) {
+		 var recordObj = scriptContext.newRecord;
+		 try {
 
-	   // Obtiene la interface que se esta ejecutando
-	   var type_interface = runtime.executionContext;
-	   if (type_interface == 'MAPREDUCE') {
-		 return true;
-	   }
+			 // Obtiene la interface que se esta ejecutando
+			 var type_interface = runtime.executionContext;
+			 if (type_interface == 'MAPREDUCE') {
+				 return true;
+			 }
 
-	   var type = scriptContext.type;
+			 var type = scriptContext.type;
 
-	   var subsidiary = recordObj.getValue('subsidiary');
+			 var subsidiary = recordObj.getValue('subsidiary');
 
-	   licenses = library_mail.getLicenses(subsidiary);
-	   var LMRY_Result = ValidateAccessTO(subsidiary);
+			 licenses = library_mail.getLicenses(subsidiary);
+			 var LMRY_Result = ValidateAccessTO(subsidiary);
 
-	   if (LMRY_Result[0] == "BR") {
-		 if (type == 'create') {
-		   Library_BRDup.assignPreprinted(recordObj, licenses);
+			 if (LMRY_Result[0] == "BR") {
+				 if (type == 'create') {
+					 Library_BRDup.assignPreprinted(recordObj, licenses);
+				 }
+			 }
+
+			 if (LMRY_Result[0] == 'MX') {
+				 var featPedimentos = MXPedimentos.isAutomaticPedimentos(subsidiary)
+				 if ((type == "create" || type == "edit" || type == "copy" || type == "view") && featPedimentos) {
+					 MXPedimentos.createMXTransactionbyPediment(recordObj);
+				 }
+			 }
+
+		 } catch (error) {
+			 library_mail.sendemail2(' [ afterSubmit ] ' + error, LMRY_script, recordObj, 'tranid', 'entity');
 		 }
-	   }
-
-	   var featPedimentos = isAutomaticPedimentos(subsidiary)
-	   if ((type == "create" || type == "edit" || type == "copy" || type == "view") && LMRY_Result[0] == 'MX' && featPedimentos) {
-		 MXPedimentos.createMXTransactionbyPediment(recordObj);
-	   }
-	 } catch (error) {
-	   library_mail.sendemail2(' [ afterSubmit ] ' + error, LMRY_script, recordObj, 'tranid', 'entity');
+		 return true;
 	 }
-	 return true;
-   }
 
    function ValidateAccessTO(idSubsidiary) {
 	 var LMRY_access = false;
@@ -186,28 +192,6 @@
 	 }
 
 	 return LMRY_Result;
-   }
-
-   function isAutomaticPedimentos(idSubsidiary) {
-	var featPedimentos = false;
-	var featureSubs = runtime.isFeatureInEffect({ feature: 'SUBSIDIARIES' });
-	if (featureSubs == true || featureSubs == 'T') {
-		if (idSubsidiary) {
-			search.create({
-				type: 'customrecord_lmry_setup_tax_subsidiary',
-				columns: ['custrecord_lmry_setuptax_pediment_automa'],
-				filters: [
-					['custrecord_lmry_setuptax_subsidiary', 'anyof', idSubsidiary],
-					"AND",
-                    ["isinactive","is","F"]
-				]
-			}).run().each(function(result){
-				featPedimentos = result.getValue('custrecord_lmry_setuptax_pediment_automa');
-				featPedimentos = featPedimentos === "T" || featPedimentos === true;
-			});
-		}
-	}
-	return featPedimentos;
    }
 
 

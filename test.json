@@ -1,1 +1,21 @@
-{"1744;23;887":[{"number":"22 22 4444 7777771","quantity":"197","date":"10/29/2024","aduana":"6"},{"number":"22 22 4444 7777772","quantity":"10","date":"10/29/2024","aduana":"6"},{"number":"22 22 4444 7777773","quantity":"10","date":"10/29/2024","aduana":"7"}],"1122;23;":[{"number":"22 22 4444 7777771","quantity":"194","date":"10/29/2024","aduana":"6"},{"number":"22 22 4444 7777772","quantity":"10","date":"10/29/2024","aduana":"6"},{"number":"22 22 4444 7777773","quantity":"10","date":"10/29/2024","aduana":"7"},{"number":"22 22 4444 7777774","quantity":"1","date":"10/30/2024","aduana":"6"}],"1719;23;1996":[{"number":"22 22 4444 7777772","quantity":"1","date":"10/29/2024","aduana":"6"}],"1719;23;1997":[{"number":"22 22 4444 7777772","quantity":"1","date":"10/29/2024","aduana":"6"}],"1744;23;2018":[{"number":"22 22 4444 7777774","quantity":"1","date":"10/30/2024","aduana":"6"}]}
+{
+    type: "error.SuiteScriptError",
+    name: "RCRD_DSNT_EXIST",
+    message: "That record does not exist.",
+    id: "28",
+    stack: [
+       "Error\n    at suitescript/resources/javascript/record/recordImpl.js:96:12\n    at Function.loadRecord_raw (suitescript/resources/javascript/record/recordImpl.js:94:24)\n    at suitescript/resources/javascript/record/recordImpl.js:82:27\n    at Object.loadRecord (suitescript/resources/javascript/record/recordImpl.js:80:24)\n    at updateInboundPedimentoRecord (/SuiteBundles/Bundle 35754/LMRY_InboundURET_V2.1.js:168:51)\n    at createInboundPedimentoRecord (/SuiteBundles/Bundle 35754/LMRY_InboundURET_V2.1.js:140:17)\n    at Object.afterSubmit (/SuiteBundles/Bundle 35754/LMRY_InboundURET_V2.1.js:113:21)"
+    ],
+    cause: {
+       type: "internal error",
+       code: "RCRD_DSNT_EXIST",
+       details: "That record does not exist.",
+       userEvent: null,
+       stackTrace: [
+          "Error\n    at suitescript/resources/javascript/record/recordImpl.js:96:12\n    at Function.loadRecord_raw (suitescript/resources/javascript/record/recordImpl.js:94:24)\n    at suitescript/resources/javascript/record/recordImpl.js:82:27\n    at Object.loadRecord (suitescript/resources/javascript/record/recordImpl.js:80:24)\n    at updateInboundPedimentoRecord (/SuiteBundles/Bundle 35754/LMRY_InboundURET_V2.1.js:168:51)\n    at createInboundPedimentoRecord (/SuiteBundles/Bundle 35754/LMRY_InboundURET_V2.1.js:140:17)\n    at Object.afterSubmit (/SuiteBundles/Bundle 35754/LMRY_InboundURET_V2.1.js:113:21)"
+       ],
+       notifyOff: false
+    },
+    notifyOff: false,
+    userFacing: true
+ }
