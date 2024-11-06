@@ -136,10 +136,13 @@ define(['N/runtime', 'N/log','N/https', 'N/query', 'N/search', 'N/record', 'N/ui
 
           }
         }
-        var featPedimentos = isAutomaticPedimentos(recordObj.getValue("subsidiary"))
-        if (LMRY_Result[0] == "MX" && featPedimentos && (context.type == "create" || context.type == "edit")) {
-          MXPedimentos.updateLinesUsePedimentos(recordObj);
+        if (LMRY_Result[0] == "MX") {
+          var featPedimentos = MXPedimentos.isAutomaticPedimentos(recordObj.getValue("subsidiary"))
+          if (featPedimentos && (context.type == "create" || context.type == "edit")) {
+            MXPedimentos.updateLinesUsePedimentos(recordObj);
+          }
         }
+        
 
         if (LMRY_Result[0]=='BR' && (context.type=="create"||context.type=="edit"||context.type=="view"||context.type=="copy")) {
           librarySecondClient.setSecondClient(recordObj,OBJ_FORM,context.type);
@@ -412,36 +415,40 @@ define(['N/runtime', 'N/log','N/https', 'N/query', 'N/search', 'N/record', 'N/ui
           * ****************************************** */
           updateSalesOrder(RCD, OLDRCD);
         }
-        var featPedimentos = isAutomaticPedimentos(RCD.getValue('subsidiary'))
-        if (LMRY_Result[0] == 'MX' && featPedimentos && (type == 'create' || type == 'edit') /*&& RCD.getValue('status') == "Shipped"*/) {
-          if (libtools.searchPediments(RCD.id)) {
-            const lifoInfo = search.create({
-              type: 'customrecord_lmry_mx_transaction_fields',
-              filters: [
-                'custrecord_lmry_mx_transaction_related', 'anyof', RCD.getValue('createdfrom')
-              ],
-              columns: ['custrecord_lmry_mx_pedimento_lifo', 'custrecord_lmry_mx_pedimento_fifo', 'custrecord_lmry_mx_pedimento']
-            }).run().getRange(0, 1);
-            if (lifoInfo.length > 0) {
-              if (lifoInfo[0].getValue('custrecord_lmry_mx_pedimento_lifo') == true || lifoInfo[0].getValue('custrecord_lmry_mx_pedimento_fifo') == true || lifoInfo[0].getValue('custrecord_lmry_mx_pedimento') != null) {
-                const mensaje = https.requestRestlet({
-                  deploymentId: "customdeploy_lmry_pedimentos_rlt",
-                  scriptId: "customscript_lmry_pedimentos_rlt",
-                  method: "GET",
-                  headers: {
-                    "Content-Type": "application/json"
-                  },
-                  urlParams: {
-                    idRecord: RCD.id
+
+        if (LMRY_Result[0] == 'MX') {
+          var featPedimentos = MXPedimentos.isAutomaticPedimentos(RCD.getValue('subsidiary'))
+          if (featPedimentos && (type == 'create' || type == 'edit') /*&& RCD.getValue('status') == "Shipped"*/) {
+            if (libtools.searchPediments(RCD.id)) {
+              const lifoInfo = search.create({
+                type: 'customrecord_lmry_mx_transaction_fields',
+                filters: [
+                  'custrecord_lmry_mx_transaction_related', 'anyof', RCD.getValue('createdfrom')
+                ],
+                columns: ['custrecord_lmry_mx_pedimento_lifo', 'custrecord_lmry_mx_pedimento_fifo', 'custrecord_lmry_mx_pedimento']
+              }).run().getRange(0, 1);
+              if (lifoInfo.length > 0) {
+                if (lifoInfo[0].getValue('custrecord_lmry_mx_pedimento_lifo') == true || lifoInfo[0].getValue('custrecord_lmry_mx_pedimento_fifo') == true || lifoInfo[0].getValue('custrecord_lmry_mx_pedimento') != null) {
+                  const mensaje = https.requestRestlet({
+                    deploymentId: "customdeploy_lmry_pedimentos_rlt",
+                    scriptId: "customscript_lmry_pedimentos_rlt",
+                    method: "GET",
+                    headers: {
+                      "Content-Type": "application/json"
+                    },
+                    urlParams: {
+                      idRecord: RCD.id
+                    }
+                  });
+                  if (typeof mensaje != "object" && mensaje.indexOf('Error')) {
+                    throw mensaje;
                   }
-                });
-                if (typeof mensaje != "object" && mensaje.indexOf('Error')) {
-                  throw mensaje;
                 }
               }
             }
           }
         }
+        
 
       } catch (err) {
         library_mail.sendemail2(' [ afterSubmit ] ' + err, LMRY_script, RCD, 'tranid', 'entity');
@@ -449,27 +456,6 @@ define(['N/runtime', 'N/log','N/https', 'N/query', 'N/search', 'N/record', 'N/ui
 
     }
 
-    function isAutomaticPedimentos(idSubsidiary) {
-      var featPedimentos = false;
-      var featureSubs = runtime.isFeatureInEffect({ feature: 'SUBSIDIARIES' });
-      if (featureSubs == true || featureSubs == 'T') {
-          if (idSubsidiary) {
-              search.create({
-                  type: 'customrecord_lmry_setup_tax_subsidiary',
-                  columns: ['custrecord_lmry_setuptax_pediment_automa'],
-                  filters: [
-                      ['custrecord_lmry_setuptax_subsidiary', 'anyof', idSubsidiary],
-                      "AND",
-                      ["isinactive","is","F"]
-                  ]
-              }).run().each(function(result){
-                  featPedimentos = result.getValue('custrecord_lmry_setuptax_pediment_automa');
-                  featPedimentos = featPedimentos === "T" || featPedimentos === true;
-              });
-          }
-      }
-      return featPedimentos;
-     }
 
     function updateSalesOrder(recordObj, oldRecordObj) {
       var id_so = recordObj.getValue({ fieldId: 'createdfrom' });

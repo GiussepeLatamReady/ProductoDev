@@ -618,28 +618,34 @@ define(['N/log', 'N/search', 'N/query', 'N/url', 'N/https', 'N/runtime', 'N/reco
                 if (LMRY_countr[0] == "BR") {
                     updateBRBaseAmount(recordObj);
                 }
-                //C0624 - L :Pedimentos
-                var featPedimentos = MXPedimentos.isAutomaticPedimentos(recordObj.getValue("subsidiary"))
-                if (LMRY_countr[0] == "MX" && featPedimentos && (type == "create" || type == 'edit' || type == 'copy')) {
-                    var idPurchaseOrder = recordObj.getValue("createdfrom");
-                    // if (libtools.searchPediments(recordObj.id)) {
-                    var mxTransaction = getPedimentoMXtransaction(idPurchaseOrder);
-                    if (mxTransaction.length > 0) {
-                        if (Number(recordObj.id) != 0) {
-                            if (!libTools.searchPediments(recordObj.id)) {
-                                return true;
+                if (LMRY_countr[0] == "MX") {
+                    //C0624 - L :Pedimentos
+                    var featPedimentos = MXPedimentos.isAutomaticPedimentos(recordObj.getValue("subsidiary"))
+                    if (featPedimentos && (type == "create" || type == 'edit' || type == 'copy')) {
+                        var idPurchaseOrder = recordObj.getValue("createdfrom");
+                        // if (libtools.searchPediments(recordObj.id)) {
+                        var mxTransaction = getPedimentoMXtransaction(idPurchaseOrder);
+                        if (mxTransaction.length > 0) {
+                            if (Number(recordObj.id) != 0) {
+                                if (!libTools.searchPediments(recordObj.id)) {
+                                    return true;
+                                }
                             }
-                        }
 
-                        const mensaje = MXPedimentos.isValidItemsTransaction(recordObj);
-                        translateAlert(mensaje);
-                        if (mensaje.indexOf('Error') !== -1) {
-                            return false;
+                            const mensaje = MXPedimentos.isValidItemsTransaction(recordObj);
+                            if (mensaje !== "ok") {
+                                translateAlert(mensaje);
+                                if (mensaje.indexOf('Error') !== -1) {
+                                    return false;
+                                }
+                            }
+                            
                         }
+                        // }
+
                     }
-                    // }
-
                 }
+                
 
             } catch (err) {
                 //alert("[ saveRecord ] \n" + err.message);

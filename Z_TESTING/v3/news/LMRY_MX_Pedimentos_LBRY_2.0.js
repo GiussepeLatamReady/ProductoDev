@@ -25,9 +25,11 @@ define(["N/query", "N/search", "N/record", "N/log","N/runtime","N/format"], func
         var pedimentoDate = recordObj.getValue("custpage_mx_pedimento_date");
         var isValid = validateLinesxPedimento(nroPedimento);
         log.error("isValid",isValid)
+        
         //automatico
         var fifo = recordObj.getValue('custpage_mx_pedimento_au_fifo');
         var lifo = recordObj.getValue('custpage_mx_pedimento_au_lifo');
+        log.error("fifo",fifo)
         if (fifo === 'T' || lifo === 'T' || isValid) {
             var recordMxtransaction = searchMxtransaction(recordObj.id);
             if (recordMxtransaction.length > 0) {
@@ -63,14 +65,18 @@ define(["N/query", "N/search", "N/record", "N/log","N/runtime","N/format"], func
                     fieldId: "custrecord_lmry_mx_pedimento_aduana",
                     value: pedimentoAduana
                 });
-                log.error("pedimentoDate",pedimentoDate)
-                //format.parse({ value: pedimentoDate, type: format.Type.DATE });
-                var dateFormat = format.parse({ value: pedimentoDate, type: format.Type.DATE });
-                log.error("dateFormat",dateFormat);
-                mxTransaction.setValue({
-                    fieldId: "custrecord_lmry_mx_tf_pedimento_date",
-                    value: dateFormat
-                });
+
+                if (pedimentoDate) {
+                    log.error("pedimentoDate", pedimentoDate)
+                    //format.parse({ value: pedimentoDate, type: format.Type.DATE });
+                    var dateFormat = format.parse({ value: pedimentoDate, type: format.Type.DATE });
+                    log.error("dateFormat", dateFormat);
+                    mxTransaction.setValue({
+                        fieldId: "custrecord_lmry_mx_tf_pedimento_date",
+                        value: dateFormat
+                    });
+                }
+                
                 if (fifo === 'T') mxTransaction.setValue({
                     fieldId: "custrecord_lmry_mx_pedimento_fifo",
                     value: true
