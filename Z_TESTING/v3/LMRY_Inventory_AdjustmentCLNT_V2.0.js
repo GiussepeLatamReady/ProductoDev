@@ -83,9 +83,7 @@ define([
           // Valida el Acceso
           ValidateAccessAjust(subsidiary);
           
-          if (LMRY_countr[0]=="MX") {
-            redirectToPageWithParameter(subsidiary);
-          }
+          redirectToPageWithParameter(subsidiary);
           
           return true;
         }
@@ -108,7 +106,6 @@ define([
         Library_Mail.onFieldsHide([2], currentRCD, false);
 
         LMRY_countr = Library_Mail.Get_Country_STLT(ID);
-        console.log("LMRY_countr",LMRY_countr)
         if (LMRY_countr[0] == '' || LMRY_countr[0] == null) {
           return true;
         }
@@ -122,7 +119,6 @@ define([
         }
 
         LMRY_access = Library_Mail.getCountryOfAccess(LMRY_countr, LICENSES);
-        console.log("LMRY_access",LMRY_access)
         // Solo si tiene acceso
         if (LMRY_access == true) {
           Library_Mail.onFieldsDisplayBody(currentRCD, LMRY_countr[1], 'custrecord_lmry_on_inventory_adjust', false);

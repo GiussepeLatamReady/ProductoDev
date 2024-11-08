@@ -17,21 +17,19 @@ define(["N/log", "N/search", "N/record", 'N/runtime', 'N/format', 'N/query', './
                     id: idRecord,
                     columns: ['type']
                 }).type[0].value;
-                log.error("type: ",type)
                 let dataTransaction;
                 let isReceipt = true;
                 let flagTransfer = false;
                 if (type == "InvAdjst") {
                     dataTransaction = search.lookupFields({
                         type: search.Type.INVENTORY_ADJUSTMENT,
-                        id: "4233076",
+                        id: idRecord,
                         columns: [
                             'subsidiary',
                             'createdfrom',
                             'trandate'
                         ]
                     });
-                    log.error("dataTransaction: ",dataTransaction)
                     dataTransaction['createdfrom']= [{value:idRecord}];
                 } else {
                     isReceipt = type === "ItemRcpt" ? true : false;
@@ -42,7 +40,8 @@ define(["N/log", "N/search", "N/record", 'N/runtime', 'N/format', 'N/query', './
                         columns: [
                             'subsidiary',
                             'createdfrom',
-                            'trandate'
+                            'trandate',
+                            'transferlocation'
                         ]
                     });
                     const transactionOgirinType = search.lookupFields({
@@ -58,7 +57,6 @@ define(["N/log", "N/search", "N/record", 'N/runtime', 'N/format', 'N/query', './
                 const { isAutomatic, automaticType } = getAutomaticType(dataTransaction['createdfrom'][0]?.value);
 
                 if (isAutomatic) {
-                    log.error("isAutomatic: ",isAutomatic)
                     const items = getItems(idRecord, isReceipt);
                     if (items.length === 0) return translation.NO_LINES_SELECTED;
                     let listSelected = [];
@@ -82,9 +80,11 @@ define(["N/log", "N/search", "N/record", 'N/runtime', 'N/format', 'N/query', './
                                 const jsonPediment = JSON.parse(JSON.stringify(listPediment[i]));
                                 let ped_quantity = Number(jsonPediment.values["SUM(custrecord_lmry_mx_ped_quantity)"]);
                                 let aduana = Number(jsonPediment.values["GROUP(custrecord_lmry_mx_ped_aduana)"][0]?.value);
-
+                                let datePediment = jsonPediment.values["GROUP(custrecord_lmry_mx_ped_date)"]
+                                
                                 if (aduana > 0 && ped_quantity > 0) {
-
+                                    itemLine['date'] = datePediment;
+                                    
                                     if (ped_quantity == quantitytotal) {
                                         listSelected.push({ pediment: jsonPediment, nroItems: quantitytotal, itemLine });
                                         quantitytotal = quantitytotal - ped_quantity;
@@ -113,7 +113,7 @@ define(["N/log", "N/search", "N/record", 'N/runtime', 'N/format', 'N/query', './
                         if (typeof auxJson === 'object')
                             listSelected = auxJson;
                     }
-                    listCreated = createPedimenetByList(listSelected, dataTransaction, idRecord, isReceipt);
+                    listCreated = createPedimenetByList(listSelected, dataTransaction, idRecord, isReceipt,dataTransaction['transferlocation'][0].value);
 
                     if (flagTransfer && isReceipt == false) {
                         const jsonPedimentos = getInfoMXtransaction(dataTransaction['createdfrom'][0]?.value);
@@ -129,7 +129,6 @@ define(["N/log", "N/search", "N/record", 'N/runtime', 'N/format', 'N/query', './
 
                     return translation.PEDIMENTO_SUCCESS;
                 } else {
-                    log.error("isAutomatic: ","no automatico")
                     let respuesta;
                     if (flagTransfer && isReceipt) {
                         const jsonPedimentos = getInfoMXtransaction(dataTransaction['createdfrom'][0]?.value).custrecord_lmry_mx_pedimento_transfer;
@@ -422,7 +421,6 @@ define(["N/log", "N/search", "N/record", 'N/runtime', 'N/format', 'N/query', './
                 }
             });
 
-            log.error("typeAutomatic",typeAutomatic)
             return typeAutomatic;
         }
 
@@ -433,7 +431,6 @@ define(["N/log", "N/search", "N/record", 'N/runtime', 'N/format', 'N/query', './
          * @param {boolean} isReceipt 
          */
         function createPedimentoDetailRecord(dataTransaction, idRecord, isReceipt, flagTransfer, resultItems,translation) {
-            log.error("dataTransaction",dataTransaction)
             let idPurchaseOrder = dataTransaction['createdfrom'][0]?.value;
             if (Number(idPurchaseOrder) === 0) return 'Error falta ID';
             if (!existPediments(idRecord)) return translation.PEDIMENTO_EXISTS;
@@ -582,7 +579,7 @@ define(["N/log", "N/search", "N/record", 'N/runtime', 'N/format', 'N/query', './
             }).asMappedResults();
             return nroPedimentoandAduana;
         }
-        function createPedimenetByList(listSelected, dataTransaction, idRecord, isReceipt) {
+        function createPedimenetByList(listSelected, dataTransaction, idRecord, isReceipt, transferlocation) {
             const listCreated = [];
             listSelected.forEach((pedimentSelect) => {
                 const { pediment: jsonPediment, nroItems: quantity, itemLine: itemLineInfo } = pedimentSelect;
@@ -615,7 +612,7 @@ define(["N/log", "N/search", "N/record", 'N/runtime', 'N/format', 'N/query', './
 
                 ped_details.setValue({ fieldId: 'custrecord_lmry_mx_ped_num', value: jsonPediment.values["GROUP(custrecord_lmry_mx_ped_num)"] });
 
-                ped_details.setValue({ fieldId: 'custrecord_lmry_mx_ped_location', value: itemLineInfo.location });
+                ped_details.setValue({ fieldId: 'custrecord_lmry_mx_ped_location', value: transferlocation });
 
                 ped_details.setValue({ fieldId: 'custrecord_lmry_mx_ped_quantity', value: quantity * (!isReceipt ? -1 : 1) });
 

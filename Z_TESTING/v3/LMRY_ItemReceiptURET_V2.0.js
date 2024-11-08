@@ -62,7 +62,7 @@ define(['N/search', 'N/record', 'N/https', 'N/runtime', 'N/query', 'N/log', './L
             var featPedimentos = MXPedimentos.isAutomaticPedimentos(recordObj.getValue({ fieldId: 'subsidiary' }));
             if (runtime.executionContext == 'USERINTERFACE' && featPedimentos && (type === "create" || type === "edit" || type === "copy" || type === "view")) {
               var idPurchaseOrder = recordObj.getValue("createdfrom");
-              MXPedimentos.showMXTransactionbyPedimentFields(OBJ_FORM, idPurchaseOrder, "purchaseorder", type);
+              MXPedimentos.showMXTransactionbyPedimentFields(OBJ_FORM, idPurchaseOrder, "purchaseorder", type,true);
             }
             if (featPedimentos && (type == "create" || type == "edit")) {
               MXPedimentos.updateLinesUsePedimentos(recordObj);

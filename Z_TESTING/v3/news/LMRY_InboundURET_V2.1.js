@@ -138,9 +138,6 @@ define(["N/record", "N/search", "N/log", "N/runtime", 'N/ui/serverWidget', "N/fo
         function createInboundPedimentoRecord(InboundPedimentoRecord) {
             const {recordInboundID,exist} = validateInboundPedimentoRecord(InboundPedimentoRecord.idRecord);
             InboundPedimentoRecord.recordInboundID = recordInboundID;
-            log.error("recordInboundID",recordInboundID)
-            log.error("InboundPedimentoRecord",InboundPedimentoRecord);
-            log.error("exist",exist);
             if (exist) {
                 updateInboundPedimentoRecord(InboundPedimentoRecord);
             } else {

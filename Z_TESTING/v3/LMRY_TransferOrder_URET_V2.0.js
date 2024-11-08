@@ -38,7 +38,7 @@
 		* Se agrega el Hide And View
 		************************************ */
 	   var recordObj = scriptContext.newRecord;
-
+	   var request =scriptContext.request;
 	   // Obtiene la interface que se esta ejecutando
 	   var type_interface = runtime.executionContext;
 	   if (type_interface == 'MAPREDUCE') {
@@ -86,9 +86,14 @@
 			 library_HideView.HideColumn(scriptContext.form, LMRY_Result[1], recordObj.type, licenses);
 		   } // Hide and View en formulario
 		 }
-		   if (LMRY_Result[0] == "MX") {
-			   var featPedimentos = MXPedimentos.isAutomaticPedimentos(subsidiary)
-			   if ((runtime.executionContext == 'USERINTERFACE' && featPedimentos && (scriptContext.type === "create" || scriptContext.type === "edit" || scriptContext.type === "copy" || scriptContext.type === "view"))) {
+
+		   var subsidiaryID = request.parameters.subsidiary;
+		   if (subsidiaryID) recordObj.setValue({ fieldId: 'subsidiary', value: subsidiaryID });
+		   if (subsidiaryID || LMRY_Result[0] == "MX") {
+			   if (LMRY_Result[0] == "MX") subsidiaryID = subsidiary;
+			   var featPedimentos = MXPedimentos.isAutomaticPedimentos(subsidiaryID);
+			   var typesEvent = ["create","edit","copy","view"];
+			   if (runtime.executionContext == 'USERINTERFACE' && featPedimentos && typesEvent.indexOf(scriptContext.type)!=-1) {
 				   MXPedimentos.showMXTransactionbyPedimentFields(OBJ_FORM, RCD_OBJ.id, RCD_OBJ.type, scriptContext.type);
 			   }
 		   }

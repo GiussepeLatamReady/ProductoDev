@@ -121,7 +121,6 @@ define([
 
             // Lógica GL Impact
             var btnGl = libraryGLImpact.featureGLImpact(recordObj, 'inventoryadjustment');
-            //log.error('btnGl', btnGl);
             if (btnGl == 1) {
               if (featurelang == 'es') {
                 form.addButton({
@@ -157,13 +156,11 @@ define([
             }
           }
         }
-        log.error("country[0]",country[0])
         var subsidiaryID = request.parameters.subsidiary;
         if (subsidiaryID) recordObj.setValue({ fieldId: 'subsidiary', value: subsidiaryID });
         if (subsidiaryID || country[0] == "MX") {
           if (country[0] == "MX") subsidiaryID = subsidiary;
           var featPedimentos = MXPedimentos.isAutomaticPedimentos(subsidiaryID);
-          log.error("featPedimentos",featPedimentos)
           if (runtime.executionContext == 'USERINTERFACE' && featPedimentos && (type === "create" || type === "edit" || type === "copy" || type === "view")) {
             MXPedimentos.showMXTransactionbyPedimentFields(form, recordObj.id, "purchaseorder", type);
           }
@@ -221,12 +218,9 @@ define([
         }
 
         var country = ValidateAccessAjust(subsidiary, form, LICENSES);
-        log.error("country",country)
         if (country[0] === 'MX') {
           var featPedimentos = MXPedimentos.isAutomaticPedimentos(subsidiary)
-          log.error("afterSubmit featPedimentos",featPedimentos)
           if ((eventType === "create" || eventType === "edit" || eventType === "copy" || eventType === "view") && featPedimentos) {
-            log.error("processs","creando")
             MXPedimentos.createMXTransactionbyPediment(recordObj, true, recordObj.id);
           }
           if (featPedimentos && (eventType == 'create' || eventType == 'edit')) {

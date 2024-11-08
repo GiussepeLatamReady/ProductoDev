@@ -21,10 +21,27 @@ En el siguiente requerimiento se solicita la creación de un Automatic Set a niv
 ## Records Configuration
 + Create
 
-    custrecord_lmry_mx_pedimento_date -  customrecord_mx_pedimento_inbound
+    Latam - MX Date custrecord_lmry_mx_pedimento_date -  customrecord_mx_pedimento_inbound
     custrecord_lmry_mx_tf_pedimento_date - mx transaccion field
     agreagr ajuste de inventario a Latam - MX Related Transaction de mx transaction field
         	                    ... custrecord_lmry_mx_ped_trans_ref de customrecord_lmry_mx_pedimento_details
+
+    LatamReady - MX Transaction fields (customrecord_lmry_mx_transaction_fields)
+    Latam - MX Pediment Date 
+    (custrecord_lmry_mx_tf_pedimento_date)
+    Date
+
+    LatamReady - MX Pedimento Inbound (customrecord_mx_pedimento_inbound)
+    Latam - MX Date
+    (custrecord_lmry_mx_pedimento_date)
+    Date
+
+
+    LatamReady - MX Pedimento Details (customrecord_lmry_mx_pedimento_details)
+    adicion la transaccion al inventory adjustment Latam - MX Source Transaction Reference
+    LatamReady - MX Transaction fields (customrecord_lmry_mx_transaction_fields)
+    adicion la transaccion al inventory adjustment Latam - MX Related Transaction
+
 + Update
     
 ## Fields

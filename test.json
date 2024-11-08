@@ -1,21 +1,25 @@
-{
-    type: "error.SuiteScriptError",
-    name: "RCRD_DSNT_EXIST",
-    message: "That record does not exist.",
-    id: "28",
-    stack: [
-       "Error\n    at suitescript/resources/javascript/record/recordImpl.js:96:12\n    at Function.loadRecord_raw (suitescript/resources/javascript/record/recordImpl.js:94:24)\n    at suitescript/resources/javascript/record/recordImpl.js:82:27\n    at Object.loadRecord (suitescript/resources/javascript/record/recordImpl.js:80:24)\n    at updateInboundPedimentoRecord (/SuiteBundles/Bundle 35754/LMRY_InboundURET_V2.1.js:168:51)\n    at createInboundPedimentoRecord (/SuiteBundles/Bundle 35754/LMRY_InboundURET_V2.1.js:140:17)\n    at Object.afterSubmit (/SuiteBundles/Bundle 35754/LMRY_InboundURET_V2.1.js:113:21)"
-    ],
-    cause: {
-       type: "internal error",
-       code: "RCRD_DSNT_EXIST",
-       details: "That record does not exist.",
-       userEvent: null,
-       stackTrace: [
-          "Error\n    at suitescript/resources/javascript/record/recordImpl.js:96:12\n    at Function.loadRecord_raw (suitescript/resources/javascript/record/recordImpl.js:94:24)\n    at suitescript/resources/javascript/record/recordImpl.js:82:27\n    at Object.loadRecord (suitescript/resources/javascript/record/recordImpl.js:80:24)\n    at updateInboundPedimentoRecord (/SuiteBundles/Bundle 35754/LMRY_InboundURET_V2.1.js:168:51)\n    at createInboundPedimentoRecord (/SuiteBundles/Bundle 35754/LMRY_InboundURET_V2.1.js:140:17)\n    at Object.afterSubmit (/SuiteBundles/Bundle 35754/LMRY_InboundURET_V2.1.js:113:21)"
-       ],
-       notifyOff: false
-    },
-    notifyOff: false,
-    userFacing: true
- }
+[
+   {
+      "pediment": {
+         "values": {
+            "GROUP(custrecord_lmry_mx_ped_num)": "17 01 3173 7000001",
+            "SUM(custrecord_lmry_mx_ped_quantity)": "9925",
+            "GROUP(custrecord_lmry_mx_ped_date)": "12/08/2022",
+            "GROUP(custrecord_lmry_mx_ped_aduana)": [
+               {
+                  "value": "1",
+                  "text": "ACAPULCO, ACAPULCO DE JUAREZ, GUERRERO."
+               }
+            ]
+         }
+      },
+      "nroItems": "1",
+      "itemLine": {
+         "itemid": "387",
+         "itemDescription": "400 Watt Power Supply 1",
+         "location": "7",
+         "date": "07/11/2024",
+         "quantity": "1"
+      }
+   }
+]

@@ -59,34 +59,11 @@ define(['N/runtime', 'N/search', 'N/record', 'N/url', 'N/https', './Latam_Librar
                 if (Number(subsidiary)) {
                     LMRY_countr = libraryMail.Validate_Country(subsidiary);
                 }
-                var featPedimentos = isAutomaticPedimentos(subsidiary)
-                if (LMRY_countr[0] == 'MX' && featPedimentos) {
-                    recordObj.getField({
-                        fieldId: 'custpage_mx_nro_pedimento'
-                    }).isDisplay = true;
-                    recordObj.getField({
-                        fieldId: 'custpage_mx_pedimento_aduana'
-                    }).isDisplay = true;
-                    /*
-                    recordObj.getField({
-                        fieldId: 'custpage_mx_pedimento_au_fifo'
-                    }).isDisplay = false;
-                    */
-                } else {
-                    recordObj.getField({
-                        fieldId: 'custpage_mx_nro_pedimento'
-                    }).isDisplay = false;
-                    recordObj.getField({
-                        fieldId: 'custpage_mx_pedimento_aduana'
-                    }).isDisplay = false;
-                    /*
-                    recordObj.getField({
-                        fieldId: 'custpage_mx_pedimento_au_fifo'
-                    }).isDisplay = false;
-                    */
-                }
+                
 
             } catch (error) {
+                console.log("error: ",error)
+                console.log("error stack: ",error.stack)
                 libraryMail.sendemail(' [ pageInit ] ' + error, LMRY_script);
             }
 
@@ -179,32 +156,8 @@ define(['N/runtime', 'N/search', 'N/record', 'N/url', 'N/https', './Latam_Librar
                     if (Number(subsidiary)) {
                         LMRY_countr = libraryMail.Validate_Country(subsidiary);
                     }
-                    var featPedimentos = isAutomaticPedimentos(subsidiary)
-                    if (LMRY_countr[0] == 'MX' && featPedimentos) {
-                        recordObj.getField({
-                            fieldId: 'custpage_mx_nro_pedimento'
-                        }).isDisplay = true;
-                        recordObj.getField({
-                            fieldId: 'custpage_mx_pedimento_aduana'
-                        }).isDisplay = true;
-                        /*
-                        recordObj.getField({
-                            fieldId: 'custpage_mx_pedimento_au_fifo'
-                        }).isDisplay = true;
-                        */
-                    } else {
-                        recordObj.getField({
-                            fieldId: 'custpage_mx_nro_pedimento'
-                        }).isDisplay = false;
-                        recordObj.getField({
-                            fieldId: 'custpage_mx_pedimento_aduana'
-                        }).isDisplay = false;
-                        /*
-                        recordObj.getField({
-                            fieldId: 'custpage_mx_pedimento_au_fifo'
-                        }).isDisplay = false;
-                        */
-                    }
+
+                    redirectToPageWithParameter(subsidiary);
                 }
 
                 //cambio numeracion preimpreso Brasil
@@ -475,6 +428,24 @@ define(['N/runtime', 'N/search', 'N/record', 'N/url', 'N/https', './Latam_Librar
             }
             return featPedimentos;
         }
+
+
+        function redirectToPageWithParameter(subsidiaryID) {
+            var currentUrl = window.location.href;
+            var regex = new RegExp('([?&])subsidiary=([^&]*)');
+      
+            // Verificar si el parámetro 'subsidiary' ya existe en la URL
+            if (regex.test(currentUrl)) {
+              // Si existe, reemplazar el valor del parámetro 'subsidiary' con subsidiaryID
+              currentUrl = currentUrl.replace(regex, '$1subsidiary=' + subsidiaryID);
+            } else {
+              // Si no existe, agregar el parámetro 'subsidiary=subsidiaryID'
+              currentUrl += (currentUrl.indexOf('?') !== -1 ? '&' : '?') + 'subsidiary=' + subsidiaryID;
+            }
+      
+            // Redirigir a la URL con el parámetro actualizado
+            window.location.href = currentUrl;
+          }
 
         return {
             pageInit: pageInit,

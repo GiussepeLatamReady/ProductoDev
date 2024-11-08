@@ -104,8 +104,6 @@ define(["require", "N/search", "N/http", "N/url", "N/record","N/format", "N/quer
                 mxTransaction.setValue({ fieldId: "custrecord_lmry_mx_currency", value: transaction.currency });
                 mxTransaction.setValue({ fieldId: "custrecord_lmry_mx_exchange_rate", value: transaction.exchangerate });
                 mxTransaction.setValue({ fieldId: "custrecord_lmry_mx_pedimento", value: nroPedimento });
-                //pedimentoDate = format.parse({ value: pedimentoDate, type: format.Type.DATE });
-                console.log("pedimentoDate",pedimentoDate);
                 mxTransaction.setValue({ fieldId: "custrecord_lmry_mx_tf_pedimento_date", value: pedimentoDate });
                 if (Number(idAduana) !== 0) mxTransaction.setValue({ fieldId: "custrecord_lmry_mx_pedimento_aduana", value: idAduana });
                 idsMxTransactionCreadas.push(mxTransaction.save());

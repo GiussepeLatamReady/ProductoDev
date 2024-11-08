@@ -24,14 +24,12 @@ define(["N/query", "N/search", "N/record", "N/log","N/runtime","N/format"], func
         var pedimentoAduana = recordObj.getValue("custpage_mx_pedimento_aduana");
         var pedimentoDate = recordObj.getValue("custpage_mx_pedimento_date");
         var isValid = validateLinesxPedimento(nroPedimento);
-        log.error("isValid",isValid)
         
         //automatico
         var fifo = recordObj.getValue('custpage_mx_pedimento_au_fifo');
         var lifo = recordObj.getValue('custpage_mx_pedimento_au_lifo');
-        log.error("fifo",fifo)
         if (fifo === 'T' || lifo === 'T' || isValid) {
-            var recordMxtransaction = searchMxtransaction(recordObj.id);
+            var recordMxtransaction = searchMxtransaction(isReceiptDeferral ? idPurchaseOrder : recordObj.id);
             if (recordMxtransaction.length > 0) {
                 recordMxtransaction.forEach(function (Mxtransaction) {
                     updateMxTransaction(nroPedimento, pedimentoAduana, Mxtransaction.id, fifo, lifo,pedimentoDate);
@@ -67,10 +65,7 @@ define(["N/query", "N/search", "N/record", "N/log","N/runtime","N/format"], func
                 });
 
                 if (pedimentoDate) {
-                    log.error("pedimentoDate", pedimentoDate)
-                    //format.parse({ value: pedimentoDate, type: format.Type.DATE });
                     var dateFormat = format.parse({ value: pedimentoDate, type: format.Type.DATE });
-                    log.error("dateFormat", dateFormat);
                     mxTransaction.setValue({
                         fieldId: "custrecord_lmry_mx_tf_pedimento_date",
                         value: dateFormat
@@ -112,45 +107,57 @@ define(["N/query", "N/search", "N/record", "N/log","N/runtime","N/format"], func
         }
     }
 
-    function showMXTransactionbyPedimentFields(form, id, type, eventType) {
+    function showMXTransactionbyPedimentFields(form, id, type, eventType,isItemReceipt) {
         var fieldPedimento;
         var fieldAduana;
         var fieldDate;
-        if (type === 'transferorder' || type === 'purchaseorder' || type == 'inventoryadjustment') {
-            var aduanaSearch = search.create({
-                type: 'customrecord_lmry_mx_aduana',
-                columns: ['internalid', 'name'],
-                filters: [['isinactive', 'is', 'F']]
-            });
-            var aduanas = aduanaSearch.run().getRange(0, 1000);
-            fieldPedimento = form.addField({
-                label: "Latam - MX Nro Pedimento",
-                id: "custpage_mx_nro_pedimento",
-                type: "text"
-            });
-            fieldAduana = form.addField({
-                label: "Latam - MX Pedimento Aduana",
-                id: "custpage_mx_pedimento_aduana",
-                type: "select"
-            });
-            fieldAduana.addSelectOption({
-                value: "0",
-                text: " "
-            });
-            aduanas.forEach(function (aduana) {
-                fieldAduana.addSelectOption({
-                    value: aduana.getValue("internalid"),
-                    text: aduana.getValue("name")
+        if (type === 'purchaseorder' || type == 'inventoryadjustment') {
+            var isTranferOrder = false;
+            if (isItemReceipt) {
+                var transactionOgirinType = search.lookupFields({
+                    type: 'transaction',
+                    id: id,
+                    columns: ['type']
+                }).type[0].value;
+                if (transactionOgirinType == 'TrnfrOrd') isTranferOrder = true;
+            }
+            if (!isTranferOrder) {
+                var aduanaSearch = search.create({
+                    type: 'customrecord_lmry_mx_aduana',
+                    columns: ['internalid', 'name'],
+                    filters: [['isinactive', 'is', 'F']]
                 });
-            });
-
-            fieldDate = form.addField({
-                label: "Latam - MX Pedimento Date",
-                id: "custpage_mx_pedimento_date",
-                type: "date"
-            });
-
-            if (eventType && eventType !== "view") fieldDate.defaultValue = new Date();
+                var aduanas = aduanaSearch.run().getRange(0, 1000);
+                fieldPedimento = form.addField({
+                    label: "Latam - MX Nro Pedimento",
+                    id: "custpage_mx_nro_pedimento",
+                    type: "text"
+                });
+                fieldAduana = form.addField({
+                    label: "Latam - MX Pedimento Aduana",
+                    id: "custpage_mx_pedimento_aduana",
+                    type: "select"
+                });
+                fieldAduana.addSelectOption({
+                    value: "0",
+                    text: " "
+                });
+                aduanas.forEach(function (aduana) {
+                    fieldAduana.addSelectOption({
+                        value: aduana.getValue("internalid"),
+                        text: aduana.getValue("name")
+                    });
+                });
+    
+                fieldDate = form.addField({
+                    label: "Latam - MX Pedimento Date",
+                    id: "custpage_mx_pedimento_date",
+                    type: "date"
+                });
+    
+                if (eventType && eventType !== "view") fieldDate.defaultValue = new Date();
+            }
+            
         }
 
 
@@ -542,7 +549,6 @@ define(["N/query", "N/search", "N/record", "N/log","N/runtime","N/format"], func
         };
 
         var listUsePedimentos = {};
-        log.error("listItems",listItems)
         if (listItems.length) {
             search.create({
                 type: "item",
