@@ -52,68 +52,75 @@ define(["N/log", "N/search", "N/record", 'N/runtime', 'N/format', 'N/query', './
                     if (transactionOgirinType == 'TrnfrOrd') flagTransfer = true;
                 }
                 
-
+                log.error("dataTransaction",dataTransaction)
 
                 const { isAutomatic, automaticType } = getAutomaticType(dataTransaction['createdfrom'][0]?.value);
-
+                log.error("isAutomatic",isAutomatic)
+                log.error("automaticType",automaticType)
                 if (isAutomatic) {
                     const items = getItems(idRecord, isReceipt);
                     if (items.length === 0) return translation.NO_LINES_SELECTED;
                     let listSelected = [];
                     let listCreated = [];
-                    items.forEach((itemLine) => {
-                        const listPediment = getPedimentos(itemLine.itemid, itemLine.location, itemLine.lote, (automaticType === 1 ? true : false));
-                        let sumQuantityDisp = 0;
-                        let quantitytotal = itemLine.quantity;
-                        for (let i = 0; i < listPediment.length; i++) {
-                            const jsonPediment = JSON.parse(JSON.stringify(listPediment[i]));
-                            let ped_quantity = Number(jsonPediment.values["SUM(custrecord_lmry_mx_ped_quantity)"]);
-                            let aduana = jsonPediment.values["GROUP(custrecord_lmry_mx_ped_aduana)"][0]?.value;
-                            if (aduana) {
-                                sumQuantityDisp += ped_quantity;
-                            }
-                        }
-                        if (quantitytotal > sumQuantityDisp) {
-                            throw translation.INSUFFICIENT_STOCK;
-                        } else {
+                    if (!isReceipt) {
+                        items.forEach((itemLine) => {
+                            const listPediment = getPedimentos(itemLine.itemid, itemLine.location, itemLine.lote, (automaticType === 1 ? true : false));
+                            let sumQuantityDisp = 0;
+                            let quantitytotal = itemLine.quantity;
                             for (let i = 0; i < listPediment.length; i++) {
                                 const jsonPediment = JSON.parse(JSON.stringify(listPediment[i]));
                                 let ped_quantity = Number(jsonPediment.values["SUM(custrecord_lmry_mx_ped_quantity)"]);
-                                let aduana = Number(jsonPediment.values["GROUP(custrecord_lmry_mx_ped_aduana)"][0]?.value);
-                                let datePediment = jsonPediment.values["GROUP(custrecord_lmry_mx_ped_date)"]
-                                
-                                if (aduana > 0 && ped_quantity > 0) {
-                                    itemLine['date'] = datePediment;
-                                    
-                                    if (ped_quantity == quantitytotal) {
-                                        listSelected.push({ pediment: jsonPediment, nroItems: quantitytotal, itemLine });
-                                        quantitytotal = quantitytotal - ped_quantity;
-                                        break;
-                                    };
-                                    if (ped_quantity > quantitytotal) {
-                                        listSelected.push({ pediment: jsonPediment, nroItems: quantitytotal, itemLine });
-                                        quantitytotal = quantitytotal - ped_quantity;
-                                        break;
-                                    };
-                                    if (ped_quantity < quantitytotal) {
-                                        listSelected.push({ pediment: jsonPediment, nroItems: ped_quantity, itemLine });
-                                        quantitytotal = quantitytotal - ped_quantity;
-                                    }
-
-                                } else {
-                                    continue;
+                                let aduana = jsonPediment.values["GROUP(custrecord_lmry_mx_ped_aduana)"][0]?.value;
+                                if (aduana) {
+                                    sumQuantityDisp += ped_quantity;
                                 }
                             }
-                            if (quantitytotal > 0) throw translation.INSUFFICIENT_STOCK;
-                        };
-                    });
+                            if (quantitytotal > sumQuantityDisp) {
+                                throw translation.INSUFFICIENT_STOCK;
+                            } else {
+                                for (let i = 0; i < listPediment.length; i++) {
+                                    const jsonPediment = JSON.parse(JSON.stringify(listPediment[i]));
+                                    let ped_quantity = Number(jsonPediment.values["SUM(custrecord_lmry_mx_ped_quantity)"]);
+                                    let aduana = Number(jsonPediment.values["GROUP(custrecord_lmry_mx_ped_aduana)"][0]?.value);
+                                    let datePediment = jsonPediment.values["GROUP(custrecord_lmry_mx_ped_date)"]
+                                    
+                                    if (aduana > 0 && ped_quantity > 0) {
+                                        itemLine['date'] = datePediment;
+                                        
+                                        if (ped_quantity == quantitytotal) {
+                                            listSelected.push({ pediment: jsonPediment, nroItems: quantitytotal, itemLine });
+                                            quantitytotal = quantitytotal - ped_quantity;
+                                            break;
+                                        };
+                                        if (ped_quantity > quantitytotal) {
+                                            listSelected.push({ pediment: jsonPediment, nroItems: quantitytotal, itemLine });
+                                            quantitytotal = quantitytotal - ped_quantity;
+                                            break;
+                                        };
+                                        if (ped_quantity < quantitytotal) {
+                                            listSelected.push({ pediment: jsonPediment, nroItems: ped_quantity, itemLine });
+                                            quantitytotal = quantitytotal - ped_quantity;
+                                        }
+    
+                                    } else {
+                                        continue;
+                                    }
+                                }
+                                if (quantitytotal > 0) {
+                                    log.error("validacion","Insuficiente stock")
+                                    throw translation.INSUFFICIENT_STOCK;
+                                }
+                            };
+                        });
+                    }
+                    
                     if (flagTransfer && isReceipt == true) {
                         const jsonPedimentos = getInfoMXtransaction(dataTransaction['createdfrom'][0]?.value)[0].custrecord_lmry_mx_pedimento_transfer;
                         const auxJson = JSON.parse(jsonPedimentos);
                         if (typeof auxJson === 'object')
                             listSelected = auxJson;
                     }
-                    listCreated = createPedimenetByList(listSelected, dataTransaction, idRecord, isReceipt,dataTransaction['transferlocation'][0].value);
+                    listCreated = createPedimenetByList(listSelected, dataTransaction, idRecord, isReceipt, flagTransfer ? dataTransaction['transferlocation'][0].value: null);
 
                     if (flagTransfer && isReceipt == false) {
                         const jsonPedimentos = getInfoMXtransaction(dataTransaction['createdfrom'][0]?.value);
@@ -580,6 +587,7 @@ define(["N/log", "N/search", "N/record", 'N/runtime', 'N/format', 'N/query', './
             return nroPedimentoandAduana;
         }
         function createPedimenetByList(listSelected, dataTransaction, idRecord, isReceipt, transferlocation) {
+            log.error("createPedimenetByList","start")
             const listCreated = [];
             listSelected.forEach((pedimentSelect) => {
                 const { pediment: jsonPediment, nroItems: quantity, itemLine: itemLineInfo } = pedimentSelect;
@@ -612,7 +620,12 @@ define(["N/log", "N/search", "N/record", 'N/runtime', 'N/format', 'N/query', './
 
                 ped_details.setValue({ fieldId: 'custrecord_lmry_mx_ped_num', value: jsonPediment.values["GROUP(custrecord_lmry_mx_ped_num)"] });
 
-                ped_details.setValue({ fieldId: 'custrecord_lmry_mx_ped_location', value: transferlocation });
+                if (transferlocation) {
+                    ped_details.setValue({ fieldId: 'custrecord_lmry_mx_ped_location', value: transferlocation });
+                }else{
+                    ped_details.setValue({ fieldId: 'custrecord_lmry_mx_ped_location', value: itemLineInfo.location });
+                }
+                
 
                 ped_details.setValue({ fieldId: 'custrecord_lmry_mx_ped_quantity', value: quantity * (!isReceipt ? -1 : 1) });
 
@@ -625,7 +638,7 @@ define(["N/log", "N/search", "N/record", 'N/runtime', 'N/format', 'N/query', './
                 if (Number(jsonPediment.values["GROUP(custrecord_lmry_mx_ped_aduana)"][0]?.value)) {
                     ped_details.setValue({ fieldId: 'custrecord_lmry_mx_ped_aduana', value: Number(jsonPediment.values["GROUP(custrecord_lmry_mx_ped_aduana)"][0]?.value) });
                 }
-
+                log.error("save","save")
                 listCreated.push(ped_details.save());
 
             });

@@ -39,6 +39,7 @@ En el siguiente requerimiento se solicita la creación de un Automatic Set a niv
 
     LatamReady - MX Pedimento Details (customrecord_lmry_mx_pedimento_details)
     adicion la transaccion al inventory adjustment Latam - MX Source Transaction Reference
+    
     LatamReady - MX Transaction fields (customrecord_lmry_mx_transaction_fields)
     adicion la transaccion al inventory adjustment Latam - MX Related Transaction
 

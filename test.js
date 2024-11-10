@@ -8,3 +8,9 @@ search.lookupFields({
       "transferlocation"
   ]
 });
+
+search.lookupFields({
+  type: 'transaction',
+  id: "4253212",
+  columns: ['type','location']
+});
