@@ -60,7 +60,40 @@ En el siguiente requerimiento se solicita la creación de un Automatic Set a niv
 
 ## Observations
  
-+ Verificar si en el record LatamReady - Setup Automatic Set Fiel (customrecord_lmry_setup_universal_set_v2) estan todos los campos de colombia que se desan setear.
+CashSale CLNT
+CreditMemo CLNT
+CustomerPayment CLNT
+ExpenseReport CLNT
+Invoice CLNT
+ItemFulfillment CLNT
+MandatoryRecords CLNT URET
+VendorBill CLNT
+VendorCredit CLNT
+VendorPayment CLNT
+VendorReturnAuthorization CLNT
+
+
+Vendor CLNT
+Employee CLNT
+Entity CLNT
+EntityProject CLNT
+
+flujo
+   Transaction
+	validación body fields
+	validación line fields
+	mensaje saverecord
+
+
+
+'/content/drive/MyDrive/ia_entre/hilton/data'
+
+Creación del record (Core)
+Creación de archivos de configuración, estrutura y data (Core, BR)
+Carga de datos (BR)
+
+creación de la librería y reslet (Core)
+adecuar el clnt para Brazi
 
 ## SmartReady
 
