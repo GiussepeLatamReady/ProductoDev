@@ -1,25 +1,23 @@
 {
-   "type": "error.SuiteScriptError",
-   "name": "USER_ERROR",
-   "message": "A folder with the same name already exists in the selected folder.",
-   "id": "",
-   "stack": [
-      "Error\n at RecordInvoker.save (suitescript/resources/javascript/record/serverRecordService.js:371:13)\n 
-      at NetSuiteObject.thenableFunction() (suitescript/resources/javascript/record/proxy.js:115:24)\n 
-      at /SuiteApps/com.latamready.lmrylocalizationcore/lib/Document Folders/LMRY_Document_Folders_LBRY.js:113:51\n 
-      at Array.forEach (native)\n at Object.saveFolders (/SuiteApps/com.latamready.lmrylocalizationcore/lib/Document Folders/LMRY_Document_Folders_LBRY.js:99:30)\n 
-      at Object.run (/SuiteApps/com.latamready.lmrylocalizationcore/lib/SDF Installation/LR_LatamLocalization_SDFI.js:30:27)"
+   type: "error.SuiteScriptError",
+   name: "SSS_REQUEST_TIME_EXCEEDED",
+   message: "The host you are trying to connect to has exceeded the maximum allowed response time.",
+   id: "",
+   stack: [
+      "Error\n    
+      at sendSaveDataRequest (/SuiteApps/com.latamready.lmrylocalizationcore/lib/Loading Data/LR_LoadData_MPRD.js:378:32)\n    
+      at Object.reduce (/SuiteApps/com.latamready.lmrylocalizationcore/lib/Loading Data/LR_LoadData_MPRD.js:118:78)"
    ],
-   "cause": {
-      "type": "internal error",
-      "code": "USER_ERROR",
-      "details": "A folder with the same name already exists in the selected folder.",
-      "userEvent": null,
-      "stackTrace": [
-         "Error\n at RecordInvoker.save (suitescript/resources/javascript/record/serverRecordService.js:371:13)\n at NetSuiteObject.thenableFunction() (suitescript/resources/javascript/record/proxy.js:115:24)\n at /SuiteApps/com.latamready.lmrylocalizationcore/lib/Document Folders/LMRY_Document_Folders_LBRY.js:113:51\n at Array.forEach (native)\n at Object.saveFolders (/SuiteApps/com.latamready.lmrylocalizationcore/lib/Document Folders/LMRY_Document_Folders_LBRY.js:99:30)\n at Object.run (/SuiteApps/com.latamready.lmrylocalizationcore/lib/SDF Installation/LR_LatamLocalization_SDFI.js:30:27)"
+   cause: {
+      type: "internal error",
+      code: "SSS_REQUEST_TIME_EXCEEDED",
+      details: "The host you are trying to connect to has exceeded the maximum allowed response time.",
+      userEvent: null,
+      stackTrace: [
+         "Error\n    at sendSaveDataRequest (/SuiteApps/com.latamready.lmrylocalizationcore/lib/Loading Data/LR_LoadData_MPRD.js:378:32)\n    at Object.reduce (/SuiteApps/com.latamready.lmrylocalizationcore/lib/Loading Data/LR_LoadData_MPRD.js:118:78)"
       ],
-      "notifyOff": false
+      notifyOff: false
    },
-   "notifyOff": false,
-   "userFacing": true
+   notifyOff: false,
+   userFacing: true
 }
