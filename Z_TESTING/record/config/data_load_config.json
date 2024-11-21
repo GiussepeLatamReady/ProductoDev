@@ -1,0 +1,7 @@
+{
+    "level_1": [        
+        { "recordType" : "customrecord_lr_advance_fields_hide", "dataOperation" : "REPLACEDATA"},
+        { "recordType" : "customrecord_lr_advance_fields_view", "dataOperation" : "REPLACEDATA"},
+        { "recordType" : "customrecord_lr_validation_fields", "dataOperation" : "REPLACEDATA"}
+    ]
+}

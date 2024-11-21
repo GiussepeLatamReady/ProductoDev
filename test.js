@@ -1,74 +1,61 @@
-data.forEach((d) => {
-  const { operation, recordObj, dataOperation } = d;
-  nLog.debug("recordObj", JSON.stringify(recordObj));
-  if (recordObj.scriptid) {
-    try {
-      if (operation === "create") {
-        const newRecord = record.create({
-          type: recordType
-        });
+const tickets = [
+  { id: "C20319", type: "MAJOR", description: "Rediseño completo del sistema de autenticación" },
+  { id: "C2020", type: "MINOR", description: "Optimización del rendimiento del módulo de reportes" },
+  { id: "C1956", type: "PATCH", description: "Corrección menor en el mensaje de error del login" },
+  { id: "C20450", type: "MINOR", description: "Añadido soporte para exportación de datos en formato CSV" },
+  { id: "C20111", type: "MAJOR", description: "Implementación de un nuevo motor de búsqueda" },
+  { id: "C20678", type: "PATCH", description: "Corrección de ortografía en los mensajes del sistema" },
+  { id: "C20987", type: "MINOR", description: "Actualización de la biblioteca de gráficos a la última versión" },
+  { id: "C20320", type: "PATCH", description: "Corrección de un bug en el formulario de contacto" },
+  { id: "C20500", type: "MAJOR", description: "Migración completa del sistema a una arquitectura basada en microservicios" },
+  { id: "C20745", type: "PATCH", description: "Pequeña mejora en los logs de depuración" },
+  { id: "C20988", type: "MINOR", description: "Añadido soporte para autenticación multifactor (MFA)" }
+];
 
+function calculateVersionByOrder(tickets) {
+  let major = 0, minor = 0, patch = 0;
+  const versions = []; // Almacenar versiones en cada paso
 
-        fields.forEach((fieldObj) => {
-          const { fieldScriptId, isCircularReference, type } = fieldObj;
-          if (!isCircularReference && recordObj.hasOwnProperty(fieldScriptId)) {
-            let value = recordObj[fieldScriptId];
-            if (type === "DATE") {
-              if (value) {
-                value = new Date(value);
-              }
-            }
-            newRecord.setValue({ fieldId: fieldScriptId, value: value });
-          }
-        });
-
-        const newId = newRecord.save({
-          ignoreMandatoryFields: true,
-          enableSourcing: false,
-          disableTriggers: true
-        });
-
-        response.updateData.push({ id: newId, scriptid: recordObj.scriptid, operation: operation });
-      } else if (operation === "update") {
-        if (dataOperation === "REPLACEDATA") {
-          const values = {};
-
-          fields.forEach((fieldObj) => {
-            const { fieldScriptId, isCircularReference, type } = fieldObj;
-            if (!isCircularReference && recordObj.hasOwnProperty(fieldScriptId)) {
-              let value = recordObj[fieldScriptId];
-              if (type === "DATE") {
-                value = new Date(value);
-              }
-              values[fieldScriptId] = value;
-            }
-          });
-
-          if (Object.keys(values).length) {
-            // values.scriptid = recordObj.scriptid;
-            values.externalid = recordObj.externalid;
-            values.isinactive = recordObj.isinactive;
-
-            record.submitFields({
-              type: recordType,
-              id: recordObj.id,
-              values: values,
-              options: {
-                ignoreMandatoryFields: true,
-                enableSourcing: false,
-                disableTriggers: true
-              }
-            });
-
-            response.updateData.push({ id: recordObj.id, scriptid: recordObj.scriptid, operation: operation });
-          }
-        } else if (dataOperation === "PRESERVEDATA") {
-          response.updateData.push({ id: recordObj.id, scriptid: recordObj.scriptid, operation: operation });
-        }
-      }
-    } catch (err) {
-      nLog.error("[saveData]", err);
-      response.errorData.push({ scriptid: recordObj.scriptid, operation: operation, error: err.message });
+  tickets.forEach(ticket => {
+    switch (ticket.type) {
+      case "MAJOR":
+        major++;
+        minor = 0; // Reiniciar minor
+        patch = 0; // Reiniciar patch
+        break;
+      case "MINOR":
+        minor++;
+        patch = 0; // Reiniciar patch
+        break;
+      case "PATCH":
+        patch++;
+        break;
     }
-  }
+    // Registrar la versión actual después de procesar cada ticket
+    versions.push(`${major}.${minor}.${patch}`);
+  });
+
+  return versions;
+}
+
+
+https.requestSuitelet({
+  scriptId: "customscript_lr_loadvalidate_stlt",
+  deploymentId: "customdeploy_lr_loadvalidate_stlt",
+  headers: {
+    "Content-Type": "application/json",
+    "User-Agent": "Mozilla/5.0"
+  },
+  method: "POST",
+  body: JSON.stringify({
+      recordType: "customer",
+      country: 48
+  })
 });
+
+
+search.lookupFields({
+  type: "subsidiary",
+  id: "7",
+  columns: ['country'] //
+})['country'][0].value;

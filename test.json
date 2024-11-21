@@ -1,23 +1,22 @@
 {
-   type: "error.SuiteScriptError",
-   name: "SSS_REQUEST_TIME_EXCEEDED",
-   message: "The host you are trying to connect to has exceeded the maximum allowed response time.",
-   id: "",
-   stack: [
-      "Error\n    
-      at sendSaveDataRequest (/SuiteApps/com.latamready.lmrylocalizationcore/lib/Loading Data/LR_LoadData_MPRD.js:378:32)\n    
-      at Object.reduce (/SuiteApps/com.latamready.lmrylocalizationcore/lib/Loading Data/LR_LoadData_MPRD.js:118:78)"
+   "type": "error.SuiteScriptError",
+   "name": "MAP_REDUCE_ALREADY_RUNNING",
+   "message": "Map/Reduce Script 6773 with Deployment 1 is already running and cannot be started until it has completed.",
+   "id": "",
+   "stack": [
+      "Error\n at Object.executeDataLoadProcess (/SuiteApps/com.latamready.lmrylocalizationcore/lib/Loading Data/LR_LoadData_Handler_LBRY.js:44:12)\n 
+      at Object.run (/SuiteApps/com.latamready.lmrylocalizationcore/lib/SDF Installation/LR_LatamLocalization_SDFI.js:43:28)"
    ],
-   cause: {
-      type: "internal error",
-      code: "SSS_REQUEST_TIME_EXCEEDED",
-      details: "The host you are trying to connect to has exceeded the maximum allowed response time.",
-      userEvent: null,
-      stackTrace: [
-         "Error\n    at sendSaveDataRequest (/SuiteApps/com.latamready.lmrylocalizationcore/lib/Loading Data/LR_LoadData_MPRD.js:378:32)\n    at Object.reduce (/SuiteApps/com.latamready.lmrylocalizationcore/lib/Loading Data/LR_LoadData_MPRD.js:118:78)"
+   "cause": {
+      "type": "internal error",
+      "code": "MAP_REDUCE_ALREADY_RUNNING",
+      "details": "Map/Reduce Script 6773 with Deployment 1 is already running and cannot be started until it has completed.",
+      "userEvent": null,
+      "stackTrace": [
+         "Error\n at Object.executeDataLoadProcess (/SuiteApps/com.latamready.lmrylocalizationcore/lib/Loading Data/LR_LoadData_Handler_LBRY.js:44:12)\n at Object.run (/SuiteApps/com.latamready.lmrylocalizationcore/lib/SDF Installation/LR_LatamLocalization_SDFI.js:43:28)"
       ],
-      notifyOff: false
+      "notifyOff": false
    },
-   notifyOff: false,
-   userFacing: true
+   "notifyOff": false,
+   "userFacing": true
 }
