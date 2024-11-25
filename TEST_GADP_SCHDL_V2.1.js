@@ -14,14 +14,14 @@
  */
 define([
     'N/file',
-    "N/search", 
-    "N/record", 
-    "N/log", 
-    "N/query", 
+    "N/search",
+    "N/record",
+    "N/log",
+    "N/query",
     "N/runtime",
     "N/https"
 ],
-    function (file,search, record, log, query, runtime,https) {
+    function (file, search, record, log, query, runtime, https) {
 
         const countries = {
             "AR": 11,
@@ -39,12 +39,16 @@ define([
         function execute(Context) {
             try {
 
-                Object.keys(countries).forEach(country =>{
-                    createDataMandatoryFields(country);
-                })
                 
+                createOperationType()
+                //createDataMandatoryFields("CO");
                 
                 /*
+                Object.keys(countries).forEach(country => {
+                    createDataMandatoryFields(country);
+                })
+
+                
                 let response = https.requestSuitelet({
                     scriptId: "customscript_lr_loadvalidate_stlt",
                     deploymentId: "customdeploy_lr_loadvalidate_stlt",
@@ -71,18 +75,18 @@ define([
                 log.error("fieldValidations",arraytemp)
                 */
             } catch (error) {
-               log.error('Error execute',error)
+                log.error('Error execute', error)
             }
-          
+
         }
 
-        
+
 
 
         const deleteAllRecord = () => {
             /* Query */
             const max = 5;
-            let i=0;
+            let i = 0;
             search.create({
                 type: "customrecord_lmry_br_ibpt",
                 filters: [],
@@ -94,25 +98,26 @@ define([
                 ]
             }).run().each(result => {
                 const internalid = result.getValue("internalid");
-                if (i>max) return false;
-                const idrecord =record.delete({
+                if (i > max) return false;
+                const idrecord = record.delete({
                     type: 'customrecord_lmry_br_ibpt',
                     id: internalid,
                 });
                 i++
-                log.error("idrecord",idrecord)
+                log.error("idrecord", idrecord)
                 return true;
             });
         }
 
         const createDataMandatoryFields = (country) => {
-            
 
-            log.error("country.toUppercase()",country.toLowerCase())
-            log.error("countries[country.toUppercase()]",countries[country])
+
+            log.error("country.toUppercase()", country.toLowerCase())
+            log.error("countries[country.toUppercase()]", countries[country])
             const mandatoryFields = [];
             let count = 0;
             const sections = getSection();
+            const operationsType = getOperationType();
             search.create({
                 type: "customrecord_lmry_validation_fields",
                 filters: [
@@ -234,19 +239,25 @@ define([
                         name: "formulatext",
                         formula: "{isinactive}",
                         label: "Formula (Text)"
-                    })
+                    }),
+                    search.createColumn({
+                        name: "formulatext",
+                        formula: "{custrecord_lmry_val_ope_type}",
+                        label: "Formula (Text)"
+                    }),
                 ]
             }).run().each(function (result) {
-                const { columns, getValue } = result;
+                const { columns, getValue,getText } = result;
                 count++;
                 const get = (i) => getValue(columns[i]);
-                const varid = `mf_${country.toLowerCase()}_${formatNumberWithZeros(count)}`;
+                const varid = `lr_sdf_validation_fields_${country.toLowerCase()}_${formatNumberWithZeros(count)}`;
                 //log.error("seccion encontrado",sections.find(section => section.name == get(3)).scriptid)
+                let operationType =  get(24).replace(/\t/g, "");
                 mandatoryFields.push({
                     custrecord_lr_val_name: get(0),
                     isinactive: get(23),
-                    scriptid:varid,
-                    externalid:varid,
+                    scriptid: varid,
+                    externalid: varid,
                     custrecord_lr_validation_country: get(1),
                     custrecord_lr_mandatory: get(2),
                     custrecord_lr_val_section: sections.find(section => section.name == get(3)).scriptid,
@@ -268,61 +279,168 @@ define([
                     custrecord_lr_val_fiscal_doc_type: get(19),
                     custrecord_lr_column_name_sp: get(20),
                     custrecord_lr_column_name_en: get(21),
-                    custrecord_lr_val_item_fulfill: get(22)
+                    custrecord_lr_val_item_fulfill: get(22),
+                    custrecord_lr_val_ope_type: operationsType.find(operation => operation.name == operationType)?.scriptid || "",         
                 });
                 return true;
             });
 
-            mandatoryFields.unshift(Object.keys(mandatoryFields[0]));
-            //mandatoryFields.slice(0, 5);
-            //log.error("mandatoryFields",mandatoryFields.slice(0, 3))
+            const nameFile = `customrecord_lr_validation_fields_${country}.csv`;
+            const FolderID = "98360";
 
-            const contentFile = generateFile(mandatoryFields);
-            //log.error("contentFile",contentFile)
-            log.error("generate file success",saveFile(contentFile,country))
-           //return mandatoryFields;
+            buildFile(mandatoryFields,nameFile,FolderID);
         };
 
-        const generateFile = (mandatoryFields) => 
-            mandatoryFields.map(field => Object.values(field).join("\t")).join('\n');
+        const buildFile = (values,nameFile,FolderID) =>{
+            values.unshift(Object.keys(values[0]));
+            const contentFile = generateFile(values);
+            log.error("generate file success", saveFile(contentFile,nameFile,FolderID))
+        }
 
-        const saveFile = (fileContent,country) => {
+        const generateFile = (values) =>
+            values.map(field => Object.values(field).join("\t")).join('\n');
+
+        const saveFile = (fileContent,nameFile,FolderID) => {
+
+            //`customrecord_lr_validation_fields_${country}.csv` "920172"
             const fileGenerate = file.create({
-                name: `customrecord_lr_validation_fields_${country}.csv`,
+                name: nameFile,
                 fileType: file.Type.CSV,
                 contents: fileContent,
                 encoding: file.Encoding.UTF8,
-                folder: "920172"
+                folder: FolderID
             });
             return fileGenerate.save();
         };
 
+        const createOperationType = () => {
+            let count = 0;
+            const operationType = [];
+            search.create({
+                type: "customrecord_lmry_operation_type",
+                filters:
+                    [
+                    ],
+                columns:
+                    [
+                        search.createColumn({ name: "name", label: "Name" }),
+                        search.createColumn({
+                            name: "formulatext",
+                            formula: "{custrecord_lmry_operation_type_code}",
+                            label: "Formula (Text)"
+                        }),
+                        search.createColumn({
+                            name: "formulatext",
+                            formula: "{custrecord_lmry_operation_type_country.id}",
+                            label: "Formula (Text)"
+                        }),
+                        search.createColumn({
+                            name: "formulatext",
+                            formula: "{custrecord_lmry_sales_status}",
+                            label: "Formula (Text)"
+                        }),
+                        search.createColumn({
+                            name: "formulatext",
+                            formula: "{custrecord_lmry_operation_type_doc.id}",
+                            label: "Formula (Text)"
+                        }),
+                        search.createColumn({
+                            name: "formulatext",
+                            formula: "{custrecord_lmry_operation_type_ref}",
+                            label: "Formula (Text)"
+                        }),
+                        search.createColumn({
+                            name: "formulatext",
+                            formula: "{isinactive}",
+                            label: "Formula (Text)"
+                        }),
+                    ]
+            }).run().each(result => {
+                const { columns, getValue } = result;
+                count++;
+                const get = (i) => getValue(columns[i]);
+                const varid = `lr_sdf_operation_type_${formatNumberWithZeros(count)}`;
+                //log.error("seccion encontrado",sections.find(section => section.name == get(3)).scriptid)
+                operationType.push({
+                    id:count,
+                    custrecord_lr_operation_type_name: get(0).replace(/\t/g, ""),
+                    isinactive: get(6),
+                    scriptid: varid,
+                    externalid: varid,
+                    custrecord_lr_operation_type_code: get(1),
+                    custrecord_lr_operation_type_country: get(2),
+                    custrecord_lr_sales_status: get(3)|| "F",
+                    custrecord_lr_operation_type_doc: get(4),
+                    custrecord_lr_operation_type_ref: get(5)|| "F",
+                    name: get(0).replace(/\t/g, ""),
+                });
+                
+                return true;
+            });
+
+            const nameFile = `customrecord_lr_operation_type.csv`;
+            const FolderID = "98360";
+
+            buildFile(operationType,nameFile,FolderID);
+        }
+
+        const getOperationType = () =>{
+            const operationType = [];
+            search.create({
+                type: "customrecord_lr_operation_type",
+                filters:
+                    [
+                    ],
+                columns:
+                    [
+                        search.createColumn({
+                            name: "formulatext",
+                            formula: "{custrecord_lr_operation_type_name}",
+                            label: "Formula (Text)"
+                        }),
+                        search.createColumn({ name: "scriptid", label: "Script ID" })
+                    ]
+            }).run().each(result => {
+                const { columns, getValue } = result;
+                const get = (i) => getValue(columns[i]);
+
+                operationType.push(
+                    {
+                        name: get(0).replace(/\t/g, ""),
+                        scriptid: get(1)
+                    }
+                );
+                return true;
+            });
+            log.error("operationType", operationType)
+            return operationType;
+        }
         const getSection = () => {
             const section = [];
             search.create({
                 type: "customrecord_lr_advance_section",
                 filters:
-                [
-                ],
+                    [
+                    ],
                 columns:
-                [
-                   search.createColumn({name: "name", label: "Name"}),
-                   search.createColumn({name: "scriptid", label: "Script ID"})
-                ]
-             }).run().each(result =>{
+                    [
+                        search.createColumn({ name: "name", label: "Name" }),
+                        search.createColumn({ name: "scriptid", label: "Script ID" })
+                    ]
+            }).run().each(result => {
                 const { columns, getValue } = result;
                 const get = (i) => getValue(columns[i]);
 
                 section.push(
                     {
-                        name:get(0),
-                        scriptid:get(1)
+                        name: get(0),
+                        scriptid: get(1)
                     }
                 );
                 return true;
-             });
-             log.error("section",section)
-             return section;
+            });
+            log.error("section", section)
+            return section;
         }
 
         function formatNumberWithZeros(number) {

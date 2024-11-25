@@ -1,8 +1,8 @@
-# [D1653 - CO Automatic Set by Subsidiary]()
+# [D1658 - ALL Country Mandatory SuiteSDF](https://docs.google.com/document/d/1L6Awbu59EC7fIVbX1TYDghsvH1y_CA9mMQw_76uHsmU/edit?tab=t.0)
 
 ## Description of the Requirement
 
-En el siguiente requerimiento se solicita la creación de un Automatic Set a nivel general, es decir, que no funcione por entidad, si no que se haga una configuración general y que rija para las transacciones indicadas en la configuración.
+Surge la necesidad de mejorar la creación de transacciones Invoice, ya que se tarda mucho el proceso para poder crear una factura.
 
 
 
@@ -21,27 +21,6 @@ En el siguiente requerimiento se solicita la creación de un Automatic Set a niv
 ## Records Configuration
 + Create
 
-    Latam - MX Date custrecord_lmry_mx_pedimento_date -  customrecord_mx_pedimento_inbound
-    custrecord_lmry_mx_tf_pedimento_date - mx transaccion field
-    agreagr ajuste de inventario a Latam - MX Related Transaction de mx transaction field
-        	                    ... custrecord_lmry_mx_ped_trans_ref de customrecord_lmry_mx_pedimento_details
-
-    LatamReady - MX Transaction fields (customrecord_lmry_mx_transaction_fields)
-    Latam - MX Pediment Date 
-    (custrecord_lmry_mx_tf_pedimento_date)
-    Date
-
-    LatamReady - MX Pedimento Inbound (customrecord_mx_pedimento_inbound)
-    Latam - MX Date
-    (custrecord_lmry_mx_pedimento_date)
-    Date
-
-
-    LatamReady - MX Pedimento Details (customrecord_lmry_mx_pedimento_details)
-    adicion la transaccion al inventory adjustment Latam - MX Source Transaction Reference
-    
-    LatamReady - MX Transaction fields (customrecord_lmry_mx_transaction_fields)
-    adicion la transaccion al inventory adjustment Latam - MX Related Transaction
 
 + Update
     
@@ -86,7 +65,7 @@ flujo
 
 
 
-'/content/drive/MyDrive/ia_entre/hilton/data'
+
 
 Creación del record (Core)
 Creación de archivos de configuración, estrutura y data (Core, BR)
@@ -115,14 +94,6 @@ adecuar el clnt para Brazi
     + com.latamready.lmrybrlocalization
 
 
-    Input
-https://tstdrv1774174.app.netsuite.com/app/accounting/transactions/purchord.nl?id=4211286&whence=
-https://tstdrv1774174.app.netsuite.com/app/accounting/transactions/itemrcpt.nl?id=4211287&compid=TSTDRV1774174
-
-output
-
-https://tstdrv1774174.app.netsuite.com/app/accounting/transactions/salesord.nl?id=4211289
-https://tstdrv1774174.app.netsuite.com/app/accounting/transactions/itemship.nl?id=4211290&whence=&cmid=1728919266050_2242
 
 
 

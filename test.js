@@ -1,61 +1,113 @@
-const tickets = [
-  { id: "C20319", type: "MAJOR", description: "Rediseño completo del sistema de autenticación" },
-  { id: "C2020", type: "MINOR", description: "Optimización del rendimiento del módulo de reportes" },
-  { id: "C1956", type: "PATCH", description: "Corrección menor en el mensaje de error del login" },
-  { id: "C20450", type: "MINOR", description: "Añadido soporte para exportación de datos en formato CSV" },
-  { id: "C20111", type: "MAJOR", description: "Implementación de un nuevo motor de búsqueda" },
-  { id: "C20678", type: "PATCH", description: "Corrección de ortografía en los mensajes del sistema" },
-  { id: "C20987", type: "MINOR", description: "Actualización de la biblioteca de gráficos a la última versión" },
-  { id: "C20320", type: "PATCH", description: "Corrección de un bug en el formulario de contacto" },
-  { id: "C20500", type: "MAJOR", description: "Migración completa del sistema a una arquitectura basada en microservicios" },
-  { id: "C20745", type: "PATCH", description: "Pequeña mejora en los logs de depuración" },
-  { id: "C20988", type: "MINOR", description: "Añadido soporte para autenticación multifactor (MFA)" }
-];
-
-function calculateVersionByOrder(tickets) {
-  let major = 0, minor = 0, patch = 0;
-  const versions = []; // Almacenar versiones en cada paso
-
-  tickets.forEach(ticket => {
-    switch (ticket.type) {
-      case "MAJOR":
-        major++;
-        minor = 0; // Reiniciar minor
-        patch = 0; // Reiniciar patch
-        break;
-      case "MINOR":
-        minor++;
-        patch = 0; // Reiniciar patch
-        break;
-      case "PATCH":
-        patch++;
-        break;
-    }
-    // Registrar la versión actual después de procesar cada ticket
-    versions.push(`${major}.${minor}.${patch}`);
-  });
-
-  return versions;
-}
-
-
-https.requestSuitelet({
-  scriptId: "customscript_lr_loadvalidate_stlt",
-  deploymentId: "customdeploy_lr_loadvalidate_stlt",
-  headers: {
-    "Content-Type": "application/json",
-    "User-Agent": "Mozilla/5.0"
+const paths = {
+  lmrylocalizationcore: { //Core
+      dataConfigPath: "../../Custom Data/Loading Data/data_load_config.json",
+      recordStructurePath: "../../Custom Data/Loading Data/record_structure.json",
+      dataFilePath: "../../Custom Data/Loading Data/data"
   },
-  method: "POST",
-  body: JSON.stringify({
-      recordType: "customer",
-      country: 48
-  })
-});
+  lmryarlocalization: { //Argentina
+      dataConfigPath: "SuiteApps/com.latamready.lmryarlocalization/Custom Data/Loading Data/data_load_config.json",
+      recordStructurePath: "SuiteApps/com.latamready.lmryarlocalization/Custom Data/Loading Data/record_structure.json",
+      dataFilePath: "SuiteApps/com.latamready.lmryarlocalization/Custom Data/Loading Data/data"
+  },
+  lmrybolocalization: { //Bolivia
+      dataConfigPath: "SuiteApps/com.latamready.lmrybolocalization/Custom Data/Loading Data/data_load_config.json",
+      recordStructurePath: "SuiteApps/com.latamready.lmrybolocalization/Custom Data/Loading Data/record_structure.json",
+      dataFilePath: "SuiteApps/com.latamready.lmrybolocalization/Custom Data/Loading Data/data"
+  },
+  lmrybrlocalization: {   //Brasil
+      dataConfigPath: "SuiteApps/com.latamready.lmrybrlocalization/Custom Data/Loading Data/data_load_config.json",
+      recordStructurePath: "SuiteApps/com.latamready.lmrybrlocalization/Custom Data/Loading Data/record_structure.json",
+      dataFilePath: "SuiteApps/com.latamready.lmrybrlocalization/Custom Data/Loading Data/data"
+  },
+  lmrycllocalization: {   // CHile
+      dataConfigPath: "/SuiteApps/com.latamready.lmrycllocalization/Custom Data/Loading Data/data_load_config.json",
+      recordStructurePath: "SuiteApps/com.latamready.lmrycllocalization/Custom Data/Loading Data/record_structure.json",
+      dataFilePath: "SuiteApps/com.latamready.lmrycllocalization/Custom Data/Loading Data/data"
+  },
+  lmrycolocalization: {   //Colombia
+      dataConfigPath: "SuiteApps/com.latamready.lmrycolocalization/Custom Data/Loading Data/data_load_config.json",
+      recordStructurePath: "SuiteApps/com.latamready.lmrycolocalization/Custom Data/Loading Data/record_structure.json",
+      dataFilePath: "SuiteApps/com.latamready.lmrycolocalization/Custom Data/Loading Data/data"
+  },
+  lmrycrlocalization: {   //Costa rica
+      dataConfigPath: "SuiteApps/com.latamready.lmrycrlocalization/Custom Data/Loading Data/data_load_config.json",
+      recordStructurePath: "SuiteApps/com.latamready.lmrycrlocalization/Custom Data/Loading Data/record_structure.json",
+      dataFilePath: "SuiteApps/com.latamready.lmrycrlocalization/Custom Data/Loading Data/data"
+  },
+  lmryeclocalization: {   //Ecuador
+      dataConfigPath: "SuiteApps/com.latamready.lmryeclocalization/Custom Data/Loading Data/data_load_config.json",
+      recordStructurePath: "SuiteApps/com.latamready.lmryeclocalization/Custom Data/Loading Data/record_structure.json",
+      dataFilePath: "SuiteApps/com.latamready.lmryeclocalization/Custom Data/Loading Data/data"
+  },
+  lmrygtlocalization: {   //Guatemala
+      dataConfigPath: "SuiteApps/com.latamready.lmrygtlocalization/Custom Data/Loading Data/data_load_config.json",
+      recordStructurePath: "SuiteApps/com.latamready.lmrygtlocalization/Custom Data/Loading Data/record_structure.json",
+      dataFilePath: "SuiteApps/com.latamready.lmrygtlocalization/Custom Data/Loading Data/data"
+  },
+  lmrymxlocalization: {   //Mexico
+      dataConfigPath: "SuiteApps/com.latamready.lmrymxlocalization/Custom Data/Loading Data/data_load_config.json",
+      recordStructurePath: "SuiteApps/com.latamready.lmrymxlocalization/Custom Data/Loading Data/record_structure.json",
+      dataFilePath: "SuiteApps/com.latamready.lmrymxlocalization/Custom Data/Loading Data/data"
+  },
+  lmrypalocalization: {   //Panama
+      dataConfigPath: "SuiteApps/com.latamready.lmrypalocalization/Custom Data/Loading Data/data_load_config.json",
+      recordStructurePath: "SuiteApps/com.latamready.lmrypalocalization/Custom Data/Loading Data/record_structure.json",
+      dataFilePath: "SuiteApps/com.latamready.lmrypalocalization/Custom Data/Loading Data/data"
+  },
+  lmrypelocalization: {   //Peru
+      dataConfigPath: "SuiteApps/com.latamready.lmrypelocalization/Custom Data/Loading Data/data_load_config.json",
+      recordStructurePath: "SuiteApps/com.latamready.lmrypelocalization/Custom Data/Loading Data/record_structure.json",
+      dataFilePath: "SuiteApps/com.latamready.lmrypelocalization/Custom Data/Loading Data/data"
+  },
+};
 
 
-search.lookupFields({
-  type: "subsidiary",
-  id: "7",
-  columns: ['country'] //
-})['country'][0].value;
+validateMandatoryFieldBody() {
+    const legalDocumentBody = this.currentRCD.getValue('custbody_lmry_document_type');
+    const operationTypeBody = this.currentRCD.getValue('custpage_lmry_operation_type');
+
+    console.log("legalDocumentBody", legalDocumentBody)
+    console.log("operationTypeBody", operationTypeBody)
+    //operationType
+    this.fieldValidations.forEach(field => {
+        const { legalDocument, operationType, nameFieldID } = field;
+        const currentField = this.currentRCD.getField({ fieldId: nameFieldID });
+        const fieldExist = currentField["isDisplay"] === "T" || currentField["isDisplay"] === true;
+        if (field.section !== "Cust Col") {
+            if (operationType) {
+                if (!!operationTypeBody && operationType == operationTypeBody) {
+                    if (fieldExist) {
+                        if (currentField && currentField.hasOwnProperty("isDisplay")) {
+                            if (fieldExist) {
+                                field.marked = true;
+                            }else{
+                                field.marked = false;
+                            }      
+                        }else{
+                            field.marked = false;
+                        }
+                    }else{
+                        field.marked = false;
+                    }
+                }else{
+                    field.marked = false;
+                }
+            }else{
+                if (!legalDocument || (!!legalDocumentBody && legalDocumentBody == legalDocument)) {
+                    if (currentField && currentField.hasOwnProperty("isDisplay")) {
+                        if (fieldExist) {
+                            field.marked = true;
+                        }else{
+                            field.marked = false;
+                        }
+                    }else{
+                        field.marked = false;
+                    }
+                } else {
+                    field.marked = false;
+                }
+            }
+            
+        }
+    });
+}

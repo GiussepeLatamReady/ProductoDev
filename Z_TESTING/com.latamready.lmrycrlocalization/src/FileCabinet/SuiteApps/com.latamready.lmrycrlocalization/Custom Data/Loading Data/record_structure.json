@@ -1,0 +1,175 @@
+{
+    "customrecord_lr_validation_fields": {
+        "recordScriptId": "customrecord_lr_validation_fields",
+        "fields": [
+            {
+                "type": "TEXT",
+                "fieldScriptId": "custrecord_lr_val_name",
+                "referenceType": "",
+                "isScriptIdReference": false,
+                "isCircularReference": false
+            },
+            {
+                "type": "SELECT",
+                "fieldScriptId": "custrecord_lr_validation_country",
+                "referenceType": "",
+                "isScriptIdReference": false,
+                "isCircularReference": false
+            },
+            {
+                "type": "CHECKBOX",
+                "fieldScriptId": "custrecord_lr_mandatory",
+                "referenceType": "",
+                "isScriptIdReference": false,
+                "isCircularReference": false
+            },
+            {
+                "type": "SELECT",
+                "fieldScriptId": "custrecord_lr_val_section",
+                "referenceType": "customrecord_lr_advance_section",
+                "isScriptIdReference": true,
+                "isCircularReference": false
+            },
+            {
+                "type": "CHECKBOX",
+                "fieldScriptId": "custrecord_lr_val_invoice",
+                "referenceType": "",
+                "isScriptIdReference": false,
+                "isCircularReference": false
+            },
+            {
+                "type": "CHECKBOX",
+                "fieldScriptId": "custrecord_lr_val_credit_memo",
+                "referenceType": "",
+                "isScriptIdReference": false,
+                "isCircularReference": false
+            },
+            {
+                "type": "CHECKBOX",
+                "fieldScriptId": "custrecord_lr_val_bill",
+                "referenceType": "",
+                "isScriptIdReference": false,
+                "isCircularReference": false
+            },
+            {
+                "type": "CHECKBOX",
+                "fieldScriptId": "custrecord_lr_val_bill_credit",
+                "referenceType": "",
+                "isScriptIdReference": false,
+                "isCircularReference": false
+            },
+            {
+                "type": "CHECKBOX",
+                "fieldScriptId": "custrecord_lr_val_cust_payment",
+                "referenceType": "",
+                "isScriptIdReference": false,
+                "isCircularReference": false
+            },
+            {
+                "type": "CHECKBOX",
+                "fieldScriptId": "custrecord_lr_val_vend_payment",
+                "referenceType": "",
+                "isScriptIdReference": false,
+                "isCircularReference": false
+            },
+            {
+                "type": "CHECKBOX",
+                "fieldScriptId": "custrecord_lr_val_customer",
+                "referenceType": "",
+                "isScriptIdReference": false,
+                "isCircularReference": false
+            },
+            {
+                "type": "CHECKBOX",
+                "fieldScriptId": "custrecord_lr_val_vendor",
+                "referenceType": "",
+                "isScriptIdReference": false,
+                "isCircularReference": false
+            },
+            {
+                "type": "CHECKBOX",
+                "fieldScriptId": "custrecord_lr_val_project",
+                "referenceType": "",
+                "isScriptIdReference": false,
+                "isCircularReference": false
+            },
+            {
+                "type": "CHECKBOX",
+                "fieldScriptId": "custrecord_lr_val_employee",
+                "referenceType": "",
+                "isScriptIdReference": false,
+                "isCircularReference": false
+            },
+            {
+                "type": "CHECKBOX",
+                "fieldScriptId": "custrecord_lr_val_prospect",
+                "referenceType": "",
+                "isScriptIdReference": false,
+                "isCircularReference": false
+            },
+            {
+                "type": "CHECKBOX",
+                "fieldScriptId": "custrecord_lr_val_lead",
+                "referenceType": "",
+                "isScriptIdReference": false,
+                "isCircularReference": false
+            },
+            {
+                "type": "CHECKBOX",
+                "fieldScriptId": "custrecord_lr_val_expensereport",
+                "referenceType": "",
+                "isScriptIdReference": false,
+                "isCircularReference": false
+            },
+            {
+                "type": "CHECKBOX",
+                "fieldScriptId": "custrecord_lr_val_vendretaut",
+                "referenceType": "",
+                "isScriptIdReference": false,
+                "isCircularReference": false
+            },
+            {
+                "type": "CHECKBOX",
+                "fieldScriptId": "custrecord_lr_val_cashsale",
+                "referenceType": "",
+                "isScriptIdReference": false,
+                "isCircularReference": false
+            },
+            {
+                "type": "SELECT",
+                "fieldScriptId": "custrecord_lr_val_fiscal_doc_type",
+                "referenceType": "customrecord_lmry_tipo_doc",
+                "isScriptIdReference": false,
+                "isCircularReference": false
+            },
+            {
+                "type": "TEXT",
+                "fieldScriptId": "custrecord_lr_column_name_sp",
+                "referenceType": "",
+                "isScriptIdReference": false,
+                "isCircularReference": false
+            },
+            {
+                "type": "TEXT",
+                "fieldScriptId": "custrecord_lr_column_name_en",
+                "referenceType": "",
+                "isScriptIdReference": false,
+                "isCircularReference": false
+            },
+            {
+                "type": "CHECKBOX",
+                "fieldScriptId": "custrecord_lr_val_item_fulfill",
+                "referenceType": "",
+                "isScriptIdReference": false,
+                "isCircularReference": false
+            },
+            {
+                "type": "SELECT",
+                "fieldScriptId": "custrecord_lr_val_ope_type",
+                "referenceType": "customrecord_lr_operation_type",
+                "isScriptIdReference": true,
+                "isCircularReference": false
+            }
+        ]
+    }
+}
