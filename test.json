@@ -1,22 +1,16 @@
 {
-   "type": "error.SuiteScriptError",
-   "name": "MAP_REDUCE_ALREADY_RUNNING",
-   "message": "Map/Reduce Script 6773 with Deployment 1 is already running and cannot be started until it has completed.",
-   "id": "",
-   "stack": [
-      "Error\n at Object.executeDataLoadProcess (/SuiteApps/com.latamready.lmrylocalizationcore/lib/Loading Data/LR_LoadData_Handler_LBRY.js:44:12)\n 
-      at Object.run (/SuiteApps/com.latamready.lmrylocalizationcore/lib/SDF Installation/LR_LatamLocalization_SDFI.js:43:28)"
-   ],
-   "cause": {
-      "type": "internal error",
-      "code": "MAP_REDUCE_ALREADY_RUNNING",
-      "details": "Map/Reduce Script 6773 with Deployment 1 is already running and cannot be started until it has completed.",
-      "userEvent": null,
-      "stackTrace": [
-         "Error\n at Object.executeDataLoadProcess (/SuiteApps/com.latamready.lmrylocalizationcore/lib/Loading Data/LR_LoadData_Handler_LBRY.js:44:12)\n at Object.run (/SuiteApps/com.latamready.lmrylocalizationcore/lib/SDF Installation/LR_LatamLocalization_SDFI.js:43:28)"
-      ],
-      "notifyOff": false
-   },
-   "notifyOff": false,
-   "userFacing": true
+    "type": "error.SuiteScriptError",
+    "name": "SSS_MISSING_REQD_ARGUMENT",
+    "message": "search.lookupFields: Falta un argumento requerido: id",
+    "id": null,
+    "stack": [
+        "Error",
+        " at Object.beforeLoad (/SuiteScripts/ColombiaTax/WHT Payment/WHT_UE_PaymentColombia.js:44:36)"
+    ],
+    "cause": {
+        "name": "SSS_MISSING_REQD_ARGUMENT",
+        "message": "search.lookupFields: Falta un argumento requerido: id"
+    },
+    "notifyOff": false,
+    "userFacing": true
 }

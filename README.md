@@ -1,8 +1,8 @@
-# [D1658 - ALL Country Mandatory SuiteSDF](https://docs.google.com/document/d/1L6Awbu59EC7fIVbX1TYDghsvH1y_CA9mMQw_76uHsmU/edit?tab=t.0)
+# [D1676 - PE Rentas No Domiciliadas incluir Bill Credit](https://docs.google.com/document/d/1fJ8PHYwBPUpw6ort3cpPIGCNqw3zx-8XaS5HuZeZfhU/edit?tab=t.0)
 
 ## Description of the Requirement
 
-Surge la necesidad de mejorar la creación de transacciones Invoice, ya que se tarda mucho el proceso para poder crear una factura.
+Considerar en la búsqueda del proceso el Amount Remaining al Bill antes de realizar el pago y el Journal Entry.
 
 
 
