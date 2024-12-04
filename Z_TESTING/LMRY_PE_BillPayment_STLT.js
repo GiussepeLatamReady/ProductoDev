@@ -1771,6 +1771,12 @@ define(['N/record', 'N/currency', 'N/task', 'N/log', 'N/xml', 'N/ui/serverWidget
                         search_transac.filters.push(Filter_Paye);
                         search_transac.filters.push(Filter_Date);
                         search_transac.filters.push(Filter_Acco);
+
+                        search_transac.columns.push(search.createColumn({
+                            name: "formulatext",
+                            formula: "{fxamountremaining}",
+                            label: "amount due"
+                        }))
                         //search_transac.filters.push(legalFilters);
                         //search_transac.filters.push(Filter_Impuesto);
                         //search_transac.filters.push(Filter_TransField);
@@ -1888,12 +1894,12 @@ define(['N/record', 'N/currency', 'N/task', 'N/log', 'N/xml', 'N/ui/serverWidget
                                     }
 
                                     var amure = "" + (Math.round(parseFloat(lengt_transac[i].getValue(colFields[4])) * 100) / 100);
-
+                                    var amountDue = (Math.round(parseFloat(lengt_transac[i].getValue(colFields[9])) * 100) / 100);
                                     if (amure != "") {
                                         SubTabla.setSublistValue({
                                             id: 'id_amou',
                                             line: key,
-                                            value: amure
+                                            value: amountDue
                                         });
                                     }
                                 }
