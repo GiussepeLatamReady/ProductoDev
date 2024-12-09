@@ -1,8 +1,9 @@
-# [D1676 - PE Rentas No Domiciliadas incluir Bill Credit](https://docs.google.com/document/d/1fJ8PHYwBPUpw6ort3cpPIGCNqw3zx-8XaS5HuZeZfhU/edit?tab=t.0)
+# [D1738 - MX - EI Void Payment - Reversal Journal Traslado de IVA](https://docs.google.com/document/d/1o5H7mbfwsJ6oqbgU_oYQU5oYpFO5zCMxxMk8dRBMpqA/edit?tab=t.0)
 
 ## Description of the Requirement
 
-Considerar en la búsqueda del proceso el Amount Remaining al Bill antes de realizar el pago y el Journal Entry.
+Para ello, al anular un pago en un período cerrado, se creará automáticamente un asiento contable (journal) que revierta el impacto en el libro mayor de la transferencia del IVA.
+
 
 
 
