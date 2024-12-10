@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Issues>
+    <Issue>
+        <ID>C0319</ID>
+        <Description>Rediseño completo del sistema de autenticación</Description>
+        <Release>SEP_2024</Release>
+        <Title>Rediseño del sistema de autenticación</Title>
+        <IsClienteIssue>false</IsClienteIssue>
+        <IsMajor>true</IsMajor>
+    </Issue>
+    <Issue>
+        <ID>C020</ID>
+        <Description>Optimización del rendimiento del módulo de reportes</Description>
+        <Release>SEP_2024</Release>
+        <Title>Optimización del módulo de reportes</Title>
+        <IsClienteIssue>false</IsClienteIssue>
+        <IsMajor>false</IsMajor>
+    </Issue>
+    <Issue>
+        <ID>C1956</ID>
+        <Description>Corrección menor en el mensaje de error del login</Description>
+        <Release>OCT_2024</Release>
+        <Title>Corrección del mensaje de error</Title>
+        <IsClienteIssue>true</IsClienteIssue>
+        <IsMajor>false</IsMajor>
+    </Issue>
+    <Issue>
+        <ID>C0450</ID>
+        <Description>Añadido soporte para exportación de datos en formato CSV</Description>
+        <Release>OCT_2024</Release>
+        <Title>Soporte para exportación en CSV</Title>
+        <IsClienteIssue>false</IsClienteIssue>
+        <IsMajor>false</IsMajor>
+    </Issue>
+    <Issue>
+        <ID>C0111</ID>
+        <Description>Implementación de un nuevo motor de búsqueda</Description>
+        <Release>OCT_2024</Release>
+        <Title>Nuevo motor de búsqueda</Title>
+        <IsClienteIssue>false</IsClienteIssue>
+        <IsMajor>true</IsMajor>
+    </Issue>
+    <Issue>
+        <ID>C0678</ID>
+        <Description>Corrección de ortografía en los mensajes del sistema</Description>
+        <Release>OCT_2024</Release>
+        <Title>Corrección de ortografía</Title>
+        <IsClienteIssue>true</IsClienteIssue>
+        <IsMajor>false</IsMajor>
+    </Issue>
+    <Issue>
+        <ID>C0987</ID>
+        <Description>Actualización de la biblioteca de gráficos a la última versión</Description>
+        <Release>OCT_2024</Release>
+        <Title>Actualización de biblioteca de gráficos</Title>
+        <IsClienteIssue>false</IsClienteIssue>
+        <IsMajor>false</IsMajor>
+    </Issue>
+    <Issue>
+        <ID>C0222</ID>
+        <Description>Actualización de la biblioteca</Description>
+        <Release>NOV_2024</Release>
+        <Title>Actualización de biblioteca de gráficos</Title>
+        <IsClienteIssue>false</IsClienteIssue>
+        <IsMajor>false</IsMajor>
+    </Issue>
+    <Issue>
+        <ID>C0223</ID>
+        <Description>Actualización de la LIBRERIAS</Description>
+        <Release>NOV_2024</Release>
+        <Title>Actualización de biblioteca de gráficos</Title>
+        <IsClienteIssue>true</IsClienteIssue>
+        <IsMajor>false</IsMajor>
+    </Issue>
+</Issues>

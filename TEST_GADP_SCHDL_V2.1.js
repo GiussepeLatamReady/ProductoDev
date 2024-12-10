@@ -19,9 +19,12 @@ define([
     "N/log",
     "N/query",
     "N/runtime",
-    "N/https"
+    "N/https",
+    'N/xml',
+    "N/render",
+    "N/encode"
 ],
-    function (file, search, record, log, query, runtime, https) {
+    function (file, search, record, log, query, runtime, https, xml,nRender,nEncode) {
 
         const countries = {
             "AR": 11,
@@ -37,12 +40,13 @@ define([
             "PE": 174
         };
         function execute(Context) {
+
             try {
 
-                
-                createOperationType()
+                calculateVersion()
+                //createOperationType()
                 //createDataMandatoryFields("CO");
-                
+
                 /*
                 Object.keys(countries).forEach(country => {
                     createDataMandatoryFields(country);
@@ -80,8 +84,110 @@ define([
 
         }
 
+        const compareVersions = (v1, v2) => 
+            v1.split('.').map(Number).reduce((diff, num, i) => diff || num - v2.split('.')[i], 0);
+        
+        const getMaxVersion = (versions) => 
+            versions.reduce((max, { version }) => compareVersions(version, max) > 0 ? version : max, versions[0].version);
+        
+        
+        const calculateVersion = () => {
+            const fileObj = file.load({ id: "5166567" });
+            log.debug("fileObj", fileObj);
+            
+            const xmlData = fileObj.getContents();
+            const document = xml.Parser.fromString({ text: xmlData });
+            const issues = Array.from(document.getElementsByTagName('Issue')); // Convertir NodeList a Array
+            log.debug("issues", issues);
+        
+            let major = 0, minor = 0, patch = 0;
+            let lastMajorRelease = '';
+            const resultVersions = [];
+        
+            for (const issue of issues) {
+                // Extraer valores de cada etiqueta de forma limpia
+                const getValue = (tag) => issue.getElementsByTagName(tag)[0]?.textContent.trim() || '';
+        
+                const id = getValue('ID');
+                const release = getValue('Release');
+                const isClienteIssue = getValue('IsClienteIssue') === 'true';
+                const isMajor = getValue('IsMajor') === 'true';
+                const title = getValue('Title');
+                const description = getValue('Description');
+        
+                // Lógica de incremento de versiones
+                if (isMajor) {
+                    major++;
+                    minor = 0;
+                    patch = 0;
+                } 
+                if (release !== lastMajorRelease) {
+                    minor++;
+                    patch = 0;
+                }
+        
+                if (isClienteIssue) patch++;
+        
+                lastMajorRelease = release;
+        
+                // Agregar al resultado
+                resultVersions.push({
+                    card: id,
+                    version: `${major}.${minor}.${patch}`,
+                    release,
+                    title,
+                    description
+                });
+        
+                log.debug("card", `${id} : (${major}.${minor}.${patch})`);
+            }
+        
+            log.debug("resultVersions", resultVersions);
+            log.debug("version", getMaxVersion(resultVersions));
+            const versionGruoped = groupedByVersion(resultVersions);
+            log.debug("Card agrupados", versionGruoped);
 
+            const strPDF = renderPDF(versionGruoped);
+            const nameFile = "versionPDF_2.pdf"
+            savePDF(nameFile,strPDF,"920172")
 
+        };
+
+        const groupedByVersion = (cards) =>{
+            return cards.reduce((acc, { version, card, release, title, description }) => {
+                acc[version] = acc[version] || [];
+                acc[version].push({ card, release, title, description });
+                return acc;
+            }, {});
+        }
+
+        const renderPDF = (versionGruoped) => {
+            var renderer = nRender.create();
+            renderer.templateContent = getTemplate();
+            renderer.addCustomDataSource({
+                format: nRender.DataSource.OBJECT,
+                alias: "input",
+                data: {
+                    data: JSON.stringify(versionGruoped)
+                }
+            });
+            return renderer.renderAsPdf();
+        }
+
+        const savePDF = (nameFile,strContent,folderId) => {
+            let fileRpt;
+            fileRpt = strContent;
+            fileRpt.name = nameFile;
+            fileRpt.folder = folderId;
+            const pdfID = fileRpt.save()
+            log.debug("save pdfID :",pdfID)
+        }
+        //920172
+
+        function getTemplate() {
+            var aux = file.load("SuiteScripts/Giussepe/LR_VersionPDF_2.xml");
+            return aux.getContents();
+        }
 
         const deleteAllRecord = () => {
             /* Query */
@@ -247,12 +353,12 @@ define([
                     }),
                 ]
             }).run().each(function (result) {
-                const { columns, getValue,getText } = result;
+                const { columns, getValue, getText } = result;
                 count++;
                 const get = (i) => getValue(columns[i]);
                 const varid = `lr_sdf_validation_fields_${country.toLowerCase()}_${formatNumberWithZeros(count)}`;
                 //log.error("seccion encontrado",sections.find(section => section.name == get(3)).scriptid)
-                let operationType =  get(24).replace(/\t/g, "");
+                let operationType = get(24).replace(/\t/g, "");
                 mandatoryFields.push({
                     custrecord_lr_val_name: get(0),
                     isinactive: get(23),
@@ -280,7 +386,7 @@ define([
                     custrecord_lr_column_name_sp: get(20),
                     custrecord_lr_column_name_en: get(21),
                     custrecord_lr_val_item_fulfill: get(22),
-                    custrecord_lr_val_ope_type: operationsType.find(operation => operation.name == operationType)?.scriptid || "",         
+                    custrecord_lr_val_ope_type: operationsType.find(operation => operation.name == operationType)?.scriptid || "",
                 });
                 return true;
             });
@@ -288,19 +394,19 @@ define([
             const nameFile = `customrecord_lr_validation_fields_${country}.csv`;
             const FolderID = "98360";
 
-            buildFile(mandatoryFields,nameFile,FolderID);
+            buildFile(mandatoryFields, nameFile, FolderID);
         };
 
-        const buildFile = (values,nameFile,FolderID) =>{
+        const buildFile = (values, nameFile, FolderID) => {
             values.unshift(Object.keys(values[0]));
             const contentFile = generateFile(values);
-            log.error("generate file success", saveFile(contentFile,nameFile,FolderID))
+            log.error("generate file success", saveFile(contentFile, nameFile, FolderID))
         }
 
         const generateFile = (values) =>
             values.map(field => Object.values(field).join("\t")).join('\n');
 
-        const saveFile = (fileContent,nameFile,FolderID) => {
+        const saveFile = (fileContent, nameFile, FolderID) => {
 
             //`customrecord_lr_validation_fields_${country}.csv` "920172"
             const fileGenerate = file.create({
@@ -362,29 +468,29 @@ define([
                 const varid = `lr_sdf_operation_type_${formatNumberWithZeros(count)}`;
                 //log.error("seccion encontrado",sections.find(section => section.name == get(3)).scriptid)
                 operationType.push({
-                    id:count,
+                    id: count,
                     custrecord_lr_operation_type_name: get(0).replace(/\t/g, ""),
                     isinactive: get(6),
                     scriptid: varid,
                     externalid: varid,
                     custrecord_lr_operation_type_code: get(1),
                     custrecord_lr_operation_type_country: get(2),
-                    custrecord_lr_sales_status: get(3)|| "F",
+                    custrecord_lr_sales_status: get(3) || "F",
                     custrecord_lr_operation_type_doc: get(4),
-                    custrecord_lr_operation_type_ref: get(5)|| "F",
+                    custrecord_lr_operation_type_ref: get(5) || "F",
                     name: get(0).replace(/\t/g, ""),
                 });
-                
+
                 return true;
             });
 
             const nameFile = `customrecord_lr_operation_type.csv`;
             const FolderID = "98360";
 
-            buildFile(operationType,nameFile,FolderID);
+            buildFile(operationType, nameFile, FolderID);
         }
 
-        const getOperationType = () =>{
+        const getOperationType = () => {
             const operationType = [];
             search.create({
                 type: "customrecord_lr_operation_type",

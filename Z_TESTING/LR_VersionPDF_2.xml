@@ -1,0 +1,73 @@
+<#assign data = input.data?eval />
+<!DOCTYPE pdf PUBLIC "-//big.faceless.org//report" "report-1.1.dtd">
+<pdf>
+<head>
+    <meta name="title" value="Reporte de Cambios - Documentación Técnica"/>
+    <style type="text/css">
+        body {
+            font-family: Arial, sans-serif;
+            color: #333333;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            text-align: center;
+            font-size: 18pt;
+            color: #C70039; /* Color rojo LatamReady */
+            margin-bottom: 20pt;
+        }
+        h2 {
+            font-size: 12pt;
+            color: #C70039;
+            margin-top: 30pt;
+            margin-bottom: 20pt;
+            border-bottom: 2px solid #C70039;
+            padding-bottom: 3pt;
+        }
+        p {
+            margin: 0;
+            font-size: 10pt;
+        }
+        .entry {
+            margin-top: 15pt;
+            margin-bottom: 5pt;
+            padding-bottom: 10pt;
+            border-bottom: 1px solid #E0E0E0;
+        }
+        .entry-title {
+            font-size: 11pt;
+            font-weight: bold;
+            color: #C70039;
+            margin-top: 15pt;
+            margin-bottom: 15pt;
+        }
+        .entry-meta {
+            font-size: 9pt;
+            color: #555555;
+            font-style: italic;
+            margin-top: 15pt;
+            margin-bottom: 15pt;
+        }
+        .entry-description {
+            font-size: 10pt;
+            margin-top: 15pt;
+            margin-bottom: 15pt;
+            color: #444444;
+        }
+    </style>
+</head>
+<body>
+    <h1>Reporte General de Cambios - LatamReady</h1>
+
+    <#list data?keys as version>
+        <h2>Versión ${version}</h2>
+        <#list data[version] as item>
+            <div class="entry">
+                <p class="entry-title">${item.title} (${item.card})</p>
+                <p class="entry-meta">Release: ${item.release}</p>
+                <p class="entry-description">${item.description}</p>
+            </div>
+        </#list>
+    </#list>
+</body>
+</pdf>
