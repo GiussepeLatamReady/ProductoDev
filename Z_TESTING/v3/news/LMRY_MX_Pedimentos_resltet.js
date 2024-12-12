@@ -20,6 +20,7 @@ define(["N/log", "N/search", "N/record", 'N/runtime', 'N/format', 'N/query', './
                 let dataTransaction;
                 let isReceipt = true;
                 let flagTransfer = false;
+                let fromLocation;
                 if (type == "InvAdjst") {
                     dataTransaction = search.lookupFields({
                         type: search.Type.INVENTORY_ADJUSTMENT,
@@ -31,6 +32,7 @@ define(["N/log", "N/search", "N/record", 'N/runtime', 'N/format', 'N/query', './
                         ]
                     });
                     dataTransaction['createdfrom']= [{value:idRecord}];
+                    dataTransaction['isAdjustment']= true;
                 } else {
                     isReceipt = type === "ItemRcpt" ? true : false;
                     //INVENTORY_ADJUSTMENT
@@ -47,16 +49,18 @@ define(["N/log", "N/search", "N/record", 'N/runtime', 'N/format', 'N/query', './
                     const transactionOgirinType = search.lookupFields({
                         type: 'transaction',
                         id: dataTransaction['createdfrom'][0]?.value,
-                        columns: ['type']
-                    }).type[0].value;
-                    if (transactionOgirinType == 'TrnfrOrd') flagTransfer = true;
+                        columns: ['type','transferlocation']
+                    });
+                    if (transactionOgirinType.type[0].value == 'TrnfrOrd') {
+                        flagTransfer = true;
+                        fromLocation = transactionOgirinType.transferlocation[0].value
+                    }
                 }
                 
-                log.error("dataTransaction",dataTransaction)
+
 
                 const { isAutomatic, automaticType } = getAutomaticType(dataTransaction['createdfrom'][0]?.value);
-                log.error("isAutomatic",isAutomatic)
-                log.error("automaticType",automaticType)
+
                 if (isAutomatic) {
                     const items = getItems(idRecord, isReceipt);
                     if (items.length === 0) return translation.NO_LINES_SELECTED;
@@ -106,10 +110,7 @@ define(["N/log", "N/search", "N/record", 'N/runtime', 'N/format', 'N/query', './
                                         continue;
                                     }
                                 }
-                                if (quantitytotal > 0) {
-                                    log.error("validacion","Insuficiente stock")
-                                    throw translation.INSUFFICIENT_STOCK;
-                                }
+                                if (quantitytotal > 0) throw translation.INSUFFICIENT_STOCK;
                             };
                         });
                     }
@@ -120,7 +121,7 @@ define(["N/log", "N/search", "N/record", 'N/runtime', 'N/format', 'N/query', './
                         if (typeof auxJson === 'object')
                             listSelected = auxJson;
                     }
-                    listCreated = createPedimenetByList(listSelected, dataTransaction, idRecord, isReceipt, flagTransfer ? dataTransaction['transferlocation'][0].value: null);
+                    listCreated = createPedimenetByList(listSelected, dataTransaction, idRecord, isReceipt, flagTransfer && isReceipt ? fromLocation: null);
 
                     if (flagTransfer && isReceipt == false) {
                         const jsonPedimentos = getInfoMXtransaction(dataTransaction['createdfrom'][0]?.value);
@@ -475,8 +476,9 @@ define(["N/log", "N/search", "N/record", 'N/runtime', 'N/format', 'N/query', './
                     let ped_details = record.create({ type: 'customrecord_lmry_mx_pedimento_details', isDynamic: true });
 
                     ped_details.setValue({ fieldId: 'custrecord_lmry_mx_ped_subsidiary', value: idSubsidiary });
-
-                    ped_details.setValue({ fieldId: 'custrecord_lmry_mx_ped_trans_ref', value: idPurchaseOrder });
+                    if (!dataTransaction['isAdjustment']) {
+                        ped_details.setValue({ fieldId: 'custrecord_lmry_mx_ped_trans_ref', value: idPurchaseOrder });
+                    }          
 
                     ped_details.setValue({ fieldId: 'custrecord_lmry_source_transaction_id', value: idPurchaseOrder });
 
@@ -539,6 +541,113 @@ define(["N/log", "N/search", "N/record", 'N/runtime', 'N/format', 'N/query', './
 
         }
 
+
+        function createPedimentoForInventoryAdj(dataTransaction, inventoryAdjustmentID, translation) {
+            if (Number(inventoryAdjustmentID) === 0) return 'Error falta ID';
+            if (!existPediments(inventoryAdjustmentID)) return translation.PEDIMENTO_EXISTS;
+
+            const mxTransactionFields = getInfoMXtransaction(inventoryAdjustmentID);
+            if (mxTransactionFields.length > 0) {
+                const idSubsidiary = dataTransaction['subsidiary'][0].value;
+                //Filtra por la transacción
+                const Filter_Trans = search.createFilter({ name: 'internalid', operator: search.Operator.ANYOF, values: inventoryAdjustmentID });
+
+                /* Busqueda personalizada LatamReady - MX Pediment Lines*/
+                // Devuelve las líneas de item de las transacciones que cuentan con check activado de pedimento
+                //let search_items_ped = search.load({ id: 'customsearch_lmry_mx_ped_receipt_lines' });
+
+                const search_items_ped = search.create({
+                    type: "transaction",
+                    settings: [{ "name": "consolidationtype", "value": "NONE" }, { "name": "includeperiodendtransactions", "value": "F" }],
+                    filters:
+                        [
+                            ["type", "anyof", "InvAdjst"],
+                            "AND",
+                            ["custcol_lmry_mx_pediment", "is", "T"],
+                            "AND",
+                            ["item.type", "noneof", "Kit"]
+                        ],
+                    columns:
+                        [
+                            search.createColumn({ name: "trandate", label: "Date" }),
+                            search.createColumn({ name: "type", label: "Type" }),
+                            search.createColumn({ name: "tranid", label: "Document Number" }),
+                            search.createColumn({ name: "location", label: "Location" }),
+                            search.createColumn({ name: "quantity", label: "Quantity" }),
+                            search.createColumn({ name: "item", label: "Item" }),
+                            search.createColumn({
+                                name: "internalid",
+                                join: "inventoryDetail",
+                                label: "Internal ID"
+                            }),
+                            search.createColumn({
+                                name: "quantity",
+                                join: "inventoryDetail",
+                                label: "Quantity"
+                            }),
+                            search.createColumn({
+                                name: "inventorynumber",
+                                join: "inventoryDetail",
+                                label: " Number"
+                            })
+                        ]
+                });
+
+                search_items_ped.filters.push(Filter_Trans);
+
+                const result_items_ped = search_items_ped.run().getRange(0, 1000);
+                if (result_items_ped.length === 0) return translation.NO_LINES_SELECTED;
+
+                for (let i = 0; i < result_items_ped.length; i++) { 
+                    let colFields = result_items_ped[i].columns;
+                    let ITEM_ID = "" + result_items_ped[i].getValue(colFields[5]);
+                    let locationLine = result_items_ped[i].getValue(colFields[3]);
+
+                    let FEAT_INVENTORY = runtime.isFeatureInEffect({ feature: "advbinseriallotmgmt" });
+                    let INVENTORY_DETAIL = "" + result_items_ped[i].getValue(colFields[6]);
+
+                    // validar para poder guardar los datos
+                    let ped_details = record.create({ type: 'customrecord_lmry_mx_pedimento_details', isDynamic: true });
+
+                    ped_details.setValue({ fieldId: 'custrecord_lmry_mx_ped_subsidiary', value: idSubsidiary });        
+
+                    ped_details.setValue({ fieldId: 'custrecord_lmry_source_transaction_id', value: inventoryAdjustmentID });
+
+                    ped_details.setValue({ fieldId: 'custrecord_lmry_mx_ped_trans', value: inventoryAdjustmentID });
+
+                    ped_details.setValue({ fieldId: 'custrecord_lmry_transaction_id', value: inventoryAdjustmentID });
+
+                    ped_details.setValue({fieldId: 'custrecord_lmry_date', value: new Date()});
+
+                    ped_details.setValue({ fieldId: 'custrecord_lmry_mx_ped_item', value: ITEM_ID });
+                    const pedimentoDate = mxTransactionFields[0].custrecord_lmry_mx_tf_pedimento_date;
+                    ped_details.setValue({ fieldId: 'custrecord_lmry_mx_ped_date', value: format.parse({value: pedimentoDate,type: "date"})});
+                    ped_details.setValue({ fieldId: 'custrecord_lmry_mx_ped_num', value: mxTransactionFields[0].custrecord_lmry_mx_pedimento });
+
+                    ped_details.setValue({ fieldId: 'custrecord_lmry_mx_ped_location', value: locationLine });
+
+                    if ((FEAT_INVENTORY === "T" || FEAT_INVENTORY === true) && INVENTORY_DETAIL != "") {
+                        if (Number(result_items_ped[i].getValue(colFields[8]))) {
+                            ped_details.setValue({ fieldId: 'custrecord_lmry_mx_ped_lote_serie', value: result_items_ped[i].getValue(colFields[8]) });
+                        }
+                        ped_details.setValue({ fieldId: 'custrecord_lmry_mx_ped_quantity', value: result_items_ped[i].getValue(colFields[7])});
+                    } else {
+                        ped_details.setValue({ fieldId: 'custrecord_lmry_mx_ped_quantity', value: result_items_ped[i].getValue(colFields[4])});
+                    }
+
+                    if (Number(mxTransactionFields[0].custrecord_lmry_mx_pedimento_aduana)) {
+                        ped_details.setValue({ fieldId: 'custrecord_lmry_mx_ped_aduana', value: mxTransactionFields[0].custrecord_lmry_mx_pedimento_aduana });
+                    }
+
+                    // Graba record Latam - MX Pedimento Details
+                    let ped_id = ped_details.save();
+                }
+                return translation.PEDIMENTO_SUCCESS;
+            }
+            return translation.NO_MX_TRANSACTION;
+
+        }
+
         function existPediments(idRecord) {
             try {
 
@@ -587,7 +696,6 @@ define(["N/log", "N/search", "N/record", 'N/runtime', 'N/format', 'N/query', './
             return nroPedimentoandAduana;
         }
         function createPedimenetByList(listSelected, dataTransaction, idRecord, isReceipt, transferlocation) {
-            log.error("createPedimenetByList","start")
             const listCreated = [];
             listSelected.forEach((pedimentSelect) => {
                 const { pediment: jsonPediment, nroItems: quantity, itemLine: itemLineInfo } = pedimentSelect;
@@ -638,7 +746,7 @@ define(["N/log", "N/search", "N/record", 'N/runtime', 'N/format', 'N/query', './
                 if (Number(jsonPediment.values["GROUP(custrecord_lmry_mx_ped_aduana)"][0]?.value)) {
                     ped_details.setValue({ fieldId: 'custrecord_lmry_mx_ped_aduana', value: Number(jsonPediment.values["GROUP(custrecord_lmry_mx_ped_aduana)"][0]?.value) });
                 }
-                log.error("save","save")
+
                 listCreated.push(ped_details.save());
 
             });
