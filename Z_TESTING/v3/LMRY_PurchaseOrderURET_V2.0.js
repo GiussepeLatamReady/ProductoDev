@@ -198,9 +198,7 @@ define(['N/config', 'N/ui/serverWidget', 'N/format', 'N/runtime', 'N/log', 'N/re
           //Pedimentos
           if (country == 'MX') {
             var recordID = recordObj.id;
-            if (type == 'view' && searchPediments(recordID)) {
-              form.removeButton('edit');
-            }
+            
             var featPedimentos = MXPedimentos.isAutomaticPedimentos(recordObj.getValue({ fieldId: 'subsidiary'}));
             if (runtime.executionContext == 'USERINTERFACE' && featPedimentos && (type === "create" || type === "edit" || type === "copy" || type === "view")) {
               MXPedimentos.showMXTransactionbyPedimentFields(form, recordID, recordObj.type, type);

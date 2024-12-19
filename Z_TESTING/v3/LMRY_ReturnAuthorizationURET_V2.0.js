@@ -42,12 +42,6 @@ define(['N/search', 'N/runtime', 'N/log', './Latam_Library/LMRY_libSendingEmails
                     hideandViewFields(context, country, hasAccess, LICENSES);
 
                     //Pedimentos
-                    if (country[0] == 'MX') {
-                        var recordID = recordObj.id;
-                        if (type == 'view' && searchPediments(recordID)) {
-                            form.removeButton('edit');
-                        }
-                    }
                     var LMRY_country = library_mail.Validate_Country(subsidiary);
                     if (LMRY_country[0] === "MX") {
                         var featPedimentos = MXPedimentos.isAutomaticPedimentos(subsidiary)

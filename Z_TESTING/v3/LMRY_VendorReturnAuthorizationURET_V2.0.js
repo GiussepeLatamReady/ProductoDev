@@ -141,13 +141,6 @@ define(['N/log', 'N/ui/serverWidget', 'N/record', 'N/search', 'N/runtime', './La
             }
           }
 
-          //Pedimentos
-          if (LMRY_Result[0] == 'MX') {
-            var recordID = recordObj.id;
-            if (type == 'view' && searchPediments(recordID)) {
-              form.removeButton('edit');
-            }
-          }
 
         }
         if (LMRY_Result[0] == "MX") {

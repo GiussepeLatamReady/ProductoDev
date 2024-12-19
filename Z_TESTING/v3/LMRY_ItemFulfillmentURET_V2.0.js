@@ -131,7 +131,6 @@ define(['N/runtime', 'N/log','N/https', 'N/query', 'N/search', 'N/record', 'N/ui
               } else {
                 shipvalidate = true;
               }
-              if (shipvalidate) OBJ_FORM.removeButton('edit');
             }
 
           }

@@ -359,9 +359,7 @@
           switch (LMRY_countr[0]) {
             //Pedimentos, en caso ya se haya registrado en el record "LatamReady - MX Pedimento Details"
             case 'MX':
-              if (searchPediments(recordID)) {
-                OBJ_FORM.removeButton('edit');
-              }
+              
               break;
 
             case 'CL':

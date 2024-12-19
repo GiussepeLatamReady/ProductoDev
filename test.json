@@ -1,25 +1,28 @@
-[
-   {
-      "pediment": {
-         "values": {
-            "GROUP(custrecord_lmry_mx_ped_num)": "17 01 3173 7000001",
-            "SUM(custrecord_lmry_mx_ped_quantity)": "9925",
-            "GROUP(custrecord_lmry_mx_ped_date)": "12/08/2022",
-            "GROUP(custrecord_lmry_mx_ped_aduana)": [
-               {
-                  "value": "1",
-                  "text": "ACAPULCO, ACAPULCO DE JUAREZ, GUERRERO."
-               }
-            ]
-         }
-      },
-      "nroItems": "1",
-      "itemLine": {
-         "itemid": "387",
-         "itemDescription": "400 Watt Power Supply 1",
-         "location": "7",
-         "date": "07/11/2024",
-         "quantity": "1"
-      }
-   }
-]
+{
+   type: "error.SuiteScriptError",
+   name: "INVALID_FLD_VALUE",
+   message: "You have entered an Invalid Field Value 4279909 for the following field: custrecord_lmry_mx_ped_trans_ref",
+   id: "",
+   stack: [
+      "Error\n    at RecordInvoker.setValue (suitescript/resources/javascript/record/serverRecordService.js:443:5)\n    
+      at NetSuiteObject.thenableFunction() (suitescript/resources/javascript/record/proxy.js:115:24)\n    
+      at /SuiteBundles/Bundle 35754/LMRY_MX_Pedimentos_resltet.js:926:33\n    
+      at Array.forEach (native)\n    
+      at createPedimenetByList (/SuiteBundles/Bundle 35754/LMRY_MX_Pedimentos_resltet.js:913:26)\n    
+      at /SuiteBundles/Bundle 35754/LMRY_MX_Pedimentos_resltet.js:850:62\n    
+      at createPedimentoForInventoryAdj (/SuiteBundles/Bundle 35754/LMRY_MX_Pedimentos_resltet.js:741:40)\n    
+      at Object.get (/SuiteBundles/Bundle 35754/LMRY_MX_Pedimentos_resltet.js:55:28)"
+   ],
+   cause: {
+      type: "internal error",
+      code: "INVALID_FLD_VALUE",
+      details: "You have entered an Invalid Field Value 4279909 for the following field: custrecord_lmry_mx_ped_trans_ref",
+      userEvent: null,
+      stackTrace: [
+         "Error\n    at RecordInvoker.setValue (suitescript/resources/javascript/record/serverRecordService.js:443:5)\n    at NetSuiteObject.thenableFunction() (suitescript/resources/javascript/record/proxy.js:115:24)\n    at /SuiteBundles/Bundle 35754/LMRY_MX_Pedimentos_resltet.js:926:33\n    at Array.forEach (native)\n    at createPedimenetByList (/SuiteBundles/Bundle 35754/LMRY_MX_Pedimentos_resltet.js:913:26)\n    at /SuiteBundles/Bundle 35754/LMRY_MX_Pedimentos_resltet.js:850:62\n    at createPedimentoForInventoryAdj (/SuiteBundles/Bundle 35754/LMRY_MX_Pedimentos_resltet.js:741:40)\n    at Object.get (/SuiteBundles/Bundle 35754/LMRY_MX_Pedimentos_resltet.js:55:28)"
+      ],
+      notifyOff: false
+   },
+   notifyOff: false,
+   userFacing: true
+}

@@ -109,8 +109,6 @@ define(['N/search', 'N/record', 'N/https', 'N/runtime', 'N/query', 'N/log', './L
               });
 
               OBJ_FORM.clientScriptModulePath = './Latam_Library/LMRY_GLImpact_CLNT_V2.0.js';
-            } else {
-              OBJ_FORM.removeButton('edit');
             }
           }
         }

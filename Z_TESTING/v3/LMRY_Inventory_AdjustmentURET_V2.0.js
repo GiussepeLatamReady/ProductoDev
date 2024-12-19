@@ -150,13 +150,14 @@ define([
                 });
 
                 form.clientScriptModulePath = './Latam_Library/LMRY_GLImpact_CLNT_V2.0.js';
-              }else{
-                form.removeButton('edit');
               }
             }
           }
         }
-        var subsidiaryID = request.parameters.subsidiary;
+        var subsidiaryID = "";
+        if (request) {
+          subsidiaryID = request.parameters.subsidiary;
+        }
         if (subsidiaryID) recordObj.setValue({ fieldId: 'subsidiary', value: subsidiaryID });
         if (subsidiaryID || country[0] == "MX") {
           if (country[0] == "MX") subsidiaryID = subsidiary;
@@ -166,6 +167,7 @@ define([
           }
           
         }
+
       } catch (error) {
         log.error(" [ beforeLoad ]  error",error);
         library.sendemail(' [ beforeLoad ] ' + error, LMRY_script);
@@ -225,32 +227,22 @@ define([
           }
           if (featPedimentos && (eventType == 'create' || eventType == 'edit')) {
             if (searchPediments(recordObj.id)) {
-              const lifoInfo = search.create({
-                type: 'customrecord_lmry_mx_transaction_fields',
-                filters: [
-                  'custrecord_lmry_mx_transaction_related', 'anyof', recordObj.id
-                ],
-                columns: ['custrecord_lmry_mx_pedimento_lifo', 'custrecord_lmry_mx_pedimento_fifo', 'custrecord_lmry_mx_pedimento']
-              }).run().getRange(0, 1);
-              if (lifoInfo.length > 0) {
-                if (lifoInfo[0].getValue('custrecord_lmry_mx_pedimento_lifo') == true || lifoInfo[0].getValue('custrecord_lmry_mx_pedimento_fifo') == true || lifoInfo[0].getValue('custrecord_lmry_mx_pedimento') != null) {
-                  var mensaje = https.requestRestlet({
-                    deploymentId: "customdeploy_lmry_pedimentos_rlt",
-                    scriptId: "customscript_lmry_pedimentos_rlt",
-                    method: "GET",
-                    headers: {
-                      "Content-Type": "application/json"
-                    },
-                    urlParams: {
-                      idRecord: recordObj.id
-                    }
-                  });
-  
-                  if (typeof mensaje != "object" && mensaje.indexOf('Error')) {
-                    throw mensaje;
-                  }
+              var mensaje = https.requestRestlet({
+                deploymentId: "customdeploy_lmry_pedimentos_rlt",
+                scriptId: "customscript_lmry_pedimentos_rlt",
+                method: "GET",
+                headers: {
+                  "Content-Type": "application/json"
+                },
+                urlParams: {
+                  idRecord: recordObj.id
                 }
+              });
+
+              if (typeof mensaje != "object" && mensaje.indexOf('Error')) {
+                throw mensaje;
               }
+
             }
           }
         }
