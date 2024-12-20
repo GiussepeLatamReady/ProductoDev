@@ -194,8 +194,8 @@ define(["N/query", "N/search", "N/record", "N/log","N/runtime","N/format"], func
 
         var valuesMxTransaction = searchMxtransaction(id);
         if (valuesMxTransaction.length > 0) {
-            if (validateLinesxPedimento(valuesMxTransaction[0].custrecord_lmry_mx_pedimento)) fieldPedimento.defaultValue = valuesMxTransaction[0].custrecord_lmry_mx_pedimento;
-            if (Number(valuesMxTransaction[0].custrecord_lmry_mx_pedimento_aduana)) fieldAduana.defaultValue = valuesMxTransaction[0].custrecord_lmry_mx_pedimento_aduana;
+            if (validateLinesxPedimento(valuesMxTransaction[0].custrecord_lmry_mx_pedimento) && fieldPedimento) fieldPedimento.defaultValue = valuesMxTransaction[0].custrecord_lmry_mx_pedimento;
+            if (Number(valuesMxTransaction[0].custrecord_lmry_mx_pedimento_aduana) && fieldAduana) fieldAduana.defaultValue = valuesMxTransaction[0].custrecord_lmry_mx_pedimento_aduana;
             if (type === 'transferorder' || type === 'salesorder') {
                 fifoFiedl.defaultValue = valuesMxTransaction[0].custrecord_lmry_mx_pedimento_fifo;
             }
@@ -203,7 +203,7 @@ define(["N/query", "N/search", "N/record", "N/log","N/runtime","N/format"], func
                 lifoFiedl.defaultValue = valuesMxTransaction[0].custrecord_lmry_mx_pedimento_lifo;
             }
             var pedimentoDate = valuesMxTransaction[0].custrecord_lmry_mx_tf_pedimento_date;
-            if (pedimentoDate) {
+            if (pedimentoDate && fieldDate) {
                 fieldDate.defaultValue = format.parse({ value: pedimentoDate, type: format.Type.DATE });
             }
             

@@ -297,34 +297,34 @@ define(['N/search', 'N/record', 'N/https', 'N/runtime', 'N/query', 'N/log', './L
             MXPedimentos.createMXTransactionbyPediment(recordObj, true, recordObj.getValue('createdfrom'));
           }
           if (featPedimentos && (eventType == 'create' || eventType == 'edit')) {
-            if (libtools.searchPediments(recordObj.id)) {
-              const lifoInfo = search.create({
-                type: 'customrecord_lmry_mx_transaction_fields',
-                filters: [
-                  'custrecord_lmry_mx_transaction_related', 'anyof', recordObj.getValue('createdfrom')
-                ],
-                columns: ['custrecord_lmry_mx_pedimento_lifo', 'custrecord_lmry_mx_pedimento_fifo', 'custrecord_lmry_mx_pedimento']
-              }).run().getRange(0, 1);
-              if (lifoInfo.length > 0) {
-                if (lifoInfo[0].getValue('custrecord_lmry_mx_pedimento_lifo') == true || lifoInfo[0].getValue('custrecord_lmry_mx_pedimento_fifo') == true || lifoInfo[0].getValue('custrecord_lmry_mx_pedimento') != null) {
-                  var mensaje = https.requestRestlet({
-                    deploymentId: "customdeploy_lmry_pedimentos_rlt",
-                    scriptId: "customscript_lmry_pedimentos_rlt",
-                    method: "GET",
-                    headers: {
-                      "Content-Type": "application/json"
-                    },
-                    urlParams: {
-                      idRecord: recordObj.id
-                    }
-                  });
-  
-                  if (typeof mensaje != "object" && mensaje.indexOf('Error')) {
-                    throw mensaje;
+            
+            const lifoInfo = search.create({
+              type: 'customrecord_lmry_mx_transaction_fields',
+              filters: [
+                'custrecord_lmry_mx_transaction_related', 'anyof', recordObj.getValue('createdfrom')
+              ],
+              columns: ['custrecord_lmry_mx_pedimento_lifo', 'custrecord_lmry_mx_pedimento_fifo', 'custrecord_lmry_mx_pedimento']
+            }).run().getRange(0, 1);
+            if (lifoInfo.length > 0) {
+              if (lifoInfo[0].getValue('custrecord_lmry_mx_pedimento_lifo') == true || lifoInfo[0].getValue('custrecord_lmry_mx_pedimento_fifo') == true || lifoInfo[0].getValue('custrecord_lmry_mx_pedimento') != null) {
+                var mensaje = https.requestRestlet({
+                  deploymentId: "customdeploy_lmry_pedimentos_rlt",
+                  scriptId: "customscript_lmry_pedimentos_rlt",
+                  method: "GET",
+                  headers: {
+                    "Content-Type": "application/json"
+                  },
+                  urlParams: {
+                    idRecord: recordObj.id
                   }
+                });
+
+                if (typeof mensaje != "object" && mensaje.indexOf('Error')) {
+                  throw mensaje;
                 }
               }
             }
+
           }
         }
         

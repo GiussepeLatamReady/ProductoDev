@@ -28,8 +28,8 @@ define([
 
         function get(parameters) {
             const translation = getTranslations();
+
             try {
-                log.error("parameters",parameters)
                 const idRecord = parameters.idRecord;
                 deletePedimentoDetails(idRecord);
                 const type = search.lookupFields({
@@ -79,7 +79,7 @@ define([
                     }
 
                     salesOrderID = getTransactionOrigin(dataTransaction['createdfrom'][0]?.value)
-                    log.error("salesOrderID",salesOrderID)
+
                 }
 
                 const { isAutomatic, automaticType } = getAutomaticType(dataTransaction['createdfrom'][0]?.value);
@@ -98,7 +98,7 @@ define([
                     } else{
                         items.forEach((itemLine) => {
                             const listPediment = getPedimentos(itemLine.itemid, itemLine.location, itemLine.lote, salesOrderID);
-                            log.error("listPediment",listPediment)
+
                             let sumQuantityDisp = 0;
                             let quantitytotal = itemLine.quantity;
                             for (let i = 0; i < listPediment.length; i++) {
@@ -157,9 +157,9 @@ define([
                             };
                         });
                     }
-                    log.error("listSelected",listSelected)
+
                     listSendEmail = listSendEmail.concat(createPedimenetByList(listSelected, dataTransaction, idRecord, isReceipt, flagTransfer && isReceipt ? fromLocation : null));
-                    log.error("listSendEmail",listSendEmail)
+
                     sendEmail(listSendEmail,dataTransaction['subsidiary'][0].value,idRecord)
 
                     if (flagTransfer && isReceipt == false) {
@@ -221,7 +221,9 @@ define([
                     "FLOW": "Flujo",
                     "OBS": "Observación",
                     "ENTRY": "→ Entrada",
-                    "EXIT": "← Salida"
+                    "EXIT": "← Salida",
+                    "NOT_ASSIGNED": "Pedimento no asignado, revise sus configuraciones",
+                    "LOCATION": "Locación"
                 },
                 "en": {
                     "NO_LINES_SELECTED": "No lines selected",
@@ -242,7 +244,9 @@ define([
                     "FLOW": "Customs Entry Flow",
                     "OBS": "Observation",
                     "ENTRY": "→ Entry",
-                    "EXIT": "← Exit"
+                    "EXIT": "← Exit",
+                    "NOT_ASSIGNED": "Petition not assigned, check your settings",
+                    "LOCATION": "Location"
                 },
                 "pt": {
                     "NO_LINES_SELECTED": "Nenhuma linha selecionada",
@@ -263,7 +267,9 @@ define([
                     "FLOW": "Fluxo",
                     "OBS": "Observação",
                     "ENTRY": "→ Entrada",
-                    "EXIT": "← Saída"
+                    "EXIT": "← Saída",
+                    "NOT_ASSIGNED": "Pedimento não atribuída, verifique suas configurações",
+                    "LOCATION": "Localização"
                 }
             };
 
@@ -444,7 +450,7 @@ define([
         
                 const salesOrderId = finalTransaction?.createdfrom?.[0]?.value || null;
                 const finalTransactionType = finalTransaction?.type?.[0]?.value || null;
-                log.error("finalTransactionType",finalTransactionType)
+
                 // Si la transacción es una factura (CustInvc), devolver la Sales Order original
                 if (finalTransactionType === "CustInvc" || finalTransactionType === "CashSale") {
                     return salesOrderId ? salesOrderId : 0;
@@ -674,7 +680,8 @@ define([
                                 lote: loteSerie || "",
                                 quantity,
                                 isReceipt,
-                                location:locationLine
+                                location: locationLine,
+                                aduana: purchaseOrder[0].custrecord_lmry_mx_pedimento_aduana
                             }
                         )
                     }
@@ -812,11 +819,24 @@ define([
                                     lote: INVENTORY_DETAIL && Number(loteSerie) ? loteSerie : "",
                                     quantity: Math.abs(quantity),
                                     isReceipt: true,
-                                    location: locationLine
+                                    location: locationLine,
+                                    aduana: mxTransactionFields[0].custrecord_lmry_mx_pedimento_aduana || ""
                                 }
                             )
                         }
                         
+                    }else{
+                        listSendEmail.push(
+                            {
+                                item: itemID,
+                                pedimento: "",
+                                lote: "",
+                                quantity: Math.abs(quantity),
+                                isReceipt: true,
+                                location: locationLine,
+                                obs: translation.NOT_ASSIGNED
+                            }
+                        )
                     }
                 } else if (quantityItem[itemID] < 0) {
                     let listSelected = [];
@@ -874,7 +894,7 @@ define([
                         if (quantitytotal > 0 && addCount !== 0) {
                             for (let i = listSelected.length - 1; i >= listSelected.length - addCount; i--) {
                                 let line = listSelected[i];
-                                line["obs"] = "Insufficient Stock";
+                                line["obs"] = translation.INSUFFICIENT_STOCK;
                                 line["stop"] = true;
                             }
                         }
@@ -1052,7 +1072,8 @@ define([
                             quantity: Math.abs(quantity),
                             isReceipt,
                             obs: pedimentSelect.obs || "",
-                            location: itemLineInfo.location
+                            location: itemLineInfo.location,
+                            aduana: Number(jsonPediment.values["GROUP(custrecord_lmry_mx_ped_aduana)"][0]?.value) || ""
                         }
                     )
                 }
@@ -1063,7 +1084,6 @@ define([
         }
 
         const sendEmail = (listItems,subsidiaryID,idRecord) => {
-
 
             const userID = runtime.getCurrentUser().id;
             let userName;
@@ -1092,7 +1112,7 @@ define([
                     "tranid"
                 ]
             });
-            log.error("listItems",listItems)
+
             assignmentDetails(listItems)
             const emailBodyContent = buildMailBody(
                 {
@@ -1121,7 +1141,7 @@ define([
             const itemsID = listItems.map(line => line.item);
             const jsonItems = {};
             const jsonLotes = {};
-            log.error("itemsID",itemsID)
+
             search.create({
                 type: "item",
                 filters:
@@ -1159,9 +1179,48 @@ define([
                 
             }
 
+            const locationIDs = listItems.filter(line => line.location).map(line => line.location);
+            const jsonLocation = {};
+            if (locationIDs.length) {
+                search.create({
+                    type: "location",
+                    filters:
+                        [
+                            ["internalid", "anyof", locationIDs]
+                        ],
+                    columns:
+                        ["internalid", "name"]
+                }).run().each(result => {
+                    const internalid = result.getValue("internalid");
+                    jsonLocation[internalid] = result.getValue("name") || "";
+                    return true;
+                });
+            }
+
+            const aduanaIDs = listItems.filter(line => line.aduana).map(line => line.aduana);
+            const jsonAduana = {};
+            if (aduanaIDs.length) {
+                search.create({
+                    type: "customrecord_lmry_mx_aduana",
+                    filters:
+                        [
+                            ["internalid", "anyof", aduanaIDs]
+                        ],
+                    columns:
+                        ["internalid", "name"]
+                }).run().each(result => {
+                    const internalid = result.getValue("internalid");
+                    jsonAduana[internalid] = result.getValue("name") || "";
+                    return true;
+                });
+            }
+
+            
             listItems.forEach(line => {
                 if (jsonItems[line.item]) line.item = jsonItems[line.item];
                 if (line.lote && jsonLotes[line.lote]) line.lote = jsonLotes[line.lote];
+                if (line.location && jsonLocation[line.location]) line.location = jsonLocation[line.location];
+                if (line.aduana && jsonAduana[line.aduana]) line.aduana = jsonAduana[line.aduana];
             })
         }
 
@@ -1217,6 +1276,8 @@ define([
                                               <th style="padding: 10px">N°</th>
                                               <th style="padding: 10px">${translations.ITEM}</th>
                                               <th style="padding: 10px">Lote</th>
+                                              <th style="padding: 10px">${translations.LOCATION}</th>
+                                              <th style="padding: 10px">Aduana</th>
                                               <th style="padding: 10px">N° Pedimento</th>
                                               <th style="padding: 10px">${translations.QUANTITY}</th>
                                               <th style="padding: 10px">${translations.FLOW}</th>
@@ -1231,6 +1292,8 @@ define([
                                                                         <td style="padding: 10px; color: ${textColor}; font-weight: bold;">${index + 1}</td>
                                                                         <td style="padding: 10px; color: ${textColor}; font-weight: bold;">${lineItem.item}</td>
                                                                         <td style="padding: 10px; color: ${textColor}; font-weight: bold;">${lineItem.lote || ""}</td>
+                                                                        <td style="padding: 10px; color: ${textColor}; font-weight: bold;">${lineItem.location || ""}</td>
+                                                                        <td style="padding: 10px; color: ${textColor}; font-weight: bold;">${lineItem.aduana || ""}</td>
                                                                         <td style="padding: 10px; color: ${textColor}; font-weight: bold;">${lineItem.pedimento || ""}</td>    
                                                                         <td style="padding: 10px; color: ${textColor}; font-weight: bold;">${lineItem.quantity}</td>
                                                                         <td style="padding: 10px; color: ${textColor}; font-weight: bold;">${lineItem.isReceipt ? translations.ENTRY : translations.EXIT}</td>
@@ -1358,10 +1421,11 @@ define([
 
         const deletePedimentoDetails = (transactionID) => {
             const recordIDs = [];
+            
             search.create({
                 type: "customrecord_lmry_mx_pedimento_details",
                 filters: [
-                    ["custrecord_lmry_mx_ped_trans_ref","anyof",transactionID]
+                    ["custrecord_lmry_mx_ped_trans","anyof",transactionID]
                 ], 
                 columns: ["internalid"],
             }).run().each(result =>{

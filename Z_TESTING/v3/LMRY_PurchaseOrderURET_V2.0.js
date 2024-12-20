@@ -729,31 +729,6 @@ define(['N/config', 'N/ui/serverWidget', 'N/format', 'N/runtime', 'N/log', 'N/re
 
     }
 
-    function searchPediments(obj_ped) {
-
-      //Busca si la transacción ya se registró en el record LatamReady - MX Pediments Detail
-      var search_ped = search.create({
-        type: 'customrecord_lmry_mx_pedimento_details',
-        filters: [{
-          name: 'custrecord_lmry_mx_ped_trans_ref',
-          operator: 'is',
-          values: obj_ped
-        }],
-        columns: ['internalid']
-      });
-
-      var result_ped = search_ped.run().getRange({
-        start: 0,
-        end: 1
-      });
-
-      if (result_ped != null && result_ped.length > 0) {
-        return true;
-      } else {
-        return false;
-      }
-    }
-
     function cleanLinesforCopy(RCD_TRANS) {
       try {
         var numLineas = RCD_TRANS.getLineCount({

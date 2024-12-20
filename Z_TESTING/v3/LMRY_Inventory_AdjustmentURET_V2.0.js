@@ -221,29 +221,28 @@ define([
 
         var country = ValidateAccessAjust(subsidiary, form, LICENSES);
         if (country[0] === 'MX') {
+
           var featPedimentos = MXPedimentos.isAutomaticPedimentos(subsidiary)
           if ((eventType === "create" || eventType === "edit" || eventType === "copy" || eventType === "view") && featPedimentos) {
             MXPedimentos.createMXTransactionbyPediment(recordObj, true, recordObj.id);
           }
           if (featPedimentos && (eventType == 'create' || eventType == 'edit')) {
-            if (searchPediments(recordObj.id)) {
-              var mensaje = https.requestRestlet({
-                deploymentId: "customdeploy_lmry_pedimentos_rlt",
-                scriptId: "customscript_lmry_pedimentos_rlt",
-                method: "GET",
-                headers: {
-                  "Content-Type": "application/json"
-                },
-                urlParams: {
-                  idRecord: recordObj.id
-                }
-              });
-
-              if (typeof mensaje != "object" && mensaje.indexOf('Error')) {
-                throw mensaje;
+            var mensaje = https.requestRestlet({
+              deploymentId: "customdeploy_lmry_pedimentos_rlt",
+              scriptId: "customscript_lmry_pedimentos_rlt",
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json"
+              },
+              urlParams: {
+                idRecord: recordObj.id
               }
-
+            });
+            if (typeof mensaje != "object" && mensaje.indexOf('Error')) {
+              throw mensaje;
             }
+
+            
           }
         }
         
