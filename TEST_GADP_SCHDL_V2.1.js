@@ -38,11 +38,14 @@ define([
         };
         function execute(Context) {
             try {
-
-                
-                createOperationType()
+                const newInvoices = [];
+                for (let i = 0; i < 10; i++) {
+                    newInvoices.push(makeCopyInvoice("4279493"));
+                }
+                log.error("newInvoices", newInvoices)
+                //createOperationType()
                 //createDataMandatoryFields("CO");
-                
+
                 /*
                 Object.keys(countries).forEach(country => {
                     createDataMandatoryFields(country);
@@ -78,6 +81,61 @@ define([
                 log.error('Error execute', error)
             }
 
+        }
+
+
+        const makeCopyInvoice = (originalInvoiceId) => {
+
+            if (!originalInvoiceId) {
+                log.error('ERROR', 'El ID del Invoice a copiar es requerido.');
+                return;
+            }
+
+            log.audit('INICIO', `Iniciando copia del Invoice con ID: ${originalInvoiceId}`);
+
+            // Copiar el registro Invoice
+            const newInvoice = record.copy({
+                type: record.Type.INVOICE,
+                id: originalInvoiceId,
+                isDynamic: true
+            });
+
+            // Actualizar campos en el nuevo registro si es necesario
+            newInvoice.setValue({
+                fieldId: 'postingperiod',
+                value: 198
+            });
+
+            newInvoice.setValue({
+                fieldId: 'custbody_lmry_pe_estado_sf',
+                value: ""
+            });
+
+            newInvoice.setValue({
+                fieldId: 'approvalstatus',
+                value: "2"
+            });
+
+            const dateStr = "16/07/2012"; // Formato inicial
+            const [day, month, year] = dateStr.split('/'); // Desglosa la fecha
+            const formattedDate = new Date(`${year}-${month}-${day}`); // Convierte a formato YYYY-MM-DD
+
+            // Setear la fecha en el campo 'trandate'
+            newInvoice.setValue({
+                fieldId: 'trandate',
+                value: formattedDate
+            });
+
+            newInvoice.setValue({
+                fieldId: 'memo',
+                value: `D1738`
+            });
+
+            // Guardar el nuevo Invoice
+            return newInvoice.save({
+                enableSourcing: true,
+                ignoreMandatoryFields: false
+            });
         }
 
 
@@ -247,12 +305,12 @@ define([
                     }),
                 ]
             }).run().each(function (result) {
-                const { columns, getValue,getText } = result;
+                const { columns, getValue, getText } = result;
                 count++;
                 const get = (i) => getValue(columns[i]);
                 const varid = `lr_sdf_validation_fields_${country.toLowerCase()}_${formatNumberWithZeros(count)}`;
                 //log.error("seccion encontrado",sections.find(section => section.name == get(3)).scriptid)
-                let operationType =  get(24).replace(/\t/g, "");
+                let operationType = get(24).replace(/\t/g, "");
                 mandatoryFields.push({
                     custrecord_lr_val_name: get(0),
                     isinactive: get(23),
@@ -280,7 +338,7 @@ define([
                     custrecord_lr_column_name_sp: get(20),
                     custrecord_lr_column_name_en: get(21),
                     custrecord_lr_val_item_fulfill: get(22),
-                    custrecord_lr_val_ope_type: operationsType.find(operation => operation.name == operationType)?.scriptid || "",         
+                    custrecord_lr_val_ope_type: operationsType.find(operation => operation.name == operationType)?.scriptid || "",
                 });
                 return true;
             });
@@ -288,19 +346,19 @@ define([
             const nameFile = `customrecord_lr_validation_fields_${country}.csv`;
             const FolderID = "98360";
 
-            buildFile(mandatoryFields,nameFile,FolderID);
+            buildFile(mandatoryFields, nameFile, FolderID);
         };
 
-        const buildFile = (values,nameFile,FolderID) =>{
+        const buildFile = (values, nameFile, FolderID) => {
             values.unshift(Object.keys(values[0]));
             const contentFile = generateFile(values);
-            log.error("generate file success", saveFile(contentFile,nameFile,FolderID))
+            log.error("generate file success", saveFile(contentFile, nameFile, FolderID))
         }
 
         const generateFile = (values) =>
             values.map(field => Object.values(field).join("\t")).join('\n');
 
-        const saveFile = (fileContent,nameFile,FolderID) => {
+        const saveFile = (fileContent, nameFile, FolderID) => {
 
             //`customrecord_lr_validation_fields_${country}.csv` "920172"
             const fileGenerate = file.create({
@@ -362,29 +420,29 @@ define([
                 const varid = `lr_sdf_operation_type_${formatNumberWithZeros(count)}`;
                 //log.error("seccion encontrado",sections.find(section => section.name == get(3)).scriptid)
                 operationType.push({
-                    id:count,
+                    id: count,
                     custrecord_lr_operation_type_name: get(0).replace(/\t/g, ""),
                     isinactive: get(6),
                     scriptid: varid,
                     externalid: varid,
                     custrecord_lr_operation_type_code: get(1),
                     custrecord_lr_operation_type_country: get(2),
-                    custrecord_lr_sales_status: get(3)|| "F",
+                    custrecord_lr_sales_status: get(3) || "F",
                     custrecord_lr_operation_type_doc: get(4),
-                    custrecord_lr_operation_type_ref: get(5)|| "F",
+                    custrecord_lr_operation_type_ref: get(5) || "F",
                     name: get(0).replace(/\t/g, ""),
                 });
-                
+
                 return true;
             });
 
             const nameFile = `customrecord_lr_operation_type.csv`;
             const FolderID = "98360";
 
-            buildFile(operationType,nameFile,FolderID);
+            buildFile(operationType, nameFile, FolderID);
         }
 
-        const getOperationType = () =>{
+        const getOperationType = () => {
             const operationType = [];
             search.create({
                 type: "customrecord_lr_operation_type",
