@@ -19,9 +19,10 @@ define([
     "N/log",
     "N/query",
     "N/runtime",
-    "N/https"
+    "N/https",
+    '/SuiteBundles/Bundle 243159/EI_Library/LMRY_AnulacionInvoice_LBRY_V2.0'
 ],
-    function (file, search, record, log, query, runtime, https) {
+    function (file, search, record, log, query, runtime, https,library_AnulacionInvoice) {
 
         const countries = {
             "AR": 11,
@@ -36,11 +37,30 @@ define([
             "PA": 173,
             "PE": 174
         };
+
+
+        const deleteTransaction =[
+            "4283253",
+            "4283252",
+            "4283251",
+            "4283250",
+            "4283249",
+            "4283248",
+            "4283247",
+            "4283246",
+            "4283239",
+            "4283238",
+            "4283237",
+            "4283236",
+            "4283137",
+            "4283136"
+        ]
         function execute(Context) {
             try {
+                deleteInvoices(deleteTransaction);
                 const newInvoices = [];
-                for (let i = 0; i < 10; i++) {
-                    newInvoices.push(makeCopyInvoice("4279493"));
+                for (let i = 0; i < 4; i++) {
+                    newInvoices.push(makeCopyInvoice("4283255"));
                 }
                 log.error("newInvoices", newInvoices)
                 //createOperationType()
@@ -139,7 +159,15 @@ define([
         }
 
 
-
+        const deleteInvoices = (Ids) => {
+            Ids.forEach(element => {
+                record.delete({
+                    type: 'invoice',
+                    id: element,
+                });
+                log.audit("invoice eliminado",element)
+            });
+        }
 
         const deleteAllRecord = () => {
             /* Query */
@@ -503,6 +531,154 @@ define([
 
         function formatNumberWithZeros(number) {
             return number.toString().padStart(6, '0');
+        }
+
+        function Remove_Trans(_recordId, recordType, void_feature) {
+            let jsonEnableFeat = getEnableFeatures();
+            if (recordType == 'customtransaction_lmry_payment_complemnt') {
+                _rec = record.load({
+                    type: recordType,
+                    id: _recordId,
+                    isDynamic: false
+                });
+
+                var count_invoice = _rec.getLineCount({
+                    sublistId: 'recmachcustrecord_lmry_factoring_rel_pymnt_cust'
+                });
+                for (var i = 0; i < count_invoice; i++) {
+                    _rec.setSublistValue({
+                        sublistId: 'recmachcustrecord_lmry_factoring_rel_pymnt_cust',
+                        fieldId: 'custrecord_lmry_factoring_apply_compensa',
+                        line: i,
+                        value: false
+                    });
+                    _rec.setSublistValue({
+                        sublistId: 'recmachcustrecord_lmry_factoring_rel_pymnt_cust',
+                        fieldId: 'custrecord_lmry_factoring_apply_invoice',
+                        line: i,
+                        value: false
+                    });
+                }
+
+                var count_bills = _rec.getLineCount({
+                    sublistId: 'recmachcustrecord_lmry_factoring_rel_pymnt_vend'
+                });
+                for (var i = 0; i < count_bills; i++) {
+                    _rec.setSublistValue({
+                        sublistId: 'recmachcustrecord_lmry_factoring_rel_pymnt_vend',
+                        fieldId: 'custrecord_lmry_factoring_apply_bill',
+                        line: i,
+                        value: false
+                    });
+                }
+                _rec.setValue('custpage_amount_deposited', 0)
+                _rec.setValue('custpage_vendor_subtotal', 0);
+                _rec.setValue('custpage_vendor_total', 0);
+                _rec.setValue('custpage_apply_total', 0);
+
+                var count_accounts = _rec.getLineCount({
+                    sublistId: 'line'
+                });
+                for (var i = 0; i < count_accounts; i++) {
+                    _rec.setSublistValue('line', 'credit', i, 0);
+                    _rec.setSublistValue('line', 'debit', i, 0);
+                }
+                _rec.save({
+                    ignoreMandatoryFields: true,
+                    enableSourcing: true
+                });
+
+            } else if (recordType == 'customerpayment') {
+                var validJournal = true,
+                    journalId = "";
+                if (void_feature == true || void_feature == 'T') {
+                    if (!jsonEnableFeat.voidOnlyTransaction.includes("payments")) {
+                        var resultJournal = library_AnulacionInvoice.reversalJournal(_recordId);
+                        log.debug('resultJournal', resultJournal);
+                        validJournal = (resultJournal.fields.length == 0);
+                        journalId = resultJournal.trans || "";
+                    }
+                }
+
+                if (validJournal) {
+                    var _rec = record.load({
+                        type: "customerpayment",
+                        id: _recordId
+                    });
+
+                    var count_invoice = _rec.getLineCount({
+                        sublistId: 'apply'
+                    });
+                    for (i = 0; i < count_invoice; i++) {
+                        if (_rec.getSublistValue('apply', 'apply', i)) {
+                            _rec.setSublistValue({
+                                sublistId: 'apply',
+                                fieldId: 'apply',
+                                line: i,
+                                value: false
+                            });
+                        }
+                        if (journalId) {
+                            var transactionId = _rec.getSublistValue("apply", "internalid", i);
+                            if (transactionId == journalId) {
+                                _rec.setSublistValue({
+                                    sublistId: "apply",
+                                    fieldId: "apply",
+                                    line: i,
+                                    value: true
+                                })
+                            }
+                        }
+                    }
+                    _rec.save({
+                        ignoreMandatoryFields: true,
+                        enableSourcing: true,
+                    });
+                }
+            }
+        }
+
+        function getEnableFeatures() {
+            /* Registro Personalizado LatamReady - MX FEL Enable Feature */
+            let jsonResult = {};
+
+            search.create({
+                type: "customrecord_lmry_mx_fel_enable_feature",
+                columns: [
+                    'custrecord_lmry_mx_fel_host',
+                    'custrecord_lmry_mx_fel_sendtype',
+                    'custrecord_lmry_mx_fel_user',
+                    'custrecord_lmry_mx_fel_password',
+                    'custrecord_lmry_mx_fel_email',
+                    'custrecord_lmry_mx_fel_mail_cancel',
+                    'custrecord_lmry_mx_fel_void_only_current',
+                    'custrecord_lmry_mx_fel_void_pay_wo_jrnl',
+                    'custrecord_lmry_mx_fel_void_transactions'
+                ],
+                filters: [
+                    ['custrecord_lmry_mx_fel_subsi', 'anyof', "6"]
+                ]
+            }).run().each(function(obj) {
+                jsonResult = {
+                    host: obj.getValue('custrecord_lmry_mx_fel_host'),
+                    sendType: obj.getValue('custrecord_lmry_mx_fel_sendtype'),
+                    user: obj.getValue('custrecord_lmry_mx_fel_user'),
+                    password: obj.getValue('custrecord_lmry_mx_fel_password'),
+                    emailSubsi: obj.getValue('custrecord_lmry_mx_fel_email'),
+                    sendEmailCancel: obj.getValue('custrecord_lmry_mx_fel_mail_cancel'),
+                    voidOnlyCurrent: obj.getValue('custrecord_lmry_mx_fel_void_only_current'),
+                    voidPayWithoutJournal: obj.getValue('custrecord_lmry_mx_fel_void_pay_wo_jrnl'),
+                    voidOnlyTransaction: JSON.parse(obj.getValue('custrecord_lmry_mx_fel_void_transactions') || "[]")
+                };
+
+                if (jsonResult.password) {
+                    jsonResult.password = jsonResult.password.replace(/&/g, "&amp;");
+                }
+
+                return false;
+            });
+
+            return jsonResult;
         }
         return {
             execute: execute
