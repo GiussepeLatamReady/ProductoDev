@@ -25,7 +25,7 @@ define([
         function execute(Context) {
             // ID de la transacción que deseas duplicar
             try {
-                deleteAllRecord();
+                //deleteAllRecord();
             } catch (error) {
                 log.error("error", error)
             }
