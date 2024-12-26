@@ -1,8 +1,9 @@
-# [D1738 - MX - EI Void Payment - Reversal Journal Traslado de IVA](https://docs.google.com/document/d/1o5H7mbfwsJ6oqbgU_oYQU5oYpFO5zCMxxMk8dRBMpqA/edit?tab=t.0)
+# [D1045 - Retenciones Regimen minero RG-5333 Salta](https://docs.google.com/document/d/1GVWSLchkZIDPnNAzTZbNf-eeSu-t9IHX6vJK4GjthNE/edit?tab=t.0)
 
 ## Description of the Requirement
 
-Para ello, al anular un pago en un período cerrado, se creará automáticamente un asiento contable (journal) que revierta el impacto en el libro mayor de la transferencia del IVA.
+Se requiere poder crear las clases contributivas específicas para las retenciones de IVA, Ganancias y IIBB con las condiciones del padrón de régimen minero RG-5333 y el padrón de IIBB de Salta, cuyos padrones actualizan diariamente y mensualmente correspondientemente.
+
 
 
 
