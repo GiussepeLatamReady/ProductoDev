@@ -641,11 +641,20 @@ define(["N/query", "N/search", "N/record", "N/log","N/runtime","N/format"], func
         return featPedimentos;
     }
 
-    function formatDate(date) {
-        var parseDate = format.parse({ value: date, type: format.Type.DATE });
-        parseDate = format.format({ type: format.Type.DATE, value: parseDate });
-
-        return parseDate;
+    function deletePedimentoDetails (transactionID) {        
+        search.create({
+            type: "customrecord_lmry_mx_pedimento_details",
+            filters: [
+                ["custrecord_lmry_mx_ped_trans","anyof",transactionID]
+            ], 
+            columns: ["internalid"],
+        }).run().each(function(result){
+            var internalid = result.getValue("internalid")
+            if (internalid) {
+                record.delete({ type: "customrecord_lmry_mx_pedimento_details", id: internalid })
+            }
+            return true;
+        });
     }
     return {
         showMXTransactionbyPedimentFields: showMXTransactionbyPedimentFields,
@@ -653,6 +662,7 @@ define(["N/query", "N/search", "N/record", "N/log","N/runtime","N/format"], func
         isValidItemsTransaction: isValidItemsTransaction,
         updateLinesUsePedimentos:updateLinesUsePedimentos,
         pedimentoIsValid:pedimentoIsValid,
-        isAutomaticPedimentos: isAutomaticPedimentos
+        isAutomaticPedimentos: isAutomaticPedimentos,
+        deletePedimentoDetails: deletePedimentoDetails
     };
 });

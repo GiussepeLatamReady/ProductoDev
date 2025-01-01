@@ -333,6 +333,10 @@ define(['N/runtime', 'N/log','N/https', 'N/query', 'N/search', 'N/record', 'N/ui
           }
         }
 
+        if (country == 'MX' && type == "delete") {
+          MXPedimentos.deletePedimentoDetails(RCD.id)
+        }
+
 
       } catch (err) {
         library_mail.sendemail2(' [ beforeSubmit ] ' + err, LMRY_script, recordObj, 'tranid', 'entity');

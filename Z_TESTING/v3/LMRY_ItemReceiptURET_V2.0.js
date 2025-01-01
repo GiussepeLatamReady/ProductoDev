@@ -201,6 +201,10 @@ define(['N/search', 'N/record', 'N/https', 'N/runtime', 'N/query', 'N/log', './L
             }
           }
         }
+
+        if (LMRY_Result[0] == 'MX' && eventType == "delete") {
+          MXPedimentos.deletePedimentoDetails(recordObj.id)
+        }
         
 
       } catch (err) {
