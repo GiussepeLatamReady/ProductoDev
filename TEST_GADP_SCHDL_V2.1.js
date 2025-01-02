@@ -57,16 +57,25 @@ define([
         ]
         function execute(Context) {
             try {
+                
+                //createOperationType()
+                //createDataMandatoryFields("CO");
+                
+                Remove_Trans("4286738","customerpayment",true)
+
+                /*
+                const newInvoices = [];
+                for (let i = 0; i < 2; i++) {
+                    newInvoices.push(makeCopyInvoice("4283443"));
+                }
+                log.error("newInvoices", newInvoices)
                 deleteInvoices(deleteTransaction);
                 const newInvoices = [];
                 for (let i = 0; i < 4; i++) {
-                    newInvoices.push(makeCopyInvoice("4283255"));
+                    newInvoices.push(makeCopyInvoice("4283443"));
                 }
                 log.error("newInvoices", newInvoices)
-                //createOperationType()
-                //createDataMandatoryFields("CO");
 
-                /*
                 Object.keys(countries).forEach(country => {
                     createDataMandatoryFields(country);
                 })
@@ -123,7 +132,7 @@ define([
             // Actualizar campos en el nuevo registro si es necesario
             newInvoice.setValue({
                 fieldId: 'postingperiod',
-                value: 198
+                value: 200
             });
 
             newInvoice.setValue({
