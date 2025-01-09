@@ -20,6 +20,8 @@ function transferenciaIva(transactionRecord, standardLines, customLines, book, l
   try {
     var transactionType = transactionRecord.getRecordType().toLowerCase();
     //validate approval Gl impact
+
+    nlapiLogExecution('DEBUG', 'transferenciaIva', 'start');
     if (transactionType == "vendorpayment" && getAuthorization(673, licenses)) { //  Validate Approval GL Impact
       var approvalVendorPayment = objContext.getPreference("CUSTOMAPPROVALVENDPYMT");
       nlapiLogExecution('DEBUG', 'approvalVendorPayment', approvalVendorPayment);
@@ -142,6 +144,7 @@ function transferenciaIva(transactionRecord, standardLines, customLines, book, l
         if (searchCuentas != null && searchCuentas != '') {
           // Marca la transaccion como excluida del proceso
           // nlapiSubmitField(transactionType, idTransaction, 'custbody_lmry_schedule_transfer_of_iva', '3');
+          nlapiLogExecution("ERROR", "stop", "cuenta configurada");
           return true;
         }
       }
@@ -178,6 +181,7 @@ function transferenciaIva(transactionRecord, standardLines, customLines, book, l
 
       // nlapiLogExecution('ERROR', 'transaccionPagar', JSON.stringify(transaccionPagar));
       if (!transaccionPagar.length) {
+        nlapiLogExecution("ERROR", "stop", "no hay transaccion a pagar");
         return true;
       }
 
@@ -229,6 +233,7 @@ function transferenciaIva(transactionRecord, standardLines, customLines, book, l
       }
 
       if (!parseFloat(contador) > 0) {
+        nlapiLogExecution("ERROR", "stop", "contador");
         return true;
       }
 

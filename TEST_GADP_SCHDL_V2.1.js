@@ -61,8 +61,8 @@ define([
                 //createOperationType()
                 //createDataMandatoryFields("CO");
                 
-                Remove_Trans("4286738","customerpayment",true)
-
+                //Remove_Trans("4286427","customerpayment",true)
+                reversalJournalClosedPeriod("4286431");
                 /*
                 const newInvoices = [];
                 for (let i = 0; i < 2; i++) {
@@ -603,7 +603,7 @@ define([
                 if (void_feature == true || void_feature == 'T') {
                     if (!jsonEnableFeat.voidOnlyTransaction.includes("payments")) {
                         var resultJournal = library_AnulacionInvoice.reversalJournal(_recordId);
-                        log.debug('resultJournal', resultJournal);
+                        log.error('resultJournal', resultJournal);
                         validJournal = (resultJournal.fields.length == 0);
                         journalId = resultJournal.trans || "";
                     }
@@ -688,6 +688,245 @@ define([
             });
 
             return jsonResult;
+        }
+
+        function getPaymentValues(paymentId) {
+            var F_DEPARTMENTS = runtime.isFeatureInEffect({
+                feature: "DEPARTMENTS"
+            });
+            var F_LOCATIONS = runtime.isFeatureInEffect({
+                feature: "LOCATIONS"
+            });
+            var F_CLASSES = runtime.isFeatureInEffect({
+                feature: "CLASSES"
+            });
+
+            var columns = ["fxamount", "subsidiary", "entity", "currency", "exchangerate"];
+
+            if (F_DEPARTMENTS == "T" || F_DEPARTMENTS == true) {
+                columns.push("department");
+            }
+
+            if (F_LOCATIONS == "T" || F_LOCATIONS == true) {
+                columns.push("location");
+            }
+
+            if (F_CLASSES == "T" || F_CLASSES == true) {
+                columns.push("class");
+            }
+
+            var paymentSearch = search.create({
+                type: "customerpayment",
+                filters: [
+                    ["mainline", "is", "T"], "AND",
+                    ["internalid", "anyof", paymentId]
+                ],
+                columns: columns
+            });
+            var results = paymentSearch.run().getRange(0, 1);
+            if (results && results.length) {
+                return {
+                    subsidiary: results[0].getValue("subsidiary"),
+                    customer: results[0].getValue("entity"),
+                    currency: results[0].getValue("currency"),
+                    exchangerate: results[0].getValue("exchangerate") || "",
+                    total: parseFloat(results[0].getValue("fxamount")) || 0.00,
+                    department: results[0].getValue("department") || "",
+                    class_: results[0].getValue("class") || "",
+                    location: results[0].getValue("location") || ""
+                };
+            }
+
+            return null;
+        }
+
+        function getFormConfigVoid(subsidiaryID){
+            var searchConfigVoidTransaction = search.create({
+                type: 'customrecord_lmry_config_voidtransaction',
+                columns: ["custrecord_lmry_configvoid_je_form"],
+                filters: ['custrecord_lmry_configvoid_subsidiary', 'is', subsidiaryID]
+            });
+
+            var searchResult = searchConfigVoidTransaction.run().getRange(0, 1);
+
+
+            if (searchResult != '' && searchResult != null) {
+                return searchResult[0].getValue({
+                    name: 'custrecord_lmry_configvoid_je_form'
+                }) || 0;
+            }
+            
+            return false;
+        }
+
+
+
+        function reversalJournalClosedPeriod(recordId) {
+            try {
+                var result = {
+                    trans: '',
+                    fields: []
+                };
+                var F_SUBSIDIAR = runtime.isFeatureInEffect({ feature: "SUBSIDIARIES" });
+                var F_LOCMANDATORY = runtime.getCurrentUser().getPreference({ name: 'LOCMANDATORY' });
+                var F_DEPTMANDATORY = runtime.getCurrentUser().getPreference({ name: 'DEPTMANDATORY' });
+                var F_CLASSMANDATORY = runtime.getCurrentUser().getPreference({ name: 'CLASSMANDATORY' });
+
+
+                var custPymtAccountDetail = query.runSuiteQL({
+                    query: "SELECT BUILTIN.DF(TransactionAccountingLine.Account) AS Account, TransactionAccountingLine.Account, TransactionAccountingLine.Debit, TransactionAccountingLine.Credit, TransactionLine.class, TransactionLine.department, TransactionLine.location FROM accountingbook, TransactionLine, TransactionAccountingLine WHERE TransactionLine.Transaction = TransactionAccountingLine.Transaction AND TransactionAccountingLine.accountingbook = accountingbook.id AND accountingbook.isprimary = 'T' AND TransactionLine.id = '0' AND TransactionAccountingLine.Transaction = '4286431' AND (TransactionAccountingLine.Debit IS NOT NULL OR TransactionAccountingLine.Credit IS NOT NULL) ORDER BY TransactionLine.ID" }).results;
+
+                
+                log.error("custPymtAccountDetail",custPymtAccountDetail)
+                var paymentValues = getPaymentValues(recordId);
+                log.error("paymentValues",paymentValues)
+                var formJournal = 0;
+
+                if (F_SUBSIDIAR) {
+                    formJournal = getFormConfigVoid(paymentValues.subsidiary)
+                }
+                var transactionsLine = [];
+                custPymtAccountDetail.forEach(function(line){
+                    transactionsLine.push(
+                        {
+                            account:line.values[1],
+                            amountDebit:line.values[2],
+                            amountCredit:line.values[3],
+                            "class":line.values[4],
+                            "department":line.values[5],
+                            "location":line.values[6]
+                        }
+                    )
+                });
+
+                
+
+                var revJournal = record.create({
+                    type: record.Type.JOURNAL_ENTRY,
+                    isDynamic: true
+                });
+
+                if (F_SUBSIDIAR) revJournal.setValue({
+                    fieldId: 'subsidiary',
+                    value: paymentValues.subsidiary
+                });
+
+                if (formJournal) {
+                    revJournal.setValue({
+                        fieldId: 'customform',
+                        value: formJournal
+                    });
+                }
+                log.error("paymentValues.currency",paymentValues.currency)
+                revJournal.setValue({
+                    fieldId: 'currency',
+                    value: paymentValues.currency
+                });
+                revJournal.setValue({
+                    fieldId: 'exchangerate',
+                    value: paymentValues.exchangerate
+                });
+                revJournal.setValue({
+                    fieldId: 'memo',
+                    value: 'VOID Reverse GL Impact'
+                });
+                revJournal.setValue({
+                    fieldId: 'custbody_lmry_reference_entity',
+                    value: paymentValues.customer
+                });
+                revJournal.setValue({
+                    fieldId: 'approvalstatus',
+                    value: 2
+                });
+
+                revJournal.setValue({
+                    fieldId: 'custbody_lmry_reference_transaction',
+                    value: recordId
+                });
+
+                revJournal.setValue({
+                    fieldId: 'custbody_lmry_reference_transaction_id',
+                    value: recordId
+                });
+
+
+                transactionsLine.forEach(function(line){
+
+                    revJournal.selectNewLine({
+                        sublistId: 'line'
+                    });
+                    
+                    revJournal.setCurrentSublistValue({
+                        sublistId: 'line',
+                        fieldId: 'account',
+                        value: line.account
+                    });
+
+                    if (line.amountDebit) {
+                        revJournal.setCurrentSublistValue({
+                            sublistId: 'line',
+                            fieldId: "credit",
+                            value: line.amountDebit
+                        });
+                    }
+
+                    if (line.amountCredit) {
+                        revJournal.setCurrentSublistValue({
+                            sublistId: 'line',
+                            fieldId: "debit",
+                            value: line.amountCredit
+                        });
+                    }
+
+                    revJournal.setCurrentSublistValue({
+                        sublistId: 'line',
+                        fieldId: 'entity',
+                        value: paymentValues.customer
+                    });
+
+                    revJournal.setCurrentSublistValue({
+                        sublistId: 'line',
+                        fieldId: 'memo',
+                        value: 'VOID Reverse GL Impact'
+                    });
+
+                    if (line["class"] && F_CLASSMANDATORY) {
+                        revJournal.setCurrentSublistValue({
+                            sublistId: 'line',
+                            fieldId: 'class',
+                            value: line["class"]
+                        });
+                    }
+                    
+                    if (line["department"] && F_DEPTMANDATORY) {
+                        revJournal.setCurrentSublistValue({
+                            sublistId: 'line',
+                            fieldId: 'department',
+                            value: line["department"]
+                        });
+                    }
+                    
+                    if (line["location"] && F_LOCMANDATORY) {
+                        revJournal.setCurrentSublistValue({
+                            sublistId: 'line',
+                            fieldId: 'location',
+                            value: line["location"]
+                        });
+                    }   
+
+                    revJournal.commitLine({
+                        sublistId: 'line'
+                    });
+
+                });
+                
+                result['trans'] = revJournal.save({ enableSourcing: true, ignoreMandatoryFields: true, disableTriggers: true });
+                log.debug("VOID Reverse GL Impact.", result);
+                return result;
+            } catch (error) {
+                log.error('LMRY_AnulacionInvoice_LBRY_V2 - [reversalJournal]', error);
+                //libraryEmail.sendemail(' [ reversalJournal ] ' + error, LMRY_script);
+            }
         }
         return {
             execute: execute
