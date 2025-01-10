@@ -1,8 +1,8 @@
-# [D1738 - MX - EI Void Payment - Reversal Journal Traslado de IVA](https://docs.google.com/document/d/1o5H7mbfwsJ6oqbgU_oYQU5oYpFO5zCMxxMk8dRBMpqA/edit?tab=t.0)
+# [D1787 - ALL - Customer y Vendor Custom Form](https://docs.google.com/document/d/17UtSvnAXrbnfb2Dp372LzOmM0PlsDdYCqbtZ536utw4/edit?tab=t.0#heading=h.37nr90gwl3v3)
 
 ## Description of the Requirement
 
-Para ello, al anular un pago en un período cerrado, se creará automáticamente un asiento contable (journal) que revierta el impacto en el libro mayor de la transferencia del IVA.
+Actualmente, las entidades cuentan con campos visibles en función del país de la subsidiaria primaria seleccionada. Este enfoque limita la flexibilidad de visualización de campos para casos con múltiples subsidiarias.
 
 
 
