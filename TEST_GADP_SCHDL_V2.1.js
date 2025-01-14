@@ -774,17 +774,10 @@ define([
 
 
                 var custPymtAccountDetail = query.runSuiteQL({
-                    query: "SELECT BUILTIN.DF(TransactionAccountingLine.Account) AS Account, TransactionAccountingLine.Account, TransactionAccountingLine.Debit, TransactionAccountingLine.Credit, TransactionLine.class, TransactionLine.department, TransactionLine.location FROM accountingbook, TransactionLine, TransactionAccountingLine WHERE TransactionLine.Transaction = TransactionAccountingLine.Transaction AND TransactionAccountingLine.accountingbook = accountingbook.id AND accountingbook.isprimary = 'T' AND TransactionLine.id = '0' AND TransactionAccountingLine.Transaction = '4286431' AND (TransactionAccountingLine.Debit IS NOT NULL OR TransactionAccountingLine.Credit IS NOT NULL) ORDER BY TransactionLine.ID" }).results;
-
+                    query: "SELECT BUILTIN.DF(TransactionAccountingLine.Account) AS Account, TransactionAccountingLine.Account, TransactionAccountingLine.Debit, TransactionAccountingLine.Credit, TransactionLine.class, TransactionLine.department, TransactionLine.location FROM accountingbook, TransactionLine, TransactionAccountingLine WHERE TransactionLine.Transaction = TransactionAccountingLine.Transaction AND TransactionAccountingLine.accountingbook = accountingbook.id AND accountingbook.isprimary = 'T' AND TransactionLine.id = '0' AND TransactionAccountingLine.Transaction = '4286431' AND (TransactionAccountingLine.Debit IS NOT NULL OR TransactionAccountingLine.Credit IS NOT NULL) ORDER BY TransactionLine.ID" }).results;     
                 
-                log.error("custPymtAccountDetail",custPymtAccountDetail)
                 var paymentValues = getPaymentValues(recordId);
-                log.error("paymentValues",paymentValues)
-                var formJournal = 0;
-
-                if (F_SUBSIDIAR) {
-                    formJournal = getFormConfigVoid(paymentValues.subsidiary)
-                }
+                
                 var transactionsLine = [];
                 custPymtAccountDetail.forEach(function(line){
                     transactionsLine.push(
@@ -810,14 +803,7 @@ define([
                     fieldId: 'subsidiary',
                     value: paymentValues.subsidiary
                 });
-
-                if (formJournal) {
-                    revJournal.setValue({
-                        fieldId: 'customform',
-                        value: formJournal
-                    });
-                }
-                log.error("paymentValues.currency",paymentValues.currency)
+                
                 revJournal.setValue({
                     fieldId: 'currency',
                     value: paymentValues.currency
