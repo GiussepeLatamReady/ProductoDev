@@ -1,12 +1,3 @@
 {
-  "type": "error.SuiteScriptError",
-  "name": "THE_GL_IMPACT_OF_A_TRANSACTION_IN_A_CLOSED_PERIOD_CANNOT_BE_CHANGED_SUMMARY_OF_IMPACT_CHANGES_1",
-  "message": "The G/L impact of a transaction in a closed period cannot be changed. Summary of impact changes: \n|                 Accounting Book|                         Account|                          Amount|              Credit Amount (FX)|\n|                   LOCAL GAAP(1)|MX - Impuestos Retenidos IVA por Arrendamiento(202)|                          313.92|                          313.92|\n|                       USGAAP(2)|         Account ICMSDeson(1908)|                         -313.92|                         -313.92|\n|               Local (Prueba)(4)|         Account ICMSDeson(1908)|                         -313.92|                         -313.92|\n|               Local (Prueba)(4)|MX - Impuestos Retenidos IVA por Arrendamiento(202)|                          313.92|                          313.92|\n|                   LOCAL GAAP(1)|         Account ICMSDeson(1908)|                         -313.92|                         -313.92|\n|                       USGAAP(2)|MX - Impuestos Retenidos IVA por Arrendamiento(202)|                          313.92|                          313.92|\n",
-  "id": "",
-  "stack": [
-    "Error\n at RecordInvoker.save (suitescript/resources/javascript/record/serverRecordService.js:371:13)\n at NetSuiteObject.thenableFunction() (suitescript/resources/javascript/record/proxy.js:115:24)\n at Remove_Trans (/SuiteScripts/Giussepe/TEST_GADP_SCHDL_V2.0.js:642:26)\n at Object.execute (/SuiteScripts/Giussepe/TEST_GADP_SCHDL_V2.0.js:64:17)"
-  ],
-  "cause": {
-    "type": "internal error",
-    "code": "THE_GL_IMPACT_OF_A_TRANSACTION_IN_A_CLOSED_PERIOD_CANNOT_BE_CHANGED_SUMMARY_OF_IMPACT_CHANGES_1",
-    "details": "The G/L impact of a transaction in a closed period cannot be changed. Summary of impact changes: \n|                 Accounting Book|                         Account|                          Amount|              Credit Amount (FX)|\n|                   LOCAL GAAP(1)|MX - Impuestos Retenidos IVA por Arrendamiento(202)|                          313.92|                          313.92|\n|                       USGAAP(2)|         Account ICMSDeson(1908)|                         -313.92|                         -313.92|\n|               Local (Prueba)(4)|         Account ICMSDeson(1908)|                         -313.92|                         -313.92|\n|               Local (Prueba)(4)|MX - Impuestos Retenidos IVA por Arrendamiento(202)|                          313.92|                          313.92|\n|                   LOCAL GAAP(1)|         Account ICMSDeson(1908)|                         -313.92|                         -313.92|\n|                       USGAAP(2)|MX - Impuestos Retenidos IVA por Arrendamiento(202)|                          313.92|                          313.92|\n","
+  
+}

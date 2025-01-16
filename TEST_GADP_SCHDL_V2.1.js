@@ -58,60 +58,174 @@ define([
         function execute(Context) {
             try {
                 
-                //createOperationType()
-                //createDataMandatoryFields("CO");
-                
-                //Remove_Trans("4286427","customerpayment",true)
-                reversalJournalClosedPeriod("4286431");
-                /*
-                const newInvoices = [];
-                for (let i = 0; i < 2; i++) {
-                    newInvoices.push(makeCopyInvoice("4283443"));
-                }
-                log.error("newInvoices", newInvoices)
-                deleteInvoices(deleteTransaction);
-                const newInvoices = [];
-                for (let i = 0; i < 4; i++) {
-                    newInvoices.push(makeCopyInvoice("4283443"));
-                }
-                log.error("newInvoices", newInvoices)
+                //reversalJournalClosedPeriod("4286431");
 
-                Object.keys(countries).forEach(country => {
-                    createDataMandatoryFields(country);
-                })
 
-                
-                let response = https.requestSuitelet({
-                    scriptId: "customscript_lr_loadvalidate_stlt",
-                    deploymentId: "customdeploy_lr_loadvalidate_stlt",
-                    headers: {
-                      "Content-Type": "application/json",
-                      "User-Agent": "Mozilla/5.0"
-                    },
-                    method: "POST",
-                    body: JSON.stringify({
-                        recordType: "customer",
-                        country: 48
-                    })
-                  });
-                log.error("response",response.body)
-                response = JSON.parse(response.body);
+                HideEntityFields()
 
-                const {fieldValidations,status,code} = response;
-                log.error("status",status)
-                log.error("code",code)
-                const arraytemp = []
-                fieldValidations.forEach(({nameFieldID,section}) =>{
-                    arraytemp.push({nameFieldID,section});
-                }) 
-                log.error("fieldValidations",arraytemp)
-                */
             } catch (error) {
                 log.error('Error execute', error)
             }
 
         }
 
+
+        function HideEntityFields(OBJ_FORM,countryCode,licenses){
+            var countries = {
+                "11": "AR",
+                "29": "BO",
+                "30": "BR",
+                "45": "CL",
+                "48": "CO",
+                "49": "CR",
+                "63": "EC",
+                "208": "SV",
+                "91": "GT",
+                "157": "MX",
+                "165": "NI",
+                "173": "PA",
+                "186": "PY",
+                "174": "PE",
+                "61": "DO",
+                "231": "UY",
+                "230": "US"
+            }
+
+            
+            var authorizationCode = getFeatureByCountryCode(countryCode,licenses)
+            
+            var primaryCountryID = getCountryID(countryCode,countries)
+
+            var listSetupView = {}
+
+            var filters = [
+                ["custrecord_lmry_section", "anyof", "1"],
+                "AND",
+                ["isinactive", "is", "F"]
+            ]
+
+            filters.push("AND",["custrecord_lmry_country","is",primaryCountryID])
+
+            //view
+            search.create({
+                type: "customrecord_lmry_fields",
+                filters: filters,
+                columns:
+                [
+                   search.createColumn({name: "name", label: "Name"}),
+                   search.createColumn({name: "custrecord_lmry_country", label: "Country"}),
+                   search.createColumn({name: "custrecord_lmry_section", label: "Section"})
+                ]
+            }).run().each(function(result){
+                var columns = result.columns
+                var setupName = result.getValue(columns[0])
+                var setupCountry = countries[result.getValue(columns[1])]
+                if (!listSetupView[setupCountry]) {
+                    listSetupView[setupCountry] = []
+                }
+                
+                listSetupView[setupCountry].push(
+                    {
+                        "name":setupName,
+                        "country": setupCountry
+                    }
+                )      
+                return true
+            })
+
+            var listSetupHide = {}
+
+            search.create({
+                type: "customrecord_lmry_hide_fields",
+                filters: filters,
+                columns:
+                [
+                   search.createColumn({name: "name", label: "Name"}),
+                   search.createColumn({name: "custrecord_lmry_country", label: "Country"})
+                ]
+            }).run().each(function(result){
+                var columns = result.columns
+                var setupName = result.getValue(columns[0])
+                var setupCountry = countries[result.getValue(columns[1])]
+                if (!listSetupView[setupCountry]) {
+                    listSetupView[setupCountry] = []
+                }
+                
+                listSetupView[setupCountry].push(
+                    {
+                        "name":setupName,
+                        "country": setupCountry
+                    }
+                )    
+                           
+                return true
+            });
+
+            if (authorizationCode) {
+                listSetupHide[countryCode] = removeElements(listSetupHide[countryCode],listSetupView[countryCode]);
+            }
+            
+            hideFields(listSetupHide[countryCode])
+
+        }
+
+        function hideFields(listHide){
+            listHide.forEach(function(fieldName){
+                var field = OBJ_FORM.getField({id: fieldName})
+                if (field) {
+                    field.updateDisplayType({
+                        displayType : serverWidget.FieldDisplayType.HIDDEN
+                    });
+                }   
+            })
+        }
+
+        function removeElements(listHide, listView) {
+            return listHide.filter(function(fieldName) {
+                return listView.indexOf(fieldName) === -1;
+            });
+        }
+        
+        
+
+        function getFeatureByCountryCode(countryCode, licenses) {
+            var countryAuthorizationMap = {
+                "AR": 100,
+                "BO": 37,
+                "BR": 140,
+                "CL": 98,
+                "CO": 26,
+                "CR": 24,
+                "EC": 42,
+                "SV": 6,
+                "GT": 133,
+                "MX": 20,
+                "PA": 137,
+                "PY": 38,
+                "PE": 136,
+                "UY": 39,
+                "NI": 406,
+                "DO": 399,
+                "US": 1007
+            };
+            var authorizationCode = countryAuthorizationMap[countryCode];
+            
+            if (authorizationCode !== undefined) {
+                return Library_Mail.getAuthorization(authorizationCode, licenses)
+            } else {
+                return null
+            }
+        }
+        
+
+        function getCountryID(country,countryCodes) {
+            for (var code in countryCodes) {
+                if (countryCodes.hasOwnProperty(code) && countryCodes[code] === country) {
+                    return parseInt(code, 10); 
+                }
+            }
+            return null;
+        }
 
         const makeCopyInvoice = (originalInvoiceId) => {
 
