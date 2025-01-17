@@ -912,20 +912,8 @@ define(['N/ui/serverWidget', 'N/search', 'N/log', './LMRY_libSendingEmailsLBRY_V
         return true
       })
 
-      if (listSetupHide.indexOf("custentity_lmry_actecon_sii_cl")>=0) {
-        log.error("custentity_lmry_actecon_sii_cl","No se va visualizar")
-      }else{
-        log.error("custentity_lmry_actecon_sii_cl","SI se va visualizar")
-      }
-
       if (authorizationCode) {
         listSetupHide = removeElements(listSetupHide, listSetupView[countryCode]);
-      }
-
-      if (listSetupHide.indexOf("custentity_lmry_actecon_sii_cl")>=0) {
-        log.error("custentity_lmry_actecon_sii_cl 2","No se va visualizar")
-      }else{
-        log.error("custentity_lmry_actecon_sii_cl 2","SI se va visualizar")
       }
 
       log.error("listSetupView", listSetupView)

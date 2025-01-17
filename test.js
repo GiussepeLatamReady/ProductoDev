@@ -1,19 +1,41 @@
+
+var fieldMultiCountry = {
+   "CL":[
+      "custentity_lmry_actecon_sii_cl",
+      "custentity_lmry_digito_verificator",
+      "custentity_lmry_entityrelated",
+      "custentity_lmry_prefijo_prov",
+      "custentity_lmry_sv_taxpayer_number"
+   ],
+   "CO":[
+      "custentity_lmry_digito_verificator",
+      "custentity_lmry_pa_person_type",
+      "custentity_lmry_sunat_tipo_doc_cod",
+      "custentity_lmry_sunat_tipo_doc_id"
+   ],
+   "DO":[
+      "custentity_lmry_sunat_tipo_doc_id"
+   ],
+   "MX":[
+      "custentity_lmry_legal_name_project",
+      "custentity_lmry_sv_taxpayer_number",
+      "custentity_lmry_sv_taxpayer_type"
+   ],
+   "PA":[
+      "custentity_lmry_digito_verificator",
+      "custentity_lmry_legal_name_project",
+      "custentity_lmry_pa_person_code",
+      "custentity_lmry_pa_person_type",
+      "custentity_lmry_sv_taxpayer_type"
+   ],
+   "PE":[
+      "custentity_lmry_sunat_tipo_doc_id",
+      "custentity_lmry_sv_taxpayer_number"
+   ]
+}
+
 {
-   custentity_lmry_country:{
-      isGeneral: true,
-   },
-   custentity_lmry_country_codeiso:{
-      isGeneral: true,
-   },
-   custentity_lmry_countrycode:{
-      isGeneral: true,
-   },
-   custentity_lmry_sv_taxpayer_number:{
-      isGeneral: true,
-   },
-   custentity_lmry_sv_taxpayer_type:{
-      isGeneral: true,
-   }, 
+   
    custentity_lmry_actecon_sii_cl:{
       countries: ["CL"],
       isGeneral: false,
@@ -59,3 +81,13 @@
       isGeneral: false,
    }
 }
+
+
+var fieldGeneral = [
+   "custentity_lmry_country",
+   "custentity_lmry_country_codeiso",
+   "custentity_lmry_countrycode",
+   "custentity_lmry_sv_taxpayer_number",
+   "custentity_lmry_sv_taxpayer_type", 
+]
+
