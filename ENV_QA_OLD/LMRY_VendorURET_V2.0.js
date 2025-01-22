@@ -327,7 +327,7 @@ define([
                 if (LMRY_access == true) {
                     // Oculta todos los campos LMRY
                     if (isURET == 'view' && hide_entities) {
-                        Library_HideView.HideEntityFields(FORM, LMRY_countr[0], licenses);
+                        Library_HideView.HideEntityFields(FORM, LMRY_countr[0], licenses,RCD);
                         /*Library_Mail.onFieldsHide(1, FORM, true);
                         Library_Mail.onFieldsDisplayE(FORM, LMRY_countr[1], true);*/
                     }

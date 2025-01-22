@@ -3,23 +3,22 @@ SELECT
     TransactionAccountingLine.Account,
     TransactionAccountingLine.Debit,
     TransactionAccountingLine.Credit,
-    TransactionAccountingLine.Posting,
-    TransactionLine.Memo,
-    TransactionLine.id,
-    TransactionLine.Transaction,
+    TransactionLine.class,
+    TransactionLine.department,
+    TransactionLine.location
 FROM
     accountingbook,
     TransactionLine,
     TransactionAccountingLine
-where
+WHERE
     TransactionLine.Transaction = TransactionAccountingLine.Transaction
-    and TransactionAccountingLine.accountingbook = accountingbook.id
-    and accountingbook.isprimary = 'T'
-    and TransactionLine.id = "0"
-    and TransactionAccountingLine.Transaction = '4286427'
-    and (
+    AND TransactionAccountingLine.accountingbook = accountingbook.id
+    AND accountingbook.isprimary = 'T'
+    AND TransactionLine.id = '0'
+    AND TransactionAccountingLine.Transaction = '1198010'
+    AND (
         TransactionAccountingLine.Debit IS NOT NULL
-        or TransactionAccountingLine.Credit IS NOT NULL
+        OR TransactionAccountingLine.Credit IS NOT NULL
     )
 ORDER BY
     TransactionLine.ID
