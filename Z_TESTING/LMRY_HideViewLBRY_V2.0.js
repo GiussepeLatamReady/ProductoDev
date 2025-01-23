@@ -842,6 +842,8 @@ define(['N/ui/serverWidget', 'N/search', 'N/log', './LMRY_libSendingEmailsLBRY_V
       if (currentRecord) {
         subsidiaries = getSubsidiaries(currentRecord);
       }
+      
+
       var countries = {
         "11": "AR",
         "29": "BO",
@@ -927,19 +929,35 @@ define(['N/ui/serverWidget', 'N/search', 'N/log', './LMRY_libSendingEmailsLBRY_V
 
     function getSubsidiaries(currRecord) {
       //var currRecord = record.load({type:record.Type.CUSTOMER, id:currentRecord.get().id, isDynamic:true});
-      log.error("currRecord: ",currRecord.id)
+      log.error("currRecord: ", currRecord.id)
       //console.log("subsidiary: ",currRecord.getValue("subsidiary"))
       var countSubsidiaries = currRecord.getLineCount({
-         sublistId: 'submachine'
+        sublistId: 'submachine'
       });
       var subsidiaries = [];
       for (var i = 0; i < countSubsidiaries; i++) {
-         subsidiaries.push(currRecord.getSublistValue({sublistId:'submachine',fieldId:'subsidiary',line:i}))
+        subsidiaries.push(currRecord.getSublistValue({ sublistId: 'submachine', fieldId: 'subsidiary', line: i }))
       }
-      
-      log.error("subsidiaries: ",subsidiaries)
-      return subsidiaries;
-   }
+
+      var jsonSubsidiaries = {};
+      search.create({
+        type: search.Type.SUBSIDIARY,
+        columns: ['internalid', 'country', 'name'],
+        filters: [{ name: 'internalid', operator: 'anyof', values: subsidiaries }]
+      }).run().each(function (result) {
+        var internalid = result.getValue("internalid");
+        var nameWords = result.getValue("name").split(":");
+        console.log("nameWords: ", nameWords)
+        jsonSubsidiaries[internalid] = {
+          country: result.getValue("country"),
+          "name": nameWords[nameWords.length - 1]
+        }
+        return true;
+      });
+
+      log.error("subsidiaries: ", jsonSubsidiaries)
+      return jsonSubsidiaries;
+    }
 
     function hideFields(listHide, OBJ_FORM) {
       listHide.forEach(function (fieldName) {

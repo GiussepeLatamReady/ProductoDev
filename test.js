@@ -1,161 +1,140 @@
-
-var fieldMultiCountry = {
-   "CL":[
-      "custentity_lmry_actecon_sii_cl",
-      "custentity_lmry_digito_verificator",
-      "custentity_lmry_entityrelated",
-      "custentity_lmry_prefijo_prov",
-      "custentity_lmry_sv_taxpayer_number"
-   ],
-   "CO":[
-      "custentity_lmry_digito_verificator",
-      "custentity_lmry_pa_person_type",
-      "custentity_lmry_sunat_tipo_doc_cod",
-      "custentity_lmry_sunat_tipo_doc_id"
-   ],
-   "DO":[
-      "custentity_lmry_sunat_tipo_doc_id"
-   ],
-   "MX":[
-      "custentity_lmry_legal_name_project",
-      "custentity_lmry_sv_taxpayer_number",
-      "custentity_lmry_sv_taxpayer_type"
-   ],
-   "PA":[
-      "custentity_lmry_digito_verificator",
-      "custentity_lmry_legal_name_project",
-      "custentity_lmry_pa_person_code",
-      "custentity_lmry_pa_person_type",
-      "custentity_lmry_sv_taxpayer_type"
-   ],
-   "PE":[
-      "custentity_lmry_sunat_tipo_doc_id",
-      "custentity_lmry_sv_taxpayer_number"
-   ]
-}
-
-{  
-   custentity_lmry_actecon_sii_cl:{
-      countries: ["CL"],
-      isGeneral: false,
-   },
-   custentity_lmry_digito_verificator:{
-      countries: ["CL","CO","PA"],
-      isGeneral: false,
-   },
-   custentity_lmry_entityrelated:{
-      countries: ["CL"],
-      isGeneral: false,
-   },
-   custentity_lmry_legal_name_project:{
-      countries: ["MX","PA"],
-      isGeneral: false,
-   },
-   custentity_lmry_pa_person_code:{
-      countries: ["PA"],
-      isGeneral: false,
-   },
-   custentity_lmry_pa_person_type:{
-      countries: ["CO","PA"],
-      isGeneral: false,
-   },
-   custentity_lmry_prefijo_prov:{
-      countries: ["CL"],
-      isGeneral: false,
-   },
-   custentity_lmry_sunat_tipo_doc_cod:{
-      countries: ["CO"],
-      isGeneral: false,
-   },
-   custentity_lmry_sunat_tipo_doc_id:{
-      countries: ["CO","DO","PE"],
-      isGeneral: false,
-   },
-   custentity_lmry_sv_taxpayer_number:{
-      countries: ["CL","MX","PA"],
-      isGeneral: false,
-   },
-   custentity_lmry_sv_taxpayer_type:{
-      countries: ["MX","PA"],
-      isGeneral: false,
-   }
-}
-
-
-var fieldGeneral = [
-   "custentity_lmry_country",
-   "custentity_lmry_country_codeiso",
-   "custentity_lmry_countrycode",
-   "custentity_lmry_sv_taxpayer_number",
-   "custentity_lmry_sv_taxpayer_type", 
-]
-
-
-
 var fieldEntity = {
    custentity_lmry_country:{
-      countries: ["CO","MX","PE","DO","PA"],
+      countries: {
+         CO: ["customer","vendor"],
+         MX: ["customer","vendor"],
+         PE: ["vendor"]
+      },
       isGeneral: false,
+      fieldRecord:"custrecord_lmry_ef_country"
    },
    custentity_lmry_country_codeiso:{
-      countries: ["CO","MX","PE","DO","PA"],
+      countries: {
+         CO: ["customer"],
+         MX: ["customer"]
+      },
       isGeneral: false,
+      fieldRecord:"custrecord_lmry_ef_country_codeiso"
    },
    custentity_lmry_countrycode:{
-      countries: ["CO","MX","PE","DO","PA"],
+      countries: {
+         DO: ["customer","vendor"],
+         PA: ["customer"]
+      },
       isGeneral: false,
+      fieldRecord:"custrecord_lmry_ef_countrycode"
    },
    custentity_lmry_sv_taxpayer_number:{
       isGeneral: true,
+      fieldRecord:"custrecord_lmry_ef_sv_taxpayer_number"
    },
    custentity_lmry_sv_taxpayer_type:{
       isGeneral: true,
+      fieldRecord:"custrecord_lmry_ef_sv_taxpayer_type"
    }, 
    custentity_lmry_actecon_sii_cl:{
-      countries: ["CL"],
+      countries: {
+         CL:["customer"]
+      },
       isGeneral: false,
+      fieldRecord:"custrecord_lmry_ef_actecon_sii_cl"
    },
    custentity_lmry_digito_verificator:{
-      countries: ["CL","CO","PA"],
+      countries: {
+         CL: ["customer","vendor"],
+         CO: ["customer","vendor"],
+         PA: ["customer","vendor"]
+      },
       isGeneral: false,
+      fieldRecord:"custrecord_lmry_ef_digito_verificator"
    },
    custentity_lmry_entityrelated:{
-      countries: ["CL"],
+      countries: {
+         CL:["customer"]
+      },
       isGeneral: false,
+      fieldRecord:"custrecord_lmry_ef_entityrelated"
+   },
+   custentity_lmry_fiscal_responsability:{
+      countries: {
+         PE:["customer"]
+      },
+      isGeneral: false,
+      fieldRecord:"custrecord_lmry_ef_fiscal_responsability"
+   },
+   custentity_lmry_giro:{
+      countries: {
+         CL:["customer"]
+      },
+      isGeneral: false,
+      fieldRecord:"custrecord_lmry_ef_giro"
    },
    custentity_lmry_legal_name_project:{
-      countries: ["MX","PA"],
+      countries: {
+         MX:["customer"],
+         PA:["customer"]
+      },
       isGeneral: false,
+      fieldRecord:"custrecord_lmry_ef_legal_name_project"
    },
    custentity_lmry_pa_person_code:{
-      countries: ["PA"],
+      countries: {
+         PA:["customer"]
+      },
       isGeneral: false,
+      fieldRecord:"custrecord_lmry_ef_pa_person_code"
    },
    custentity_lmry_pa_person_type:{
-      countries: ["CO","PA"],
+      countries: {
+         CO:["customer"],
+         PA:["customer"]
+      },
       isGeneral: false,
+      fieldRecord:"custrecord_lmry_ef_pa_person_type"
    },
    custentity_lmry_prefijo_prov:{
-      countries: ["CL"],
+      countries: {
+         CL:["customer"]
+      },
       isGeneral: false,
+      fieldRecord:"custrecord_lmry_ef_prefijo_prov"
    },
    custentity_lmry_sunat_tipo_doc_cod:{
-      countries: ["CO"],
+      countries: {
+         CO:["customer"]
+      },
       isGeneral: false,
+      fieldRecord:"custrecord_lmry_ef_sunat_tipo_doc_cod"
    },
    custentity_lmry_sunat_tipo_doc_id:{
-      countries: ["CO","DO","PE"],
+      countries: {
+         CO: ["customer","vendor"],
+         DO: ["customer","vendor"],
+         PE: ["customer","vendor"]
+      },
       isGeneral: false,
+      fieldRecord:"custrecord_lmry_ef_sunat_tipo_doc_id"
    },
    custentity_lmry_sv_taxpayer_number:{
-      countries: ["CL","MX","PA"],
+      countries: {
+         CL: ["customer","vendor"],
+         MX: ["customer","vendor"],
+         PA: ["vendor"]
+      },
       isGeneral: false,
+      fieldRecord:"custrecord_lmry_ef_sv_taxpayer_number"
    },
    custentity_lmry_sv_taxpayer_type:{
-      countries: ["MX","PA"],
+      countries: {
+         MX: ["customer"],
+         PA: ["customer"]
+      },
       isGeneral: false,
+      fieldRecord:"custrecord_lmry_ef_sv_taxpayer_type"
    }
 }
+
+
 
 
 function getSUbsidiaries() {
@@ -170,7 +149,24 @@ function getSUbsidiaries() {
       subsidiaries.push(currRecord.getSublistValue({sublistId:'submachine',fieldId:'subsidiary',line:i}))
    }
    
-   console.log("subsidiaries: ",subsidiaries)
+
+   var jsonSubsidiaries = {};
+   search.create({
+      type: search.Type.SUBSIDIARY, 
+      columns: ['internalid', 'country','name'], 
+      filters: [{ name: 'internalid', operator: 'anyof', values: subsidiaries }]
+   }).run().each(function(result){
+      var internalid = result.getValue("internalid");
+      var nameWords = result.getValue("name").split(":");
+      console.log("nameWords: ", nameWords)
+      jsonSubsidiaries[internalid] = {
+         country: result.getValue("country"),
+         "name": nameWords[nameWords.length-1]
+      }
+      return true;
+   });
+   console.log("subsidiaries: ", subsidiaries)
+   console.log("jsonSubsidiaries: ", jsonSubsidiaries)
 }
 
 getSUbsidiaries();
