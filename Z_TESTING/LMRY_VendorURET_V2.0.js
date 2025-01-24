@@ -113,7 +113,7 @@ define([
                     // Valida el Acceso
                     ValidateAccessV(FORM, RCD.getValue({
                         fieldId: 'subsidiary'
-                    }), licenses);
+                    }), licenses,RCD);
                 }
 
                 if (isURET == 'view' || isURET == 'edit') {
@@ -260,7 +260,13 @@ define([
          * @Since 2015.2
          */
         function beforeSubmit(scriptContext) {
-
+            var type = scriptContext.type;
+            var ObjRecord = scriptContext.newRecord;
+            var FORM = scriptContext.form;
+            
+            if (type != 'view' && type != 'create') {
+                Library_HideView.saveEntityFields(ObjRecord,FORM);
+            }
         }
 
         /**
@@ -287,7 +293,7 @@ define([
                     // Valida el Acceso
                     ValidateAccessV(FORM, RCD.getValue({
                         fieldId: 'subsidiary'
-                    }), licenses);
+                    }), licenses,RCD);
                 }
 
                 if (executionContext == "USERINTERFACE" &&
@@ -307,7 +313,7 @@ define([
         /* ------------------------------------------------------------------------------------------------------
          * featureId = 1 Registro de Compras Electronico - Peru (PE)
          * --------------------------------------------------------------------------------------------------- */
-        function ValidateAccessV(RCD, ID, licenses) {
+        function ValidateAccessV(RCD, ID, licenses,RCD) {
             try {
 
                 // Inicializa variables Locales y Globales
@@ -326,7 +332,7 @@ define([
                 // Solo si tiene acceso
                 if (LMRY_access == true) {
                     // Oculta todos los campos LMRY
-                    if (isURET == 'view' && hide_entities) {
+                    if ((isURET == 'view'|| isURET == 'edit') && hide_entities) {
                         Library_HideView.HideEntityFields(FORM, LMRY_countr[0], licenses,RCD);
                         /*Library_Mail.onFieldsHide(1, FORM, true);
                         Library_Mail.onFieldsDisplayE(FORM, LMRY_countr[1], true);*/
@@ -346,7 +352,7 @@ define([
 
         return {
             beforeLoad: beforeLoad,
-            // beforeSubmit: beforeSubmit,
+            beforeSubmit: beforeSubmit,
             afterSubmit: afterSubmit
         };
 

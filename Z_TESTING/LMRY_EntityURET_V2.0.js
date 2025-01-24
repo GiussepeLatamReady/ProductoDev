@@ -316,7 +316,9 @@ define(['N/search', 'N/runtime', 'N/ui/serverWidget', 'N/log', './Latam_Library/
 
                 }
             } catch (err) {
+                log.error("err before load",err)
                 Library_Mail.sendemail('[beforeLoad] ' + err, LMRY_script);
+                
             }
         }
 
@@ -336,6 +338,7 @@ define(['N/search', 'N/runtime', 'N/ui/serverWidget', 'N/log', './Latam_Library/
                 if (type != 'view' && type != 'create') {
                     var ObjRecord = scriptContext.newRecord;
                     var objrecordold = scriptContext.oldRecord;
+                    var FORM = scriptContext.form;
                     var isSuiteTax = runtime.isFeatureInEffect({ feature: 'tax_overhauling' });
                     // Latam Entity - Subsidiary Country = 30 Brasil
                     var country = objrecordold.getValue({ fieldId: 'custentity_lmry_subsidiary_country' });
@@ -405,6 +408,8 @@ define(['N/search', 'N/runtime', 'N/ui/serverWidget', 'N/log', './Latam_Library/
                         log.debug("info_tax: ", info_tax);
                         ObjRecord.setValue({ fieldId: 'custentity_lmry_ei_entity_regtax', value: info_tax });
                     }
+
+                    Library_HideView.saveEntityFields(ObjRecord,FORM);
                 }
             } catch (err2) {
                 log.error('beforeSubmit', err2);
@@ -446,9 +451,9 @@ define(['N/search', 'N/runtime', 'N/ui/serverWidget', 'N/log', './Latam_Library/
 
                 // Solo si tiene acceso
                 if (LMRY_access == true) {
-                    if (isURET == 'view' && hide_entities) {
+                    if ((isURET == 'view' || isURET == 'edit') && hide_entities) {
                         log.error("LMRY_countr",LMRY_countr);
-                        Library_HideView.HideEntityFields(FORM, LMRY_countr[0], licenses);
+                        Library_HideView.HideEntityFields(FORM, LMRY_countr[0], licenses,RCD);
                         /*Library_Mail.onFieldsHide(1, FORM, true);
                         Library_Mail.onFieldsDisplayE(FORM, LMRY_countr[1], true);*/
                     }
