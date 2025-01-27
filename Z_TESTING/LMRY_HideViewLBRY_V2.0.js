@@ -11,9 +11,9 @@
    * @NModuleScope Public
    */
 
-  define(['N/ui/serverWidget', 'N/search', 'N/log','N/record', './LMRY_libSendingEmailsLBRY_V2.0'],
+  define(['N/search', 'N/log','N/record', './LMRY_libSendingEmailsLBRY_V2.0'],
 
-    function(serverWidget, search, log,record, Library_Mail) {
+    function( search, log,record, Library_Mail) {
 
       var err;
       var feature = false;
@@ -820,21 +820,23 @@
           //log.error('list_hide', list_hide);
         }
 
+        require(['N/ui/serverWidget'], function (serverWidget) {
+          for (var p = 0; p < list_hide.length; p++) {
 
-        for (var p = 0; p < list_hide.length; p++) {
-
-          if (list_hide[p] != null && list_hide[p] != '') {
-
-            var sublist = OBJ_FORM.getSublist({
-              id: list_hide[p]
-            });
-            try {
-              sublist.displayType = serverWidget.SublistDisplayType.HIDDEN;
-            } catch (err) {
-              //log.error('se callo script', list_hide[p] + ',' + err);
+            if (list_hide[p] != null && list_hide[p] != '') {
+  
+              var sublist = OBJ_FORM.getSublist({
+                id: list_hide[p]
+              });
+              try {
+                sublist.displayType = serverWidget.SublistDisplayType.HIDDEN;
+              } catch (err) {
+                //log.error('se callo script', list_hide[p] + ',' + err);
+              }
             }
           }
-        }
+        });
+        
       }
 
       function getCountries(){
@@ -859,54 +861,21 @@
         }
       }
 
-      function HideEntityFields(OBJ_FORM, countryCode, licenses, currentRecord) {
+      function HideEntityFields(OBJ_FORM, countryCode, licenses, currentRecord,contextType) {
         try {
           var featureInterCompany = true;
           var subsidiaries = []
           log.error("HideEntityFields", "start");
-
           var authorizationCode = getFeatureByCountryCode(countryCode, licenses)
-
           var primaryCountryID = getCountryID(countryCode)
-          
-          var filters = [
-            ["custrecord_lmry_section", "anyof", "1"],
-            "AND",
-            ["isinactive", "is", "F"]
-          ]
-          if (featureInterCompany) {
-            var uniqueCountryCodes = [];
-            var seen = {};
-            subsidiaries = getSubsidiaries(currentRecord)
-            for (var subsidiaryId in subsidiaries) {
-              if (subsidiaries.hasOwnProperty(subsidiaryId)) {
-                var countryCode = subsidiaries[subsidiaryId].countryCode;
-                if (!seen[countryCode]) {
-                  seen[countryCode] = true;
-                  uniqueCountryCodes.push(countryCode);
-                }
-              }
-            }
-            log.error("uniqueCountryCodes", uniqueCountryCodes)
-            var countryIDs = [];
-
-            uniqueCountryCodes.forEach(function(code){
-              countryIDs.push(getCountryID(code));
-            })
-            filters.push("AND", ["custrecord_lmry_country", "anyof", countryIDs])
-          } else {
-            filters.push("AND", ["custrecord_lmry_country", "anyof", primaryCountryID])
-          }
+          if (featureInterCompany) subsidiaries = getSubsidiaries(currentRecord,contextType == "view")
 
           //view
-          var listSetupView = getFieldToView(filters);
-
+          var listSetupView = getFieldToView(featureInterCompany,primaryCountryID,subsidiaries);
           var listSetupHide = getFieldToHide();
 
-          if (authorizationCode) {
-            if (!featureInterCompany) {
-              listSetupHide = removeElements(listSetupHide, listSetupView[countryCode]);
-            }
+          if (authorizationCode && !featureInterCompany) {
+            listSetupHide = removeElements(listSetupHide, listSetupView[countryCode]);
           }
 
           log.error("listSetupView", listSetupView)
@@ -915,11 +884,19 @@
           hideFields(listSetupHide, OBJ_FORM)
           if (featureInterCompany) {
             var entityFields = getEntityFields();
+            log.error("entityFields",entityFields)
             var fieldData = assignFieldsToSubsidiaries(subsidiaries, entityFields, currentRecord.type);
+            log.error("fieldData 1",fieldData)
             fieldData = filterAllowedFieldsByCountry(listSetupView, fieldData);
+            
             createGroups(OBJ_FORM, fieldData);
-            asiggnFields(OBJ_FORM, fieldData,true);
+            assignFields(OBJ_FORM, fieldData);
             loadData(fieldData,currentRecord)
+
+            log.error("fieldData 2",fieldData)
+            Object.keys(fieldData["subsidiaries"]).forEach(function(field){
+              log.error(field,fieldData["subsidiaries"][field])
+            })
             
           }
         } catch (error) {
@@ -928,40 +905,51 @@
         }
 
       }
-      function saveEntityFields(currentRecord, OBJ_FORM) {
+      
+      
+      function showEntityFieldsIntercompany(currentRecord) {
         try {
-          log.error("saveEntityFields", "start");
-          var uniqueCountryCodes = [];
-          var seen = {};
-          subsidiaries = getSubsidiaries(currentRecord)
-          for (var subsidiaryId in subsidiaries) {
-            if (subsidiaries.hasOwnProperty(subsidiaryId)) {
-              var countryCode = subsidiaries[subsidiaryId].countryCode;
-              if (!seen[countryCode]) {
-                seen[countryCode] = true;
-                uniqueCountryCodes.push(countryCode);
-              }
-            }
-          }
-          log.error("uniqueCountryCodes", uniqueCountryCodes)
-          var countryIDs = [];
 
-          uniqueCountryCodes.forEach(function (code) {
-            countryIDs.push(getCountryID(code));
-          })
-          var filters = [
-            ["custrecord_lmry_section", "anyof", "1"],
-            "AND",
-            ["isinactive", "is", "F"]
-          ]
-          filters.push("AND", ["custrecord_lmry_country", "anyof", countryIDs])
-          var listSetupView = getFieldToView(filters);
+          var subsidiariesAll = []
+          subsidiariesAll = getSubsidiaries(currentRecord);
+
+          var subsidiariesView = []
+          subsidiariesView = getSubsidiaries(currentRecord,true);
+
+    
+          var entityFields = getEntityFields();
+
+          var listSetupHide = getFieldToView(true,0,subsidiariesAll);
+          var fieldDataHide = assignFieldsToSubsidiaries(subsidiariesAll, entityFields, currentRecord.type);
+          fieldDataHide = filterAllowedFieldsByCountry(listSetupHide, fieldDataHide);
+          createGroups(null, fieldDataHide,true)
+          setCustpage(fieldDataHide,true,currentRecord,false); 
+          
+
+          var listSetupView = getFieldToView(true,0,subsidiariesView);
+          var fieldDataView = assignFieldsToSubsidiaries(subsidiariesView, entityFields, currentRecord.type);
+          fieldDataView = filterAllowedFieldsByCountry(listSetupView, fieldDataView);
+          createGroups(null, fieldDataView,true)
+          setCustpage(fieldDataView,true,currentRecord,true);     
+          
+        } catch (error) {
+          console.error("[HideEntityFields] error",error);
+          console.error("[HideEntityFields] error stack",error.stack);
+        }
+
+      }
+
+      
+      
+      function saveEntityFields(currentRecord) {
+        try {
+         
+          var subsidiaries = getSubsidiaries(currentRecord,true)
+          var listSetupView = getFieldToView(true,0,subsidiaries);
           var entityFields = getEntityFields();
           var fieldData = assignFieldsToSubsidiaries(subsidiaries, entityFields, currentRecord.type);
           fieldData = filterAllowedFieldsByCountry(listSetupView, fieldData);
-
           setCustpage(fieldData);
-
           createRecord(fieldData, currentRecord)
         } catch (error) {
           log.error("saveEntityFields", error)
@@ -971,50 +959,81 @@
       }
 
 
-      function createRecord(fieldData,currentRecord){
-        if (fieldData.subsidiaries) {
-          var subsidiariesConfig = fieldData.subsidiaries;
-          for (var subsidiaryId in subsidiariesConfig) {
-            if (subsidiariesConfig.hasOwnProperty(subsidiaryId)) {
-              var subsidiaryConfig = subsidiariesConfig[subsidiaryId];
-              if (subsidiaryConfig["fieldsEntity"].length) {
-                var recordEntityFields = record.create({
-                  type: "customrecord_lmry_entity_fields",
-                  isDynamic: true
-                });
-
-                
-
-                recordEntityFields.setValue("custrecord_lmry_co_entity",currentRecord.id);
-                recordEntityFields.setValue("custrecord_lmry_co_subsi_reten",subsidiaryId);
-                
-                subsidiaryConfig["fieldsEntity"].forEach(function(fieldConfig){
-                  var fieldValue = currentRecord.getValue(fieldConfig.custpage);
-                  if (fieldValue) {
-                    recordEntityFields.setValue(fieldConfig.fieldRecord,fieldValue);
-                  }
-                })
-
-                if (fieldData.general) {
-                  var generalConfig = fieldData.general;
-                  generalConfig.forEach(function (fieldConfig) {
-                    var fieldValue = currentRecord.getValue(fieldConfig.custpage);
-                    if (fieldValue) {
-                      recordEntityFields.setValue(fieldConfig.fieldRecord, fieldValue);
-                    }
-                  });
+      function createRecord(fieldData, currentRecord) {
+        function getValues(config, record, prefix) {
+          return config.reduce(function (values, fieldConfig) {
+            var fieldValue = record.getValue(fieldConfig.custpage);
+            if (fieldValue) {
+              if (fieldConfig.type == "checkbox") {
+                if (fieldValue === "T") {
+                  values[fieldConfig.fieldRecord] = true;
+                }else{
+                  values[fieldConfig.fieldRecord] = false;
                 }
-                recordEntityFields.save({
-                  ignoreMandatoryFields: true,
-                  disableTriggers: true
-                });
-              }           
+              }else{
+                values[fieldConfig.fieldRecord] = fieldValue;
+              }
+              
             }
-          }
-        }   
+            return values;
+          }, prefix || {});
+        }
 
-      
+        function findRecordId(subsidiaryId, entityId) {
+          var recordID;
+          search.create({
+            type: "customrecord_lmry_entity_fields",
+            filters: [
+              ["custrecord_lmry_co_subsi_reten", "anyof", subsidiaryId],
+              "AND",
+              ["custrecord_lmry_co_entity", "anyof", entityId]
+            ],
+            columns: ["internalid"]
+          }).run().each(function (result) {
+            recordID = result.getValue("internalid");
+          });
+          return recordID;
+        }
+
+        function submitOrSaveRecord(recordID, values, subsidiaryId, entityId) {
+          if (recordID) {
+            record.submitFields({
+              type: "customrecord_lmry_entity_fields",
+              id: recordID,
+              values: values,
+              options: { ignoreMandatoryFields: true, enableSourcing: true, disableTriggers: true }
+            });
+          } else {
+            var newRecord = record.create({
+              type: "customrecord_lmry_entity_fields",
+              isDynamic: true
+            });
+            newRecord.setValue("custrecord_lmry_co_entity", entityId);
+            newRecord.setValue("custrecord_lmry_co_subsi_reten", subsidiaryId);
+            Object.keys(values).forEach(function (key) {
+              
+              newRecord.setValue(key, values[key]);
+            });
+            newRecord.save({ ignoreMandatoryFields: true, disableTriggers: true });
+          }
+        }
+
+        if (fieldData.subsidiaries) {
+          Object.keys(fieldData.subsidiaries).forEach(function (subsidiaryId) {
+            var subsidiaryConfig = fieldData.subsidiaries[subsidiaryId];
+            if (subsidiaryConfig.fieldsEntity.length) {
+              var recordID = findRecordId(subsidiaryId, currentRecord.id);
+              var values = getValues(subsidiaryConfig.fieldsEntity, currentRecord);
+              if (fieldData.general) {
+                values = getValues(fieldData.general, currentRecord, values);
+              }
+              submitOrSaveRecord(recordID, values, subsidiaryId, currentRecord.id);
+            }
+          });
+        }
       }
+    
+    
       function getFieldsRecord(fieldData) {
         var fieldsViewRecord = [];
         var subsidiaries = fieldData.subsidiaries || {};
@@ -1038,7 +1057,6 @@
       function loadData(fieldData,currentRecord){
         var entityFieldsRecordData = {}
         var fieldRecords = getFieldsRecord(fieldData);
-        log.error("columnsRecords",fieldRecords)
         var columns = [
           "custrecord_lmry_co_subsi_reten"
         ]
@@ -1091,137 +1109,144 @@
         }
       }
 
-      
+      function createGroups(OBJ_FORM, fieldData,isClient) {
 
-      function createGroups(OBJ_FORM,fieldData){
-        log.error("fieldData",fieldData)
-        if (fieldData.general) {
-          var generalConfig = fieldData.general;
-          generalConfig["group"] = {
-            id: 'custpage_group_general_entity',
-            label: 'Latam - General'
-          }
-          OBJ_FORM.addFieldGroup(generalConfig["group"]);
-        }     
-        if (fieldData.subsidiaries) {
-          var subsidiariesConfig = fieldData.subsidiaries;
-          for (var subsidiaryId in subsidiariesConfig) {
-            if (subsidiariesConfig.hasOwnProperty(subsidiaryId)) {
-              var subsidiaryConfig = subsidiariesConfig[subsidiaryId];
-              if (subsidiaryConfig["fieldsEntity"].length) {
-                log.error("crear grupo","start")
-                subsidiaryConfig["group"] = {
-                  id: 'custpage_group_'+subsidiaryConfig["countryCode"]+'_'+subsidiaryId,
-                  label: 'Latam - '+subsidiaryConfig["countryName"]+' : '+subsidiaryConfig["name"]
-                }
-                OBJ_FORM.addFieldGroup(subsidiaryConfig["group"]);
-              }           
-            }
-          }
+        function addGroup(config, id, label) {
+          config.group = { id: id, label: label };
+          OBJ_FORM.addFieldGroup(config.group);
         }
-        
+
+        if (fieldData.general && !isClient) {
+          addGroup(
+            fieldData.general,
+            'custpage_group_general_entity',
+            'Latam - General'
+          );
+        }
+
+        if (fieldData.subsidiaries) {
+          Object.keys(fieldData.subsidiaries).forEach(function (subsidiaryId) {
+            var subsidiaryConfig = fieldData.subsidiaries[subsidiaryId];
+            if (subsidiaryConfig.fieldsEntity.length) {
+              var grupoID = 'custpage_group_' + subsidiaryConfig.countryCode + '_' + subsidiaryId;
+              var groupName = 'Latam - ' + subsidiaryConfig.countryName + ' : ' + subsidiaryConfig.name;
+              if (isClient) {
+                subsidiaryConfig.groupName = groupName;
+              }else{
+                addGroup(
+                  subsidiaryConfig,
+                  grupoID,
+                  groupName
+                );
+              }
+              
+            }
+          });
+        }
       }
 
-
-      function asiggnFields(OBJ_FORM,fieldData, isCreate){
-        if (fieldData.subsidiaries) {
-          var subsidiariesConfig = fieldData.subsidiaries;
-          for (var subsidiaryId in subsidiariesConfig) {
-            if (subsidiariesConfig.hasOwnProperty(subsidiaryId)) {
-              var subsidiaryConfig = subsidiariesConfig[subsidiaryId];
-              if (subsidiaryConfig["fieldsEntity"].length) {
-                subsidiaryConfig["fieldsEntity"].forEach(function(fieldConfig){
-                  if (isCreate) {
-                    var fieldEntity = OBJ_FORM.getField(fieldConfig["fieldKey"]);
-                  }
-                  if (fieldEntity || !isCreate) {
-                    
-                    var fieldLabel = fieldEntity.label;
-                    var fieldID = fieldConfig["fieldKey"].replace('custentity', 'custpage')+"_"+subsidiaryId;
-                    var objField = {}
-                    if (fieldConfig["type"] == "select") {
-                      objField = {
-                        id: fieldID,
-                        label: fieldLabel,
-                        type: fieldConfig["type"],
-                        container: subsidiaryConfig["group"].id,
-                        source: fieldConfig["source"]
-                      }
-                    }else{
-                      objField = {
-                        id: fieldID,
-                        label: fieldLabel,
-                        type: fieldConfig["type"],
-                        container: subsidiaryConfig["group"].id
-                      }
-                    }
-                    fieldConfig["custpage"] = fieldID; //set fieldConfig
-                    if (isCreate) {
-                      OBJ_FORM.addField(objField).setHelpText(fieldConfig["fieldRecord"]);
-                    }
-                    
-                  }
-                })
-              }           
-            }
-          }
-        }
-        if (fieldData.general) {
-          var generalConfig = fieldData.general;
-          generalConfig.forEach(function(fieldConfig){
-            var fieldEntity = OBJ_FORM.getField(fieldConfig["fieldKey"]);
+      function assignFields(OBJ_FORM, fieldData) {
+    
+          function createField(fieldConfig, containerId, subsidiaryId) {
+            var fieldEntity = OBJ_FORM.getField(fieldConfig.fieldKey);
             if (fieldEntity) {
-              var fieldLabel = fieldEntity.label;
-              var fieldID = fieldConfig["fieldKey"].replace('custentity', 'custpage');
-              var objField = {}
-              if (fieldConfig["type"] == "select") {
-                objField = {
-                  id: fieldID,
-                  label: fieldLabel,
-                  type: fieldConfig["type"],
-                  container: generalConfig["group"].id,
-                  source: fieldConfig["source"]
-                }
-              } else {
-                objField = {
-                  id: fieldID,
-                  label: fieldLabel,
-                  type: fieldConfig["type"],
-                  container: generalConfig["group"].id
-                }
+              var fieldID = fieldConfig.fieldKey.replace('custentity', 'custpage') + (subsidiaryId ? "_" + subsidiaryId : "");
+              var objField = {
+                id: fieldID,
+                label: fieldEntity.label,
+                type: fieldConfig.type,
+                container: containerId
+              };
+              if (fieldConfig.type === "select") objField.source = fieldConfig.source;
+              fieldConfig.custpage = fieldID;
+              OBJ_FORM.addField(objField).setHelpText(fieldConfig.fieldRecord)
+            }
+          }
+          //setHelpText(fieldConfig.fieldRecord).
+          if (fieldData.subsidiaries) {
+            for (var subsidiaryId in fieldData.subsidiaries) {
+              if (fieldData.subsidiaries.hasOwnProperty(subsidiaryId)) {
+                var subsidiary = fieldData.subsidiaries[subsidiaryId];
+                subsidiary.fieldsEntity.forEach(function (fieldConfig) {
+                  createField(fieldConfig, subsidiary.group.id, subsidiaryId);
+                });
               }
-              fieldConfig["custpage"] = fieldID;//set fieldConfig
-              if (isCreate) {
-                OBJ_FORM.addField(objField).setHelpText(fieldConfig["fieldRecord"]);
-              }
+            }
+          }
+
+          if (fieldData.general) {
+            fieldData.general.forEach(function (fieldConfig) {
+              createField(fieldConfig, fieldData.general.group.id);
+            });
+          }
+      }
+
+
+      /**
+       * Asigna el custpage para cada campo temporal , en caso sea en el client muestra los valores segun la sublista
+       * @param {*} fieldData Campos filtrados que se van a mostrar
+       * @param {*} isClient contexto en que se ejecuta la funcion
+       * @param {*} currentRecord Data de la entidad
+       */
+      function setCustpage(fieldData,isClient,currentRecord,isVisible) {
+        //console.log("currentRecord ",currentRecord.id)
+
+        function updateFieldConfig(fields, subsidiaryId) {
+          fields.forEach(function (fieldConfig) {
+            var custpageValue = fieldConfig.fieldKey.replace('custentity', 'custpage');
+            if (subsidiaryId) {
+              custpageValue += "_" + subsidiaryId;
+            }
+            fieldConfig["custpage"] = custpageValue;
+            if (isClient && subsidiaryId) {    
+              var field = currentRecord.getField(fieldConfig.custpage);
+              if (field) field.isDisplay = isVisible;
             }
           });
         }
-      }
 
-      function setCustpage(fieldData) {
+
+        /**
+         * Oculta el grupo de manera nativa con js vanilla
+         * @param {*} label Nombre del grupo
+         * @param {*} hide 
+         */
+        function toggleBlockByName(label, hide) {
+          var tdElement = document.querySelector('td[data-nsps-label="' + label + '"]');
+          if (tdElement) {
+            var mainTr = tdElement.closest('tr');
+            if (mainTr) {
+              mainTr.style.display = hide ? 'none' : '';
+              var relatedSiblings = mainTr.parentElement.querySelectorAll('tr');
+              Array.prototype.forEach.call(relatedSiblings, function (sibling) {
+                if (sibling.id === mainTr.id || sibling.id.startsWith('tr_' + mainTr.id) || sibling.className.includes('uir-field-group')) {
+                  sibling.style.display = hide ? 'none' : '';
+                }
+              });
+            }
+          }
+        }
+
         if (fieldData.subsidiaries) {
-          var subsidiariesConfig = fieldData.subsidiaries;
-          for (var subsidiaryId in subsidiariesConfig) {
-            if (subsidiariesConfig.hasOwnProperty(subsidiaryId)) {
-              var subsidiaryConfig = subsidiariesConfig[subsidiaryId];
-              if (subsidiaryConfig["fieldsEntity"].length) {
-                subsidiaryConfig["fieldsEntity"].forEach(function (fieldConfig) {
-                    var fieldID = fieldConfig["fieldKey"].replace('custentity', 'custpage') + "_" + subsidiaryId;    
-                    fieldConfig["custpage"] = fieldID; //set fieldConfig 
-                })
+          for (var subsidiaryId in fieldData.subsidiaries) {
+            if (fieldData.subsidiaries.hasOwnProperty(subsidiaryId)) {
+              var subsidiaryConfig = fieldData.subsidiaries[subsidiaryId];
+              if (subsidiaryConfig.fieldsEntity.length) {
+                updateFieldConfig(subsidiaryConfig.fieldsEntity, subsidiaryId);
+                if (isClient) {
+                  toggleBlockByName(subsidiaryConfig.groupName,!isVisible)
+                }
+                
               }
             }
           }
         }
+
         if (fieldData.general) {
-          var generalConfig = fieldData.general;
-          generalConfig.forEach(function (fieldConfig) {  
-              var fieldID = fieldConfig["fieldKey"].replace('custentity', 'custpage');    
-              fieldConfig["custpage"] = fieldID;//set fieldConfig   
-          });
+          updateFieldConfig(fieldData.general);
         }
       }
+    
 
       function getFieldToHide(){
         var listSetupHide = []
@@ -1244,9 +1269,36 @@
         return listSetupHide;
       }
 
-      function getFieldToView(filters){
+      function getFieldToView(featureInterCompany,primaryCountryID,subsidiaries){
+        var filters = [
+          ["custrecord_lmry_section", "anyof", "1"],
+          "AND",
+          ["isinactive", "is", "F"]
+        ]
+        if (featureInterCompany) {
+          var uniqueCountryCodes = [];
+          var seen = {};
+          for (var subsidiaryId in subsidiaries) {
+            if (subsidiaries.hasOwnProperty(subsidiaryId)) {
+              var countryCode = subsidiaries[subsidiaryId].countryCode;
+              if (!seen[countryCode]) {
+                seen[countryCode] = true;
+                uniqueCountryCodes.push(countryCode);
+              }
+            }
+          }
+          log.error("uniqueCountryCodes", uniqueCountryCodes)
+          var countryIDs = [];
+
+          uniqueCountryCodes.forEach(function(code){
+            countryIDs.push(getCountryID(code));
+          })
+          filters.push("AND", ["custrecord_lmry_country", "anyof", countryIDs])
+        } else {
+          filters.push("AND", ["custrecord_lmry_country", "anyof", primaryCountryID])
+        }
         var countries = getCountries();
-        var listSetupView = [];
+        var listSetupView = {};
         search.create({
           type: "customrecord_lmry_fields",
           filters: filters,
@@ -1270,6 +1322,56 @@
         return listSetupView;
       }
 
+      function getSubsidiaries(currentRecord,isFilterSubsidiaries) {
+       
+
+        var filters = [["custrecord_lmry_features_subsidiary.isinactive","anyof","F"]];
+        if (isFilterSubsidiaries) {
+          //log.error("currRecord: ", currentRecord.id)
+          var countSubsidiaries = currentRecord.getLineCount({
+            sublistId: 'submachine'
+          });
+          var subsidiaries = [];
+          for (var i = 0; i < countSubsidiaries; i++) {
+            subsidiaries.push(currentRecord.getSublistValue({ sublistId: 'submachine', fieldId: 'subsidiary', line: i }))
+          }
+          filters.push("AND",["custrecord_lmry_features_subsidiary.internalid","anyof",subsidiaries])
+        }
+
+        var jsonSubsidiaries = {};
+        search.create({
+          type: "customrecord_lmry_features_by_subsi",
+          columns: [
+            'custrecord_lmry_features_subsidiary.internalid', 
+            'custrecord_lmry_features_subsidiary.country', 
+            'custrecord_lmry_features_subsidiary.name'
+          ],
+          filters: filters
+        }).run().each(function (result) {
+          //log.error("result :",result)
+          var columns = result.columns;
+          var internalid = result.getValue(columns[0]);
+          var nameSubsidiary = result.getValue(columns[2]);
+          if (nameSubsidiary && nameSubsidiary.indexOf(":") != -1) {
+            var nameWords = result.getValue(columns[2]).split(":");
+            nameSubsidiary = nameWords[nameWords.length - 1];
+          }
+         
+          //console.log("nameWords: ", nameWords)
+          jsonSubsidiaries[internalid] = {
+            countryCode: result.getValue(columns[1]),
+            countryName: result.getText(columns[1]),
+            "name": nameSubsidiary || " "
+          }
+          return true;
+        });
+
+        //log.error("subsidiaries: ", jsonSubsidiaries)
+        return jsonSubsidiaries;
+      }
+
+      /*
+      
       function getSubsidiaries(currentRecord) {
         //var currRecord = record.load({type:record.Type.CUSTOMER, id:currentRecord.get().id, isDynamic:true});
         log.error("currRecord: ", currentRecord.id)
@@ -1302,16 +1404,19 @@
         log.error("subsidiaries: ", jsonSubsidiaries)
         return jsonSubsidiaries;
       }
+      */
 
       function hideFields(listHide, OBJ_FORM) {
-        listHide.forEach(function (fieldName) {
-          var field = OBJ_FORM.getField({ id: fieldName })
-          if (field) {
-            field.updateDisplayType({
-              displayType: serverWidget.FieldDisplayType.HIDDEN
-            });
-          }
-        })
+        require(['N/ui/serverWidget'], function (serverWidget) {
+          listHide.forEach(function (fieldName) {
+            var field = OBJ_FORM.getField({ id: fieldName })
+            if (field) {
+              field.updateDisplayType({
+                displayType: serverWidget.FieldDisplayType.HIDDEN
+              });
+            }
+          })
+        });
       }
 
       function removeElements(listHide, listView) {
@@ -1360,50 +1465,36 @@
       }
 
       function assignFieldsToSubsidiaries(subsidiaries, entityFields, typeEntity) {
-        var general = [];
+        var general = Object.keys(entityFields).filter(function (fieldKey) {
+          return entityFields[fieldKey] && entityFields[fieldKey].isGeneral;
+        }).map(function (fieldKey) {
+          return {
+            fieldKey: fieldKey,
+            fieldRecord: entityFields[fieldKey].fieldRecord,
+            type: entityFields[fieldKey].type,
+            source: entityFields[fieldKey].source || ""
+          };
+        });
 
-        for (var fieldKey in entityFields) {
-          if (entityFields.hasOwnProperty(fieldKey)) {
+        Object.keys(subsidiaries).forEach(function (subsidiaryId) {
+          var subsidiary = subsidiaries[subsidiaryId];
+          var countryCode = subsidiary.countryCode;
+          subsidiary.fieldsEntity = Object.keys(entityFields).filter(function (fieldKey) {
             var fieldConfig = entityFields[fieldKey];
-            if (fieldConfig && fieldConfig.isGeneral) {
-              general.push({
-                fieldKey: fieldKey,
-                fieldRecord: fieldConfig.fieldRecord,
-                type: fieldConfig.type,
-                source: fieldConfig.source || ""
-              });
-            }
-          }
-        }
-
-        for (var subsidiaryId in subsidiaries) {
-          if (subsidiaries.hasOwnProperty(subsidiaryId)) {
-            var subsidiary = subsidiaries[subsidiaryId];
-            var countryCode = subsidiary.countryCode;
-            subsidiary.fieldsEntity = [];
-
-            for (var fieldKey in entityFields) {
-              if (entityFields.hasOwnProperty(fieldKey)) {
-                var fieldConfig = entityFields[fieldKey];
-
-                if (
-                  fieldConfig &&
-                  !fieldConfig.isGeneral &&
-                  fieldConfig.countries &&
-                  fieldConfig.countries[countryCode] &&
-                  fieldConfig.countries[countryCode].indexOf(typeEntity) !== -1
-                ) {
-                  subsidiary.fieldsEntity.push({
-                    fieldKey: fieldKey,
-                    fieldRecord: fieldConfig.fieldRecord,
-                    type: fieldConfig.type,
-                    source: fieldConfig.source || ""
-                  });
-                }
-              }
-            }
-          }
-        }
+            return fieldConfig &&
+              !fieldConfig.isGeneral &&
+              fieldConfig.countries &&
+              fieldConfig.countries[countryCode] &&
+              fieldConfig.countries[countryCode].indexOf(typeEntity) !== -1;
+          }).map(function (fieldKey) {
+            return {
+              fieldKey: fieldKey,
+              fieldRecord: entityFields[fieldKey].fieldRecord,
+              type: entityFields[fieldKey].type,
+              source: entityFields[fieldKey].source || ""
+            };
+          });
+        });
 
         return { subsidiaries: subsidiaries, general: general };
       }
@@ -1412,10 +1503,10 @@
         for (var subsidiaryId in entityFields.subsidiaries) {
           if (entityFields.subsidiaries.hasOwnProperty(subsidiaryId)) {
             var subsidiary = entityFields.subsidiaries[subsidiaryId];
-            var countryCode = subsidiary.countryCode; 
-            if (listSetupView[countryCode]) {
-              var allowedFields = listSetupView[countryCode]; 
+            var countryCode = subsidiary.countryCode;
 
+            if (listSetupView[countryCode]) {
+              var allowedFields = listSetupView[countryCode];
               subsidiary.fieldsEntity = subsidiary.fieldsEntity.filter(function (field) {
                 return allowedFields.indexOf(field.fieldKey) !== -1;
               });
@@ -1426,6 +1517,7 @@
         }
         return entityFields;
       }
+    
 
       function getEntityFields() {
         return {
@@ -1494,7 +1586,7 @@
             },
             isGeneral: false,
             fieldRecord: "custrecord_lmry_ef_entityrelated",
-            type:"text"
+            type:"checkbox"
           },
           custentity_lmry_fiscal_responsability: {
             countries: {
@@ -1571,11 +1663,65 @@
       }
 
 
+
+      function changeSubsidiary(currentRCD, subsidiaries) {
+        try {
+          var subsidiaryID = currentRCD.getCurrentSublistValue({
+            sublistId: 'submachine',
+            fieldId: 'subsidiary'
+          });
+
+          var isClient = true;
+          var entityFields = getEntityFields();
+
+          // Registra el evento click UNA SOLA VEZ
+          document.removeEventListener('click', handleButtonClick); // Elimina cualquier registro previo
+          document.addEventListener('click', handleButtonClick);
+
+          function handleButtonClick(event) {
+            // Mapeo de acciones de botones y valores de isVisible
+            var buttonActions = {
+              submachine_addedit: true,  // Agregar (isVisible = true)
+              submachine_clear: false,  // Limpiar (isVisible = false)
+              submachine_remove: false  // Remover (isVisible = false)
+            };
+
+            // Verifica si el clic fue en uno de los botones mapeados
+            if (event.target && buttonActions.hasOwnProperty(event.target.id)) {
+              var isVisible = buttonActions[event.target.id];
+
+              // Crear jsonSubsidiaries para la subsidiaria seleccionada
+              var jsonSubsidiaries = {};
+              jsonSubsidiaries[subsidiaryID] = subsidiaries[subsidiaryID];
+              console.log("jsonSubsidiaries", jsonSubsidiaries);
+
+              // Procesar los datos de campo
+              var fieldData = assignFieldsToSubsidiaries(jsonSubsidiaries, entityFields, currentRCD.type);
+
+              // Crear grupos y actualizar campos
+              createGroups(null, fieldData, isClient);
+              setCustpage(fieldData, isClient, currentRCD, isVisible);
+
+              // Mostrar el botón presionado en consola
+              console.log("Botón presionado: " + event.target.id.replace('submachine_', '') + ", Subsidiaria: ", subsidiaryID);
+            }
+          }
+
+        } catch (error) {
+          console.error('Error', error);
+        }
+      }
+    
+
+
       return {
         HideColumn: HideColumn,
         HideSubTab: HideSubTab,
         HideEntityFields: HideEntityFields,
-        saveEntityFields: saveEntityFields
+        saveEntityFields: saveEntityFields,
+        showEntityFieldsIntercompany:showEntityFieldsIntercompany,
+        changeSubsidiary: changeSubsidiary,
+        getSubsidiaries:getSubsidiaries
       };
 
     });

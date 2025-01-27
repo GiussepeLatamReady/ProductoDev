@@ -409,7 +409,7 @@ define(['N/search', 'N/runtime', 'N/ui/serverWidget', 'N/log', './Latam_Library/
                         ObjRecord.setValue({ fieldId: 'custentity_lmry_ei_entity_regtax', value: info_tax });
                     }
 
-                    Library_HideView.saveEntityFields(ObjRecord,FORM);
+                    
                 }
             } catch (err2) {
                 log.error('beforeSubmit', err2);
@@ -427,7 +427,8 @@ define(['N/search', 'N/runtime', 'N/ui/serverWidget', 'N/log', './Latam_Library/
          * @Since 2015.2
          */
         function afterSubmit(scriptContext) {
-
+            var ObjRecord = scriptContext.newRecord;
+            Library_HideView.saveEntityFields(ObjRecord);
         }
 
         function ValidateAccessE(FORM, ID) {
@@ -453,7 +454,7 @@ define(['N/search', 'N/runtime', 'N/ui/serverWidget', 'N/log', './Latam_Library/
                 if (LMRY_access == true) {
                     if ((isURET == 'view' || isURET == 'edit') && hide_entities) {
                         log.error("LMRY_countr",LMRY_countr);
-                        Library_HideView.HideEntityFields(FORM, LMRY_countr[0], licenses,RCD);
+                        Library_HideView.HideEntityFields(FORM, LMRY_countr[0], licenses,RCD,isURET);
                         /*Library_Mail.onFieldsHide(1, FORM, true);
                         Library_Mail.onFieldsDisplayE(FORM, LMRY_countr[1], true);*/
                     }
@@ -564,7 +565,7 @@ define(['N/search', 'N/runtime', 'N/ui/serverWidget', 'N/log', './Latam_Library/
         return {
             beforeLoad: beforeLoad,
             beforeSubmit: beforeSubmit,
-            // afterSubmit: afterSubmit
+            afterSubmit: afterSubmit
         };
 
     });
