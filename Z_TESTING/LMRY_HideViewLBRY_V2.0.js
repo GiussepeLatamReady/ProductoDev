@@ -11,9 +11,9 @@
    * @NModuleScope Public
    */
 
-  define(['N/search', 'N/log','N/record', './LMRY_libSendingEmailsLBRY_V2.0'],
+  define(['N/search', 'N/log','N/record', './LMRY_libSendingEmailsLBRY_V2.0','N/runtime'],
 
-    function( search, log,record, Library_Mail) {
+    function( search, log,record, Library_Mail,runtime) {
 
       var err;
       var feature = false;
@@ -863,9 +863,8 @@
 
       function HideEntityFields(OBJ_FORM, countryCode, licenses, currentRecord,contextType) {
         try {
-          var featureInterCompany = true;
+          var featureInterCompany = runtime.getCurrentScript().getParameter({ name: "custscript_lmry_all_entity_fields" });
           var subsidiaries = []
-          log.error("HideEntityFields", "start");
           var authorizationCode = getFeatureByCountryCode(countryCode, licenses)
           var primaryCountryID = getCountryID(countryCode)
           if (featureInterCompany) subsidiaries = getSubsidiaries(currentRecord,contextType == "view")
@@ -878,26 +877,15 @@
             listSetupHide = removeElements(listSetupHide, listSetupView[countryCode]);
           }
 
-          log.error("listSetupView", listSetupView)
-          log.error("listSetupHide", listSetupHide)
-
           hideFields(listSetupHide, OBJ_FORM)
           if (featureInterCompany) {
             var entityFields = getEntityFields();
             log.error("entityFields",entityFields)
             var fieldData = assignFieldsToSubsidiaries(subsidiaries, entityFields, currentRecord.type);
-            log.error("fieldData 1",fieldData)
             fieldData = filterAllowedFieldsByCountry(listSetupView, fieldData);
-            
             createGroups(OBJ_FORM, fieldData);
             assignFields(OBJ_FORM, fieldData);
             loadData(fieldData,currentRecord)
-
-            log.error("fieldData 2",fieldData)
-            Object.keys(fieldData["subsidiaries"]).forEach(function(field){
-              log.error(field,fieldData["subsidiaries"][field])
-            })
-            
           }
         } catch (error) {
           log.error("[HideEntityFields] error",error);
@@ -1157,7 +1145,7 @@
                 type: fieldConfig.type,
                 container: containerId
               };
-              if (fieldConfig.type === "select") objField.source = fieldConfig.source;
+              if (fieldConfig.fieldKey == "custentity_lmry_country" || fieldConfig.fieldKey == "custentity_lmry_actecon_sii_cl") objField.source = fieldConfig.source;
               fieldConfig.custpage = fieldID;
               OBJ_FORM.addField(objField).setHelpText(fieldConfig.fieldRecord)
             }
@@ -1169,6 +1157,7 @@
                 var subsidiary = fieldData.subsidiaries[subsidiaryId];
                 subsidiary.fieldsEntity.forEach(function (fieldConfig) {
                   createField(fieldConfig, subsidiary.group.id, subsidiaryId);
+                  loadSelect(OBJ_FORM,fieldConfig,subsidiary.countryCode)
                 });
               }
             }
@@ -1179,6 +1168,120 @@
               createField(fieldConfig, fieldData.general.group.id);
             });
           }
+      }
+
+
+      function loadSelect(OBJ_FORM,fieldConfig,countryCode){
+        log.error("loadSelect","start")
+        var countryID = getCountryID(countryCode);
+        log.error("countryID",countryID)
+        log.error("countryCode",countryCode)
+        if (fieldConfig.fieldKey == "custentity_lmry_fiscal_responsability") {
+
+          var fieldList = OBJ_FORM.getField(fieldConfig.custpage);
+          fieldList.addSelectOption({
+            value: 0,
+            text: ' '
+          });
+          search.create({
+            type: "customrecord_lmry_fiscal_responsability",
+            filters: [
+              ["custrecordlmry_responsibility_country","anyof",countryID],
+              "AND",
+              ["isinactive","is","F"]
+            ],
+            columns:
+              ["internalid","name"]
+          }).run().each(function (result) {
+            var columns = result.columns;
+            fieldList.addSelectOption({
+              value: result.getValue(columns[0]),
+              text: result.getValue(columns[1])
+            });
+            return true
+          });
+        }
+
+        if (fieldConfig.fieldKey == "custentity_lmry_pa_person_type") {
+
+          var fieldList = OBJ_FORM.getField(fieldConfig.custpage);
+          fieldList.addSelectOption({
+            value: 0,
+            text: ' '
+          });
+          search.create({
+            type: "customrecord_lmry_entity_type",
+            filters: [
+              ["custrecord_lmry_person_type_country","anyof",countryID],
+              "AND",
+              ["isinactive","is","F"]
+            ],
+            columns:
+              ["internalid","name"]
+          }).run().each(function (result) {
+            log.error("result",result)
+            var columns = result.columns;
+            fieldList.addSelectOption({
+              value: result.getValue(columns[0]),
+              text: result.getValue(columns[1])
+            });
+            return true
+          });
+        }
+
+        if (fieldConfig.fieldKey == "custentity_lmry_sunat_tipo_doc_id") {
+
+          var fieldList = OBJ_FORM.getField(fieldConfig.custpage);
+          fieldList.addSelectOption({
+            value: 0,
+            text: ' '
+          });
+          search.create({
+            type: "customrecord_lmry_tipo_doc_iden",
+            filters: [
+              ["custrecord_lmry_tipo_doc_country","anyof",countryID],
+              "AND",
+              ["isinactive","is","F"]
+            ],
+            columns:
+              ["internalid","name"]
+          }).run().each(function (result) {
+            log.error("result",result)
+            var columns = result.columns;
+            fieldList.addSelectOption({
+              value: result.getValue(columns[0]),
+              text: result.getValue(columns[1])
+            });
+            return true
+          });
+        }
+
+        if (fieldConfig.fieldKey == "custentity_lmry_sv_taxpayer_type") {
+
+          var fieldList = OBJ_FORM.getField(fieldConfig.custpage);
+          fieldList.addSelectOption({
+            value: 0,
+            text: ' '
+          });
+          search.create({
+            type: "customrecord_lmry_taxpayer_type_sv",
+            filters: [
+              ["custrecord_country","anyof",countryID],
+              "AND",
+              ["isinactive","is","F"]
+            ],
+            columns:
+              ["internalid","name"]
+          }).run().each(function (result) {
+            log.error("result",result)
+            var columns = result.columns;
+            fieldList.addSelectOption({
+              value: result.getValue(columns[0]),
+              text: result.getValue(columns[1])
+            });
+            return true
+          });
+        }
       }
 
 
@@ -1551,15 +1654,35 @@
             type:"text"
           },
           custentity_lmry_sv_taxpayer_number: {
-            isGeneral: true,
+            isGeneral: false,
             fieldRecord: "custrecord_lmry_ef_sv_taxpayer_number",
-            type:"text"
+            type:"text",
+            countries: {
+              CL: ["customer", "vendor"],
+              CO: ["customer", "vendor"],
+              PA: ["customer", "vendor"],
+              PE: ["customer", "vendor"],
+              DO: ["customer", "vendor"],
+              MX: ["customer", "vendor"],
+              BO: ["customer", "vendor"],
+              PY: ["customer", "vendor"],
+            },
           },
           custentity_lmry_sv_taxpayer_type: {
-            isGeneral: true,
+            isGeneral: false,
             fieldRecord: "custrecord_lmry_ef_sv_taxpayer_type",
             type:"select",
-            source: "customrecord_lmry_taxpayer_type_sv"
+            source: "customrecord_lmry_taxpayer_type_sv",
+            countries: {
+              CL: ["customer", "vendor"],
+              CO: ["customer", "vendor"],
+              PA: ["customer", "vendor"],
+              PE: ["customer", "vendor"],
+              DO: ["customer", "vendor"],
+              MX: ["customer", "vendor"],
+              BO: ["customer", "vendor"],
+              PY: ["customer", "vendor"],
+            },
           },
           custentity_lmry_actecon_sii_cl: {
             countries: {
@@ -1590,7 +1713,7 @@
           },
           custentity_lmry_fiscal_responsability: {
             countries: {
-              PE: ["customer"]
+              CO: ["customer"]
             },
             isGeneral: false,
             fieldRecord: "custrecord_lmry_ef_fiscal_responsability",

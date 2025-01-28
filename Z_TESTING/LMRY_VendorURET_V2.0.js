@@ -303,6 +303,8 @@ define([
                     library_WHT_Validation.saveFieldWhtIva(RCD);
 
                 }
+                var featureInterCompany = runtime.getCurrentScript().getParameter({ name: "custscript_lmry_all_entity_fields" });
+                if (featureInterCompany) Library_HideView.saveEntityFields(RCD);  
             } catch (err) {
                 Library_Mail.sendemail('[beforeLoad] ' + err, LMRY_script);
                 log.error("error", err);
@@ -332,8 +334,8 @@ define([
                 // Solo si tiene acceso
                 if (LMRY_access == true) {
                     // Oculta todos los campos LMRY
-                    if ((isURET == 'view'|| isURET == 'edit') && hide_entities) {
-                        Library_HideView.HideEntityFields(FORM, LMRY_countr[0], licenses,RCD);
+                    if ((isURET == 'view'|| isURET == 'edit' ||isURET == 'create') && hide_entities) {
+                        Library_HideView.HideEntityFields(FORM, LMRY_countr[0], licenses,RCD,isURET);
                         /*Library_Mail.onFieldsHide(1, FORM, true);
                         Library_Mail.onFieldsDisplayE(FORM, LMRY_countr[1], true);*/
                     }

@@ -428,7 +428,9 @@ define(['N/search', 'N/runtime', 'N/ui/serverWidget', 'N/log', './Latam_Library/
          */
         function afterSubmit(scriptContext) {
             var ObjRecord = scriptContext.newRecord;
-            Library_HideView.saveEntityFields(ObjRecord);
+            var featureInterCompany = runtime.getCurrentScript().getParameter({ name: "custscript_lmry_all_entity_fields" });
+            if (featureInterCompany) Library_HideView.saveEntityFields(ObjRecord);
+            
         }
 
         function ValidateAccessE(FORM, ID) {
@@ -452,7 +454,7 @@ define(['N/search', 'N/runtime', 'N/ui/serverWidget', 'N/log', './Latam_Library/
 
                 // Solo si tiene acceso
                 if (LMRY_access == true) {
-                    if ((isURET == 'view' || isURET == 'edit') && hide_entities) {
+                    if ((isURET == 'view' || isURET == 'edit'|| isURET == 'create') && hide_entities) {
                         log.error("LMRY_countr",LMRY_countr);
                         Library_HideView.HideEntityFields(FORM, LMRY_countr[0], licenses,RCD,isURET);
                         /*Library_Mail.onFieldsHide(1, FORM, true);

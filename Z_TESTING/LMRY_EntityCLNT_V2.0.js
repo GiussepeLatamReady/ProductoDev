@@ -60,6 +60,7 @@ define([
     // SuiteTax Feature
     var ST_FEATURE = false;
     var subsidiaries = {};
+    var featureInterCompany = runtime.getCurrentScript().getParameter({ name: "custscript_lmry_all_entity_fields" });
     /**
      * Function to be executed after page is initialized.
      *
@@ -105,7 +106,7 @@ define([
           }
         }
 
-        var featureInterCompany = true;
+        
         if (featureInterCompany) {
           Library_HideView.showEntityFieldsIntercompany(currentRCD);
           subsidiaries = Library_HideView.getSubsidiaries(currentRecord,false)
@@ -165,7 +166,7 @@ define([
           return true;
         }
 
-        if (subListName == "submachine") {
+        if (subListName == "submachine" && featureInterCompany) {
           Library_HideView.changeSubsidiary(currentRCD,subsidiaries);
         }
 
