@@ -39,6 +39,7 @@ define(['N/search', 'N/runtime', 'N/ui/serverWidget', 'N/log', './Latam_Library/
          */
         function beforeLoad(scriptContext) {
             try {
+                log.error("beforeLoad","start")
                 isURET = scriptContext.type;
                 FORM = scriptContext.form;
                 RCD = scriptContext.newRecord;
@@ -333,6 +334,7 @@ define(['N/search', 'N/runtime', 'N/ui/serverWidget', 'N/log', './Latam_Library/
          */
         function beforeSubmit(scriptContext) {
             try {
+                log.error("beforeSubmit","start")
                 var type = scriptContext.type;
                 // 2020.12.18 - Validacion para oldRecord
                 if (type != 'view' && type != 'create') {
@@ -427,14 +429,17 @@ define(['N/search', 'N/runtime', 'N/ui/serverWidget', 'N/log', './Latam_Library/
          * @Since 2015.2
          */
         function afterSubmit(scriptContext) {
+            log.error("afterSubmit","start")
             var ObjRecord = scriptContext.newRecord;
             var featureInterCompany = runtime.getCurrentScript().getParameter({ name: "custscript_lmry_all_entity_fields" });
+            log.error("featureInterCompany",featureInterCompany)
             if (featureInterCompany) Library_HideView.saveEntityFields(ObjRecord);
             
         }
 
         function ValidateAccessE(FORM, ID) {
             try {
+                log.error("ValidateAccessE","start")
                 var LMRY_Result = new Array();
 
                 // Inicializa variables Locales y Globales
@@ -453,6 +458,8 @@ define(['N/search', 'N/runtime', 'N/ui/serverWidget', 'N/log', './Latam_Library/
                 LMRY_access = Library_Mail.getCountryOfAccess(LMRY_countr, licenses);
 
                 // Solo si tiene acceso
+                log.error("LMRY_access",LMRY_access)
+                log.error("hide_entities",hide_entities)
                 if (LMRY_access == true) {
                     if ((isURET == 'view' || isURET == 'edit'|| isURET == 'create') && hide_entities) {
                         log.error("LMRY_countr",LMRY_countr);

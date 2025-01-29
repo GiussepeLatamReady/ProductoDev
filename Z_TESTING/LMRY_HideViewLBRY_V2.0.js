@@ -863,6 +863,11 @@
 
       function HideEntityFields(OBJ_FORM, countryCode, licenses, currentRecord,contextType) {
         try {
+
+          var subsidiary = currentRecord.getValue("subsidiary");
+          if (!subsidiary) return false;
+          
+          log.error("HideEntityFields","START")
           var featureInterCompany = runtime.getCurrentScript().getParameter({ name: "custscript_lmry_all_entity_fields" });
           var subsidiaries = []
           var authorizationCode = getFeatureByCountryCode(countryCode, licenses)
@@ -880,7 +885,7 @@
           hideFields(listSetupHide, OBJ_FORM)
           if (featureInterCompany) {
             var entityFields = getEntityFields();
-            log.error("entityFields",entityFields)
+            //log.error("entityFields",entityFields)
             var fieldData = assignFieldsToSubsidiaries(subsidiaries, entityFields, currentRecord.type);
             fieldData = filterAllowedFieldsByCountry(listSetupView, fieldData);
             createGroups(OBJ_FORM, fieldData);
@@ -895,15 +900,15 @@
       }
       
       
-      function showEntityFieldsIntercompany(currentRecord) {
+      function showEntityFieldsIntercompany(currentRecord,mode) {
         try {
 
           var subsidiariesAll = []
           subsidiariesAll = getSubsidiaries(currentRecord);
-
+          console.log("subsidiariesAll",subsidiariesAll)
           var subsidiariesView = []
-          subsidiariesView = getSubsidiaries(currentRecord,true);
-
+          subsidiariesView = getSubsidiaries(currentRecord,true,mode);
+          console.log("subsidiariesView",subsidiariesView)
     
           var entityFields = getEntityFields();
 
@@ -913,6 +918,7 @@
           createGroups(null, fieldDataHide,true)
           setCustpage(fieldDataHide,true,currentRecord,false); 
           
+          if (!Object.keys(subsidiariesView).length) return false;
 
           var listSetupView = getFieldToView(true,0,subsidiariesView);
           var fieldDataView = assignFieldsToSubsidiaries(subsidiariesView, entityFields, currentRecord.type);
@@ -931,8 +937,8 @@
       
       function saveEntityFields(currentRecord) {
         try {
-         
-          var subsidiaries = getSubsidiaries(currentRecord,true)
+         log.error("saveEntityFields","start")
+          var subsidiaries = getSubsidiaries(currentRecord,true,"create")
           var listSetupView = getFieldToView(true,0,subsidiaries);
           var entityFields = getEntityFields();
           var fieldData = assignFieldsToSubsidiaries(subsidiaries, entityFields, currentRecord.type);
@@ -1172,15 +1178,13 @@
 
 
       function loadSelect(OBJ_FORM,fieldConfig,countryCode){
-        log.error("loadSelect","start")
+
         var countryID = getCountryID(countryCode);
-        log.error("countryID",countryID)
-        log.error("countryCode",countryCode)
         if (fieldConfig.fieldKey == "custentity_lmry_fiscal_responsability") {
 
           var fieldList = OBJ_FORM.getField(fieldConfig.custpage);
           fieldList.addSelectOption({
-            value: 0,
+            value: "",
             text: ' '
           });
           search.create({
@@ -1206,7 +1210,7 @@
 
           var fieldList = OBJ_FORM.getField(fieldConfig.custpage);
           fieldList.addSelectOption({
-            value: 0,
+            value: "",
             text: ' '
           });
           search.create({
@@ -1219,7 +1223,6 @@
             columns:
               ["internalid","name"]
           }).run().each(function (result) {
-            log.error("result",result)
             var columns = result.columns;
             fieldList.addSelectOption({
               value: result.getValue(columns[0]),
@@ -1233,7 +1236,7 @@
 
           var fieldList = OBJ_FORM.getField(fieldConfig.custpage);
           fieldList.addSelectOption({
-            value: 0,
+            value: "",
             text: ' '
           });
           search.create({
@@ -1246,7 +1249,6 @@
             columns:
               ["internalid","name"]
           }).run().each(function (result) {
-            log.error("result",result)
             var columns = result.columns;
             fieldList.addSelectOption({
               value: result.getValue(columns[0]),
@@ -1260,7 +1262,7 @@
 
           var fieldList = OBJ_FORM.getField(fieldConfig.custpage);
           fieldList.addSelectOption({
-            value: 0,
+            value: "",
             text: ' '
           });
           search.create({
@@ -1273,7 +1275,6 @@
             columns:
               ["internalid","name"]
           }).run().each(function (result) {
-            log.error("result",result)
             var columns = result.columns;
             fieldList.addSelectOption({
               value: result.getValue(columns[0]),
@@ -1390,7 +1391,7 @@
               }
             }
           }
-          log.error("uniqueCountryCodes", uniqueCountryCodes)
+          //log.error("uniqueCountryCodes", uniqueCountryCodes)
           var countryIDs = [];
 
           uniqueCountryCodes.forEach(function(code){
@@ -1425,19 +1426,27 @@
         return listSetupView;
       }
 
-      function getSubsidiaries(currentRecord,isFilterSubsidiaries) {
+      function getSubsidiaries(currentRecord,isFilterSubsidiaries,mode) {
        
 
         var filters = [["custrecord_lmry_features_subsidiary.isinactive","anyof","F"]];
         if (isFilterSubsidiaries) {
           //log.error("currRecord: ", currentRecord.id)
+          var subsidiaries = [];
+          if (mode == "create") subsidiaries.push(currentRecord.getValue("subsidiary"));
           var countSubsidiaries = currentRecord.getLineCount({
             sublistId: 'submachine'
           });
-          var subsidiaries = [];
+          
           for (var i = 0; i < countSubsidiaries; i++) {
-            subsidiaries.push(currentRecord.getSublistValue({ sublistId: 'submachine', fieldId: 'subsidiary', line: i }))
+            var subsidiary = currentRecord.getSublistValue({ sublistId: 'submachine', fieldId: 'subsidiary', line: i });
+            if (subsidiaries.indexOf(subsidiary)==-1) {
+              subsidiaries.push(subsidiary);
+            }
+            
           }
+          
+          if (!subsidiaries.length) return {};
           filters.push("AND",["custrecord_lmry_features_subsidiary.internalid","anyof",subsidiaries])
         }
 

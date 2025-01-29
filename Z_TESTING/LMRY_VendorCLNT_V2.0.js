@@ -95,8 +95,8 @@ define([
                     });
                 }
 
-                if (featureInterCompany) {
-                    Library_HideView.showEntityFieldsIntercompany(currentRCD);
+                if (featureInterCompany && subsidiary) {
+                    Library_HideView.showEntityFieldsIntercompany(currentRCD,mode_type);
                     subsidiaries = Library_HideView.getSubsidiaries(currentRecord, false)
                 }
             } catch (err) {

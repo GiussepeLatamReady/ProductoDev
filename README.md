@@ -40,6 +40,23 @@ Actualmente, las entidades cuentan con campos visibles en función del país de 
 
 ## Observations
  
+## Configuration
+---features
+By Entity is true - LatamReady - Enable Features by Subsidiary
+
+--- hide Fields
+
+custentity_2663_email_address_notif
+custentity_lmry_desc_economic_activity
+custentity_lmry_type_activity
+custentity_ls_coordinate_address
+custentity_lmry_def_win_start
+custentity_lmry_def_win_end
+custentity_lmry_smp_client_id
+custentity_lmry_add_in_smp
+custentity_lmry_smp_skills_customer
+custentity_lmry_smp_note
+
 
 ## SmartReady
 
