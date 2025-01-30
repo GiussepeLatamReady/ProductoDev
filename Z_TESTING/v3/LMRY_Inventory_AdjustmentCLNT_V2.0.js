@@ -55,6 +55,7 @@ define([
 
         // Valida el Acceso
         ValidateAccessAjust(subsidiary);
+        MXPedimentos.manageFieldVisibility(subsidiary,currentRCD)
 
       } catch (err) {
         Library_Mail.sendemail(' [ pageInit ] ' + err, LMRY_script);
@@ -83,8 +84,7 @@ define([
           // Valida el Acceso
           ValidateAccessAjust(subsidiary);
           
-          redirectToPageWithParameter(subsidiary);
-          
+          MXPedimentos.manageFieldVisibility(subsidiary,currentRCD)
           return true;
         }
 
@@ -131,22 +131,6 @@ define([
 
     }
 
-    function redirectToPageWithParameter(subsidiaryID) {
-      var currentUrl = window.location.href;
-      var regex = new RegExp('([?&])subsidiary=([^&]*)');
-
-      // Verificar si el parámetro 'subsidiary' ya existe en la URL
-      if (regex.test(currentUrl)) {
-        // Si existe, reemplazar el valor del parámetro 'subsidiary' con subsidiaryID
-        currentUrl = currentUrl.replace(regex, '$1subsidiary=' + subsidiaryID);
-      } else {
-        // Si no existe, agregar el parámetro 'subsidiary=subsidiaryID'
-        currentUrl += (currentUrl.indexOf('?') !== -1 ? '&' : '?') + 'subsidiary=' + subsidiaryID;
-      }
-
-      // Redirigir a la URL con el parámetro actualizado
-      window.location.href = currentUrl;
-    }
   
 
     function saveRecord(context){

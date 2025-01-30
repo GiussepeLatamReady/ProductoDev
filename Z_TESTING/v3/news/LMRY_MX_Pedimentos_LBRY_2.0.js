@@ -107,6 +107,22 @@ define(["N/query", "N/search", "N/record", "N/log","N/runtime","N/format"], func
         }
     }
 
+    function manageFieldVisibility(subsidiary,currentRecord){
+        var isVisible = false;
+        console.log("subsidiary :",subsidiary)
+        if (subsidiary) isVisible = isAutomaticPedimentos(subsidiary);
+        console.log("isVisible :",isVisible)
+        var pedimentoFields = [
+            "custpage_mx_nro_pedimento",
+            "custpage_mx_pedimento_aduana",
+            "custpage_mx_pedimento_date"
+        ]
+        pedimentoFields.forEach(function(field){
+            console.log("field :",field)
+            currentRecord.getField(field).isDisplay = isVisible;
+        });
+    }
+
     function showMXTransactionbyPedimentFields(form, id, type, eventType,isItemReceipt) {
         var fieldPedimento;
         var fieldAduana;
@@ -585,40 +601,6 @@ define(["N/query", "N/search", "N/record", "N/log","N/runtime","N/format"], func
         
     }
 
-    function getTranslations() {
-        var language = runtime.getCurrentScript().getParameter({ name: "LANGUAGE" }).substring(0, 2);
-        language = ["es", "pt"].indexOf(language) != -1 ? language : "en";
-    
-        var translatedFields = {
-            "es": {
-                "NO_LINES_SELECTED": "No hay líneas seleccionadas",
-                "INSUFFICIENT_STOCK": "Error no hay suficiente stock",
-                "PEDIMENTO_SUCCESS": "Pedimento creado con éxito",
-                "PEDIMENTO_ERROR_DETAIL": "Error al crear el pedimento Detail",
-                "PEDIMENTO_EXISTS": "Ya existen pedimentos",
-                "NO_MX_TRANSACTION": "No hay Mx Transaction"
-            },
-            "en": {
-                "NO_LINES_SELECTED": "No lines selected",
-                "INSUFFICIENT_STOCK": "Error not enough stock",
-                "PEDIMENTO_SUCCESS": "Pedimento created successfully",
-                "PEDIMENTO_ERROR_DETAIL": "Error creating pedimento Detail",
-                "PEDIMENTO_EXISTS": "Pedimentos already exist",
-                "NO_MX_TRANSACTION": "No Mx Transaction"
-            },
-            "pt": {
-                "NO_LINES_SELECTED": "Nenhuma linha selecionada",
-                "INSUFFICIENT_STOCK": "Erro não há estoque suficiente",
-                "PEDIMENTO_SUCCESS": "Pedimento criado com sucesso",
-                "PEDIMENTO_ERROR_DETAIL": "Erro ao criar o pedimento Detalhe",
-                "PEDIMENTO_EXISTS": "Já existem pedimentos",
-                "NO_MX_TRANSACTION": "Não há Transação Mx"
-            }
-        };
-    
-        return translatedFields[language];
-    }
-
     function isAutomaticPedimentos(idSubsidiary) {
         var featPedimentos = false;
         var featureSubs = runtime.isFeatureInEffect({ feature: 'SUBSIDIARIES' });
@@ -663,6 +645,7 @@ define(["N/query", "N/search", "N/record", "N/log","N/runtime","N/format"], func
         updateLinesUsePedimentos:updateLinesUsePedimentos,
         pedimentoIsValid:pedimentoIsValid,
         isAutomaticPedimentos: isAutomaticPedimentos,
-        deletePedimentoDetails: deletePedimentoDetails
+        deletePedimentoDetails: deletePedimentoDetails,
+        manageFieldVisibility:manageFieldVisibility
     };
 });

@@ -93,6 +93,12 @@ https://tstdrv1774174.app.netsuite.com/app/accounting/transactions/itemship.nl?i
 
 
 
+general preferences
+
+Maximum Entries in Dropdowns *
+Number of Rows in List Segments *
+
+
 
 
 

@@ -154,19 +154,15 @@ define([
             }
           }
         }
-        var subsidiaryID = "";
-        if (request) {
-          subsidiaryID = request.parameters.subsidiary;
+    
+        
+        if (runtime.executionContext === 'USERINTERFACE' &&
+          (["create", "edit", "copy"].indexOf(type) !== -1 || (type === "view" && country[0] === "MX"))) {
+          MXPedimentos.showMXTransactionbyPedimentFields(form, recordObj.id, "inventoryadjustment", type);
         }
-        if (subsidiaryID) recordObj.setValue({ fieldId: 'subsidiary', value: subsidiaryID });
-        if (subsidiaryID || country[0] == "MX") {
-          if (country[0] == "MX") subsidiaryID = subsidiary;
-          var featPedimentos = MXPedimentos.isAutomaticPedimentos(subsidiaryID);
-          if (runtime.executionContext == 'USERINTERFACE' && featPedimentos && (type === "create" || type === "edit" || type === "copy" || type === "view")) {
-            MXPedimentos.showMXTransactionbyPedimentFields(form, recordObj.id, "purchaseorder", type);
-          }
-          
-        }
+      
+
+
 
       } catch (error) {
         log.error(" [ beforeLoad ]  error",error);
