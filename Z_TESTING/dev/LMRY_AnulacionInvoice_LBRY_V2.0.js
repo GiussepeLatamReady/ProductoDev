@@ -1135,7 +1135,11 @@ define(['N/record', 'N/runtime', 'N/log', 'N/search', 'N/format', 'N/transaction
             try {
 
                 var paymentValues = getPaymentValues(recordId);
-
+                F_SUBSIDIAR = runtime.isFeatureInEffect({ feature: "SUBSIDIARIES" });
+                F_LOCMANDATORY = runtime.getCurrentUser().getPreference({ name: 'LOCMANDATORY' });
+                F_DEPTMANDATORY = runtime.getCurrentUser().getPreference({ name: 'DEPTMANDATORY' });
+                F_CLASSMANDATORY = runtime.getCurrentUser().getPreference({ name: 'CLASSMANDATORY' });
+                
                 if (F_SUBSIDIAR && isVoidPaymentClosedPeriod(paymentValues.subsidiary)) {
                     return reversalJournalClosedPeriod(recordId,paymentValues);
                 }
@@ -1159,10 +1163,8 @@ define(['N/record', 'N/runtime', 'N/log', 'N/search', 'N/format', 'N/transaction
                 var accountCredit = custPymtAccountDetail.filter(function (cuenta) { return cuenta.values[3] == null })[0].values[1];
                 log.debug("data custPymtAccountDetail", [accountDebit, accountCredit]);
 
-                F_SUBSIDIAR = runtime.isFeatureInEffect({ feature: "SUBSIDIARIES" });
-                F_LOCMANDATORY = runtime.getCurrentUser().getPreference({ name: 'LOCMANDATORY' });
-                F_DEPTMANDATORY = runtime.getCurrentUser().getPreference({ name: 'DEPTMANDATORY' });
-                F_CLASSMANDATORY = runtime.getCurrentUser().getPreference({ name: 'CLASSMANDATORY' });
+                
+                
 
 
                
@@ -1319,7 +1321,8 @@ define(['N/record', 'N/runtime', 'N/log', 'N/search', 'N/format', 'N/transaction
                 });
 
                 result['trans'] = revJournal.save({ enableSourcing: true, ignoreMandatoryFields: true, disableTriggers: true });
-                log.debug("reverse journal ", result);
+                console.log("reverse journal ", result);
+                log.error("reverse journal ", result);
                 return result;
             } catch (error) {
                 log.error('LMRY_AnulacionInvoice_LBRY_V2 - [reversalJournal]', error);
@@ -1349,14 +1352,10 @@ define(['N/record', 'N/runtime', 'N/log', 'N/search', 'N/format', 'N/transaction
                     trans: '',
                     fields: []
                 };
-                var F_SUBSIDIAR = runtime.isFeatureInEffect({ feature: "SUBSIDIARIES" });
-                var F_LOCMANDATORY = runtime.getCurrentUser().getPreference({ name: 'LOCMANDATORY' });
-                var F_DEPTMANDATORY = runtime.getCurrentUser().getPreference({ name: 'DEPTMANDATORY' });
-                var F_CLASSMANDATORY = runtime.getCurrentUser().getPreference({ name: 'CLASSMANDATORY' });
-
+                log.error("reversalJournalClosedPeriod","start")
 
                 var custPymtAccountDetail = query.runSuiteQL({
-                    query: "SELECT BUILTIN.DF(TransactionAccountingLine.Account) AS Account, TransactionAccountingLine.Account, TransactionAccountingLine.Debit, TransactionAccountingLine.Credit, TransactionLine.class, TransactionLine.department, TransactionLine.location FROM accountingbook, TransactionLine, TransactionAccountingLine WHERE TransactionLine.Transaction = TransactionAccountingLine.Transaction AND TransactionAccountingLine.accountingbook = accountingbook.id AND accountingbook.isprimary = 'T' AND TransactionLine.id = '0' AND TransactionAccountingLine.Transaction = '4286431' AND (TransactionAccountingLine.Debit IS NOT NULL OR TransactionAccountingLine.Credit IS NOT NULL) ORDER BY TransactionLine.ID" }).results;
+                    query: "SELECT BUILTIN.DF(TransactionAccountingLine.Account) AS Account, TransactionAccountingLine.Account, TransactionAccountingLine.Debit, TransactionAccountingLine.Credit, TransactionLine.class, TransactionLine.department, TransactionLine.location FROM accountingbook, TransactionLine, TransactionAccountingLine WHERE TransactionLine.Transaction = TransactionAccountingLine.Transaction AND TransactionAccountingLine.accountingbook = accountingbook.id AND accountingbook.isprimary = 'T' AND TransactionLine.id = '0' AND TransactionAccountingLine.Transaction = '" + recordId + "' AND (TransactionAccountingLine.Debit IS NOT NULL OR TransactionAccountingLine.Credit IS NOT NULL) ORDER BY TransactionLine.ID" }).results;
 
                 var transactionsLine = [];
                 custPymtAccountDetail.forEach(function(line){
@@ -1371,8 +1370,6 @@ define(['N/record', 'N/runtime', 'N/log', 'N/search', 'N/format', 'N/transaction
                         }
                     )
                 });
-
-                
 
                 var revJournal = record.create({
                     type: record.Type.JOURNAL_ENTRY,
@@ -1489,6 +1486,7 @@ define(['N/record', 'N/runtime', 'N/log', 'N/search', 'N/format', 'N/transaction
                 });
                 
                 result['trans'] = revJournal.save({ enableSourcing: true, ignoreMandatoryFields: true, disableTriggers: true });
+                log.error("result",result);
                 return result;
             } catch (error) {
                 log.error('LMRY_AnulacionInvoice_LBRY_V2 - [reversalJournal]', error);

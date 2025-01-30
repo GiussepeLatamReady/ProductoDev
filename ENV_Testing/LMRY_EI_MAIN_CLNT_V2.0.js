@@ -13,7 +13,7 @@
  */
 define(["N/format", "N/currency", "N/record", "N/search", "N/runtime", 'N/ui/message', "N/url", "N/log", "N/https", './EI_Library/LMRY_EI_libSendingEmailsLBRY_V2.0', './EI_Library/LMRY_AnulacionInvoice_LBRY_V2.0.js', './EI_Library/LMRY_CO_EI_DIAN_STATUS_LBRY.js'],
 
-    function (format, currencyApi, record, search, runtime, message, url, log, https, ei_library, library_AnulacionInvoice, dian_status_library) {
+    function (format, currencyApi, record, search, runtime, message, url, LOG, https, ei_library, library_AnulacionInvoice, dian_status_library) {
       var jsonLanguage = {
         'alertaEIStatus': {
           'en': 'Are you sure you want to generate the callback?',
@@ -117,7 +117,6 @@ define(["N/format", "N/currency", "N/record", "N/search", "N/runtime", 'N/ui/mes
           }
   
           if (mode == 'copy' || mode == 'create') {
-            // log.debug('Mode', mode)
   
             if (country == 'MX') {
               rec.setValue('custbody_lmry_pe_estado_sf', '');
@@ -157,7 +156,7 @@ define(["N/format", "N/currency", "N/record", "N/search", "N/runtime", 'N/ui/mes
             }
           }
         } catch (e) {
-          log.error('Error', '[pageInit]: ' + e)
+          LOG.error('Error', '[pageInit]: ' + e)
         }
       }
   
@@ -182,7 +181,6 @@ define(["N/format", "N/currency", "N/record", "N/search", "N/runtime", 'N/ui/mes
           var doc_subsi = currentRCD.getValue('subsidiary');
           var objCountry = ei_library.getCountryID(doc_subsi);
           var doc_country = objCountry.code;
-          //log.debug("doc_country_fieldchange", doc_country);
           var serie_id = currentRCD.getValue({ fieldId: name })
           if (doc_country == 'MX') {
             if (serie_id) {
@@ -291,7 +289,7 @@ define(["N/format", "N/currency", "N/record", "N/search", "N/runtime", 'N/ui/mes
           var currentRecord = scriptContext.currentRecord;
           var doc_subsi = currentRecord.getValue('subsidiary');
           var objCountry = ei_library.getCountryID(doc_subsi);
-          log.debug("objCountry", objCountry);
+          LOG.debug("objCountry", objCountry);
           if (objCountry.code == 'BR') {
   
             var sublistId = scriptContext.sublistId;
@@ -322,7 +320,7 @@ define(["N/format", "N/currency", "N/record", "N/search", "N/runtime", 'N/ui/mes
                 if (resultCFOP != null && resultCFOP.length != 0) {
                   var row = resultCFOP[0].columns;
                   var cfop_value = resultCFOP[0].getValue(row[0]);
-                  log.debug("cfop_value", cfop_value);
+                  LOG.debug("cfop_value", cfop_value);
                   if (cfop_value != null && cfop_value != '') {
                     // cfop_value = cfop_value.replace(/\./g, '');
                     if ((/^[1-3]/.test(cfop_value)) && (currentRecord.type == 'invoice' || currentRecord.type == 'salesorder' || currentRecord.type == 'estimate' || currentRecord.type == 'itemfulfillment')) {
@@ -338,7 +336,7 @@ define(["N/format", "N/currency", "N/record", "N/search", "N/runtime", 'N/ui/mes
             }
           }
         } catch (err) {
-          log.error("Error", "[ validateLine ] " + err);
+          LOG.error("Error", "[ validateLine ] " + err);
         }
         return true;
       }
@@ -384,20 +382,16 @@ define(["N/format", "N/currency", "N/record", "N/search", "N/runtime", 'N/ui/mes
        */
       function saveRecord(scriptContext) {
         try {
-          // log.debug('INICIO saveRecord - subsi', 'INICIO saveRecord - '+subsi);
           var rec = scriptContext.currentRecord;
           //var trans_type = rec.getValue('type').toLowerCase();
           var ntype = rec.getValue('ntype');
-          // log.debug("ntype", ntype);
           var doc_type = rec.getValue('custbody_lmry_document_type');
           var doc_subsi = rec.getValue('subsidiary');
   
           objCountry = ei_library.getCountryID(doc_subsi);
-          // log.debug("objCountry", objCountry);
           doc_country = objCountry.code;
           licencias = ei_library.getLicenses(doc_subsi)
           FEATURE_SETUP = featurePais(doc_country)
-          // log.debug("doc_type", doc_type);
   
           var doc_tranType = rec.getValue('custbody_lmry_transaction_type_doc')
           if (doc_tranType != '' && doc_tranType != null && doc_country == 'EC') {
@@ -424,7 +418,6 @@ define(["N/format", "N/currency", "N/record", "N/search", "N/runtime", 'N/ui/mes
                 ]
               });
               var resultTempDoc = busqTempDoc.run().getRange(0, 30);
-              // log.debug('resultTempDoc', resultTempDoc);
   
               if (resultTempDoc != null && resultTempDoc.length != 0) {
                 var _template = '';
@@ -497,15 +490,12 @@ define(["N/format", "N/currency", "N/record", "N/search", "N/runtime", 'N/ui/mes
                 });
   
                 resultAutoDetra = busqAutoDetra.run().getRange(0, 10);
-                // log.debug('resultAutoDetra', resultAutoDetra);
   
                 var autoDetra = '';
                 if (resultAutoDetra != null && resultAutoDetra.length != 0) {
                   fila = resultAutoDetra[0].columns;
                   autoDetra = resultAutoDetra[0].getValue(fila[0]);
                 }
-  
-                // log.debug('autoDetra', autoDetra);
   
                 if (autoDetra == false || autoDetra == 'F') {
                   var detra = rec.getValue('custbody_lmry_concepto_detraccion');
@@ -522,8 +512,6 @@ define(["N/format", "N/currency", "N/record", "N/search", "N/runtime", 'N/ui/mes
                     porcentaje1 = '';
                   }
   
-                  // log.debug('porcentaje1 - porcentaje2', porcentaje1+' - '+porcentaje2);
-  
                   if ((detra != '' && detra != null) && detra_text != 'SIN DETRACCIÓN') {
                     if ("" + porcentaje1 != "" + porcentaje2) {
                       alert('Los porcentajes de LATAM - PE PORCENTAJE DETRACCION y TAX RATE deben coincidir');
@@ -535,10 +523,8 @@ define(["N/format", "N/currency", "N/record", "N/search", "N/runtime", 'N/ui/mes
             }
           }
   
-          // log.debug('FIN saveRecord', 'FIN saveRecord');
-  
         } catch (err) {
-          log.error("Error", "[ saveRecord ] " + err);
+          LOG.error("Error", "[ saveRecord ] " + err);
         }
         return true;
       }
@@ -579,7 +565,7 @@ define(["N/format", "N/currency", "N/record", "N/search", "N/runtime", 'N/ui/mes
   
   
         } catch (err) {
-          log.error("Error", "[ PE_Void_EI ] " + err);
+          LOG.error("Error", "[ PE_Void_EI ] " + err);
         }
   
       }
@@ -590,7 +576,6 @@ define(["N/format", "N/currency", "N/record", "N/search", "N/runtime", 'N/ui/mes
             name: 'LANGUAGE'
           });
           language = language.substring(0, 2);
-          //log.debug('error log',invoiceId);
           if (invoiceId) {
             if (language == 'en') {
               var msg = 'The items in the addenda will be generated.';
@@ -642,7 +627,7 @@ define(["N/format", "N/currency", "N/record", "N/search", "N/runtime", 'N/ui/mes
   
         } catch (err) {
           alert("[ Addendas_Aut ]\n" + err);
-          log.error("Error", "[ Addendas_Aut ] " + err);
+          LOG.error("Error", "[ Addendas_Aut ] " + err);
         }
       }
   
@@ -677,7 +662,7 @@ define(["N/format", "N/currency", "N/record", "N/search", "N/runtime", 'N/ui/mes
             Remove_Trans(recordId, recordType)
           }
         } catch (err) {
-          log.error("Error", "[ Button_Remove_Trans ] " + err);
+          LOG.error("Error", "[ Button_Remove_Trans ] " + err);
         }
   
       }
@@ -740,18 +725,18 @@ define(["N/format", "N/currency", "N/record", "N/search", "N/runtime", 'N/ui/mes
           var F_REVERSALVOIDING = runtime.getCurrentScript().getParameter({
             name: 'REVERSALVOIDING'
           });
-          console.log("F_REVERSALVOIDING: ",F_REVERSALVOIDING)
+  
           var validJournal = true,
             journalId = "";
           if (F_REVERSALVOIDING == true || F_REVERSALVOIDING == 'T') {
             var resultJournal = library_AnulacionInvoice.reversalJournal(recordId);
-            log.debug('resultJournal', resultJournal);
+            LOG.error('resultJournal', resultJournal);
             validJournal = (resultJournal.fields.length == 0);
             journalId = resultJournal.trans || "";
           }
   
           if (validJournal) {
-            try {
+            try{
               var rec_payment = record.load({
                 type: "customerpayment",
                 id: recordId
@@ -785,7 +770,7 @@ define(["N/format", "N/currency", "N/record", "N/search", "N/runtime", 'N/ui/mes
               var language = runtime.getCurrentScript().getParameter({ name: 'LANGUAGE' });
               language = language.substring(0, 2);
               if (language != "es"&& language != "pt") language=="en";
-
+  
               var messageError = {
                 "es": {
                   "title": "Journal No Aplicado",
@@ -809,14 +794,13 @@ define(["N/format", "N/currency", "N/record", "N/search", "N/runtime", 'N/ui/mes
                 duration: 10000
               });
             }
-            
             rec_payment.save({
               ignoreMandatoryFields: true,
               enableSourcing: true
             });
           }
         }
-        
+  
   
         var myMsg = message.create({
           title: "REMOVE TRANSACTIONS - Executing",
@@ -863,7 +847,7 @@ define(["N/format", "N/currency", "N/record", "N/search", "N/runtime", 'N/ui/mes
           }
   
         } catch (err) {
-          log.error("Error", "[ GT_Void_EI ] " + err);
+          LOG.error("Error", "[ GT_Void_EI ] " + err);
         }
   
       }
@@ -896,7 +880,6 @@ define(["N/format", "N/currency", "N/record", "N/search", "N/runtime", 'N/ui/mes
               languageSubsid = "en";
           }
   
-          console.log('Se esta ejecutando bien')
           console.log('parametros', internal_Id, type_Rec, script_name, script_deploy, message)
           if (window["ei_void"]) {
             alert(jsonLanguage['alertaEsperar'][languageSubsid]);
@@ -906,7 +889,7 @@ define(["N/format", "N/currency", "N/record", "N/search", "N/runtime", 'N/ui/mes
             button_Logic(internal_Id, type_Rec, script_name, script_deploy, message, '', "cancelacion");
           }
         } catch (err) {
-          log.error('Error', '[ EC_Void_EI ]' + err)
+          LOG.error('Error', '[ EC_Void_EI ]' + err)
         }
       }
   
@@ -943,7 +926,7 @@ define(["N/format", "N/currency", "N/record", "N/search", "N/runtime", 'N/ui/mes
             button_Logic(internal_Id, type_Rec, script_name, script_deploy, message, '', "cancelacion", "BR", "");
           }
         } catch (err) {
-          log.error("Error", "[ BR_Void_EI ] " + err);
+          LOG.error("Error", "[ BR_Void_EI ] " + err);
         }
   
       }
@@ -978,7 +961,7 @@ define(["N/format", "N/currency", "N/record", "N/search", "N/runtime", 'N/ui/mes
           button_Logic(internal_Id, type_Rec, script_name, script_deploy, message, '', "correccion", "", "");
   
         } catch (err) {
-          log.error("Error", "[ BR_CartaCorreccion_EI ] " + err);
+          LOG.error("Error", "[ BR_CartaCorreccion_EI ] " + err);
         }
       }
   
@@ -986,8 +969,6 @@ define(["N/format", "N/currency", "N/record", "N/search", "N/runtime", 'N/ui/mes
         try {
           var scriptObj = '';
           scriptObj = runtime.getCurrentScript();
-          // log.debug("Antes del load " + scriptObj.getRemainingUsage());
-          // log.debug("type_Rec", type_Rec);
           objCountry = ei_library.getCountryID(id_subsi);
           doc_country = objCountry.code;
   
@@ -1001,7 +982,6 @@ define(["N/format", "N/currency", "N/record", "N/search", "N/runtime", 'N/ui/mes
   
             var _nMontoPagado = Number(_rec.amountpaid);
   
-            // log.debug("_nMontoPagado", _nMontoPagado);
             if (parseFloat(_nMontoPagado) > 0) {
               alert('No se puede eliminar esta transaccion debido a que tienen transacciones relacionadas');
               return true;
@@ -1040,7 +1020,7 @@ define(["N/format", "N/currency", "N/record", "N/search", "N/runtime", 'N/ui/mes
             button_Logic(internal_Id, type_Rec, script_name, script_deploy, message, '', "cancelacion", doc_country, cod_modification);
           }
         } catch (err) {
-          log.error("Error", "[ MX_Void_EI ] " + err);
+          LOG.error("Error", "[ MX_Void_EI ] " + err);
         }
   
       }
@@ -1078,7 +1058,7 @@ define(["N/format", "N/currency", "N/record", "N/search", "N/runtime", 'N/ui/mes
             button_Logic(internal_Id, type_Rec, script_name, script_deploy, message, '', "cancelacion");
           }
         } catch (err) {
-          log.error("Error", "[ BO_Void_EI ] " + err);
+          LOG.error("Error", "[ BO_Void_EI ] " + err);
         }
   
       }
@@ -1109,8 +1089,6 @@ define(["N/format", "N/currency", "N/record", "N/search", "N/runtime", 'N/ui/mes
   
             var objResponse = https.get("https://" + host + _CadUrl);
   
-            // log.debug(host + _CadUrl);
-            // log.debug(objResponse.body);
             if (Typevento == 'cancelacion') {
               if (objResponse.body == 'true') {
                 var myMsg = message.create({
@@ -1172,7 +1150,7 @@ define(["N/format", "N/currency", "N/record", "N/search", "N/runtime", 'N/ui/mes
             }
           }
         } catch (err) {
-          log.error("Error", "[ button_Logic ] " + err);
+          LOG.error("Error", "[ button_Logic ] " + err);
         }
       }
   
@@ -1242,7 +1220,7 @@ define(["N/format", "N/currency", "N/record", "N/search", "N/runtime", 'N/ui/mes
             window.open(url_stlt, '_blank');
           }
         } catch (e) {
-          log.error("Error", "[ Print_PDF_EI ] " + e);
+          LOG.error("Error", "[ Print_PDF_EI ] " + e);
         }
       }
   
@@ -1331,7 +1309,6 @@ define(["N/format", "N/currency", "N/record", "N/search", "N/runtime", 'N/ui/mes
                 returnExternalUrl: false
               });
               url_stlt = 'https://' + host + url_stlt + '&custpage_subsi=' + id_subsi + '&custpage_trandata=' + internal_Id + '&custpage_origen=transaccion' + '&rec_canc=' + rechazar + '&has_pdf=' + hasPDF;
-              console.log(url_stlt);
   
               var objRellamado = '';
               var retorno = '';
@@ -1342,7 +1319,6 @@ define(["N/format", "N/currency", "N/record", "N/search", "N/runtime", 'N/ui/mes
                   body: obj_json
                 });
               retorno = objRellamado.body;
-              //log.debug('retornoSTLT', retorno);
   
               switch (retorno) {
                 case 'PENDING':
@@ -1390,7 +1366,7 @@ define(["N/format", "N/currency", "N/record", "N/search", "N/runtime", 'N/ui/mes
             }
           }
         } catch (err) {
-          log.error("Error", "[ Status_EI ] " + err);
+          LOG.error("Error", "[ Status_EI ] " + err);
         }
   
       }
@@ -1455,7 +1431,7 @@ define(["N/format", "N/currency", "N/record", "N/search", "N/runtime", 'N/ui/mes
           }
   
         } catch (err) {
-          log.error("Error", "[ Send_Customer ] " + err);
+          LOG.error("Error", "[ Send_Customer ] " + err);
         }
   
       }
@@ -1539,7 +1515,7 @@ define(["N/format", "N/currency", "N/record", "N/search", "N/runtime", 'N/ui/mes
           }
   
         } catch (e) {
-          log.error('Error', '[ei exchange rate]: ' + e)
+          LOG.error('Error', '[ei exchange rate]: ' + e)
         }
   
       }
@@ -1557,7 +1533,7 @@ define(["N/format", "N/currency", "N/record", "N/search", "N/runtime", 'N/ui/mes
           var objCountry = ei_library.getCountryID(doc_subsi);
           var subsimoneda = objCountry.currency;
         }
-        log.debug("subsi-localmoneda-subsimoneda", subsi + '-' + localmoneda + '-' + subsimoneda)
+        LOG.debug("subsi-localmoneda-subsimoneda", subsi + '-' + localmoneda + '-' + subsimoneda)
         if (subsimoneda == localmoneda) {
           return '';
         } else if (currentRCD.getValue('currency') == localmoneda) {
@@ -1648,7 +1624,7 @@ define(["N/format", "N/currency", "N/record", "N/search", "N/runtime", 'N/ui/mes
           });
           window.location.href = output;
         } catch (err) {
-          log.error("Error", "[ onclick_event_preprintedNumber ] " + err);
+          LOG.error("Error", "[ onclick_event_preprintedNumber ] " + err);
         }
       }
   
@@ -1673,7 +1649,7 @@ define(["N/format", "N/currency", "N/record", "N/search", "N/runtime", 'N/ui/mes
           });
           window.location.href = output;
         } catch (err) {
-          log.error("Error", "[ onclick_event_updateTranid ] " + err);
+          LOG.error("Error", "[ onclick_event_updateTranid ] " + err);
         }
       }
   
@@ -1756,191 +1732,186 @@ define(["N/format", "N/currency", "N/record", "N/search", "N/runtime", 'N/ui/mes
                 if (window["ei_status"]) {
                     alert(jsonLanguage['alertaEsperar'][languageSubsid]);
                 } else {
-                    var flag = confirm(jsonLanguage['alertaGenerar'][languageSubsid])
-                    if (flag) {
 
-                        if (doc_type == 'invoice' && country_code == 'MX') {
-                            //Validacion feature Foreign Trade Complement
-                            var Licencias_mx = [];
-                            Licencias_mx = ei_library.getLicenses(subsid_id);
-                            var featuremx = ei_library.getAuthorization("1000", Licencias_mx);
-                            if (featuremx == true) {
-                                var valComercioExt = validarComercioExterior(doc_id, languageSubsid);
-                                if (valComercioExt) return true;
-                            }
-
+                    if (doc_type == 'invoice' && country_code == 'MX') {
+                        //Validacion feature Foreign Trade Complement
+                        var Licencias_mx = [];
+                        Licencias_mx = ei_library.getLicenses(subsid_id);
+                        var featuremx = ei_library.getAuthorization("1000", Licencias_mx);
+                        if (featuremx == true) {
+                            var valComercioExt = validarComercioExterior(doc_id, languageSubsid);
+                            if (valComercioExt) return true;
                         }
-
-                        if (country_code == 'AR') {
-                            var jsonMasivo = {
-                                'msjexiste': { 'en': "This transaction is already processing in LatamReady - Adv Sales Flow", 'es': "Esta transacción ya se encuentra procesando en LatamReady - Adv Sales Flow", 'pt': "Esta transação já está sendo processada no LatamReady - Adv Sales Flow" },
-
-                            };
-
-                            var flagInvPopulate = false;
-                            var invoicing_populateSearchObj = search.create({
-                                type: "customrecord_lmry_invoicing_populate",
-                                filters: [
-                                    ["custrecord_lmry_ip_subsidiary", "anyof", subsid_id],
-                                    "AND", ["custrecord_lmry_ip_transactions", "contains", doc_id],
-                                    "AND", ["custrecord_lmry_ip_state", "is", "1"]
-                                ],
-                                columns: [
-                                    search.createColumn({ name: "custrecord_lmry_ip_subsidiary", label: "Latam - IP Subsidiary" }),
-                                    search.createColumn({ name: "custrecord_lmry_ip_transactions", label: "Latam - IP Transactions" }),
-                                    search.createColumn({ name: "custrecord_lmry_ip_state", label: "Latam - IP State" })
-                                ]
-                            });
-
-                            var resultInvPop = invoicing_populateSearchObj.run().getRange(0, 100);
-                            if (resultInvPop != null && resultInvPop.length != 0) {
-                                row = resultInvPop[0].columns;
-                                var subsiInv = resultInvPop[0].getValue(row[0]);
-                                var transactionsInv = resultInvPop[0].getValue(row[1]);
-                                flagInvPopulate = true;
-                                if (flagInvPopulate) {
-                                    var alerta = jsonMasivo['msjexiste'][languageSubsid];
-                                    alert(alerta);
-                                    return true;
-                                }
-                            }
-
-                        }
-
-                        window["ei_status"] = true;
-                        busqTemplate = search.create({
-                            type: 'customrecord_lmry_ei_con_status',
-                            columns: ['custrecord_lmry_ei_con_temp',
-                                'custrecord_lmry_ei_con_temp.custrecord_lmry_ei_temp_script'
-                            ],
-                            filters: [
-                                ['internalid', 'anyof', id_con]
-                            ]
-                        });
-                        //Validacion template
-                        var usaTemplateGS = false;
-                        if (country_code == 'PA') {
-                            busqEnbFeatures = search.create({
-                                type: 'customrecord_lmry_pa_ei_enable_features',
-                                columns: [
-                                    'custrecord_lmry_pa_ei_ambiente'
-                                ],
-                                filters: [
-                                    ['custrecord_lmry_pa_ei_subsi', 'anyof', subsid_id]
-                                ]
-                            });
-                            resultEnbFeatures = busqEnbFeatures.run().getRange(0, 1000);
-                            row4 = resultEnbFeatures[0].columns;
-                            ambiente = resultEnbFeatures[0].getValue(row4[0]);
-                            if (ambiente == 2) {
-                                usaTemplateGS = true;
-                            }
-                        }
-
-                        result = busqTemplate.run().getRange(0, 1000);
-                        if (result != null && result.length != 0) {
-
-                            row = result[0].columns;
-                            template = result[0].getValue(row[0]);
-                            script = result[0].getValue(row[1]);
-                            if (script != null && script.length != 0) {
-
-                                busqTemplate2 = search.create({
-                                    type: 'script',
-                                    columns: ['scriptid'],
-                                    filters: [
-                                        ['internalid', 'anyof', script]
-                                    ]
-                                });
-                                result2 = busqTemplate2.run().getRange(0, 1000);
-                                if (result2 != null && result2.length != 0) {
-                                    row2 = result2[0].columns;
-                                    scriptName = result2[0].getValue(row[0]);
-                                }
-                                scriptName = scriptName.toLowerCase();
-
-                                busqTemplate3 = search.create({
-                                    type: 'scriptdeployment',
-                                    columns: ['scriptid'],
-                                    filters: [
-                                        ['script', 'anyof', script]
-                                    ]
-                                });
-                                result3 = busqTemplate3.run().getRange(0, 1000);
-                                if (result3 != null && result3.length != 0) {
-
-                                    row3 = result3[0].columns;
-                                    scriptNameDeploy = result3[0].getValue(row[0]);
-                                }
-                                scriptNameDeploy = scriptNameDeploy.toLowerCase();
-                            }
-                        }
-                        var url_stlt = '';
-                        var objResponse = false;
-                        var host = url.resolveDomain({
-                            hostType: url.HostType.APPLICATION,
-                            accountId: runtime.accountId
-                        });
-                        if (country_code == 'CL' || country_code == 'BO' ||
-                            country_code == 'UY' || country_code == 'PA' || country_code == 'GT') {
-                            log.debug("Entra Countries", "Entra COuntries");
-                            url_stlt = url.resolveScript({
-                                scriptId: "customscript_lmry_generate_countrie_stlt",
-                                deploymentId: "customdeploy_lmry_generate_countrie_stlt",
-                                returnExternalUrl: false
-                            });
-                            log.debug("doc_type 1", doc_type);
-                            objResponse = https.post({
-                                url: "https://" + host + url_stlt,
-                                body: {
-                                    "doc_id": doc_id,
-                                    "doc_type": doc_type,
-                                    "id_con": id_con,
-                                    "country": country_code,
-                                    "gs": usaTemplateGS
-                                }
-                            });
-                        } else {
-                            log.debug("Entra Countries Else", "Entra COuntries Else");
-                            url_stlt = url.resolveScript({
-                                scriptId: scriptName,
-                                deploymentId: scriptNameDeploy,
-                                returnExternalUrl: false
-                            });
-                            url_stlt += '&doc_id=' + doc_id + '&doc_type=' + doc_type + '&id_con=' + id_con + '&country=' + country_code;
-                            objResponse = https.get("https://" + host + url_stlt);
-
-                        }
-
-                        // var objResponse = https.get(url_stlt);
-
-                        //log.error('body: ', objResponse.body);
-                        if (objResponse.body == 'true') {
-                            var myMsg = message.create({
-                                title: "EI - Generate",
-                                message: "Success Generate",
-                                type: message.Type.CONFIRMATION
-                            });
-                            myMsg.show({
-                                duration: 20000
-                            });
-                        } else {
-                            var myMsg = message.create({
-                                title: "EI - Generate",
-                                message: "Generate Error",
-                                type: message.Type.ERROR
-                            });
-                            myMsg.show({
-                                duration: 20000
-                            });
-                        }
-
-                        window.location.reload();
 
                     }
+
+                    if (country_code == 'AR') {
+                        var jsonMasivo = {
+                            'msjexiste': { 'en': "This transaction is already processing in LatamReady - Adv Sales Flow", 'es': "Esta transacción ya se encuentra procesando en LatamReady - Adv Sales Flow", 'pt': "Esta transação já está sendo processada no LatamReady - Adv Sales Flow" },
+
+                        };
+
+                        var flagInvPopulate = false;
+                        var invoicing_populateSearchObj = search.create({
+                            type: "customrecord_lmry_invoicing_populate",
+                            filters: [
+                                ["custrecord_lmry_ip_subsidiary", "anyof", subsid_id],
+                                "AND", ["custrecord_lmry_ip_transactions", "contains", doc_id],
+                                "AND", ["custrecord_lmry_ip_state", "is", "1"]
+                            ],
+                            columns: [
+                                search.createColumn({ name: "custrecord_lmry_ip_subsidiary", label: "Latam - IP Subsidiary" }),
+                                search.createColumn({ name: "custrecord_lmry_ip_transactions", label: "Latam - IP Transactions" }),
+                                search.createColumn({ name: "custrecord_lmry_ip_state", label: "Latam - IP State" })
+                            ]
+                        });
+
+                        var resultInvPop = invoicing_populateSearchObj.run().getRange(0, 100);
+                        if (resultInvPop != null && resultInvPop.length != 0) {
+                            row = resultInvPop[0].columns;
+                            var subsiInv = resultInvPop[0].getValue(row[0]);
+                            var transactionsInv = resultInvPop[0].getValue(row[1]);
+                            flagInvPopulate = true;
+                            if (flagInvPopulate) {
+                                var alerta = jsonMasivo['msjexiste'][languageSubsid];
+                                alert(alerta);
+                                return true;
+                            }
+                        }
+
+                    }
+
+                    window["ei_status"] = true;
+                    busqTemplate = search.create({
+                        type: 'customrecord_lmry_ei_con_status',
+                        columns: ['custrecord_lmry_ei_con_temp',
+                            'custrecord_lmry_ei_con_temp.custrecord_lmry_ei_temp_script'
+                        ],
+                        filters: [
+                            ['internalid', 'anyof', id_con]
+                        ]
+                    });
+                    //Validacion template
+                    var usaTemplateGS = false;
+                    if (country_code == 'PA') {
+                        busqEnbFeatures = search.create({
+                            type: 'customrecord_lmry_pa_ei_enable_features',
+                            columns: [
+                                'custrecord_lmry_pa_ei_ambiente'
+                            ],
+                            filters: [
+                                ['custrecord_lmry_pa_ei_subsi', 'anyof', subsid_id]
+                            ]
+                        });
+                        resultEnbFeatures = busqEnbFeatures.run().getRange(0, 1000);
+                        row4 = resultEnbFeatures[0].columns;
+                        ambiente = resultEnbFeatures[0].getValue(row4[0]);
+                        if (ambiente == 2) {
+                            usaTemplateGS = true;
+                        }
+                    }
+
+                    result = busqTemplate.run().getRange(0, 1000);
+                    if (result != null && result.length != 0) {
+
+                        row = result[0].columns;
+                        template = result[0].getValue(row[0]);
+                        script = result[0].getValue(row[1]);
+                        if (script != null && script.length != 0) {
+
+                            busqTemplate2 = search.create({
+                                type: 'script',
+                                columns: ['scriptid'],
+                                filters: [
+                                    ['internalid', 'anyof', script]
+                                ]
+                            });
+                            result2 = busqTemplate2.run().getRange(0, 1000);
+                            if (result2 != null && result2.length != 0) {
+                                row2 = result2[0].columns;
+                                scriptName = result2[0].getValue(row[0]);
+                            }
+                            scriptName = scriptName.toLowerCase();
+
+                            busqTemplate3 = search.create({
+                                type: 'scriptdeployment',
+                                columns: ['scriptid'],
+                                filters: [
+                                    ['script', 'anyof', script]
+                                ]
+                            });
+                            result3 = busqTemplate3.run().getRange(0, 1000);
+                            if (result3 != null && result3.length != 0) {
+
+                                row3 = result3[0].columns;
+                                scriptNameDeploy = result3[0].getValue(row[0]);
+                            }
+                            scriptNameDeploy = scriptNameDeploy.toLowerCase();
+                        }
+                    }
+                    var url_stlt = '';
+                    var objResponse = false;
+                    var host = url.resolveDomain({
+                        hostType: url.HostType.APPLICATION,
+                        accountId: runtime.accountId
+                    });
+                    if (country_code == 'CL' || country_code == 'BO' ||
+                        country_code == 'UY' || country_code == 'PA' || country_code == 'GT') {
+                        LOG.debug("Entra Countries", "Entra COuntries");
+                        url_stlt = url.resolveScript({
+                            scriptId: "customscript_lmry_generate_countrie_stlt",
+                            deploymentId: "customdeploy_lmry_generate_countrie_stlt",
+                            returnExternalUrl: false
+                        });
+                        LOG.debug("doc_type 1", doc_type);
+                        objResponse = https.post({
+                            url: "https://" + host + url_stlt,
+                            body: {
+                                "doc_id": doc_id,
+                                "doc_type": doc_type,
+                                "id_con": id_con,
+                                "country": country_code,
+                                "gs": usaTemplateGS
+                            }
+                        });
+                    } else {
+                        LOG.debug("Entra Countries Else", "Entra COuntries Else");
+                        url_stlt = url.resolveScript({
+                            scriptId: scriptName,
+                            deploymentId: scriptNameDeploy,
+                            returnExternalUrl: false
+                        });
+                        url_stlt += '&doc_id=' + doc_id + '&doc_type=' + doc_type + '&id_con=' + id_con + '&country=' + country_code;
+                        objResponse = https.get("https://" + host + url_stlt);
+
+                    }
+
+                    // var objResponse = https.get(url_stlt);
+
+                    if (objResponse.body == 'true') {
+                        var myMsg = message.create({
+                            title: "EI - Generate",
+                            message: "Success Generate",
+                            type: message.Type.CONFIRMATION
+                        });
+                        myMsg.show({
+                            duration: 20000
+                        });
+                    } else {
+                        var myMsg = message.create({
+                            title: "EI - Generate",
+                            message: "Generate Error",
+                            type: message.Type.ERROR
+                        });
+                        myMsg.show({
+                            duration: 20000
+                        });
+                    }
+
+                    window.location.reload();
                 }
             } catch (e) {
-                log.error("Error", "[ ei_generate ] " + e);
+                LOG.error("Error", "[ ei_generate ] " + e);
             }
         }
 
@@ -1948,14 +1919,16 @@ define(["N/format", "N/currency", "N/record", "N/search", "N/runtime", 'N/ui/mes
             try {
                 var busq_setuptax = search.create({
                     type: "customrecord_lmry_setup_tax_subsidiary",
-                    columns: ['custrecord_lmry_setuptax_ei_language'],
+                    columns: ['custrecord_lmry_setuptax_ei_language','custrecord_lmry_skip_conf_send'],
                     filters: ['custrecord_lmry_setuptax_subsidiary', 'anyof', subsid_id]
                 });
                 var result_setuptax = busq_setuptax.run().getRange(0, 10);
                 var languageSubsid = ""
+                var skipConfSend = false
                 if (result_setuptax != null && result_setuptax.length != 0) {
                     row = result_setuptax[0].columns;
                     languageSubsid = result_setuptax[0].getText(row[0]);
+                    skipConfSend = result_setuptax[0].getValue(row[1]);
                 }
                 switch (languageSubsid) {
                     case "Español":
@@ -1971,7 +1944,10 @@ define(["N/format", "N/currency", "N/record", "N/search", "N/runtime", 'N/ui/mes
                 if (window["ei_status"]) {
                     alert(jsonLanguage['alertaEsperar'][languageSubsid]);
                 } else {
-                    var flag = confirm(jsonLanguage['alertaEnviar'][languageSubsid]);
+                    var flag = (skipConfSend)
+                      ? true
+                      : confirm(jsonLanguage['alertaEnviar'][languageSubsid]);
+
                     var hasWsAvaible = true;
                     if(country_code == 'CO'){
                         hasWsAvaible = false;
@@ -2128,7 +2104,7 @@ define(["N/format", "N/currency", "N/record", "N/search", "N/runtime", 'N/ui/mes
                     }
                 }
             } catch (e) {
-                log.error("Error", "[ ei_sending ] " + e);
+                LOG.error("Error", "[ ei_sending ] " + e);
             }
 
         }
@@ -2258,15 +2234,15 @@ define(["N/format", "N/currency", "N/record", "N/search", "N/runtime", 'N/ui/mes
                 }
                 catch (e) {
                     if (e.message.toString().indexOf('custrecord_lmry_co_ei_dian_status') != -1) {
-                        log.debug('Error en busqueda de feature para semaforo', 'No se tiene el campo dian status, no se usara feature');
+                        LOG.debug('Error en busqueda de feature para semaforo', 'No se tiene el campo dian status, no se usara feature');
                     }
                     else {
-                        log.error(e.valueOf().toString());
+                        LOG.error(e.valueOf().toString());
                     }
                 }
                 if(hasSemaforoService){
                     var dianEstadoResponse = dian_status_library.getDianStatus(_subsi, _docId);
-                    log.debug("Send Type", sendType);
+                    LOG.debug("Send Type", sendType);
                     var dianEstado = dianEstadoResponse.status;
                     var authCode = dianEstadoResponse.authCode;
                     if (authCode == '200') {
@@ -2275,7 +2251,7 @@ define(["N/format", "N/currency", "N/record", "N/search", "N/runtime", 'N/ui/mes
                         if (dianEstado == '' || dianEstado == null) {
                             dianEstado = 'CONEXION DIAN NO DISPONIBLE'
                         }
-                        log.debug("Estado DIAN", dianEstado);
+                        LOG.debug("Estado DIAN", dianEstado);
                         if (dianEstado == '200002') {
                             if (language == 'en') {
                                 languageTitle = 'Check Status';
@@ -2356,7 +2332,7 @@ define(["N/format", "N/currency", "N/record", "N/search", "N/runtime", 'N/ui/mes
                     }
                 }
             } catch (e) {
-                log.error("Error CheckDianStatus", e);
+                LOG.error("Error CheckDianStatus", e);
             }
         }
   

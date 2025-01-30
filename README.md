@@ -14,7 +14,8 @@ Para ello, al anular un pago en un período cerrado, se creará automáticamente
 + Create
 
 + Update
-    LMRY_PE_BillPayment_STLT.js
+    LMRY_AnulacionInvoice_LBRY_V2.0.js
+    LMRY_EI_MAIN_CLNT_V2.0.js
 
 + Delete
 
