@@ -885,9 +885,13 @@
           hideFields(listSetupHide, OBJ_FORM)
           if (featureInterCompany) {
             var entityFields = getEntityFields();
+            log.error("entityFields",entityFields)
             //log.error("entityFields",entityFields)
             var fieldData = assignFieldsToSubsidiaries(subsidiaries, entityFields, currentRecord.type);
+            log.error("fieldData 1",fieldData)
+            log.error("listSetupView",listSetupView)
             fieldData = filterAllowedFieldsByCountry(listSetupView, fieldData);
+            log.error("fieldData 2",fieldData)
             createGroups(OBJ_FORM, fieldData);
             assignFields(OBJ_FORM, fieldData);
             loadData(fieldData,currentRecord)
@@ -899,6 +903,33 @@
 
       }
       
+      function getSetupTax(subsidiaries){
+        log.error()
+        var jsonSetup;
+        search.create({
+          type: "customrecord_lmry_setup_tax_subsidiary",
+          filters: [
+            ["inactive", "anyof", "F"],
+            "AND",
+            ["custrecord_lmry_setuptax_subsidiary", "anyof", subsidiaries]
+          ],
+          columns: [
+            "custrecord_lmry_setuptax_subsidiary",
+            "custrecord_lmry_stf_sv_taxpayer_number",
+            "custrecord_lmry_stf_sunat_tipo_doc_id"
+          ]
+        }).run().each(function (result) {
+          var subsidiary = result.getValue("custrecord_lmry_setuptax_subsidiary");
+          var taxpayernumber = result.getValue("custrecord_lmry_stf_sv_taxpayer_number")
+          var sunatTipo = result.getValue("custrecord_lmry_stf_sunat_tipo_doc_id")
+          jsonSetup[subsidiary] = {
+            custrecord_lmry_stf_sv_taxpayer_number: taxpayernumber || "",
+            custrecord_lmry_stf_sunat_tipo_doc_id: sunatTipo || ""
+          }   
+          return true
+        });
+        return jsonSetup;
+      }
       
       function showEntityFieldsIntercompany(currentRecord,mode) {
         try {
@@ -1140,7 +1171,7 @@
       }
 
       function assignFields(OBJ_FORM, fieldData) {
-    
+          
           function createField(fieldConfig, containerId, subsidiaryId) {
             var fieldEntity = OBJ_FORM.getField(fieldConfig.fieldKey);
             if (fieldEntity) {
@@ -1153,11 +1184,15 @@
               };
               if (fieldConfig.fieldKey == "custentity_lmry_country" || fieldConfig.fieldKey == "custentity_lmry_actecon_sii_cl") objField.source = fieldConfig.source;
               fieldConfig.custpage = fieldID;
-              OBJ_FORM.addField(objField).setHelpText(fieldConfig.fieldRecord)
+              OBJ_FORM.addField(objField).setHelpText(fieldConfig.fieldRecord);
+              //fieldCreate.setHelpText(fieldConfig.fieldRecord);
+          
             }
           }
           //setHelpText(fieldConfig.fieldRecord).
           if (fieldData.subsidiaries) {
+           // var jsonSetup = getSetupTax(fieldData.subsidiaries)
+           // log.error("jsonSetup",jsonSetup)
             for (var subsidiaryId in fieldData.subsidiaries) {
               if (fieldData.subsidiaries.hasOwnProperty(subsidiaryId)) {
                 var subsidiary = fieldData.subsidiaries[subsidiaryId];
@@ -1304,7 +1339,9 @@
             fieldConfig["custpage"] = custpageValue;
             if (isClient && subsidiaryId) {    
               var field = currentRecord.getField(fieldConfig.custpage);
-              if (field) field.isDisplay = isVisible;
+              if (field) {
+                field.isDisplay = isVisible;
+              }
             }
           });
         }
@@ -1584,7 +1621,8 @@
             fieldKey: fieldKey,
             fieldRecord: entityFields[fieldKey].fieldRecord,
             type: entityFields[fieldKey].type,
-            source: entityFields[fieldKey].source || ""
+            source: entityFields[fieldKey].source || "",
+            setup: entityFields[fieldKey].setup || ""
           };
         });
 
@@ -1603,7 +1641,8 @@
               fieldKey: fieldKey,
               fieldRecord: entityFields[fieldKey].fieldRecord,
               type: entityFields[fieldKey].type,
-              source: entityFields[fieldKey].source || ""
+              source: entityFields[fieldKey].source || "",
+              setup: entityFields[fieldKey].setup || ""
             };
           });
         });
@@ -1631,6 +1670,58 @@
       }
     
 
+      
+
+
+
+      function changeSubsidiary(currentRCD, subsidiaries) {
+        try {
+          var subsidiaryID = currentRCD.getCurrentSublistValue({
+            sublistId: 'submachine',
+            fieldId: 'subsidiary'
+          });
+
+          var isClient = true;
+          var entityFields = getEntityFields();
+
+          // Registra el evento click UNA SOLA VEZ
+          document.removeEventListener('click', handleButtonClick); // Elimina cualquier registro previo
+          document.addEventListener('click', handleButtonClick);
+
+          function handleButtonClick(event) {
+            // Mapeo de acciones de botones y valores de isVisible
+            var buttonActions = {
+              submachine_addedit: true,  // Agregar (isVisible = true)
+              submachine_clear: false,  // Limpiar (isVisible = false)
+              submachine_remove: false  // Remover (isVisible = false)
+            };
+
+            // Verifica si el clic fue en uno de los botones mapeados
+            if (event.target && buttonActions.hasOwnProperty(event.target.id)) {
+              var isVisible = buttonActions[event.target.id];
+
+              // Crear jsonSubsidiaries para la subsidiaria seleccionada
+              var jsonSubsidiaries = {};
+              jsonSubsidiaries[subsidiaryID] = subsidiaries[subsidiaryID];
+              console.log("jsonSubsidiaries", jsonSubsidiaries);
+
+              // Procesar los datos de campo
+              var fieldData = assignFieldsToSubsidiaries(jsonSubsidiaries, entityFields, currentRCD.type);
+
+              // Crear grupos y actualizar campos
+              createGroups(null, fieldData, isClient);
+              setCustpage(fieldData, isClient, currentRCD, isVisible);
+
+              // Mostrar el botón presionado en consola
+              console.log("Botón presionado: " + event.target.id.replace('submachine_', '') + ", Subsidiaria: ", subsidiaryID);
+            }
+          }
+
+        } catch (error) {
+          console.error('Error', error);
+        }
+      }
+    
       function getEntityFields() {
         return {
           custentity_lmry_country: {
@@ -1666,6 +1757,7 @@
             isGeneral: false,
             fieldRecord: "custrecord_lmry_ef_sv_taxpayer_number",
             type:"text",
+            setup:"custrecord_lmry_stf_sv_taxpayer_number",
             countries: {
               CL: ["customer", "vendor"],
               CO: ["customer", "vendor"],
@@ -1789,62 +1881,28 @@
             isGeneral: false,
             fieldRecord: "custrecord_lmry_ef_sunat_tipo_doc_id",
             type:"select",
-            source: "customrecord_lmry_tipo_doc_iden"
-          }
+            source: "customrecord_lmry_tipo_doc_iden",
+            setup: "custrecord_lmry_stf_sunat_tipo_doc_id"
+          },
+          custentity_lmry_municcode: {
+            countries: {
+              CO: ["customer", "vendor"]
+            },
+            isGeneral: false,
+            fieldRecord: "custrecord_lmry_ef_municcode",
+            type:"text"
+          },
+          custentity_lmry_vinc_contri_resi_ext_cod: {
+            countries: {
+              PE: ["vendor"]
+            },
+            isGeneral: false,
+            fieldRecord: "custrecord_lmry_ef_resi_ext_cod",
+            type:"text"
+          },
+
         }
       }
-
-
-
-      function changeSubsidiary(currentRCD, subsidiaries) {
-        try {
-          var subsidiaryID = currentRCD.getCurrentSublistValue({
-            sublistId: 'submachine',
-            fieldId: 'subsidiary'
-          });
-
-          var isClient = true;
-          var entityFields = getEntityFields();
-
-          // Registra el evento click UNA SOLA VEZ
-          document.removeEventListener('click', handleButtonClick); // Elimina cualquier registro previo
-          document.addEventListener('click', handleButtonClick);
-
-          function handleButtonClick(event) {
-            // Mapeo de acciones de botones y valores de isVisible
-            var buttonActions = {
-              submachine_addedit: true,  // Agregar (isVisible = true)
-              submachine_clear: false,  // Limpiar (isVisible = false)
-              submachine_remove: false  // Remover (isVisible = false)
-            };
-
-            // Verifica si el clic fue en uno de los botones mapeados
-            if (event.target && buttonActions.hasOwnProperty(event.target.id)) {
-              var isVisible = buttonActions[event.target.id];
-
-              // Crear jsonSubsidiaries para la subsidiaria seleccionada
-              var jsonSubsidiaries = {};
-              jsonSubsidiaries[subsidiaryID] = subsidiaries[subsidiaryID];
-              console.log("jsonSubsidiaries", jsonSubsidiaries);
-
-              // Procesar los datos de campo
-              var fieldData = assignFieldsToSubsidiaries(jsonSubsidiaries, entityFields, currentRCD.type);
-
-              // Crear grupos y actualizar campos
-              createGroups(null, fieldData, isClient);
-              setCustpage(fieldData, isClient, currentRCD, isVisible);
-
-              // Mostrar el botón presionado en consola
-              console.log("Botón presionado: " + event.target.id.replace('submachine_', '') + ", Subsidiaria: ", subsidiaryID);
-            }
-          }
-
-        } catch (error) {
-          console.error('Error', error);
-        }
-      }
-    
-
 
       return {
         HideColumn: HideColumn,
