@@ -1243,7 +1243,8 @@
         var fieldRecords = getFieldsRecord(fieldData);
 
         var columns = ["custrecord_lmry_co_subsi_reten"].concat(fieldRecords);
-
+        log.error("columns",columns)
+        log.error("fieldRecords",fieldRecords)
         // Buscar los datos en NetSuite
         search.create({
           type: "customrecord_lmry_entity_fields",
@@ -1297,7 +1298,10 @@
 
               countryConfig.fieldsEntity.forEach(function (fieldConfig) {
                 var fieldValue = entityFieldsByCountry[countryCode][fieldConfig.fieldRecord];
+                log.error("fieldConfig",fieldConfig)
+                log.error("fieldValue",fieldValue)
                 if (fieldValue) {
+                  log.error("seteo","success")
                   currentRecord.setValue(fieldConfig.custpage, fieldValue);
                 }
               });
