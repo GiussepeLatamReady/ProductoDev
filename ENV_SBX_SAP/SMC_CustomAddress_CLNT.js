@@ -5,43 +5,50 @@
  */
 define(["N/search", "N/currentRecord", "N/runtime"], function (search, currentRecord,runtime) {
     function brCustomCity() {
-        // const urlt = new URL(window.location.href);
-        const recordNow = currentRecord.get();
-        const country = recordNow.getValue("country")
-        // if (urlt.searchParams.get("country") !== "BR") return;
-        NavigationHistory.saveForm();
-  
-        validateLocalized(country);
-  
-        
-        const province = document.querySelector("[name=custrecord_lmry_addr_prov]");
-        if (!province) return;
-        const observer = new MutationObserver(async function (mutations) {
-            const selectCity = document.querySelector("#custpage_br_city");
-  
-            selectCity.innerHTML = "<option value=''> </option>";
-            if (Number(province.value)) {
-                const cities = getCities(province);
-  
-                cities.forEach((cityData) => {
-                    selectCity.innerHTML += `<option value='${cityData.getValue("internalid")}'>${cityData.getValue("name")}</option>`;
-                });
-                if (Number(recordNow.getValue("custrecord_lmry_addr_city"))) {
-                    document.querySelector("#custpage_br_city").value = recordNow.getValue("custrecord_lmry_addr_city");
-                }
+        try {
+            // const urlt = new URL(window.location.href);
+            const recordNow = currentRecord.get();
+            let country = recordNow.getValue("country")
+            // if (urlt.searchParams.get("country") !== "BR") return;
+            NavigationHistory.saveForm();
+            //console.log("recordNow 1:",recordNow)
+            //console.log("country 1:",country)
+
+            if (!country) {
+                country = getCountryExt(recordNow.id)
             }
-        });
-  
-        // Configurar las opciones del observador
-        const config = { attributes: true, childList: false, subtree: false };
-  
-        // Iniciar la observación del elemento input con las opciones configuradas
-        observer.observe(province, config);
-  
-        document.querySelector('[data-walkthrough="Field:custrecord_lmry_addr_city"]').style.display = "none";
-  
-        document.querySelector('[data-walkthrough="Field:custrecord_lmry_addr_city"]').parentElement.innerHTML +=
-            `<div class="uir-field-wrapper" data-nsps-label="Latam - City" data-nsps-type="field" data-field-type="select" data-walkthrough="Field:custrecord_lmry_addr_prov">
+            //console.log("country 2:",country)
+            validateLocalized(country);
+
+
+            const province = document.querySelector("[name=custrecord_lmry_addr_prov]");
+            if (!province) return;
+            const observer = new MutationObserver(async function (mutations) {
+                const selectCity = document.querySelector("#custpage_br_city");
+
+                selectCity.innerHTML = "<option value=''> </option>";
+                if (Number(province.value)) {
+                    const cities = getCities(province);
+
+                    cities.forEach((cityData) => {
+                        selectCity.innerHTML += `<option value='${cityData.getValue("internalid")}'>${cityData.getValue("name")}</option>`;
+                    });
+                    if (Number(recordNow.getValue("custrecord_lmry_addr_city"))) {
+                        document.querySelector("#custpage_br_city").value = recordNow.getValue("custrecord_lmry_addr_city");
+                    }
+                }
+            });
+
+            // Configurar las opciones del observador
+            const config = { attributes: true, childList: false, subtree: false };
+
+            // Iniciar la observación del elemento input con las opciones configuradas
+            observer.observe(province, config);
+
+            document.querySelector('[data-walkthrough="Field:custrecord_lmry_addr_city"]').style.display = "none";
+
+            document.querySelector('[data-walkthrough="Field:custrecord_lmry_addr_city"]').parentElement.innerHTML +=
+                `<div class="uir-field-wrapper" data-nsps-label="Latam - City" data-nsps-type="field" data-field-type="select" data-walkthrough="Field:custrecord_lmry_addr_prov">
     <span id="custrecord_lmry_addr_city_fs_lbl_uir_label" class="smallgraytextnolink uir-label" data-nsps-type="field_label"
         ><span id="custrecord_lmry_addr_city_fs_lbl" class="labelSpanEdit smallgraytextnolink" style="" data-nsps-type="label">
             <a
@@ -62,19 +69,24 @@ define(["N/search", "N/currentRecord", "N/runtime"], function (search, currentRe
         </select>
     </span>
     </div>`;
-        if (Number(recordNow.getValue("custrecord_lmry_addr_city"))) {
+            if (Number(recordNow.getValue("custrecord_lmry_addr_city"))) {
+                const selectCity = document.querySelector("#custpage_br_city");
+                selectCity.innerHTML = "<option value=''> </option>";
+                const cities = getCities(province);
+                cities.forEach((cityData) => {
+                    selectCity.innerHTML += `<option value='${cityData.getValue("internalid")}'>${cityData.getValue("name")}</option>`;
+                });
+                document.querySelector("#custpage_br_city").value = recordNow.getValue("custrecord_lmry_addr_city");
+            }
             const selectCity = document.querySelector("#custpage_br_city");
-            selectCity.innerHTML = "<option value=''> </option>";
-            const cities = getCities(province);
-            cities.forEach((cityData) => {
-                selectCity.innerHTML += `<option value='${cityData.getValue("internalid")}'>${cityData.getValue("name")}</option>`;
+            selectCity.addEventListener("change", (ev) => {
+                recordNow.setValue("custrecord_lmry_addr_city", ev.target.value);
             });
-            document.querySelector("#custpage_br_city").value = recordNow.getValue("custrecord_lmry_addr_city");
+        } catch (error) {
+            console.log("error",error)
+            console.log("error stack",error.stack)
         }
-        const selectCity = document.querySelector("#custpage_br_city");
-        selectCity.addEventListener("change", (ev) => {
-            recordNow.setValue("custrecord_lmry_addr_city", ev.target.value);
-        });
+        
     }
   
     function getCities(province){
@@ -93,33 +105,53 @@ define(["N/search", "N/currentRecord", "N/runtime"], function (search, currentRe
         .run()
         .getRange(0, 1000);
     }
+    function getCountryExt(addressID) {
+        //console.log("addressID", addressID)
+        var country;
+        search.create({
+            type: "address",
+            columns: [search.createColumn({
+                name: "formulatext",
+                formula: "{country.id}",
+                label: "country"
+            })],
+            filters: ['internalid', 'anyof', addressID]
+        }).run().each(function (result) {
+            if ("Colombia" == result.getValue(result.columns[0])) {
+                country = "CO";
+            } else {
+                country = "US"
+            }
+        });
+        return country;
+    }
   
     function validateLocalized(country) {
         if (!runtime.isFeatureInEffect({ feature: 'SUBSIDIARIES' })) return false;
         NavigationHistory.setURL(document.referrer)
         const urlUp = NavigationHistory.findUrl();
+        //console.log("urlUp",NavigationHistory.getURLS())
         if (!urlUp) {
             hideLatamFields();
             return false;
         }
         const { href, searchParams } = new URL(urlUp);
 
-        const subsidiaryID = searchParams.get(href.includes("subsidiarytype") ? "id" : "subsidiary");
+        let subsidiaryID = searchParams.get(href.includes("subsidiarytype") ? "id" : "subsidiary");
 
         if (subsidiaryID && !isLocalized(subsidiaryID,country)) {
             hideLatamFields();
         } else if (href.includes("entity")) {
             const entityID = searchParams.get("id");
-            const subsidiaryID = search.lookupFields({
+            subsidiaryID = search.lookupFields({
                 type: search.Type.ENTITY,
                 id: entityID,
                 columns: ['subsidiary']
             }).subsidiary?.[0]?.value;
-    
             if (subsidiaryID && !isLocalized(subsidiaryID,country)) hideLatamFields();
         } else if (href.includes("transactions")){
             const transactionID = searchParams.get("id");
-            const subsidiaryID = search.lookupFields({
+            subsidiaryID = search.lookupFields({
                 type: search.Type.TRANSACTION,
                 id: transactionID,
                 columns: ['subsidiary']
@@ -127,7 +159,6 @@ define(["N/search", "N/currentRecord", "N/runtime"], function (search, currentRe
             if (subsidiaryID && !isLocalized(subsidiaryID,country)) hideLatamFields();
         }
         hideState(subsidiaryID,country);
-
     }
 
     function hideState(subsidiaryID,countryForm){
@@ -150,6 +181,8 @@ define(["N/search", "N/currentRecord", "N/runtime"], function (search, currentRe
     }
   
     function isLocalized(subsidiaryID,country) {
+        //console.log("subsidiaryID",subsidiaryID)
+        //console.log("country",country)
         const searchOW = search.create({
             type: 'customrecord_lmry_features_by_subsi',
             columns: [
@@ -172,6 +205,7 @@ define(["N/search", "N/currentRecord", "N/runtime"], function (search, currentRe
         rowstable.forEach(row => {
             const div = row.querySelector("td>div");
             if (div && div.getAttribute("data-walkthrough")?.startsWith("Field:custrecord_lmry")) {
+                console.log("ocultando")
                 row.style.display = "none";
             }
         });
