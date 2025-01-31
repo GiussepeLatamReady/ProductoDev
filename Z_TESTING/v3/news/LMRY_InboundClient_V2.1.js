@@ -4,9 +4,9 @@
  * @NModuleScope Public
  * @Name LMRY_InboundClient_V2.1.js
  */
-define(["require", "N/search", "N/http", "N/url", "N/record","N/format", "N/query",'./Latam_Library/LMRY_libSendingEmailsLBRY_V2.0'],
+define(["require", "N/search", "N/log", "N/runtime", "N/http", "N/url", "N/record","N/format", "N/query",'./Latam_Library/LMRY_libSendingEmailsLBRY_V2.0'],
 
-    function (require, search, http, url, record,format, query,library_mail) {
+    function (require, search, log, runtime,  http, url, record,format, query,library_mail) {
         /**
                * Script Cliente, de la transaccion Inbound
                * @exports InboundClient
@@ -50,23 +50,29 @@ define(["require", "N/search", "N/http", "N/url", "N/record","N/format", "N/quer
                         alert("Debe ingresar al menos un purchase order");
                         throw "Debe ingresar al menos un purchase order";
                     };
-                    const paises = query.runSuiteQL({
-                        query: `
-                     SELECT DISTINCT
-                         Country.id
-                     FROM
-                         transaction,
-                         Country
-                     WHERE
-                         transaction.id = any(${arregloPurchaseOrders.join(",")})
-                     and
-                         transaction.custbody_lmry_subsidiary_country = Country.uniquekey
-                     `
 
-                    }).asMappedResults();
-                    if (paises.length != 1 || paises[0]?.id !== "MX") {
-                        return confirm("Tienes transacciones que no son de Mexico no se populara el pedimento");
+                    const {roleCenter}= runtime.getCurrentUser();
+
+                    if (roleCenter != "PARTNERCENTER" && roleCenter != "BASIC" ) {
+                        const paises = query.runSuiteQL({
+                            query: `
+                         SELECT DISTINCT
+                             Country.id
+                         FROM
+                             transaction,
+                             Country
+                         WHERE
+                             transaction.id = any(${arregloPurchaseOrders.join(",")})
+                         and
+                             transaction.custbody_lmry_subsidiary_country = Country.uniquekey
+                         `
+    
+                        }).asMappedResults();
+                        if (paises.length != 1 || paises[0]?.id !== "MX") {
+                            return confirm("Tienes transacciones que no son de Mexico no se populara el pedimento");
+                        }
                     }
+                    
                     if (!validateLinesxPedimento(numberPedimento)) {
                         alert("Numero de pedimento invalido");
                         return false;
@@ -78,8 +84,14 @@ define(["require", "N/search", "N/http", "N/url", "N/record","N/format", "N/quer
 
                     return true;
                 } catch (error) {
-                    library_mail.sendemail2(' [ saveRecord ] ' + error, "LMRY_InboundClient_V2.1.js", currentRecord, 'tranid', 'entity');
                     console.log("  saverecord error",error)
+                    log.error("saverecord error",error)
+                    const {roleCenter}= runtime.getCurrentUser();
+                    if (roleCenter != "PARTNERCENTER") {
+                        library_mail.sendemail2(' [ saveRecord ] ' + error, "LMRY_InboundClient_V2.1.js", currentRecord, 'tranid', 'entity');
+                    }
+                    
+                    
                     return false;
                 }
 
