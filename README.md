@@ -14,7 +14,11 @@ Actualmente, las entidades cuentan con campos visibles en función del país de 
 + Create
 
 + Update
-    LMRY_PE_BillPayment_STLT.js
+    LMRY_EntityCLNT_V2.0.js
+    LMRY_EntityURET_V2.0.js
+    LMRY_HideViewLBRY_V2.0.js
+    LMRY_VendorCLNT_V2.0.js
+    LMRY_VendorURET_V2.0.js
 
 + Delete
 

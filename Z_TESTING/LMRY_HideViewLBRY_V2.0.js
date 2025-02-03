@@ -866,38 +866,23 @@
 
           var subsidiary = currentRecord.getValue("subsidiary");
           if (!subsidiary) return false;
-          
-          log.error("HideEntityFields","START")
           var featureInterCompany = runtime.getCurrentScript().getParameter({ name: "custscript_lmry_all_entity_fields" });
           var subsidiaries = []
           var authorizationCode = getFeatureByCountryCode(countryCode, licenses)
           var primaryCountryID = getCountryID(countryCode)
           if (featureInterCompany) subsidiaries = getSubsidiaries(currentRecord,contextType == "view")
-
-          //view
           var listSetupView = {};
-
           if (!featureInterCompany) listSetupView = getFieldToView(featureInterCompany,primaryCountryID,subsidiaries);
-
           var listSetupHide = getFieldToHide();
-
           if (authorizationCode && !featureInterCompany) {
             listSetupHide = removeElements(listSetupHide, listSetupView[countryCode]);
           }
-
           hideFields(listSetupHide, OBJ_FORM)
           if (featureInterCompany) {
             var entityFields = getEntityFields();
-            log.error("entityFields",entityFields)
-            //log.error("entityFields",entityFields)
             var fieldData = assignFieldsToSubsidiaries(subsidiaries, entityFields, currentRecord.type);
-            log.error("fieldData 1",fieldData)
-            //log.error("listSetupView",listSetupView)
-            //fieldData = filterAllowedFieldsByCountry(listSetupView, fieldData);
-            log.error("fieldData 2",fieldData)
             createGroups(OBJ_FORM, fieldData);
             assignFields(OBJ_FORM, fieldData);
-            log.error("fieldData 3",fieldData)
             loadData(fieldData,currentRecord)
           }
         } catch (error) {
@@ -909,126 +894,36 @@
       
       function showEntityFieldsIntercompany(currentRecord,mode) {
         try {
-
           var subsidiariesAll = []
           subsidiariesAll = getSubsidiaries(currentRecord);
           var subsidiariesView = []
-          subsidiariesView = getSubsidiaries(currentRecord,true,mode);
-    
+          subsidiariesView = getSubsidiaries(currentRecord,true,mode); 
           var entityFields = getEntityFields();
-
-          //var listSetupHide = getFieldToView(true,0,subsidiariesAll);
           var fieldDataHide = assignFieldsToSubsidiaries(subsidiariesAll, entityFields, currentRecord.type);
-          //fieldDataHide = filterAllowedFieldsByCountry(listSetupHide, fieldDataHide);
           createGroups(null, fieldDataHide,true)
-          setCustpage(fieldDataHide,true,currentRecord,false,mode); 
-          
+          setCustpage(fieldDataHide,true,currentRecord,false,mode);       
           if (!Object.keys(subsidiariesView).length) return false;
-
-          //var listSetupView = getFieldToView(true,0,subsidiariesView);
           var fieldDataView = assignFieldsToSubsidiaries(subsidiariesView, entityFields, currentRecord.type);
-          //fieldDataView = filterAllowedFieldsByCountry(listSetupView, fieldDataView);
           createGroups(null, fieldDataView,true)
-          setCustpage(fieldDataView,true,currentRecord,true);     
-          
+          setCustpage(fieldDataView,true,currentRecord,true);              
         } catch (error) {
-          console.error("[HideEntityFields] error",error);
-          console.error("[HideEntityFields] error stack",error.stack);
+          console.error("[showEntityFieldsIntercompany] error",error);
+          console.error("[showEntityFieldsIntercompany] error stack",error.stack);
         }
-
       }
 
       
       
       function saveEntityFields(currentRecord) {
         try {
-         log.error("saveEntityFields","start")
           var subsidiaries = getSubsidiaries(currentRecord,true,"create")
-          //var listSetupView = getFieldToView(true,0,subsidiaries);
           var entityFields = getEntityFields();
           var fieldData = assignFieldsToSubsidiaries(subsidiaries, entityFields, currentRecord.type);
-          //fieldData = filterAllowedFieldsByCountry(listSetupView, fieldData);
           setCustpage(fieldData);
           createRecord(fieldData, currentRecord)
         } catch (error) {
           log.error("saveEntityFields", error)
           log.error("saveEntityFields stack", error.stack)
-        }
-
-      }
-
-
-      function createRecord_Z(fieldData, currentRecord) {
-        function getValues(config, record, prefix) {
-          return config.reduce(function (values, fieldConfig) {
-            var fieldValue = record.getValue(fieldConfig.custpage);
-            if (fieldValue) {
-              if (fieldConfig.type == "checkbox") {
-                if (fieldValue === "T") {
-                  values[fieldConfig.fieldRecord] = true;
-                }else{
-                  values[fieldConfig.fieldRecord] = false;
-                }
-              }else{
-                values[fieldConfig.fieldRecord] = fieldValue;
-              }
-              
-            }
-            return values;
-          }, prefix || {});
-        }
-
-        function findRecordId(subsidiaryId, entityId) {
-          var recordID;
-          search.create({
-            type: "customrecord_lmry_entity_fields",
-            filters: [
-              ["custrecord_lmry_co_subsi_reten", "anyof", subsidiaryId],
-              "AND",
-              ["custrecord_lmry_co_entity", "anyof", entityId]
-            ],
-            columns: ["internalid"]
-          }).run().each(function (result) {
-            recordID = result.getValue("internalid");
-          });
-          return recordID;
-        }
-
-        function submitOrSaveRecord(recordID, values, subsidiaryId, entityId) {
-          if (recordID) {
-            record.submitFields({
-              type: "customrecord_lmry_entity_fields",
-              id: recordID,
-              values: values,
-              options: { ignoreMandatoryFields: true, enableSourcing: true, disableTriggers: false }
-            });
-          } else {
-            var newRecord = record.create({
-              type: "customrecord_lmry_entity_fields",
-              isDynamic: true
-            });
-            newRecord.setValue("custrecord_lmry_co_entity", entityId);
-            newRecord.setValue("custrecord_lmry_co_subsi_reten", subsidiaryId);
-            Object.keys(values).forEach(function (key) {
-              
-              newRecord.setValue(key, values[key]);
-            });
-            newRecord.save({ ignoreMandatoryFields: true, disableTriggers: false ,enableSourcing: true});
-          }
-        }
-
-        if (fieldData.subsidiaries) {
-          Object.keys(fieldData.subsidiaries).forEach(function (subsidiaryId) {
-            var subsidiaryConfig = fieldData.subsidiaries[subsidiaryId];
-            if (subsidiaryConfig.fieldsEntity.length) {
-              var recordID = findRecordId(subsidiaryId, currentRecord.id);
-              var values = getValues(subsidiaryConfig.fieldsEntity, currentRecord);
-              if (fieldData.general) {
-                values = getValues(fieldData.general, currentRecord, values);
-              }
-              submitOrSaveRecord(recordID, values, subsidiaryId, currentRecord.id);
-            }
-          });
         }
       }
     
@@ -1086,11 +981,8 @@
           }
         }
 
-        // Objeto para almacenar datos por país
         var countriesData = {};
-
         if (fieldData.subsidiaries) {
-          // Agrupar subsidiarias por país
           Object.keys(fieldData.subsidiaries).forEach(function (subsidiaryId) {
             var subsidiaryConfig = fieldData.subsidiaries[subsidiaryId];
             var countryCode = subsidiaryConfig.countryCode;
@@ -1109,95 +1001,14 @@
           // Procesar cada país
           Object.keys(countriesData).forEach(function (countryCode) {
             var countryConfig = countriesData[countryCode];
-
-            // Obtener valores únicos para el país
             var values = getValues(countryConfig.fieldsEntity, currentRecord);
-
-            // Agregar valores generales si existen
             if (fieldData.general) {
               values = getValues(fieldData.general, currentRecord, values);
             }
-
-            // Guardar o actualizar registros por cada subsidiaria del país
             countryConfig.subsidiaries.forEach(function (subsidiaryId) {
               var recordID = findRecordId(subsidiaryId, currentRecord.id);
               submitOrSaveRecord(recordID, values, subsidiaryId, currentRecord.id);
             });
-          });
-        }
-      }
-    
-      function getFieldsRecord_Z(fieldData) {
-        var fieldsViewRecord = [];
-        var subsidiaries = fieldData.subsidiaries || {};
-        for (var id in subsidiaries) {
-          if (subsidiaries.hasOwnProperty(id)) {
-            (subsidiaries[id].fieldsEntity || []).forEach(function (field) {
-              if (fieldsViewRecord.indexOf(field.fieldRecord) === -1) {
-                fieldsViewRecord.push(field.fieldRecord);
-              }
-            });
-          }
-        }
-        (fieldData.general || []).forEach(function (field) {
-          fieldsViewRecord.push(field.fieldRecord);
-        });
-        return fieldsViewRecord;
-      }
-    
-
-
-      function loadData_Z(fieldData,currentRecord){
-        var entityFieldsRecordData = {}
-        var fieldRecords = getFieldsRecord(fieldData);
-        var columns = [
-          "custrecord_lmry_co_subsi_reten"
-        ]
-        var count = 0;
-        columns = columns.concat(fieldRecords);
-        search.create({
-          type: "customrecord_lmry_entity_fields",
-          filters: [
-            ["custrecord_lmry_co_entity","anyof",currentRecord.id]
-          ],
-          columns: columns
-        }).run().each(function(result) {
-          var subsidiaryID = result.getValue("custrecord_lmry_co_subsi_reten");
-          var objFieldsRecord = {}
-          fieldRecords.forEach(function(field){
-            objFieldsRecord[field] = result.getValue(field) || "";
-          });
-          entityFieldsRecordData[subsidiaryID] = objFieldsRecord;
-          count++;
-          return true;
-        });
-
-        if (fieldData.subsidiaries) {
-          var subsidiariesConfig = fieldData.subsidiaries;
-          for (var subsidiaryId in subsidiariesConfig) {
-            if (subsidiariesConfig.hasOwnProperty(subsidiaryId) && entityFieldsRecordData[subsidiaryId]) {
-              var subsidiaryConfig = subsidiariesConfig[subsidiaryId];
-              if (subsidiaryConfig["fieldsEntity"].length) {
-                subsidiaryConfig["fieldsEntity"].forEach(function(fieldConfig){
-                  var fieldValue = entityFieldsRecordData[subsidiaryId][fieldConfig.fieldRecord];
-                  if (fieldValue) {
-                    currentRecord.setValue(fieldConfig.custpage,fieldValue);
-                  }
-                })
-              }           
-            }
-          }
-        }   
-
-        if (fieldData.general && count) {
-          var generalConfig = fieldData.general;
-          generalConfig.forEach(function (fieldConfig) {
-            for (var subsidiaryID in entityFieldsRecordData) {
-              var fieldValue = entityFieldsRecordData[subsidiaryID][fieldConfig.fieldRecord];
-              if (fieldValue) {
-                currentRecord.setValue(fieldConfig.custpage, fieldValue);
-              }
-            }
           });
         }
       }
@@ -1211,7 +1022,6 @@
             var subsidiary = subsidiaries[id];
             var fieldsEntity = subsidiary.fieldsEntity || [];
 
-            // Agregamos los campos sin repetir
             for (var i = 0; i < fieldsEntity.length; i++) {
               var fieldRecord = fieldsEntity[i].fieldRecord;
               if (fieldsViewRecord.indexOf(fieldRecord) === -1) {
@@ -1221,7 +1031,6 @@
           }
         }
 
-        // Agregar los campos generales sin repetir
         var generalFields = fieldData.general || [];
         for (var j = 0; j < generalFields.length; j++) {
           var fieldRecord = generalFields[j].fieldRecord;
@@ -1239,9 +1048,6 @@
         var fieldRecords = getFieldsRecord(fieldData);
 
         var columns = ["custrecord_lmry_co_subsi_reten"].concat(fieldRecords);
-        log.error("columns",columns)
-        log.error("fieldRecords",fieldRecords)
-        // Buscar los datos en NetSuite
         search.create({
           type: "customrecord_lmry_entity_fields",
           filters: [
@@ -1257,15 +1063,14 @@
             countryCode = fieldData.subsidiaries[subsidiaryID].countryCode;
           }
 
-          if (countryCode && !processedCountries[countryCode]) { // Verificamos si ya se procesó este país
+          if (countryCode && !processedCountries[countryCode]) {
             var objFieldsRecord = {};
             fieldRecords.forEach(function (field) {
               objFieldsRecord[field] = result.getValue(field) || "";
             });
 
-            // Guardar los valores solo para el primer registro encontrado de cada país
             entityFieldsByCountry[countryCode] = objFieldsRecord;
-            processedCountries[countryCode] = true; // Marcamos el país como procesado
+            processedCountries[countryCode] = true;
           }
 
           return true;
@@ -1274,8 +1079,6 @@
         // Asignar los valores a los campos según el país
         if (fieldData.subsidiaries) {
           var countriesConfig = {};
-
-          // Agrupar las configuraciones de subsidiarias por país
           for (var subsidiaryId in fieldData.subsidiaries) {
             if (fieldData.subsidiaries.hasOwnProperty(subsidiaryId)) {
               var subsidiary = fieldData.subsidiaries[subsidiaryId];
@@ -1287,17 +1090,13 @@
             }
           }
 
-          // Aplicar los valores a los campos de cada país
           for (var countryCode in countriesConfig) {
             if (entityFieldsByCountry[countryCode]) {
               var countryConfig = countriesConfig[countryCode];
 
               countryConfig.fieldsEntity.forEach(function (fieldConfig) {
                 var fieldValue = entityFieldsByCountry[countryCode][fieldConfig.fieldRecord];
-                log.error("fieldConfig",fieldConfig)
-                log.error("fieldValue",fieldValue)
                 if (fieldValue) {
-                  log.error("seteo","success")
                   currentRecord.setValue(fieldConfig.custpage, fieldValue);
                 }
               });
@@ -1326,9 +1125,7 @@
           OBJ_FORM.addFieldGroup(config.group);
         }
 
-        // Objeto para almacenar países únicos con sus datos de grupo
         var countriesData = {};
-
         if (fieldData.subsidiaries) {
           Object.keys(fieldData.subsidiaries).forEach(function (subsidiaryId) {
             var subsidiaryConfig = fieldData.subsidiaries[subsidiaryId];
@@ -1339,15 +1136,14 @@
               countriesData[countryCode] = {
                 countryCode: countryCode,
                 countryName: subsidiaryConfig.countryName,
-                fieldsEntity: [], // Lista para almacenar todos los campos de sus subsidiarias
+                fieldsEntity: [],
               };
             }
 
-            // Agregamos los campos de la subsidiaria al país
             countriesData[countryCode].fieldsEntity =
               countriesData[countryCode].fieldsEntity.concat(subsidiaryConfig.fieldsEntity);
           });
-          log.error("[createGroups] countriesData",countriesData)
+
           // Ahora recorremos los países únicos para crear un grupo por cada uno
           Object.keys(countriesData).forEach(function (countryCode) {
             var countryConfig = countriesData[countryCode];
@@ -1362,7 +1158,6 @@
           });
         }
 
-        // Si hay datos generales y no es cliente, se crea un grupo general
         if (fieldData.general && !isClient) {
           addGroup(
             fieldData.general,
@@ -1374,20 +1169,16 @@
     
 
       function assignFields(OBJ_FORM, fieldData) {
-
         function createField(fieldConfig, containerId, countryCode) {
           var fieldEntity = OBJ_FORM.getField(fieldConfig.fieldKey);
           if (fieldEntity) {
             var fieldID = fieldConfig.fieldKey.replace('custentity', 'custpage') + "_" + countryCode.toLowerCase();
-            log.error("fieldID:", fieldID);
             var objField = {
               id: fieldID,
               label: fieldEntity.label,
               type: fieldConfig.type,
               container: containerId
             };
-            log.error("objField:", objField);
-
             if (fieldConfig.fieldKey === "custentity_lmry_country" || fieldConfig.fieldKey === "custentity_lmry_actecon_sii_cl") {
               objField.source = fieldConfig.source;
             }
@@ -1395,8 +1186,6 @@
             OBJ_FORM.addField(objField).setHelpText(fieldConfig.fieldRecord);
           }
         }
-
-        // Objeto para almacenar los datos por país
         var countriesData = {};
 
         if (fieldData.subsidiaries) {
@@ -1411,7 +1200,7 @@
                   countryCode: countryCode,
                   countryName: subsidiary.countryName,
                   fieldsEntity: [],
-                  fieldSet: {}, // Se usa para evitar duplicados
+                  fieldSet: {}, 
                   groupId: 'custpage_group_' + countryCode
                 };
               }
@@ -1422,7 +1211,7 @@
                 var fieldRecord = fieldsEntity[i].fieldRecord;
                 if (!countriesData[countryCode].fieldSet[fieldRecord]) {
                   countriesData[countryCode].fieldsEntity.push(fieldsEntity[i]);
-                  countriesData[countryCode].fieldSet[fieldRecord] = true; // Marcar como agregado
+                  countriesData[countryCode].fieldSet[fieldRecord] = true; 
                 }
               }
             }
@@ -1440,18 +1229,15 @@
 
         // Si hay datos generales, asignarlos al grupo general
         if (fieldData.general) {
-          var generalFieldSet = {}; // Evitar duplicados en campos generales
+          var generalFieldSet = {};
           fieldData.general.forEach(function (fieldConfig) {
             if (!generalFieldSet[fieldConfig.fieldRecord]) {
               createField(fieldConfig, fieldData.general.group.id);
-              generalFieldSet[fieldConfig.fieldRecord] = true; // Marcar como agregado
+              generalFieldSet[fieldConfig.fieldRecord] = true; 
             }
           });
         }
       }
-    
-    
-
       
       function loadSelect(OBJ_FORM,fieldConfig,countryCode){
 
@@ -1584,47 +1370,6 @@
           });
         }
       }
-      
-/*
-      function loadSelect(OBJ_FORM, fieldConfig, countryCode) {
-        var countryID = getCountryID(countryCode);
-        var fieldList = OBJ_FORM.getField(fieldConfig.custpage);
-
-        if (!fieldList) {
-          return;
-        }
-
-        fieldList.addSelectOption({ value: "", text: " " });
-
-        //Los campos se relacionan a el campo de pais del record relacionado en caso tenga
-        var fieldMappings = {
-          "custentity_lmry_fiscal_responsability": "custrecordlmry_responsibility_country",
-          "custentity_lmry_pa_person_type": "custrecord_lmry_person_type_country",
-          "custentity_lmry_sunat_tipo_doc_id": "custrecord_lmry_tipo_doc_country",
-          "custentity_lmry_sv_taxpayer_type": "custrecord_country"
-        };
-
-        var filters = [["isinactive", "is", "F"]];
-
-        if (fieldMappings.hasOwnProperty(fieldConfig.fieldKey)) {
-          filters.unshift([fieldMappings[fieldConfig.fieldKey], "anyof", countryID], "AND");
-        }
-
-        var searchObj = search.create({
-          type: fieldConfig.source,
-          filters: filters,
-          columns: ["internalid", "name"]
-        });
-
-        searchObj.run().each(function (result) {
-          fieldList.addSelectOption({
-            value: result.getValue("internalid"),
-            text: result.getValue("name")
-          });
-          return true; // Continúa la iteración
-        });
-      }
-    */
 
       /**
        * Asigna el custpage para cada campo temporal , en caso sea en el client muestra los valores segun la sublista
@@ -1645,9 +1390,7 @@
             if (isClient && countryCode) {
               var field = currentRecord.getField(fieldConfig.custpage);
               if (field) {
-
-                field.isDisplay = isVisible && (mode === "view" || !fieldConfig.viewOnly);
-               
+                field.isDisplay = isVisible && (mode === "view" || !fieldConfig.viewOnly);     
               }
             }
           });
@@ -1689,13 +1432,13 @@
               var subsidiaryConfig = fieldData.subsidiaries[subsidiaryId];
               var countryCode = subsidiaryConfig.countryCode;
 
-              // Si el país aún no está registrado, crearlo
+
               if (!countriesData[countryCode]) {
                 countriesData[countryCode] = {
                   countryCode: countryCode,
                   countryName: subsidiaryConfig.countryName,
                   fieldsEntity: [],
-                  fieldSet: {} // Para evitar duplicados
+                  fieldSet: {} 
                 };
               }
 
@@ -1705,7 +1448,7 @@
                 var fieldRecord = fieldsEntity[i].fieldRecord;
                 if (!countriesData[countryCode].fieldSet[fieldRecord]) {
                   countriesData[countryCode].fieldsEntity.push(fieldsEntity[i]);
-                  countriesData[countryCode].fieldSet[fieldRecord] = true; // Marcar como agregado
+                  countriesData[countryCode].fieldSet[fieldRecord] = true; 
                 }
               }
             }
@@ -1721,9 +1464,8 @@
           }
         });
 
-        // Si hay datos generales, asignarlos
         if (fieldData.general) {
-          var generalFieldSet = {}; // Para evitar duplicados en campos generales
+          var generalFieldSet = {};
           fieldData.general.forEach(function (fieldConfig) {
             if (!generalFieldSet[fieldConfig.fieldRecord]) {
               updateFieldConfig([fieldConfig]);
@@ -1773,7 +1515,7 @@
               }
             }
           }
-          //log.error("uniqueCountryCodes", uniqueCountryCodes)
+
           var countryIDs = [];
 
           uniqueCountryCodes.forEach(function(code){
@@ -1813,7 +1555,6 @@
 
         var filters = [["custrecord_lmry_features_subsidiary.isinactive","anyof","F"]];
         if (isFilterSubsidiaries) {
-          //log.error("currRecord: ", currentRecord.id)
           var subsidiaries = [];
           if (mode == "create") subsidiaries.push(currentRecord.getValue("subsidiary"));
           var countSubsidiaries = currentRecord.getLineCount({
@@ -1824,8 +1565,7 @@
             var subsidiary = currentRecord.getSublistValue({ sublistId: 'submachine', fieldId: 'subsidiary', line: i });
             if (subsidiaries.indexOf(subsidiary)==-1) {
               subsidiaries.push(subsidiary);
-            }
-            
+            }  
           }
           
           if (!subsidiaries.length) return {};
@@ -1856,7 +1596,6 @@
           ],
           filters: filters
         }).run().each(function (result) {
-          //log.error("result :",result)
           var columns = result.columns;
           var internalid = result.getValue(columns[0]);
           var nameSubsidiary = result.getValue(columns[2]);
@@ -1864,8 +1603,6 @@
             var nameWords = result.getValue(columns[2]).split(":");
             nameSubsidiary = nameWords[nameWords.length - 1];
           }
-          
-          //console.log("nameWords: ", nameWords)
           jsonSubsidiaries[internalid] = {
             countryCode: result.getValue(columns[1]),
             countryName: result.getText(columns[1]),
@@ -1881,8 +1618,6 @@
             }
           });
         }
-
-        //log.error("subsidiaries: ", jsonSubsidiaries)
         return jsonSubsidiaries;
       }
 
@@ -1984,18 +1719,13 @@
 
       function changeSubsidiary(currentRCD, subsidiaries) {
         try {
-          console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
-          console.log("subsidiaries", subsidiaries);
 
           var subsidiaryID = currentRCD.getCurrentSublistValue({
             sublistId: 'submachine',
             fieldId: 'subsidiary'
           });
-          console.log("subsidiaryID", subsidiaryID);
           var isClient = true;
           var entityFields = getEntityFields();
-
-          // Mapeo de cuántas subsidiarias hay por país
           var subsidiariesByCountry = {};
 
           Object.keys(subsidiaries).forEach(function (subsidiaryId) {
@@ -2008,51 +1738,31 @@
             }
           });
 
-          console.log("subsidiariesByCountry", subsidiariesByCountry);
-
-          // Identificar los botones específicos
           var addButton = document.getElementById("submachine_addedit");
           var removeButton = document.getElementById("submachine_remove");
 
-          // Agregar eventos a los botones **solo si no han sido registrados**
-          if (addButton) { //&& !addButton.dataset.eventAttached
+          if (addButton) {
             addButton.addEventListener('click', handleButtonClick);
-            addButton.dataset.eventAttached = "true";  // Marcar que ya tiene evento
+            addButton.dataset.eventAttached = "true"; 
           }
 
-          if (removeButton) { //&& !removeButton.dataset.eventAttached
+          if (removeButton) {
             removeButton.addEventListener('click', handleButtonClick);
-            removeButton.dataset.eventAttached = "true";  // Marcar que ya tiene evento
+            removeButton.dataset.eventAttached = "true"; 
           }
 
           function handleButtonClick(event) {
-            console.log("##############################");
-            console.log("handleButtonClick", "click");
             
             var buttonId = event.target ? event.target.id : null;
             if (!buttonId) return;
-            
-          
-            console.log("event.target.id", buttonId);
-
-            var isVisible = buttonId === "submachine_addedit"; // true para agregar, false para eliminar
-            
+            var isVisible = buttonId === "submachine_addedit"; // true para agregar, false para eliminar   
             var subsidiary = subsidiaries[subsidiaryID];
             if (!subsidiary) return;
-
             var countryCode = subsidiary.countryCode;
-            console.log("countryCode :", countryCode);
             if (!countryCode) return;
 
-            console.log("countryCode", countryCode);
-            console.log("compareti 1 is active ----------------",subsidiaries[subsidiaryID].isActive);
-            console.log("compareti 1 is isVisible ----------------",isVisible);
-
             if (isVisible && subsidiaries[subsidiaryID].isActive === isVisible) return;
-
-
             if (!isVisible) {
-
               // Filtrar la subsidiaria eliminada
               subsidiariesByCountry[countryCode] = subsidiariesByCountry[countryCode].filter(function (id) {
                 return id !== subsidiaryID;
@@ -2067,22 +1777,13 @@
 
             var jsonSubsidiaries = {};
             jsonSubsidiaries[subsidiaryID] = subsidiary;
-            console.log("jsonSubsidiaries", jsonSubsidiaries);
-
-            // Procesar los datos de campo
             var fieldData = assignFieldsToSubsidiaries(jsonSubsidiaries, entityFields, currentRCD.type);
-
-            // Crear grupos y actualizar campos
             createGroups(null, fieldData, isClient);
             setCustpage(fieldData, isClient, currentRCD, isVisible);
-
-            console.log("Botón presionado: " + buttonId.replace('submachine_', '') + ", Subsidiaria: ", subsidiaryID);
-
             subsidiaries[subsidiaryID].isActive = isVisible;
             
             // Si se está agregando la subsidiaria, asegurar que se registre en subsidiariesByCountry
             if (isVisible) {
-              // Agregar subsidiaria al país si no existe
               if (!subsidiariesByCountry[countryCode]) {
                 subsidiariesByCountry[countryCode] = [];
               }
@@ -2090,14 +1791,9 @@
                 subsidiariesByCountry[countryCode].push(subsidiaryID);
               }
             } 
-
-            console.log("##############################");
           }
-
-          console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
-
         } catch (error) {
-          log.error('Error', error);
+          console.error('Error', error);
         }
       }
     
