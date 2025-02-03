@@ -97,7 +97,7 @@ define([
 
                 if (featureInterCompany && subsidiary) {
                     Library_HideView.showEntityFieldsIntercompany(currentRCD,mode_type);
-                    subsidiaries = Library_HideView.getSubsidiaries(currentRecord, false)
+                    subsidiaries = Library_HideView.getSubsidiaries(currentRCD,false,scriptContext.mode,true);
                 }
             } catch (err) {
                 Library_Mail.sendemail('[pageInit] ' + err, LMRY_script);
