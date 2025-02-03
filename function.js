@@ -1,92 +1,122 @@
-{
-    "subsidiaries": {
-        "10": {
-            "countryCode": "CO",
-            "countryName": "Colombia",
-            "name": " HoneyComb CO",
-            "fieldsEntity": [
-                {
-                    "fieldKey": "custentity_lmry_country",
-                    "fieldRecord": "custrecord_lmry_ef_country",
-                    "type": "select",
-                    "source": "customrecord_lmry_mx_country",
-                    "setup": "",
-                    "custpage": "custpage_lmry_country_co"
-                },
-                {
-                    "fieldKey": "custentity_lmry_country_codeiso",
-                    "fieldRecord": "custrecord_lmry_ef_country_codeiso",
-                    "type": "text",
-                    "source": "",
-                    "setup": "",
-                    "custpage": "custpage_lmry_country_codeiso_co"
-                },
-                {
-                    "fieldKey": "custentity_lmry_sv_taxpayer_number",
-                    "fieldRecord": "custrecord_lmry_ef_sv_taxpayer_number",
-                    "type": "text",
-                    "source": "",
-                    "setup": "custrecord_lmry_stf_sv_taxpayer_number",
-                    "custpage": "custpage_lmry_sv_taxpayer_number_co"
-                },
-                {
-                    "fieldKey": "custentity_lmry_sv_taxpayer_type",
-                    "fieldRecord": "custrecord_lmry_ef_sv_taxpayer_type",
-                    "type": "select",
-                    "source": "customrecord_lmry_taxpayer_type_sv",
-                    "setup": "",
-                    "custpage": "custpage_lmry_sv_taxpayer_type_co"
-                },
-                {
-                    "fieldKey": "custentity_lmry_digito_verificator",
-                    "fieldRecord": "custrecord_lmry_ef_digito_verificator",
-                    "type": "text",
-                    "source": "",
-                    "setup": "",
-                    "custpage": "custpage_lmry_digito_verificator_co"
-                },
-                {
-                    "fieldKey": "custentity_lmry_fiscal_responsability",
-                    "fieldRecord": "custrecord_lmry_ef_fiscal_responsability",
-                    "type": "select",
-                    "source": "customrecord_lmry_fiscal_responsability",
-                    "setup": "",
-                    "custpage": "custpage_lmry_fiscal_responsability_co"
-                },
-                {
-                    "fieldKey": "custentity_lmry_pa_person_type",
-                    "fieldRecord": "custrecord_lmry_ef_pa_person_type",
-                    "type": "select",
-                    "source": "customrecord_lmry_entity_type",
-                    "setup": "",
-                    "custpage": "custpage_lmry_pa_person_type_co"
-                },
-                {
-                    "fieldKey": "custentity_lmry_sunat_tipo_doc_cod",
-                    "fieldRecord": "custrecord_lmry_ef_sunat_tipo_doc_cod",
-                    "type": "text",
-                    "source": "",
-                    "setup": "",
-                    "custpage": "custpage_lmry_sunat_tipo_doc_cod_co"
-                },
-                {
-                    "fieldKey": "custentity_lmry_sunat_tipo_doc_id",
-                    "fieldRecord": "custrecord_lmry_ef_sunat_tipo_doc_id",
-                    "type": "select",
-                    "source": "customrecord_lmry_tipo_doc_iden",
-                    "setup": "custrecord_lmry_stf_sunat_tipo_doc_id",
-                    "custpage": "custpage_lmry_sunat_tipo_doc_id_co"
-                },
-                {
-                    "fieldKey": "custentity_lmry_municcode",
-                    "fieldRecord": "custrecord_lmry_ef_municcode",
-                    "type": "text",
-                    "source": "",
-                    "setup": "",
-                    "custpage": "custpage_lmry_municcode_co"
+// Variable para evitar que los eventos se registren más de una vez
+var eventsRegistered = false;
+
+function changeSubsidiary(currentRCD, subsidiaries) {
+    try {
+        log.debug("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
+        log.debug("subsidiaries", subsidiaries);
+
+        var subsidiaryID = currentRCD.getCurrentSublistValue({
+            sublistId: 'submachine',
+            fieldId: 'subsidiary'
+        });
+
+        var isClient = true;
+        var entityFields = getEntityFields();
+
+        // Mapeo de cuántas subsidiarias hay por país
+        var subsidiariesByCountry = {};
+
+        Object.keys(subsidiaries).forEach(function (subsidiaryId) {
+            if (subsidiaries[subsidiaryId].isActive) {
+                var countryCode = subsidiaries[subsidiaryId].countryCode;
+                if (!subsidiariesByCountry[countryCode]) {
+                    subsidiariesByCountry[countryCode] = [];
                 }
-            ]
+                subsidiariesByCountry[countryCode].push(subsidiaryId);
+            }
+        });
+
+        log.debug("subsidiariesByCountry", subsidiariesByCountry);
+
+        // Identificar los botones específicos
+        var addButton = document.getElementById("submachine_addedit");
+        var removeButton = document.getElementById("submachine_remove");
+
+        // Verificar si los eventos ya han sido registrados
+        if (!eventsRegistered) {
+            if (addButton) {
+                addButton.addEventListener('click', handleButtonClick);
+            }
+
+            if (removeButton) {
+                removeButton.addEventListener('click', handleButtonClick);
+            }
+
+            // Marcar que los eventos ya fueron registrados para evitar duplicaciones
+            eventsRegistered = true;
         }
-    },
-    "general": []
+
+        function handleButtonClick(event) {
+            log.debug("##############################");
+            log.debug("handleButtonClick", "click");
+
+            var buttonId = event.target ? event.target.id : null;
+            if (!buttonId) return;
+
+            log.debug("event.target.id", buttonId);
+
+            var isVisible = buttonId === "submachine_addedit"; // true para agregar, false para eliminar
+
+            // Obtener el país de la subsidiaria seleccionada
+            var subsidiary = subsidiaries[subsidiaryID];
+            if (!subsidiary) return;
+
+            var countryCode = subsidiary.countryCode;
+            if (!countryCode) return;
+
+            log.debug("countryCode", countryCode);
+
+            // Si la acción es eliminar
+            if (!isVisible) {
+                log.debug("subsidiariesByCountry antes de eliminar", subsidiariesByCountry);
+
+                // Filtrar la subsidiaria eliminada
+                subsidiariesByCountry[countryCode] = subsidiariesByCountry[countryCode].filter(function (id) {
+                    return id !== subsidiaryID;
+                });
+
+                log.debug("subsidiariesByCountry después de eliminar", subsidiariesByCountry);
+
+                // Si todavía quedan subsidiarias en el mismo país, **no ocultar el grupo**
+                if (subsidiariesByCountry[countryCode].length > 0) {
+                    log.debug("No se oculta el grupo del país porque hay más subsidiarias en", countryCode);
+                    return;
+                }
+            }
+
+            // Crear jsonSubsidiaries solo con la subsidiaria seleccionada
+            var jsonSubsidiaries = {};
+            jsonSubsidiaries[subsidiaryID] = subsidiary;
+            log.debug("jsonSubsidiaries", jsonSubsidiaries);
+
+            // Procesar los datos de campo
+            var fieldData = assignFieldsToSubsidiaries(jsonSubsidiaries, entityFields, currentRCD.type);
+
+            // Crear grupos y actualizar campos
+            createGroups(null, fieldData, isClient);
+            setCustpage(fieldData, isClient, currentRCD, isVisible);
+
+            log.debug("Botón presionado: " + buttonId.replace('submachine_', '') + ", Subsidiaria: ", subsidiaryID);
+            log.debug("##############################");
+
+            // Actualizar el estado de la subsidiaria
+            subsidiaries[subsidiaryID].isActive = isVisible;
+
+            // Si se está agregando la subsidiaria, asegurar que se registre en subsidiariesByCountry
+            if (isVisible) {
+                if (!subsidiariesByCountry[countryCode]) {
+                    subsidiariesByCountry[countryCode] = [];
+                }
+                if (subsidiariesByCountry[countryCode].indexOf(subsidiaryID) === -1) {
+                    subsidiariesByCountry[countryCode].push(subsidiaryID);
+                }
+            }
+        }
+
+        log.debug("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
+
+    } catch (error) {
+        log.error('Error', error);
+    }
 }

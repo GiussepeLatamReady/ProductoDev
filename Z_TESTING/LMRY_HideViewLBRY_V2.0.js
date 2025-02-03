@@ -912,16 +912,13 @@
 
           var subsidiariesAll = []
           subsidiariesAll = getSubsidiaries(currentRecord);
-          console.log("subsidiariesAll",subsidiariesAll)
           var subsidiariesView = []
           subsidiariesView = getSubsidiaries(currentRecord,true,mode);
-          console.log("subsidiariesView",subsidiariesView)
     
           var entityFields = getEntityFields();
 
           //var listSetupHide = getFieldToView(true,0,subsidiariesAll);
           var fieldDataHide = assignFieldsToSubsidiaries(subsidiariesAll, entityFields, currentRecord.type);
-          console.log("fieldDataHide :",fieldDataHide)
           //fieldDataHide = filterAllowedFieldsByCountry(listSetupHide, fieldDataHide);
           createGroups(null, fieldDataHide,true)
           setCustpage(fieldDataHide,true,currentRecord,false); 
@@ -930,7 +927,6 @@
 
           //var listSetupView = getFieldToView(true,0,subsidiariesView);
           var fieldDataView = assignFieldsToSubsidiaries(subsidiariesView, entityFields, currentRecord.type);
-          console.log("fieldDataView :",fieldDataView)
           //fieldDataView = filterAllowedFieldsByCountry(listSetupView, fieldDataView);
           createGroups(null, fieldDataView,true)
           setCustpage(fieldDataView,true,currentRecord,true);     
@@ -1359,6 +1355,7 @@
         }
       }
       function createGroups(OBJ_FORM, fieldData, isClient) {
+
         function addGroup(config, id, label) {
           config.group = { id: id, label: label };
           OBJ_FORM.addFieldGroup(config.group);
@@ -1710,7 +1707,6 @@
 
       function setCustpage(fieldData, isClient, currentRecord, isVisible) {
         //console.log("currentRecord ", currentRecord.id)
-
         function updateFieldConfig(fields, countryCode) {
           fields.forEach(function (fieldConfig) {
             var custpageValue = fieldConfig.fieldKey.replace('custentity', 'custpage');
@@ -1734,8 +1730,7 @@
          */
         function toggleBlockByName(label, hide) {
           // Buscar el <td> principal del grupo por su data-nsps-label
-          console.log("label", label)
-          console.log("hide", hide)
+
           var tdElement = document.querySelector('td[data-nsps-label="Latam - ' + label + '"]');
 
           if (tdElement) {
@@ -1769,7 +1764,6 @@
 
         // Objeto para almacenar los datos por país
         var countriesData = {};
-        console.log("fieldData [setCustpage]",fieldData)
         if (fieldData.subsidiaries) {
           for (var subsidiaryId in fieldData.subsidiaries) {
             if (fieldData.subsidiaries.hasOwnProperty(subsidiaryId)) {
@@ -1895,7 +1889,7 @@
         return listSetupView;
       }
 
-      function getSubsidiaries(currentRecord,isFilterSubsidiaries,mode) {
+      function getSubsidiaries(currentRecord,isFilterSubsidiaries,mode,isClient) {
        
 
         var filters = [["custrecord_lmry_features_subsidiary.isinactive","anyof","F"]];
@@ -1918,7 +1912,44 @@
           if (!subsidiaries.length) return {};
           filters.push("AND",["custrecord_lmry_features_subsidiary.internalid","anyof",subsidiaries])
         }
+        if (isClient) {
+          var subsidiariesActive = []
 
+          /*
+          if (mode == "create") {
+            subsidiariesActive.push(currentRecord.getValue("subsidiary"))
+          }else{
+            console.log("subsidiary :",currentRecord.getValue('subsidiary'))
+            var recordLoad = record.load(
+              {
+                id: currentRecord.id,
+                type: "entity"
+              }
+            )
+            var countSubsidiaries = recordLoad.getLineCount({
+              sublistId: 'submachine'
+            });
+            
+            for (var i = 0; i < countSubsidiaries; i++) {
+              var subsidiary = recordLoad.getSublistValue({ sublistId: 'submachine', fieldId: 'subsidiary', line: i });
+              if (subsidiariesActive.indexOf(subsidiary)==-1) {
+                subsidiariesActive.push(subsidiary);
+              }
+            }
+          };
+          */
+          if (mode == "create") subsidiariesActive.push(currentRecord.getValue("subsidiary"));
+          var countSubsidiaries = currentRecord.getLineCount({
+            sublistId: 'submachine'
+          });
+          
+          for (var i = 0; i < countSubsidiaries; i++) {
+            var subsidiary = currentRecord.getSublistValue({ sublistId: 'submachine', fieldId: 'subsidiary', line: i });
+            if (subsidiariesActive.indexOf(subsidiary)==-1) {
+              subsidiariesActive.push(subsidiary);
+            }
+          }
+        }
         var jsonSubsidiaries = {};
         search.create({
           type: "customrecord_lmry_features_by_subsi",
@@ -1937,7 +1968,7 @@
             var nameWords = result.getValue(columns[2]).split(":");
             nameSubsidiary = nameWords[nameWords.length - 1];
           }
-         
+          
           //console.log("nameWords: ", nameWords)
           jsonSubsidiaries[internalid] = {
             countryCode: result.getValue(columns[1]),
@@ -1946,6 +1977,14 @@
           }
           return true;
         });
+
+        if (isClient) {
+          subsidiariesActive.forEach(function(subsidiaryID){
+            if (jsonSubsidiaries[subsidiaryID]) {
+              jsonSubsidiaries[subsidiaryID].isActive = true;
+            }
+          });
+        }
 
         //log.error("subsidiaries: ", jsonSubsidiaries)
         return jsonSubsidiaries;
@@ -2100,60 +2139,147 @@
         }
         return entityFields;
       }
-    
-
-      
-
 
 
       function changeSubsidiary(currentRCD, subsidiaries) {
         try {
+          console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
+          console.log("subsidiaries", subsidiaries);
+
           var subsidiaryID = currentRCD.getCurrentSublistValue({
             sublistId: 'submachine',
             fieldId: 'subsidiary'
           });
-
+          console.log("subsidiaryID", subsidiaryID);
           var isClient = true;
           var entityFields = getEntityFields();
 
-          // Registra el evento click UNA SOLA VEZ
-          document.removeEventListener('click', handleButtonClick); // Elimina cualquier registro previo
-          document.addEventListener('click', handleButtonClick);
+          // Mapeo de cuántas subsidiarias hay por país
+          var subsidiariesByCountry = {};
 
-          function handleButtonClick(event) {
-            // Mapeo de acciones de botones y valores de isVisible
-            var buttonActions = {
-              submachine_addedit: true,  // Agregar (isVisible = true)
-              submachine_clear: false,  // Limpiar (isVisible = false)
-              submachine_remove: false  // Remover (isVisible = false)
-            };
-
-            // Verifica si el clic fue en uno de los botones mapeados
-            if (event.target && buttonActions.hasOwnProperty(event.target.id)) {
-              var isVisible = buttonActions[event.target.id];
-
-              // Crear jsonSubsidiaries para la subsidiaria seleccionada
-              var jsonSubsidiaries = {};
-              jsonSubsidiaries[subsidiaryID] = subsidiaries[subsidiaryID];
-              console.log("jsonSubsidiaries", jsonSubsidiaries);
-
-              // Procesar los datos de campo
-              var fieldData = assignFieldsToSubsidiaries(jsonSubsidiaries, entityFields, currentRCD.type);
-
-              // Crear grupos y actualizar campos
-              createGroups(null, fieldData, isClient);
-              setCustpage(fieldData, isClient, currentRCD, isVisible);
-
-              // Mostrar el botón presionado en consola
-              console.log("Botón presionado: " + event.target.id.replace('submachine_', '') + ", Subsidiaria: ", subsidiaryID);
+          Object.keys(subsidiaries).forEach(function (subsidiaryId) {
+            if (subsidiaries[subsidiaryId].isActive) {
+              var countryCode = subsidiaries[subsidiaryId].countryCode;
+              if (!subsidiariesByCountry[countryCode]) {
+                subsidiariesByCountry[countryCode] = [];
+              }
+              subsidiariesByCountry[countryCode].push(subsidiaryId);
             }
+          });
+
+          console.log("subsidiariesByCountry", subsidiariesByCountry);
+
+          // Identificar los botones específicos
+          var addButton = document.getElementById("submachine_addedit");
+          var removeButton = document.getElementById("submachine_remove");
+
+          // Agregar eventos a los botones **solo si no han sido registrados**
+          if (addButton) { //&& !addButton.dataset.eventAttached
+            addButton.addEventListener('click', handleButtonClick);
+            addButton.dataset.eventAttached = "true";  // Marcar que ya tiene evento
           }
 
+          if (removeButton) { //&& !removeButton.dataset.eventAttached
+            removeButton.addEventListener('click', handleButtonClick);
+            removeButton.dataset.eventAttached = "true";  // Marcar que ya tiene evento
+          }
+
+          function handleButtonClick(event) {
+            console.log("##############################");
+            console.log("handleButtonClick", "click");
+            
+            var buttonId = event.target ? event.target.id : null;
+            if (!buttonId) return;
+            
+          
+            console.log("event.target.id", buttonId);
+
+            var isVisible = buttonId === "submachine_addedit"; // true para agregar, false para eliminar
+            
+
+            // Obtener el país de la subsidiaria seleccionada
+            var subsidiary = subsidiaries[subsidiaryID];
+            if (!subsidiary) return;
+
+            var countryCode = subsidiary.countryCode;
+            console.log("countryCode :", countryCode);
+            if (!countryCode) return;
+
+            console.log("countryCode", countryCode);
+            console.log("compareti 1 is active ----------------",subsidiaries[subsidiaryID].isActive);
+            console.log("compareti 1 is isVisible ----------------",isVisible);
+
+            if (isVisible && subsidiaries[subsidiaryID].isActive === isVisible) return;
+
+            // Si la acción es eliminar
+            if (!isVisible) {
+
+              // Filtrar la subsidiaria eliminada
+              subsidiariesByCountry[countryCode] = subsidiariesByCountry[countryCode].filter(function (id) {
+                return id !== subsidiaryID;
+              });
+
+              // Si todavía quedan subsidiarias en el mismo país, **no ocultar el grupo**
+              if (subsidiariesByCountry[countryCode].length > 0) {
+                console.log("No se oculta el grupo del país porque hay más subsidiarias en", countryCode);
+                return;
+              }
+            }
+
+            // Crear jsonSubsidiaries solo con la subsidiaria seleccionada
+            var jsonSubsidiaries = {};
+            jsonSubsidiaries[subsidiaryID] = subsidiary;
+            console.log("jsonSubsidiaries", jsonSubsidiaries);
+
+            // Procesar los datos de campo
+            var fieldData = assignFieldsToSubsidiaries(jsonSubsidiaries, entityFields, currentRCD.type);
+
+            // Crear grupos y actualizar campos
+            createGroups(null, fieldData, isClient);
+            setCustpage(fieldData, isClient, currentRCD, isVisible);
+
+            console.log("Botón presionado: " + buttonId.replace('submachine_', '') + ", Subsidiaria: ", subsidiaryID);
+
+            // Actualizar el estado de la subsidiaria
+            subsidiaries[subsidiaryID].isActive = isVisible;
+            
+            // Si se está agregando la subsidiaria, asegurar que se registre en subsidiariesByCountry
+            if (isVisible) {
+              // Agregar subsidiaria al país si no existe
+              if (!subsidiariesByCountry[countryCode]) {
+                subsidiariesByCountry[countryCode] = [];
+              }
+              if (subsidiariesByCountry[countryCode].indexOf(subsidiaryID) === -1) {
+                subsidiariesByCountry[countryCode].push(subsidiaryID);
+              }
+            } 
+            /*
+            else {
+              // Remover subsidiaria del país
+              if (subsidiariesByCountry[countryCode]) {
+                subsidiariesByCountry[countryCode] = subsidiariesByCountry[countryCode].filter(function (id) {
+                  return id !== subsidiaryID;
+                });
+
+                // Si después de eliminar la subsidiaria no quedan más en ese país, eliminar la entrada
+                if (subsidiariesByCountry[countryCode].length === 0) {
+                  delete subsidiariesByCountry[countryCode];
+                }
+              }
+            }
+
+            */
+            console.log("##############################");
+          }
+
+          console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
+
         } catch (error) {
-          console.error('Error', error);
+          log.error('Error', error);
         }
       }
     
+ 
       function getEntityFields() {
         return {
           custentity_lmry_country: {
