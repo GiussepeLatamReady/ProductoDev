@@ -1370,8 +1370,6 @@ define(['N/record', 'N/runtime', 'N/log', 'N/search', 'N/format', 'N/transaction
                     )
                 });
 
-                console.log("transactionsLine :",transactionsLine)
-
                 var revJournal = record.create({
                     type: record.Type.JOURNAL_ENTRY,
                     isDynamic: true
