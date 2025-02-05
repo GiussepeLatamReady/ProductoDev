@@ -158,10 +158,10 @@ define(["N/search", "N/currentRecord", "N/runtime"], function (search, currentRe
             }).subsidiary?.[0]?.value;
             if (subsidiaryID && !isLocalized(subsidiaryID,country)) hideLatamFields();
         }
-        hideState(subsidiaryID,country);
+        hideFieldsSAp(subsidiaryID,country);
     }
 
-    function hideState(subsidiaryID,countryForm){
+    function hideFieldsSAp(subsidiaryID,countryForm){
         var country = search.lookupFields({
             type: search.Type.SUBSIDIARY,
             id: subsidiaryID,
@@ -175,9 +175,11 @@ define(["N/search", "N/currentRecord", "N/runtime"], function (search, currentRe
                 if (div && div.getAttribute("data-walkthrough")?.startsWith("Field:dropdownstate")) {
                     row.style.display = "none";
                 }
+                if (div && div.getAttribute("data-walkthrough")?.startsWith("Field:city")) {
+                    row.style.display = "none";
+                }
             });
         }
-        
     }
   
     function isLocalized(subsidiaryID,country) {
