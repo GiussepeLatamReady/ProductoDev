@@ -93,7 +93,11 @@ define(["N/search", "N/currentRecord", "N/runtime"], function (search, currentRe
         return search
         .create({
             type: "customrecord_lmry_city",
-            filters: [["custrecord_lmry_prov_link", "anyof", province.value]],
+            filters: [
+                ["custrecord_lmry_prov_link", "anyof", province.value],
+                "AND",
+                ["isinactive","is","F"]
+            ],
             columns: [
                 search.createColumn({
                     name: "name",
