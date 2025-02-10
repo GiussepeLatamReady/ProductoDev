@@ -929,7 +929,7 @@
     
 
       function createRecord(fieldData, currentRecord) {
-        function getValues(config, record, prefix) {
+        function getValuesRecord(config, record, prefix) {
           return config.reduce(function (values, fieldConfig) {
             var fieldValue = record.getValue(fieldConfig.custpage);
             if (fieldValue) {
@@ -937,6 +937,19 @@
                 values[fieldConfig.fieldRecord] = (fieldValue === "T");
               } else {
                 values[fieldConfig.fieldRecord] = fieldValue;
+              }
+            }
+            return values;
+          }, prefix || {});
+        }
+        function getValuesEntity(config, record, prefix) {
+          return config.reduce(function (values, fieldConfig) {
+            var fieldValue = record.getValue(fieldConfig.custpage);
+            if (fieldValue && fieldConfig.isLocalized) {
+              if (fieldConfig.type === "checkbox") {
+                values[fieldConfig.fieldKey] = (fieldValue === "T");
+              } else {
+                values[fieldConfig.fieldKey] = fieldValue;
               }
             }
             return values;
@@ -961,24 +974,23 @@
 
         function submitOrSaveRecord(recordID, values, subsidiaryId, entityId) {
           if (recordID) {
-            record.submitFields({
+            var newRecord = record.load({
               type: "customrecord_lmry_entity_fields",
               id: recordID,
-              values: values,
-              options: { ignoreMandatoryFields: true, enableSourcing: true, disableTriggers: true }
+              isDynamic: true
             });
           } else {
             var newRecord = record.create({
               type: "customrecord_lmry_entity_fields",
               isDynamic: true
             });
-            newRecord.setValue("custrecord_lmry_co_entity", entityId);
-            newRecord.setValue("custrecord_lmry_co_subsi_reten", subsidiaryId);
-            Object.keys(values).forEach(function (key) {
-              newRecord.setValue(key, values[key]);
-            });
-            newRecord.save({ ignoreMandatoryFields: true, disableTriggers: true });
           }
+          newRecord.setValue("custrecord_lmry_co_entity", entityId);
+          newRecord.setValue("custrecord_lmry_co_subsi_reten", subsidiaryId);
+          Object.keys(values).forEach(function (key) {
+            newRecord.setValue(key, values[key]);
+          });
+          newRecord.save({ ignoreMandatoryFields: true, disableTriggers: true });
         }
 
         var countriesData = {};
@@ -998,17 +1010,34 @@
             countriesData[countryCode].subsidiaries.push(subsidiaryId);
           });
 
+          
+          var currentRCD = record.load({
+            type: currentRecord.type,
+            id: currentRecord.id,
+            isDynamic: true
+          });
           // Procesar cada país
           Object.keys(countriesData).forEach(function (countryCode) {
             var countryConfig = countriesData[countryCode];
-            var values = getValues(countryConfig.fieldsEntity, currentRecord);
+            var values = getValuesRecord(countryConfig.fieldsEntity, currentRecord);
+            var valuesEntity = getValuesEntity(countryConfig.fieldsEntity, currentRecord);
             if (fieldData.general) {
-              values = getValues(fieldData.general, currentRecord, values);
+              values = getValuesRecord(fieldData.general, currentRecord, values);
             }
             countryConfig.subsidiaries.forEach(function (subsidiaryId) {
               var recordID = findRecordId(subsidiaryId, currentRecord.id);
               submitOrSaveRecord(recordID, values, subsidiaryId, currentRecord.id);
             });
+
+            //Setea los valores en campos de entidad
+            Object.keys(valuesEntity).forEach(function (key) {
+              currentRCD.setValue(key, values[key]);
+            });
+          });
+
+          currentRCD.save({
+            enableSourcing: true,
+            ignoreMandatoryFields: true
           });
         }
       }
@@ -1369,6 +1398,307 @@
             return true
           });
         }
+
+        if (fieldConfig.fieldKey == "custentity_lmry_ar_tiporespons") {
+
+          var fieldList = OBJ_FORM.getField(fieldConfig.custpage);
+          fieldList.addSelectOption({
+            value: "",
+            text: ' '
+          });
+          search.create({
+            type: fieldConfig.source,
+            filters: [
+              ["isinactive","is","F"]
+            ],
+            columns:
+              ["internalid","name"]
+          }).run().each(function (result) {
+            var columns = result.columns;
+            fieldList.addSelectOption({
+              value: result.getValue(columns[0]),
+              text: result.getValue(columns[1])
+            });
+            return true
+          });
+        }
+
+        if (fieldConfig.fieldKey == "custentity_lmry_co_reteica") {
+
+          var fieldList = OBJ_FORM.getField(fieldConfig.custpage);
+          fieldList.addSelectOption({
+            value: "",
+            text: ' '
+          });
+          search.create({
+            type: fieldConfig.source,
+            filters: [
+              ["custrecord_lmry_wht_countries","anyof",countryID],
+              "AND",
+              ["isinactive","is","F"],
+              "AND",
+              ["custrecord_lmry_wht_types.custrecord_lmry_wht_entityfield","is",fieldConfig.fieldKey]
+            ],
+            columns:
+              ["internalid","name"]
+          }).run().each(function (result) {
+            var columns = result.columns;
+            fieldList.addSelectOption({
+              value: result.getValue(columns[0]),
+              text: result.getValue(columns[1])
+            });
+            return true
+          });
+        }
+        if (fieldConfig.fieldKey == "custentity_lmry_co_retefte") {
+
+          var fieldList = OBJ_FORM.getField(fieldConfig.custpage);
+          fieldList.addSelectOption({
+            value: "",
+            text: ' '
+          });
+          search.create({
+            type: fieldConfig.source,
+            filters: [
+              ["custrecord_lmry_wht_countries","anyof",countryID],
+              "AND",
+              ["isinactive","is","F"],
+              "AND",
+              ["custrecord_lmry_wht_types.custrecord_lmry_wht_entityfield","is",fieldConfig.fieldKey]
+            ],
+            columns:
+              ["internalid","name"]
+          }).run().each(function (result) {
+            var columns = result.columns;
+            fieldList.addSelectOption({
+              value: result.getValue(columns[0]),
+              text: result.getValue(columns[1])
+            });
+            return true
+          });
+        }
+
+        if (fieldConfig.fieldKey == "custentity_lmry_co_reteiva") {
+
+          var fieldList = OBJ_FORM.getField(fieldConfig.custpage);
+          fieldList.addSelectOption({
+            value: "",
+            text: ' '
+          });
+          search.create({
+            type: fieldConfig.source,
+            filters: [
+              ["custrecord_lmry_wht_countries","anyof",countryID],
+              "AND",
+              ["isinactive","is","F"],
+              "AND",
+              ["custrecord_lmry_wht_types.custrecord_lmry_wht_entityfield","is",fieldConfig.fieldKey]
+            ],
+            columns:
+              ["internalid","name"]
+          }).run().each(function (result) {
+            var columns = result.columns;
+            fieldList.addSelectOption({
+              value: result.getValue(columns[0]),
+              text: result.getValue(columns[1])
+            });
+            return true
+          });
+        }
+        if (fieldConfig.fieldKey == "custentity_lmry_co_retecree") {
+
+          var fieldList = OBJ_FORM.getField(fieldConfig.custpage);
+          fieldList.addSelectOption({
+            value: "",
+            text: ' '
+          });
+          search.create({
+            type: fieldConfig.source,
+            filters: [
+              ["custrecord_lmry_wht_countries","anyof",countryID],
+              "AND",
+              ["isinactive","is","F"],
+              "AND",
+              ["custrecord_lmry_wht_types.custrecord_lmry_wht_entityfield","is",fieldConfig.fieldKey]
+            ],
+            columns:
+              ["internalid","name"]
+          }).run().each(function (result) {
+            var columns = result.columns;
+            fieldList.addSelectOption({
+              value: result.getValue(columns[0]),
+              text: result.getValue(columns[1])
+            });
+            return true
+          });
+        }
+
+        if (fieldConfig.fieldKey == "custentity_lmry_py_autoreteir") {
+
+          var fieldList = OBJ_FORM.getField(fieldConfig.custpage);
+          fieldList.addSelectOption({
+            value: "",
+            text: ' '
+          });
+          search.create({
+            type: fieldConfig.source,
+            filters: [
+              ["custrecord_lmry_wht_countries","anyof",countryID],
+              "AND",
+              ["isinactive","is","F"],
+              "AND",
+              ["custrecord_lmry_wht_types.custrecord_lmry_wht_entityfield","is",fieldConfig.fieldKey]
+            ],
+            columns:
+              ["internalid","name"]
+          }).run().each(function (result) {
+            var columns = result.columns;
+            fieldList.addSelectOption({
+              value: result.getValue(columns[0]),
+              text: result.getValue(columns[1])
+            });
+            return true
+          });
+        }
+
+        if (fieldConfig.fieldKey == "custentity_lmry_py_reteiva") {
+
+          var fieldList = OBJ_FORM.getField(fieldConfig.custpage);
+          fieldList.addSelectOption({
+            value: "",
+            text: ' '
+          });
+          search.create({
+            type: fieldConfig.source,
+            filters: [
+              ["custrecord_lmry_wht_countries","anyof",countryID],
+              "AND",
+              ["isinactive","is","F"],
+              "AND",
+              ["custrecord_lmry_wht_types.custrecord_lmry_wht_entityfield","is",fieldConfig.fieldKey]
+            ],
+            columns:
+              ["internalid","name"]
+          }).run().each(function (result) {
+            var columns = result.columns;
+            fieldList.addSelectOption({
+              value: result.getValue(columns[0]),
+              text: result.getValue(columns[1])
+            });
+            return true
+          });
+        }
+        if (fieldConfig.fieldKey == "custentity_lmry_bo_autoreteit") {
+
+          var fieldList = OBJ_FORM.getField(fieldConfig.custpage);
+          fieldList.addSelectOption({
+            value: "",
+            text: ' '
+          });
+          search.create({
+            type: fieldConfig.source,
+            filters: [
+              ["custrecord_lmry_wht_countries","anyof",countryID],
+              "AND",
+              ["isinactive","is","F"],
+              "AND",
+              ["custrecord_lmry_wht_types.custrecord_lmry_wht_entityfield","is",fieldConfig.fieldKey]
+            ],
+            columns:
+              ["internalid","name"]
+          }).run().each(function (result) {
+            var columns = result.columns;
+            fieldList.addSelectOption({
+              value: result.getValue(columns[0]),
+              text: result.getValue(columns[1])
+            });
+            return true
+          });
+        }
+
+        if (fieldConfig.fieldKey == "custentity_lmry_bo_reteiue") {
+
+          var fieldList = OBJ_FORM.getField(fieldConfig.custpage);
+          fieldList.addSelectOption({
+            value: "",
+            text: ' '
+          });
+          search.create({
+            type: fieldConfig.source,
+            filters: [
+              ["custrecord_lmry_wht_countries","anyof",countryID],
+              "AND",
+              ["isinactive","is","F"],
+              "AND",
+              ["custrecord_lmry_wht_types.custrecord_lmry_wht_entityfield","is",fieldConfig.fieldKey]
+            ],
+            columns:
+              ["internalid","name"]
+          }).run().each(function (result) {
+            var columns = result.columns;
+            fieldList.addSelectOption({
+              value: result.getValue(columns[0]),
+              text: result.getValue(columns[1])
+            });
+            return true
+          });
+        }
+
+        if (fieldConfig.fieldKey == "custentity_lmry_ec_autoreteir") {
+
+          var fieldList = OBJ_FORM.getField(fieldConfig.custpage);
+          fieldList.addSelectOption({
+            value: "",
+            text: ' '
+          });
+          search.create({
+            type: fieldConfig.source,
+            filters: [
+              ["custrecord_lmry_wht_countries","anyof",countryID],
+              "AND",
+              ["isinactive","is","F"],
+              "AND",
+              ["custrecord_lmry_wht_types.custrecord_lmry_wht_entityfield","is",fieldConfig.fieldKey]
+            ],
+            columns:
+              ["internalid","name"]
+          }).run().each(function (result) {
+            var columns = result.columns;
+            fieldList.addSelectOption({
+              value: result.getValue(columns[0]),
+              text: result.getValue(columns[1])
+            });
+            return true
+          });
+        }
+
+        if (fieldConfig.fieldKey == "custentity_lmry_ec_reteiva") {
+
+          var fieldList = OBJ_FORM.getField(fieldConfig.custpage);
+          fieldList.addSelectOption({
+            value: "",
+            text: ' '
+          });
+          search.create({
+            type: fieldConfig.source,
+            filters: [
+              ["custrecord_lmry_wht_countries","anyof",countryID],
+              "AND",
+              ["isinactive","is","F"],
+              "AND",
+              ["custrecord_lmry_wht_types.custrecord_lmry_wht_entityfield","is",fieldConfig.fieldKey]
+            ],
+            columns:
+              ["internalid","name"]
+          }).run().each(function (result) {
+            var columns = result.columns;
+            fieldList.addSelectOption({
+              value: result.getValue(columns[0]),
+              text: result.getValue(columns[1])
+            });
+            return true
+          });
+        }
       }
 
       /**
@@ -1688,7 +2018,8 @@
             fieldRecord: entityFields[fieldKey].fieldRecord,
             type: entityFields[fieldKey].type,
             source: entityFields[fieldKey].source || "",
-            viewOnly: entityFields[fieldKey].viewOnly || false
+            viewOnly: entityFields[fieldKey].viewOnly || false,
+            isLocalized: entityFields[fieldKey].isLocalized || false
           };
         });
 
@@ -1708,7 +2039,8 @@
               fieldRecord: entityFields[fieldKey].fieldRecord,
               type: entityFields[fieldKey].type,
               source: entityFields[fieldKey].source || "",
-              viewOnly: entityFields[fieldKey].viewOnly || false
+              viewOnly: entityFields[fieldKey].viewOnly || false,
+              isLocalized: entityFields[fieldKey].isLocalized || false
             };
           });
         });
@@ -1989,7 +2321,127 @@
             isGeneral: false,
             fieldRecord: "custrecord_lmry_ef_resi_ext_cod",
             type:"text"
-          }
+          },//***************************************************** */
+          custentity_lmry_ar_tiporespons: {
+            countries: {
+              AR: ["customer", "vendor"]
+            },
+            isGeneral: false,
+            fieldRecord: "custrecord_lmry_ef_ar_tiporespons",
+            type:"select",
+            source: "customrecord_lmry_ar_tiporespons",
+            isLocalized: true
+          },
+          custentity_lmry_ar_tiporespons_cod: {
+            countries: {
+              AR: ["customer", "vendor"]
+            },
+            isGeneral: false,
+            fieldRecord: "custrecord_lmry_ef_ar_tiporespons_cod",
+            type:"text",
+            isLocalized: true,
+            viewOnly:true
+          },
+          custentity_lmry_co_reteica: {
+            countries: {
+              CO: ["customer", "vendor"]
+            },
+            isGeneral: false,
+            fieldRecord: "custrecord_lmry_ef_co_reteica",
+            type:"select",
+            source: "customrecord_lmry_wht_code",
+            isLocalized: true
+          },
+          custentity_lmry_co_retefte: {
+            countries: {
+              CO: ["customer", "vendor"]
+            },
+            isGeneral: false,
+            fieldRecord: "custrecord_lmry_ef_co_retefte",
+            type:"select",
+            source: "customrecord_lmry_wht_code",
+            isLocalized: true
+          },
+          custentity_lmry_co_reteiva: {
+            countries: {
+              CO: ["customer", "vendor"]
+            },
+            isGeneral: false,
+            fieldRecord: "custrecord_lmry_ef_co_reteiva",
+            type:"select",
+            source: "customrecord_lmry_wht_code",
+            isLocalized: true
+          },
+          custentity_lmry_co_retecree: {
+            countries: {
+              CO: ["customer", "vendor"]
+            },
+            isGeneral: false,
+            fieldRecord: "custrecord_lmry_ef_co_retecree",
+            type:"select",
+            source: "customrecord_lmry_wht_code",
+            isLocalized: true
+          },
+          custentity_lmry_py_autoreteir: {
+            countries: {
+              PY: ["customer", "vendor"]
+            },
+            isGeneral: false,
+            fieldRecord: "custrecord_lmry_ef_py_autoreteir",
+            type:"select",
+            source: "customrecord_lmry_wht_code",
+            isLocalized: true
+          },
+          custentity_lmry_py_reteiva: {
+            countries: {
+              PY: ["customer", "vendor"]
+            },
+            isGeneral: false,
+            fieldRecord: "custrecord_lmry_ef_py_reteiva",
+            type:"select",
+            source: "customrecord_lmry_wht_code",
+            isLocalized: true
+          },
+          custentity_lmry_bo_autoreteit: {
+            countries: {
+              BO: ["customer", "vendor"]
+            },
+            isGeneral: false,
+            fieldRecord: "custrecord_lmry_ef_bo_autoreteit",
+            type:"select",
+            source: "customrecord_lmry_wht_code",
+            isLocalized: true
+          },
+          custentity_lmry_bo_reteiue: {
+            countries: {
+              BO: ["customer", "vendor"]
+            },
+            isGeneral: false,
+            fieldRecord: "custrecord_lmry_ef_bo_reteiue",
+            type:"select",
+            source: "customrecord_lmry_wht_code",
+            isLocalized: true
+          },
+          custentity_lmry_ec_autoreteir: {
+            countries: {
+              EC: ["customer", "vendor"]
+            },
+            isGeneral: false,
+            fieldRecord: "custrecord_lmry_ef_ec_autoreteir",
+            type:"select",
+            source: "customrecord_lmry_wht_code",
+            isLocalized: true
+          },
+          custentity_lmry_ec_reteiva: {
+            countries: {
+              EC: ["customer", "vendor"]
+            },
+            isGeneral: false,
+            fieldRecord: "custrecord_lmry_ef_ec_reteiva",
+            type:"select",
+            source: "customrecord_lmry_wht_code",
+            isLocalized: true
+          },
         }
       }
 
