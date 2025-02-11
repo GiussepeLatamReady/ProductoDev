@@ -921,6 +921,7 @@
           var fieldData = assignFieldsToSubsidiaries(subsidiaries, entityFields, currentRecord.type);
           setCustpage(fieldData);
           createRecord(fieldData, currentRecord)
+          log.error("guardado", "guardado")
         } catch (error) {
           log.error("saveEntityFields", error)
           log.error("saveEntityFields stack", error.stack)
@@ -1013,9 +1014,9 @@
           
           var currentRCD = record.load({
             type: currentRecord.type,
-            id: currentRecord.id,
-            isDynamic: true
+            id: currentRecord.id
           });
+          
           // Procesar cada país
           Object.keys(countriesData).forEach(function (countryCode) {
             var countryConfig = countriesData[countryCode];
@@ -1028,17 +1029,19 @@
               var recordID = findRecordId(subsidiaryId, currentRecord.id);
               submitOrSaveRecord(recordID, values, subsidiaryId, currentRecord.id);
             });
-
+            log.error("valuesEntity",valuesEntity)
             //Setea los valores en campos de entidad
             Object.keys(valuesEntity).forEach(function (key) {
               currentRCD.setValue(key, values[key]);
             });
+            
           });
-
+        
           currentRCD.save({
             enableSourcing: true,
             ignoreMandatoryFields: true
           });
+          
         }
       }
 
@@ -1269,7 +1272,7 @@
       }
       
       function loadSelect(OBJ_FORM,fieldConfig,countryCode){
-
+        log.error("fieldConfig",fieldConfig)
         var countryID = getCountryID(countryCode);
         if (fieldConfig.fieldKey == "custentity_lmry_fiscal_responsability") {
 
@@ -1688,6 +1691,67 @@
               "AND",
               ["custrecord_lmry_wht_types.custrecord_lmry_wht_entityfield","is",fieldConfig.fieldKey]
             ],
+            columns:
+              ["internalid","name"]
+          }).run().each(function (result) {
+            var columns = result.columns;
+            fieldList.addSelectOption({
+              value: result.getValue(columns[0]),
+              text: result.getValue(columns[1])
+            });
+            return true
+          });
+        }
+
+        if (fieldConfig.fieldKey == "custentity_lmry_es_agente_retencion") {
+          var fieldList = OBJ_FORM.getField(fieldConfig.custpage);
+          fieldList.addSelectOption({
+            value: "",
+            text: ' '
+          });
+          search.create({
+            type: fieldConfig.source,
+            filters: [],
+            columns:
+              ["internalid","name"]
+          }).run().each(function (result) {
+            var columns = result.columns;
+            fieldList.addSelectOption({
+              value: result.getValue(columns[0]),
+              text: result.getValue(columns[1])
+            });
+            return true
+          });
+        }
+        if (fieldConfig.fieldKey == "custentity_lmry_es_buen_contribuyente") {
+          var fieldList = OBJ_FORM.getField(fieldConfig.custpage);
+          fieldList.addSelectOption({
+            value: "",
+            text: ' '
+          });
+          search.create({
+            type: fieldConfig.source,
+            filters: [],
+            columns:
+              ["internalid","name"]
+          }).run().each(function (result) {
+            var columns = result.columns;
+            fieldList.addSelectOption({
+              value: result.getValue(columns[0]),
+              text: result.getValue(columns[1])
+            });
+            return true
+          });
+        }
+        if (fieldConfig.fieldKey == "custentity_lmry_es_agente_percepcion") {
+          var fieldList = OBJ_FORM.getField(fieldConfig.custpage);
+          fieldList.addSelectOption({
+            value: "",
+            text: ' '
+          });
+          search.create({
+            type: fieldConfig.source,
+            filters: [],
             columns:
               ["internalid","name"]
           }).run().each(function (result) {
@@ -2414,7 +2478,7 @@
           },
           custentity_lmry_bo_reteiue: {
             countries: {
-              BO: ["customer", "vendor"]
+              BO: ["vendor"]
             },
             isGeneral: false,
             fieldRecord: "custrecord_lmry_ef_bo_reteiue",
@@ -2440,6 +2504,36 @@
             fieldRecord: "custrecord_lmry_ef_ec_reteiva",
             type:"select",
             source: "customrecord_lmry_wht_code",
+            isLocalized: true
+          },
+          custentity_lmry_es_agente_retencion: {
+            countries: {
+              PE: ["customer", "vendor"]
+            },
+            isGeneral: false,
+            fieldRecord: "custrecord_lmry_ef_es_agente_retencion",
+            type:"select",
+            source: "customlist_lmry_yes_no",
+            isLocalized: true
+          },
+          custentity_lmry_es_buen_contribuyente: {
+            countries: {
+              PE: ["customer", "vendor"]
+            },
+            isGeneral: false,
+            fieldRecord: "custrecord_lmry_ef_es_buen_contribuyente",
+            type:"select",
+            source: "customlist_lmry_yes_no",
+            isLocalized: true
+          },
+          custentity_lmry_es_agente_percepcion: {
+            countries: {
+              PE: ["customer", "vendor"]
+            },
+            isGeneral: false,
+            fieldRecord: "custrecord_lmry_ef_es_agente_percepcion",
+            type:"select",
+            source: "customlist_lmry_yes_no",
             isLocalized: true
           },
         }

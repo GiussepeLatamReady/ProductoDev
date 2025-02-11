@@ -344,3 +344,35 @@ function getViewFields(listSetupView, resultado) {
    return resultado; // Retornar el resultado modificado
 }
 getViewFields(listSetupView,resultado)
+
+
+function getList() {
+
+   var list = []
+   search.create({
+      type: "customlist_lmry_yes_no",
+      filters: [],
+      columns:
+        ["internalid","name"]
+    }).run().each(function (result) {
+      var columns = result.columns;
+      var obj = {
+         value: result.getValue(columns[0]),
+         text: result.getValue(columns[1])
+      }
+      list.push(obj)
+      return true
+    });
+
+    return list;
+}
+
+getList()
+
+var currentRCD = record.load({
+   type: "Customer",
+   id: "169056",
+   isDynamic: true
+ });
+
+ var reteica = currentRCD.getValue("custentity_lmry_co_reteica")
