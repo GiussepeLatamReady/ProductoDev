@@ -921,7 +921,6 @@
           var fieldData = assignFieldsToSubsidiaries(subsidiaries, entityFields, currentRecord.type);
           setCustpage(fieldData);
           createRecord(fieldData, currentRecord)
-          log.error("guardado", "guardado")
         } catch (error) {
           log.error("saveEntityFields", error)
           log.error("saveEntityFields stack", error.stack)
@@ -1012,16 +1011,12 @@
           });
 
           
-          var currentRCD = record.load({
-            type: currentRecord.type,
-            id: currentRecord.id
-          });
           
           // Procesar cada país
           Object.keys(countriesData).forEach(function (countryCode) {
             var countryConfig = countriesData[countryCode];
             var values = getValuesRecord(countryConfig.fieldsEntity, currentRecord);
-            var valuesEntity = getValuesEntity(countryConfig.fieldsEntity, currentRecord);
+            
             if (fieldData.general) {
               values = getValuesRecord(fieldData.general, currentRecord, values);
             }
@@ -1029,17 +1024,8 @@
               var recordID = findRecordId(subsidiaryId, currentRecord.id);
               submitOrSaveRecord(recordID, values, subsidiaryId, currentRecord.id);
             });
-            log.error("valuesEntity",valuesEntity)
-            //Setea los valores en campos de entidad
-            Object.keys(valuesEntity).forEach(function (key) {
-              currentRCD.setValue(key, values[key]);
-            });
             
-          });
-        
-          currentRCD.save({
-            enableSourcing: true,
-            ignoreMandatoryFields: true
+            
           });
           
         }
@@ -1271,499 +1257,96 @@
         }
       }
       
-      function loadSelect(OBJ_FORM,fieldConfig,countryCode){
-        log.error("fieldConfig",fieldConfig)
+      function loadSelect(OBJ_FORM, fieldConfig, countryCode) {
+
         var countryID = getCountryID(countryCode);
-        if (fieldConfig.fieldKey == "custentity_lmry_fiscal_responsability") {
-
-          var fieldList = OBJ_FORM.getField(fieldConfig.custpage);
-          fieldList.addSelectOption({
-            value: "",
-            text: ' '
-          });
-          search.create({
-            type: fieldConfig.source,
-            filters: [
-              ["custrecordlmry_responsibility_country","anyof",countryID],
-              "AND",
-              ["isinactive","is","F"]
-            ],
-            columns:
-              ["internalid","name"]
-          }).run().each(function (result) {
-            var columns = result.columns;
-            fieldList.addSelectOption({
-              value: result.getValue(columns[0]),
-              text: result.getValue(columns[1])
-            });
-            return true
-          });
+        var filterMap = {
+          // Filtros con país y sin otros criterios
+          "custentity_lmry_fiscal_responsability": [
+            ["custrecordlmry_responsibility_country", "anyof", countryID],
+            "AND", ["isinactive", "is", "F"]
+          ],
+          "custentity_lmry_pa_person_type": [
+            ["custrecord_lmry_person_type_country","anyof",countryID],
+            "AND", ["isinactive","is","F"]
+          ],
+          "custentity_lmry_sunat_tipo_doc_id": [
+            ["custrecord_lmry_tipo_doc_country","anyof",countryID],
+            "AND", ["isinactive","is","F"]
+          ],
+          "custentity_lmry_sv_taxpayer_type": [
+            ["custrecord_country","anyof",countryID],
+            "AND", ["isinactive","is","F"]
+          ],
+      
+          // Filtros sin país (solo inactivos = F)
+          "custentity_lmry_municipality": [
+            ["isinactive","is","F"]
+          ],
+          "custentity_lmry_ar_tiporespons": [
+            ["isinactive","is","F"]
+          ]
+        };
+      
+        /**
+         * Lista de campos que comparten la misma lógica:
+         * Se filtran por país, activo y que el campo de entidad coincida con fieldConfig.fieldKey
+         */
+        var whtFields = [
+          "custentity_lmry_co_reteica", "custentity_lmry_co_retefte", "custentity_lmry_co_reteiva", "custentity_lmry_co_retecree",
+          "custentity_lmry_py_autoreteir", "custentity_lmry_py_reteiva",
+          "custentity_lmry_bo_autoreteit", "custentity_lmry_bo_reteiue",
+          "custentity_lmry_ec_autoreteir", "custentity_lmry_ec_reteiva"
+        ];
+      
+        for (var i = 0; i < whtFields.length; i++) {
+          var key = whtFields[i];
+          filterMap[key] = [
+            ["custrecord_lmry_wht_countries","anyof",countryID],
+            "AND", ["isinactive","is","F"],
+            "AND", ["custrecord_lmry_wht_types.custrecord_lmry_wht_entityfield","is", key]
+          ];
         }
-
-        if (fieldConfig.fieldKey == "custentity_lmry_pa_person_type") {
-
-          var fieldList = OBJ_FORM.getField(fieldConfig.custpage);
-          fieldList.addSelectOption({
-            value: "",
-            text: ' '
-          });
-          search.create({
-            type: fieldConfig.source,
-            filters: [
-              ["custrecord_lmry_person_type_country","anyof",countryID],
-              "AND",
-              ["isinactive","is","F"]
-            ],
-            columns:
-              ["internalid","name"]
-          }).run().each(function (result) {
-            var columns = result.columns;
-            fieldList.addSelectOption({
-              value: result.getValue(columns[0]),
-              text: result.getValue(columns[1])
-            });
-            return true
-          });
+      
+        /**
+         * Campos con filtros vacíos (sin país ni otros criterios).
+         */
+        var emptyFilters = [
+          "custentity_lmry_es_agente_retencion",
+          "custentity_lmry_es_buen_contribuyente",
+          "custentity_lmry_es_agente_percepcion"
+        ];
+      
+        for (var j = 0; j < emptyFilters.length; j++) {
+          filterMap[emptyFilters[j]] = [];
         }
-
-        if (fieldConfig.fieldKey == "custentity_lmry_sunat_tipo_doc_id") {
-
-          var fieldList = OBJ_FORM.getField(fieldConfig.custpage);
-          fieldList.addSelectOption({
-            value: "",
-            text: ' '
-          });
-          search.create({
-            type: fieldConfig.source,
-            filters: [
-              ["custrecord_lmry_tipo_doc_country","anyof",countryID],
-              "AND",
-              ["isinactive","is","F"]
-            ],
-            columns:
-              ["internalid","name"]
-          }).run().each(function (result) {
-            var columns = result.columns;
-            fieldList.addSelectOption({
-              value: result.getValue(columns[0]),
-              text: result.getValue(columns[1])
-            });
-            return true
-          });
+      
+       
+        var filters = filterMap[fieldConfig.fieldKey];
+        if (!filters) {
+          return;
         }
-
-        if (fieldConfig.fieldKey == "custentity_lmry_sv_taxpayer_type") {
-
-          var fieldList = OBJ_FORM.getField(fieldConfig.custpage);
+      
+       
+        var fieldList = OBJ_FORM.getField(fieldConfig.custpage);
+        fieldList.addSelectOption({
+          value: "",
+          text: " "
+        });
+        search.create({
+          type: fieldConfig.source,
+          filters: filters,
+          columns: ["internalid","name"]
+        }).run().each(function(result) {
+          var columns = result.columns;
           fieldList.addSelectOption({
-            value: "",
-            text: ' '
+            value: result.getValue(columns[0]),
+            text: result.getValue(columns[1])
           });
-          search.create({
-            type: fieldConfig.source,
-            filters: [
-              ["custrecord_country","anyof",countryID],
-              "AND",
-              ["isinactive","is","F"]
-            ],
-            columns:
-              ["internalid","name"]
-          }).run().each(function (result) {
-            var columns = result.columns;
-            fieldList.addSelectOption({
-              value: result.getValue(columns[0]),
-              text: result.getValue(columns[1])
-            });
-            return true
-          });
-        }
-
-        if (fieldConfig.fieldKey == "custentity_lmry_municipality") {
-
-          var fieldList = OBJ_FORM.getField(fieldConfig.custpage);
-          fieldList.addSelectOption({
-            value: "",
-            text: ' '
-          });
-          search.create({
-            type: fieldConfig.source,
-            filters: [
-              ["isinactive","is","F"]
-            ],
-            columns:
-              ["internalid","name"]
-          }).run().each(function (result) {
-            var columns = result.columns;
-            fieldList.addSelectOption({
-              value: result.getValue(columns[0]),
-              text: result.getValue(columns[1])
-            });
-            return true
-          });
-        }
-
-        if (fieldConfig.fieldKey == "custentity_lmry_ar_tiporespons") {
-
-          var fieldList = OBJ_FORM.getField(fieldConfig.custpage);
-          fieldList.addSelectOption({
-            value: "",
-            text: ' '
-          });
-          search.create({
-            type: fieldConfig.source,
-            filters: [
-              ["isinactive","is","F"]
-            ],
-            columns:
-              ["internalid","name"]
-          }).run().each(function (result) {
-            var columns = result.columns;
-            fieldList.addSelectOption({
-              value: result.getValue(columns[0]),
-              text: result.getValue(columns[1])
-            });
-            return true
-          });
-        }
-
-        if (fieldConfig.fieldKey == "custentity_lmry_co_reteica") {
-
-          var fieldList = OBJ_FORM.getField(fieldConfig.custpage);
-          fieldList.addSelectOption({
-            value: "",
-            text: ' '
-          });
-          search.create({
-            type: fieldConfig.source,
-            filters: [
-              ["custrecord_lmry_wht_countries","anyof",countryID],
-              "AND",
-              ["isinactive","is","F"],
-              "AND",
-              ["custrecord_lmry_wht_types.custrecord_lmry_wht_entityfield","is",fieldConfig.fieldKey]
-            ],
-            columns:
-              ["internalid","name"]
-          }).run().each(function (result) {
-            var columns = result.columns;
-            fieldList.addSelectOption({
-              value: result.getValue(columns[0]),
-              text: result.getValue(columns[1])
-            });
-            return true
-          });
-        }
-        if (fieldConfig.fieldKey == "custentity_lmry_co_retefte") {
-
-          var fieldList = OBJ_FORM.getField(fieldConfig.custpage);
-          fieldList.addSelectOption({
-            value: "",
-            text: ' '
-          });
-          search.create({
-            type: fieldConfig.source,
-            filters: [
-              ["custrecord_lmry_wht_countries","anyof",countryID],
-              "AND",
-              ["isinactive","is","F"],
-              "AND",
-              ["custrecord_lmry_wht_types.custrecord_lmry_wht_entityfield","is",fieldConfig.fieldKey]
-            ],
-            columns:
-              ["internalid","name"]
-          }).run().each(function (result) {
-            var columns = result.columns;
-            fieldList.addSelectOption({
-              value: result.getValue(columns[0]),
-              text: result.getValue(columns[1])
-            });
-            return true
-          });
-        }
-
-        if (fieldConfig.fieldKey == "custentity_lmry_co_reteiva") {
-
-          var fieldList = OBJ_FORM.getField(fieldConfig.custpage);
-          fieldList.addSelectOption({
-            value: "",
-            text: ' '
-          });
-          search.create({
-            type: fieldConfig.source,
-            filters: [
-              ["custrecord_lmry_wht_countries","anyof",countryID],
-              "AND",
-              ["isinactive","is","F"],
-              "AND",
-              ["custrecord_lmry_wht_types.custrecord_lmry_wht_entityfield","is",fieldConfig.fieldKey]
-            ],
-            columns:
-              ["internalid","name"]
-          }).run().each(function (result) {
-            var columns = result.columns;
-            fieldList.addSelectOption({
-              value: result.getValue(columns[0]),
-              text: result.getValue(columns[1])
-            });
-            return true
-          });
-        }
-        if (fieldConfig.fieldKey == "custentity_lmry_co_retecree") {
-
-          var fieldList = OBJ_FORM.getField(fieldConfig.custpage);
-          fieldList.addSelectOption({
-            value: "",
-            text: ' '
-          });
-          search.create({
-            type: fieldConfig.source,
-            filters: [
-              ["custrecord_lmry_wht_countries","anyof",countryID],
-              "AND",
-              ["isinactive","is","F"],
-              "AND",
-              ["custrecord_lmry_wht_types.custrecord_lmry_wht_entityfield","is",fieldConfig.fieldKey]
-            ],
-            columns:
-              ["internalid","name"]
-          }).run().each(function (result) {
-            var columns = result.columns;
-            fieldList.addSelectOption({
-              value: result.getValue(columns[0]),
-              text: result.getValue(columns[1])
-            });
-            return true
-          });
-        }
-
-        if (fieldConfig.fieldKey == "custentity_lmry_py_autoreteir") {
-
-          var fieldList = OBJ_FORM.getField(fieldConfig.custpage);
-          fieldList.addSelectOption({
-            value: "",
-            text: ' '
-          });
-          search.create({
-            type: fieldConfig.source,
-            filters: [
-              ["custrecord_lmry_wht_countries","anyof",countryID],
-              "AND",
-              ["isinactive","is","F"],
-              "AND",
-              ["custrecord_lmry_wht_types.custrecord_lmry_wht_entityfield","is",fieldConfig.fieldKey]
-            ],
-            columns:
-              ["internalid","name"]
-          }).run().each(function (result) {
-            var columns = result.columns;
-            fieldList.addSelectOption({
-              value: result.getValue(columns[0]),
-              text: result.getValue(columns[1])
-            });
-            return true
-          });
-        }
-
-        if (fieldConfig.fieldKey == "custentity_lmry_py_reteiva") {
-
-          var fieldList = OBJ_FORM.getField(fieldConfig.custpage);
-          fieldList.addSelectOption({
-            value: "",
-            text: ' '
-          });
-          search.create({
-            type: fieldConfig.source,
-            filters: [
-              ["custrecord_lmry_wht_countries","anyof",countryID],
-              "AND",
-              ["isinactive","is","F"],
-              "AND",
-              ["custrecord_lmry_wht_types.custrecord_lmry_wht_entityfield","is",fieldConfig.fieldKey]
-            ],
-            columns:
-              ["internalid","name"]
-          }).run().each(function (result) {
-            var columns = result.columns;
-            fieldList.addSelectOption({
-              value: result.getValue(columns[0]),
-              text: result.getValue(columns[1])
-            });
-            return true
-          });
-        }
-        if (fieldConfig.fieldKey == "custentity_lmry_bo_autoreteit") {
-
-          var fieldList = OBJ_FORM.getField(fieldConfig.custpage);
-          fieldList.addSelectOption({
-            value: "",
-            text: ' '
-          });
-          search.create({
-            type: fieldConfig.source,
-            filters: [
-              ["custrecord_lmry_wht_countries","anyof",countryID],
-              "AND",
-              ["isinactive","is","F"],
-              "AND",
-              ["custrecord_lmry_wht_types.custrecord_lmry_wht_entityfield","is",fieldConfig.fieldKey]
-            ],
-            columns:
-              ["internalid","name"]
-          }).run().each(function (result) {
-            var columns = result.columns;
-            fieldList.addSelectOption({
-              value: result.getValue(columns[0]),
-              text: result.getValue(columns[1])
-            });
-            return true
-          });
-        }
-
-        if (fieldConfig.fieldKey == "custentity_lmry_bo_reteiue") {
-
-          var fieldList = OBJ_FORM.getField(fieldConfig.custpage);
-          fieldList.addSelectOption({
-            value: "",
-            text: ' '
-          });
-          search.create({
-            type: fieldConfig.source,
-            filters: [
-              ["custrecord_lmry_wht_countries","anyof",countryID],
-              "AND",
-              ["isinactive","is","F"],
-              "AND",
-              ["custrecord_lmry_wht_types.custrecord_lmry_wht_entityfield","is",fieldConfig.fieldKey]
-            ],
-            columns:
-              ["internalid","name"]
-          }).run().each(function (result) {
-            var columns = result.columns;
-            fieldList.addSelectOption({
-              value: result.getValue(columns[0]),
-              text: result.getValue(columns[1])
-            });
-            return true
-          });
-        }
-
-        if (fieldConfig.fieldKey == "custentity_lmry_ec_autoreteir") {
-
-          var fieldList = OBJ_FORM.getField(fieldConfig.custpage);
-          fieldList.addSelectOption({
-            value: "",
-            text: ' '
-          });
-          search.create({
-            type: fieldConfig.source,
-            filters: [
-              ["custrecord_lmry_wht_countries","anyof",countryID],
-              "AND",
-              ["isinactive","is","F"],
-              "AND",
-              ["custrecord_lmry_wht_types.custrecord_lmry_wht_entityfield","is",fieldConfig.fieldKey]
-            ],
-            columns:
-              ["internalid","name"]
-          }).run().each(function (result) {
-            var columns = result.columns;
-            fieldList.addSelectOption({
-              value: result.getValue(columns[0]),
-              text: result.getValue(columns[1])
-            });
-            return true
-          });
-        }
-
-        if (fieldConfig.fieldKey == "custentity_lmry_ec_reteiva") {
-
-          var fieldList = OBJ_FORM.getField(fieldConfig.custpage);
-          fieldList.addSelectOption({
-            value: "",
-            text: ' '
-          });
-          search.create({
-            type: fieldConfig.source,
-            filters: [
-              ["custrecord_lmry_wht_countries","anyof",countryID],
-              "AND",
-              ["isinactive","is","F"],
-              "AND",
-              ["custrecord_lmry_wht_types.custrecord_lmry_wht_entityfield","is",fieldConfig.fieldKey]
-            ],
-            columns:
-              ["internalid","name"]
-          }).run().each(function (result) {
-            var columns = result.columns;
-            fieldList.addSelectOption({
-              value: result.getValue(columns[0]),
-              text: result.getValue(columns[1])
-            });
-            return true
-          });
-        }
-
-        if (fieldConfig.fieldKey == "custentity_lmry_es_agente_retencion") {
-          var fieldList = OBJ_FORM.getField(fieldConfig.custpage);
-          fieldList.addSelectOption({
-            value: "",
-            text: ' '
-          });
-          search.create({
-            type: fieldConfig.source,
-            filters: [],
-            columns:
-              ["internalid","name"]
-          }).run().each(function (result) {
-            var columns = result.columns;
-            fieldList.addSelectOption({
-              value: result.getValue(columns[0]),
-              text: result.getValue(columns[1])
-            });
-            return true
-          });
-        }
-        if (fieldConfig.fieldKey == "custentity_lmry_es_buen_contribuyente") {
-          var fieldList = OBJ_FORM.getField(fieldConfig.custpage);
-          fieldList.addSelectOption({
-            value: "",
-            text: ' '
-          });
-          search.create({
-            type: fieldConfig.source,
-            filters: [],
-            columns:
-              ["internalid","name"]
-          }).run().each(function (result) {
-            var columns = result.columns;
-            fieldList.addSelectOption({
-              value: result.getValue(columns[0]),
-              text: result.getValue(columns[1])
-            });
-            return true
-          });
-        }
-        if (fieldConfig.fieldKey == "custentity_lmry_es_agente_percepcion") {
-          var fieldList = OBJ_FORM.getField(fieldConfig.custpage);
-          fieldList.addSelectOption({
-            value: "",
-            text: ' '
-          });
-          search.create({
-            type: fieldConfig.source,
-            filters: [],
-            columns:
-              ["internalid","name"]
-          }).run().each(function (result) {
-            var columns = result.columns;
-            fieldList.addSelectOption({
-              value: result.getValue(columns[0]),
-              text: result.getValue(columns[1])
-            });
-            return true
-          });
-        }
+          return true;
+        });
       }
+      
 
       /**
        * Asigna el custpage para cada campo temporal , en caso sea en el client muestra los valores segun la sublista

@@ -166,8 +166,6 @@ define([
         }
         
         if (subListName == "submachine" && featureInterCompany) {
-          console.log("presionado________________________************")
-          console.log("lineNum",scriptContext.lineNum)
           Library_HideView.changeSubsidiary(currentRCD,subsidiaries);
         }
 
@@ -239,7 +237,7 @@ define([
       try {
 
         var currentRCD = scriptContext.currentRecord;
-        var subListName = scriptContext.sublistId;
+        
         if (scriptContext.fieldId == 'subsidiary') {
 
           var subt = currentRCD.getValue('subsidiary');

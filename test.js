@@ -223,59 +223,59 @@ filterFields(subsidiaries, fieldEntity, "customer")
 
 var resultado = {
    subsidiaries: {
-     '7': {
-       countryCode: 'AR',
-       countryName: 'Argentina',
-       name: ' HoneyComb AR',
-       fieldsEntity: []
-     },
-     '10': {
-       countryCode: 'CO',
-       countryName: 'Colombia',
-       name: ' HoneyComb CO',
-       fieldsEntity: [
-         {
-           fieldKey: 'custentity_lmry_country',
-           fieldRecord: 'custrecord_lmry_ef_country'
-         },
-         {
-           fieldKey: 'custentity_lmry_country_codeiso',
-           fieldRecord: 'custrecord_lmry_ef_country_codeiso'
-         },
-         {
-           fieldKey: 'custentity_lmry_digito_verificator',
-           fieldRecord: 'custrecord_lmry_ef_digito_verificator'
-         },
-         {
-           fieldKey: 'custentity_lmry_pa_person_type',
-           fieldRecord: 'custrecord_lmry_ef_pa_person_type'
-         },
-         {
-           fieldKey: 'custentity_lmry_sunat_tipo_doc_cod',
-           fieldRecord: 'custrecord_lmry_ef_sunat_tipo_doc_cod'
-         },
-         {
-           fieldKey: 'custentity_lmry_sunat_tipo_doc_id',
-           fieldRecord: 'custrecord_lmry_ef_sunat_tipo_doc_id'
-         }
-       ]
-     },
-     '16': {
-       countryCode: 'BR',
-       countryName: 'Brazil',
-       name: ' HoneyComb BR',
-       fieldsEntity: []
-     }
+      '7': {
+         countryCode: 'AR',
+         countryName: 'Argentina',
+         name: ' HoneyComb AR',
+         fieldsEntity: []
+      },
+      '10': {
+         countryCode: 'CO',
+         countryName: 'Colombia',
+         name: ' HoneyComb CO',
+         fieldsEntity: [
+            {
+               fieldKey: 'custentity_lmry_country',
+               fieldRecord: 'custrecord_lmry_ef_country'
+            },
+            {
+               fieldKey: 'custentity_lmry_country_codeiso',
+               fieldRecord: 'custrecord_lmry_ef_country_codeiso'
+            },
+            {
+               fieldKey: 'custentity_lmry_digito_verificator',
+               fieldRecord: 'custrecord_lmry_ef_digito_verificator'
+            },
+            {
+               fieldKey: 'custentity_lmry_pa_person_type',
+               fieldRecord: 'custrecord_lmry_ef_pa_person_type'
+            },
+            {
+               fieldKey: 'custentity_lmry_sunat_tipo_doc_cod',
+               fieldRecord: 'custrecord_lmry_ef_sunat_tipo_doc_cod'
+            },
+            {
+               fieldKey: 'custentity_lmry_sunat_tipo_doc_id',
+               fieldRecord: 'custrecord_lmry_ef_sunat_tipo_doc_id'
+            }
+         ]
+      },
+      '16': {
+         countryCode: 'BR',
+         countryName: 'Brazil',
+         name: ' HoneyComb BR',
+         fieldsEntity: []
+      }
    },
    general: [
-     {
-       fieldKey: 'custentity_lmry_sv_taxpayer_number',
-       fieldRecord: 'custrecord_lmry_ef_sv_taxpayer_number'
-     },
-     {
-       fieldKey: 'custentity_lmry_sv_taxpayer_type',
-       fieldRecord: 'custrecord_lmry_ef_sv_taxpayer_type'
-     }
+      {
+         fieldKey: 'custentity_lmry_sv_taxpayer_number',
+         fieldRecord: 'custrecord_lmry_ef_sv_taxpayer_number'
+      },
+      {
+         fieldKey: 'custentity_lmry_sv_taxpayer_type',
+         fieldRecord: 'custrecord_lmry_ef_sv_taxpayer_type'
+      }
    ]
 }
 
@@ -322,28 +322,28 @@ var listSetupView = {
 function getViewFields(listSetupView, resultado) {
    // Iterar sobre las subsidiarias en el resultado
    for (var subsidiaryId in resultado.subsidiaries) {
-       if (resultado.subsidiaries.hasOwnProperty(subsidiaryId)) {
-           var subsidiary = resultado.subsidiaries[subsidiaryId];
-           var countryCode = subsidiary.countryCode; // Obtener el código del país
+      if (resultado.subsidiaries.hasOwnProperty(subsidiaryId)) {
+         var subsidiary = resultado.subsidiaries[subsidiaryId];
+         var countryCode = subsidiary.countryCode; // Obtener el código del país
 
-           // Verificar si el país existe en listSetupView
-           if (listSetupView[countryCode]) {
-               var allowedFields = listSetupView[countryCode]; // Campos permitidos para este país
+         // Verificar si el país existe en listSetupView
+         if (listSetupView[countryCode]) {
+            var allowedFields = listSetupView[countryCode]; // Campos permitidos para este país
 
-               // Filtrar fieldsEntity para incluir solo los campos que están en allowedFields
-               subsidiary.fieldsEntity = subsidiary.fieldsEntity.filter(function(field) {
-                   return allowedFields.indexOf(field.fieldKey) !== -1;
-               });
-           } else {
-               // Si el país no está en listSetupView, eliminar todos los fieldsEntity
-               subsidiary.fieldsEntity = [];
-           }
-       }
+            // Filtrar fieldsEntity para incluir solo los campos que están en allowedFields
+            subsidiary.fieldsEntity = subsidiary.fieldsEntity.filter(function (field) {
+               return allowedFields.indexOf(field.fieldKey) !== -1;
+            });
+         } else {
+            // Si el país no está en listSetupView, eliminar todos los fieldsEntity
+            subsidiary.fieldsEntity = [];
+         }
+      }
    }
 
    return resultado; // Retornar el resultado modificado
 }
-getViewFields(listSetupView,resultado)
+getViewFields(listSetupView, resultado)
 
 
 function getList() {
@@ -353,8 +353,8 @@ function getList() {
       type: "customlist_lmry_yes_no",
       filters: [],
       columns:
-        ["internalid","name"]
-    }).run().each(function (result) {
+         ["internalid", "name"]
+   }).run().each(function (result) {
       var columns = result.columns;
       var obj = {
          value: result.getValue(columns[0]),
@@ -362,9 +362,9 @@ function getList() {
       }
       list.push(obj)
       return true
-    });
+   });
 
-    return list;
+   return list;
 }
 
 getList()
@@ -373,6 +373,82 @@ var currentRCD = record.load({
    type: "Customer",
    id: "169056",
    isDynamic: true
- });
+});
 
- var reteica = currentRCD.getValue("custentity_lmry_co_reteica")
+var reteica = currentRCD.getValue("custentity_lmry_co_reteica")
+console.log("reteica")
+
+
+
+function getFilters() {
+   let filters = [
+      ["mainline", "is", "T"],
+      "AND",
+      ["formulatext: {custbody_lmry_reference_transaction}", "isnotempty", ""]
+
+   ];
+   filters.push([
+      [
+         [
+            "type",
+            "anyof",
+            "CustCred",
+            "CustInvc"
+         ]
+      ],
+      "OR",
+      [
+         [
+            [
+               "type",
+               "anyof",
+               "Journal"
+            ],
+            "AND",
+            [
+               "formulatext: CASE WHEN  {custbody_lmry_reference_transaction.recordType} = 'invoice'  OR {custbody_lmry_reference_transaction.recordType} = 'creditmemo' THEN 1 ELSE 0 END",
+               "is",
+               "1"
+            ]
+         ]
+      ]
+   ]);
+   
+   filters.push('AND');
+   filters.push(
+      [
+         ["formulatext: {memomain}", "startswith", "Latam - WHT"],
+         "AND",
+         ["formulatext: {memomain}", "doesnotstartwith", "Latam - WHT Reverse"]
+      ]
+   );
+   let settings = [];
+
+
+   filters.push('AND', ['subsidiary', 'anyof', "7"]);
+   filters.push('AND', ['internalid', 'anyof', "4378594"]);
+   filters.push('AND',["custrecord_lmry_br_transaction.internalid", "anyof", "@NONE@"]);
+   settings = [search.createSetting({ name: 'consolidationtype', value: 'NONE' })];
+   let columns = [];
+   columns.push(search.createColumn({ name: 'formulatext', formula: '{custbody_lmry_reference_transaction.internalid}', sort: search.Sort.DESC }));
+   columns.push(search.createColumn({ name: 'formulatext', formula: '{memomain}' }));
+   let searchTransactionsWht = search.create({
+      type: "transaction",
+      filters: filters,
+      columns: columns,
+      settings: settings
+   });
+   let jsonData = {};
+   let pageData = searchTransactionsWht.runPaged({ pageSize: 1000 });
+   if (pageData) {
+      pageData.pageRanges.forEach(function (pageRange) {
+         let page = pageData.fetch({ index: pageRange.index });
+         page.data.forEach(function (result) {
+            let id = result.getValue(result.columns[0]);
+            let memo = result.getValue(result.columns[1]);
+            jsonData[id] = memo.startsWith("Latam - WHT Reclasification");
+         });
+      });
+   }
+   return jsonData;
+} 

@@ -39,7 +39,6 @@ define(['N/search', 'N/runtime', 'N/ui/serverWidget', 'N/log', './Latam_Library/
          */
         function beforeLoad(scriptContext) {
             try {
-                log.error("beforeLoad","start")
                 isURET = scriptContext.type;
                 FORM = scriptContext.form;
                 RCD = scriptContext.newRecord;
@@ -334,13 +333,11 @@ define(['N/search', 'N/runtime', 'N/ui/serverWidget', 'N/log', './Latam_Library/
          */
         function beforeSubmit(scriptContext) {
             try {
-                log.error("beforeSubmit","start")
                 var type = scriptContext.type;
                 // 2020.12.18 - Validacion para oldRecord
                 if (type != 'view' && type != 'create') {
                     var ObjRecord = scriptContext.newRecord;
                     var objrecordold = scriptContext.oldRecord;
-                    var FORM = scriptContext.form;
                     var isSuiteTax = runtime.isFeatureInEffect({ feature: 'tax_overhauling' });
                     // Latam Entity - Subsidiary Country = 30 Brasil
                     var country = objrecordold.getValue({ fieldId: 'custentity_lmry_subsidiary_country' });
@@ -409,9 +406,7 @@ define(['N/search', 'N/runtime', 'N/ui/serverWidget', 'N/log', './Latam_Library/
                         var info_tax = JSON.stringify(info_tax);
                         log.debug("info_tax: ", info_tax);
                         ObjRecord.setValue({ fieldId: 'custentity_lmry_ei_entity_regtax', value: info_tax });
-                    }
-
-                    
+                    }                  
                 }
             } catch (err2) {
                 log.error('beforeSubmit', err2);
@@ -429,17 +424,15 @@ define(['N/search', 'N/runtime', 'N/ui/serverWidget', 'N/log', './Latam_Library/
          * @Since 2015.2
          */
         function afterSubmit(scriptContext) {
-            log.error("afterSubmit","start")
             var ObjRecord = scriptContext.newRecord;
             var featureInterCompany = runtime.getCurrentScript().getParameter({ name: "custscript_lmry_all_entity_fields" });
-            log.error("featureInterCompany",featureInterCompany)
             if (featureInterCompany) Library_HideView.saveEntityFields(ObjRecord);
             
         }
 
         function ValidateAccessE(FORM, ID) {
             try {
-                log.error("ValidateAccessE","start")
+
                 var LMRY_Result = new Array();
 
                 // Inicializa variables Locales y Globales
@@ -458,11 +451,8 @@ define(['N/search', 'N/runtime', 'N/ui/serverWidget', 'N/log', './Latam_Library/
                 LMRY_access = Library_Mail.getCountryOfAccess(LMRY_countr, licenses);
 
                 // Solo si tiene acceso
-                log.error("LMRY_access",LMRY_access)
-                log.error("hide_entities",hide_entities)
                 if (LMRY_access == true) {
                     if ((isURET == 'view' || isURET == 'edit'|| isURET == 'create') && hide_entities) {
-                        log.error("LMRY_countr",LMRY_countr);
                         Library_HideView.HideEntityFields(FORM, LMRY_countr[0], licenses,RCD,isURET);
                         /*Library_Mail.onFieldsHide(1, FORM, true);
                         Library_Mail.onFieldsDisplayE(FORM, LMRY_countr[1], true);*/
