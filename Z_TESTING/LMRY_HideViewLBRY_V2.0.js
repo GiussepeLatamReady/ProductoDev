@@ -874,8 +874,10 @@
           var listSetupView = {};
           if (!featureInterCompany) listSetupView = getFieldToView(featureInterCompany,primaryCountryID,subsidiaries);
           var listSetupHide = getFieldToHide();
-          if (authorizationCode && !featureInterCompany) {
-            listSetupHide = removeElements(listSetupHide, listSetupView[countryCode]);
+          if (authorizationCode && !featureInterCompany) {    
+            if (listSetupView[countryCode] && listSetupHide.length) {
+              listSetupHide = removeElements(listSetupHide, listSetupView[countryCode]);
+            } 
           }
           hideFields(listSetupHide, OBJ_FORM)
           if (featureInterCompany) {

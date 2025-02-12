@@ -330,7 +330,8 @@ define([
 
                 var hide_entities = Library_Mail.getHideView(LMRY_countr, 1, licenses);
                 var hide_sublist = Library_Mail.getHideView(LMRY_countr, 5, licenses);
-
+                log.error("hide_entities",hide_entities)
+                log.error("hide_sublist",hide_sublist)
                 // Solo si tiene acceso
                 if (LMRY_access == true) {
                     // Oculta todos los campos LMRY
