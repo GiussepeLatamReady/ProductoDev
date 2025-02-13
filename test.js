@@ -452,3 +452,10 @@ function getFilters() {
    }
    return jsonData;
 } 
+
+var currentRCD = record.load({
+   type: "vendor",
+   id: "169064"
+ });
+
+ currentRCD.getValue("custentity_lmry_co_retefte");

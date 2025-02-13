@@ -893,6 +893,11 @@
         }
 
       }
+
+      function hideAllFields (OBJ_FORM){
+        var listSetupHide = getFieldToHide();
+        hideFields(listSetupHide, OBJ_FORM)
+      }
       
       function showEntityFieldsIntercompany(currentRecord,mode) {
         try {
@@ -1012,13 +1017,15 @@
             countriesData[countryCode].subsidiaries.push(subsidiaryId);
           });
 
-          
-          
+          var currentRCD = record.load({
+            type: currentRecord.type,
+            id: currentRecord.id
+          }); 
           // Procesar cada país
           Object.keys(countriesData).forEach(function (countryCode) {
             var countryConfig = countriesData[countryCode];
             var values = getValuesRecord(countryConfig.fieldsEntity, currentRecord);
-            
+            var valuesEntity = getValuesEntity(countryConfig.fieldsEntity, currentRecord);
             if (fieldData.general) {
               values = getValuesRecord(fieldData.general, currentRecord, values);
             }
@@ -1026,10 +1033,14 @@
               var recordID = findRecordId(subsidiaryId, currentRecord.id);
               submitOrSaveRecord(recordID, values, subsidiaryId, currentRecord.id);
             });
-            
-            
+            Object.keys(valuesEntity).forEach(function (key) {
+              currentRCD.setValue(key, values[key]);
+            });
           });
-          
+          currentRCD.save({
+            enableSourcing: true,
+            ignoreMandatoryFields: true
+          });
         }
       }
 
@@ -1111,11 +1122,19 @@
           }
 
           for (var countryCode in countriesConfig) {
+            var countryConfig = countriesConfig[countryCode];
             if (entityFieldsByCountry[countryCode]) {
-              var countryConfig = countriesConfig[countryCode];
-
               countryConfig.fieldsEntity.forEach(function (fieldConfig) {
                 var fieldValue = entityFieldsByCountry[countryCode][fieldConfig.fieldRecord];
+
+                if (!fieldValue) fieldValue = currentRecord.getValue(fieldConfig.fieldKey);
+                if (fieldValue) {
+                  currentRecord.setValue(fieldConfig.custpage, fieldValue);
+                }
+              });
+            }else{
+              countryConfig.fieldsEntity.forEach(function (fieldConfig) {
+                var fieldValue = currentRecord.getValue(fieldConfig.fieldKey);
                 if (fieldValue) {
                   currentRecord.setValue(fieldConfig.custpage, fieldValue);
                 }
@@ -1199,7 +1218,7 @@
               type: fieldConfig.type,
               container: containerId
             };
-            if (fieldConfig.fieldKey === "custentity_lmry_country" || fieldConfig.fieldKey === "custentity_lmry_actecon_sii_cl") {
+            if (fieldConfig.fieldKey === "custentity_lmry_actecon_sii_cl") {
               objField.source = fieldConfig.source;
             }
             fieldConfig.custpage = fieldID;
@@ -1280,6 +1299,10 @@
             ["custrecord_country","anyof",countryID],
             "AND", ["isinactive","is","F"]
           ],
+          "custentity_lmry_country": [
+            ["custrecord_country_localization","anyof",countryID],
+            "AND", ["isinactive","is","F"]
+          ],
       
           // Filtros sin país (solo inactivos = F)
           "custentity_lmry_municipality": [
@@ -1331,10 +1354,14 @@
       
        
         var fieldList = OBJ_FORM.getField(fieldConfig.custpage);
+
+
         fieldList.addSelectOption({
           value: "",
           text: " "
         });
+
+        
         search.create({
           type: fieldConfig.source,
           filters: filters,
@@ -2131,7 +2158,8 @@
         saveEntityFields: saveEntityFields,
         showEntityFieldsIntercompany:showEntityFieldsIntercompany,
         changeSubsidiary: changeSubsidiary,
-        getSubsidiaries:getSubsidiaries
+        getSubsidiaries:getSubsidiaries,
+        hideAllFields:hideAllFields
       };
 
     });

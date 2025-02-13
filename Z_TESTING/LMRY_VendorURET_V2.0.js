@@ -264,9 +264,6 @@ define([
             var ObjRecord = scriptContext.newRecord;
             var FORM = scriptContext.form;
             
-            if (type != 'view' && type != 'create') {
-                Library_HideView.saveEntityFields(ObjRecord,FORM);
-            }
         }
 
         /**
@@ -330,8 +327,6 @@ define([
 
                 var hide_entities = Library_Mail.getHideView(LMRY_countr, 1, licenses);
                 var hide_sublist = Library_Mail.getHideView(LMRY_countr, 5, licenses);
-                log.error("hide_entities",hide_entities)
-                log.error("hide_sublist",hide_sublist)
                 // Solo si tiene acceso
                 if (LMRY_access == true) {
                     // Oculta todos los campos LMRY
@@ -345,6 +340,8 @@ define([
                     if ((isURET == 'view' || isURET == 'edit') && (FORM != '' && FORM != null) && hide_sublist) {
                         Library_HideView.HideSubTab(FORM, LMRY_countr[1], RCD.type, licenses);
                     }
+                }else{
+                     Library_HideView.hideAllFields(FORM);
                 }
             } catch (err) {
                 Library_Mail.sendemail(' [ ValidateAccessV ] ' + err, LMRY_script);

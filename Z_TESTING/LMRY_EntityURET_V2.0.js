@@ -461,6 +461,8 @@ define(['N/search', 'N/runtime', 'N/ui/serverWidget', 'N/log', './Latam_Library/
                     if ((isURET == 'view' || isURET == 'edit' || isURET == 'copy') && (FORM != '' && FORM != null) && hide_sublist) {
                         Library_HideView.HideSubTab(FORM, LMRY_countr[1], RCD.type, licenses);
                     }
+                }else{
+                    Library_HideView.hideAllFields(FORM)
                 }
 
                 if (isURET == 'view' || isURET == 'edit') {
