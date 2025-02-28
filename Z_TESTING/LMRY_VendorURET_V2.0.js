@@ -13,7 +13,7 @@
 ||  2.0     17 ago 2018  LatamReady    Use Script 2.0           ||
  \= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = */
 
-define([
+ define([
     'N/search',
     'N/runtime',
     'N/ui/serverWidget',
@@ -312,7 +312,7 @@ define([
         /* ------------------------------------------------------------------------------------------------------
          * featureId = 1 Registro de Compras Electronico - Peru (PE)
          * --------------------------------------------------------------------------------------------------- */
-        function ValidateAccessV(RCD, ID, licenses,RCD) {
+        function ValidateAccessV(FORM, ID, licenses,RCD) {
             try {
 
                 // Inicializa variables Locales y Globales
@@ -341,7 +341,12 @@ define([
                         Library_HideView.HideSubTab(FORM, LMRY_countr[1], RCD.type, licenses);
                     }
                 }else{
-                     Library_HideView.hideAllFields(FORM);
+                    var featureInterCompany = runtime.getCurrentScript().getParameter({ name: "custscript_lmry_all_entity_fields" });
+                    if (featureInterCompany) {
+                        Library_HideView.HideEntityFields(FORM, LMRY_countr[0], licenses,RCD,isURET);
+                    }else{
+                        Library_HideView.hideAllFields(FORM);
+                    }
                 }
             } catch (err) {
                 Library_Mail.sendemail(' [ ValidateAccessV ] ' + err, LMRY_script);
