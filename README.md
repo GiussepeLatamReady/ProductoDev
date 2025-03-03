@@ -1,10 +1,8 @@
-# [D1787 - ALL - Customer y Vendor Custom Form](https://docs.google.com/document/d/17UtSvnAXrbnfb2Dp372LzOmM0PlsDdYCqbtZ536utw4/edit?tab=t.0#heading=h.37nr90gwl3v3)
+# [D1786 - CO GL Impact Add Line](https://docs.google.com/document/d/1frsCfSXOEXE7q4hN3dSMUK8lnUq6HVhDmivLA10ZS8Q/edit?tab=t.0#heading=h.1mllta7bdj39)
 
 ## Description of the Requirement
 
-Actualmente, las entidades cuentan con campos visibles en función del país de la subsidiaria primaria seleccionada. Este enfoque limita la flexibilidad de visualización de campos para casos con múltiples subsidiarias.
-
-
+Se necesita mostrar en el GL Impact el nombre de la entidad de la transacción generada para compras y ventas.
 
 
 ## Description of the solution
@@ -14,23 +12,31 @@ Actualmente, las entidades cuentan con campos visibles en función del país de 
 + Create
 
 + Update
-    LMRY_EntityCLNT_V2.0.js
-    LMRY_EntityURET_V2.0.js
-    LMRY_HideViewLBRY_V2.0.js
-    LMRY_VendorCLNT_V2.0.js
-    LMRY_VendorURET_V2.0.js
+    
 
 + Delete
 
 
 ## Records Configuration
 + Create
-
+    +   Latam - Entity
+        +   Descripcion : Este record almacena las entidades existentes en el ambiente.
+        +   Type : Custom record (customrecord)
+        +   Name : Latam - Entity
+        +   ID : customrecord_cseg_lmry_sg_entity
+        +   Fields:
+            +   Latam - Entity ID : custrecord_lr_entity_id
+            +   Latam - Entity Name : custrecord_lr_entity_name
 
 + Update
     
 ## Fields
 + Create
+    +   Latam - Entity
+        +   Descripcion : Creación de custom segment [Latam - Entity] relacionado al custom record [Latam - Entity]
+        +   Type : Custom Segment (customsegment)
+        +   Name : Latam - Entity
+        +   ID : cseg_lmry_sg_entity
 + Update 
 + Delete
 
@@ -45,33 +51,18 @@ Actualmente, las entidades cuentan con campos visibles en función del país de 
 ## Observations
  
 ## Configuration
----features
-By Entity is true - LatamReady - Enable Features by Subsidiary
-
---- hide Fields
-
-custentity_2663_email_address_notif
-custentity_lmry_desc_economic_activity
-custentity_lmry_type_activity
-custentity_ls_coordinate_address
-custentity_lmry_def_win_start
-custentity_lmry_def_win_end
-custentity_lmry_smp_client_id
-custentity_lmry_add_in_smp
-custentity_lmry_smp_skills_customer
-custentity_lmry_smp_note
 
 
 ## SmartReady
 
 + Descripcion:
 
-    + Se considera el saldo de la transaccion para realizar el pago y la generación del journal.
+    + 
 
 
 + Documento funcional ( )
 
-    + [LatamReady - PE Rentas No Domiciliadas](https://docs.google.com/presentation/d/1ey6imOtrDRQAp8AKoln9LyV86CW0wRKz/edit#slide=id.g2d659a1587c_0_0)
+    + []()
 
 + Documento Tecnico:
 
