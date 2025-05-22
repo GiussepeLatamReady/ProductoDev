@@ -1,16 +1,14 @@
-# [D1786 - CO GL Impact Add Line](https://docs.google.com/document/d/1frsCfSXOEXE7q4hN3dSMUK8lnUq6HVhDmivLA10ZS8Q/edit?tab=t.0#heading=h.1mllta7bdj39)
+# [C1252 - Enhancement - Automatic Set & Mass E-Invoicing by MX](https://docs.google.com/document/d/1frsCfSXOEXE7q4hN3dSMUK8lnUq6HVhDmivLA10ZS8Q/edit?tab=t.0#heading=h.1mllta7bdj39)
 
 ## Description of the Requirement
-
-Se necesita mostrar en el GL Impact el nombre de la entidad de la transacción generada para compras y ventas.
-
+En facturación electrónica masiva para México (MX), se requiere modificar los criterios actuales utilizados por el módulo LatamReady - Advance Flow según especificaciones proporcionadas por ISP. Estas modificaciones buscan optimizar el reconocimiento y procesamiento correcto de documentos como Facturas, Notas de Crédito y Pagos de Cliente
 
 ## Description of the solution
 
 
 ## Scripts
 + Create
-
+ 
 + Update
     
 
