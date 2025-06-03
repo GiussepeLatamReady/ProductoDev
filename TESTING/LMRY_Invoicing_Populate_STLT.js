@@ -7,7 +7,7 @@
 ||  2.0     Jul 01 2019  LatamReady    Use Script 2.0           ||
 \= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = */
 
-/**sssssss
+/**
  * @NApiVersion 2.1
  * @NScriptType Suitelet
  * @NModuleScope Public
@@ -19,6 +19,21 @@ define(['N/query', 'N/suiteAppInfo', 'N/log', 'N/xml', 'N/format', 'N/config', '
         var LMRY_script = 'LatamReady - Invoicing Populate STLT';
 
         var jsonLanguage = {
+            ddates: {
+                en: 'Deposit Date Ranges',
+                es: 'Rango de Fechas de Depósito',
+                pt: 'Intervalos de datas de depósito'
+            },
+            ddatesfrom: {
+                en: 'Deposit Date From',
+                es: 'Fecha de depósito desde',
+                pt: 'Data de depósito de'
+            },
+            ddatesto: {
+                en: 'Deposit Date To',
+                es: 'Fecha de depósito hasta',
+                pt: 'Data do depósito para'
+            },
             title: {
                 en: 'LatamReady - Advanced Sales Flow',
                 es: 'LatamReady - Flujo de Ventas Avanzado',
@@ -190,9 +205,9 @@ define(['N/query', 'N/suiteAppInfo', 'N/log', 'N/xml', 'N/format', 'N/config', '
                 pt: 'Detalhes : '
             },
             checkpaid: {
-                en: 'Include Paid Invoices',
-                es: 'Incluir Facturas Pagadas',
-                pt: 'Incluir faturas pagas'
+                en: 'Invoice Payment Status',
+                es: 'Estado de Pago de la Factura',
+                pt: 'Status de Pagamento da Fatura'
             },
             classification: {
                 en: 'Classification',
@@ -218,6 +233,21 @@ define(['N/query', 'N/suiteAppInfo', 'N/log', 'N/xml', 'N/format', 'N/config', '
                 en: 'Only Automatic Set',
                 es: 'Sólo Configuración Automática',
                 pt: 'Somente Conjunto Automático'
+            },
+            unpaid: {
+                en: 'Only Unpaid Invoices',
+                es: 'Solo Facturas sin Pago',
+                pt: 'Apenas Faturas não Pagas'
+            },
+            fullypaid: {
+                en: 'Only Fully Paid Invoices',
+                es: 'Solo Facturas Totalmente Pagadas',
+                pt: 'Apenas faturas totalmente Pagas'
+            },
+            all: {
+                en: 'All Invoices',
+                es: 'Todas las Facturas',
+                pt: 'todas as Faturas'
             }
         };
 
@@ -262,6 +292,9 @@ define(['N/query', 'N/suiteAppInfo', 'N/log', 'N/xml', 'N/format', 'N/config', '
                 var FEATURE_DEPT = runtime.isFeatureInEffect({ feature: "DEPARTMENTS" });
                 var FEATURE_LOC = runtime.isFeatureInEffect({ feature: "LOCATIONS" });
                 var FEATURE_CLASS = runtime.isFeatureInEffect({ feature: "CLASSES" });
+                var DEPTMANDATORY = runtime.getCurrentUser().getPreference({ name: "DEPTMANDATORY" });
+                var LOCMANDATORY = runtime.getCurrentUser().getPreference({ name: "LOCMANDATORY" });
+                var CLASMANDATORY = runtime.getCurrentUser().getPreference({ name: "CLASSMANDATORY" });
 
                 var current_role = runtime.getCurrentUser().roleId;
 
@@ -281,8 +314,10 @@ define(['N/query', 'N/suiteAppInfo', 'N/log', 'N/xml', 'N/format', 'N/config', '
                     var Rd_Department = context.request.parameters.custparam_department;
                     var Rd_Class = context.request.parameters.custparam_class;
                     var Rd_Location = context.request.parameters.custparam_location;
+                    var Rd_DDate_From = context.request.parameters.custparam_ddate_from;
+                    var Rd_DDate_To = context.request.parameters.custparam_ddate_to;
                     var allLicenses = libraryFeature.getAllLicenses();
-
+                    var activatedCustom = activatedCustomization(Rd_Subsi);
                     var idFeature = {
                         AR: 341,
                         BO: 704,
@@ -400,15 +435,15 @@ define(['N/query', 'N/suiteAppInfo', 'N/log', 'N/xml', 'N/format', 'N/config', '
                     // Modificacion 02-03-2022: Checkbox - Include Paid Transactions
                     var p_checkpaid = form.addField({
                         id: 'custpage_checkpaid',
-                        type: 'checkbox',
+                        type: 'select',
                         label: jsonLanguage.checkpaid[Language],
                         container: 'group_pi'
                     });
 
-                    p_checkpaid.defaultValue = 'F';
-                    p_checkpaid.updateDisplayType({
-                        displayType: serverWidget.FieldDisplayType.NODISPLAY
-                    });
+                    p_checkpaid.addSelectOption({value: '1', text: jsonLanguage['unpaid'][Language]});
+                    p_checkpaid.addSelectOption({value: '2', text: jsonLanguage['fullypaid'][Language]});
+                    p_checkpaid.addSelectOption({value: '3', text: jsonLanguage['all'][Language]});
+
 
                     // C1247: Se incluye Checkbox - Automatic Set
                     var p_checkAutomaticSet = form.addField({
@@ -439,7 +474,7 @@ define(['N/query', 'N/suiteAppInfo', 'N/log', 'N/xml', 'N/format', 'N/config', '
                         height: 60,
                         width: 30
                     });
-                    f_date.isMandatory = true;
+                    //f_date.isMandatory = true;
 
                     var f_date_2 = form.addField({
                         id: 'custpage_date_2',
@@ -452,7 +487,17 @@ define(['N/query', 'N/suiteAppInfo', 'N/log', 'N/xml', 'N/format', 'N/config', '
                         height: 60,
                         width: 30
                     });
-                    f_date_2.isMandatory = true;
+                    //f_date_2.isMandatory = true;
+
+                    let fDDateFrom
+                    let fDDateTo
+                    
+                    //Deposit Date
+                    form.addFieldGroup({ id: 'group_ddates', label: jsonLanguage.ddates[Language] });
+
+                    fDDateFrom = form.addField({ id: 'custpage_ddate_from', type: 'date', label: jsonLanguage.ddatesfrom[Language], container: 'group_rg', source: 'date' }).updateDisplaySize({ height: 60, width: 30 });
+                    fDDateTo = form.addField({ id: 'custpage_ddate_to', type: 'date', label: jsonLanguage.ddatesto[Language], container: 'group_rg', source: 'date' }).updateDisplaySize({ height: 60, width: 30 });
+
 
                     //Classification
                     form.addFieldGroup({
@@ -467,6 +512,9 @@ define(['N/query', 'N/suiteAppInfo', 'N/log', 'N/xml', 'N/format', 'N/config', '
                             label: jsonLanguage.department[Language],
                             container: 'group_classification'
                         });
+                        if (DEPTMANDATORY == true || DEPTMANDATORY == 'T') {
+                            f_dep.isMandatory = true;
+                        }
                     }
                     var f_class = '';
                     if (FEATURE_CLASS == true || FEATURE_CLASS == 'T') {
@@ -476,6 +524,9 @@ define(['N/query', 'N/suiteAppInfo', 'N/log', 'N/xml', 'N/format', 'N/config', '
                             label: jsonLanguage.class[Language],
                             container: 'group_classification'
                         });
+                        if (CLASMANDATORY == true || CLASMANDATORY == 'T') {
+                            f_class.isMandatory = true;
+                        }
                     }
                     var f_loc = '';
                     if (FEATURE_LOC == true || FEATURE_LOC == 'T') {
@@ -485,6 +536,9 @@ define(['N/query', 'N/suiteAppInfo', 'N/log', 'N/xml', 'N/format', 'N/config', '
                             label: jsonLanguage.location[Language],
                             container: 'group_classification'
                         });
+                        if (LOCMANDATORY == true || LOCMANDATORY == 'T') {
+                            f_loc.isMandatory = true;
+                        }
                     }
 
                     // CONTEO DE TRANSACCIONES
@@ -889,21 +943,25 @@ define(['N/query', 'N/suiteAppInfo', 'N/log', 'N/xml', 'N/format', 'N/config', '
                             operator: 'is',
                             values: 'T'
                         });
-                        filtros_invoice[1] = search.createFilter({
-                            name: 'trandate',
-                            operator: 'onorbefore',
-                            values: Rd_Date_2
-                        });
-                        filtros_invoice[2] = search.createFilter({
-                            name: 'trandate',
-                            operator: 'onorafter',
-                            values: Rd_Date
-                        });
-                        filtros_invoice[3] = search.createFilter({
-                            name: 'memo',
-                            operator: 'doesnotcontain',
-                            values: ['VOID']
-                        });
+
+                        if(Rd_Date || Rd_Date_2){
+
+                            filtros_invoice.push(search.createFilter({name: 'trandate', operator: 'within', values: [Rd_Date, Rd_Date_2]}));
+
+                            /*filtros_invoice.push(search.createFilter({name: 'trandate', operator: 'onorafter', values: Rd_Date}));
+                            filtros_invoice.push(search.createFilter({name: 'trandate', operator: 'onorbefore', values: Rd_Date_2}));*/
+
+                        }
+
+                        if(Rd_DDate_From || Rd_DDate_To){
+
+                            filtros_invoice.push(search.createFilter({name: 'custbody_isp_deposit_date', operator: 'within', values: [Rd_DDate_From, Rd_DDate_To]}));
+
+                            /*filtros_invoice.push(search.createFilter({name: 'custbody_isp_deposit_date', operator: 'onorafter', values: Rd_DDate_From}));
+                            filtros_invoice.push(search.createFilter({name: 'custbody_isp_deposit_date', operator: 'onorbefore', values: Rd_DDate_To}));*/
+
+                        }
+                        
                         // filtros_invoice[4] = [["type","anyof","CustCred"],"OR",[["type","anyof","CustInvc"],"AND",["amountpaid","equalto","0.00"]]];
                         // filtros_invoice[4] = search.createFilter({name:'amountpaid',operator:'equalto',values:0});
                         // filtros_invoice[4] = search.createFilter({name:'status',operator:'anyof',values:['CustInvc:A','CustCred:A']});
@@ -1358,13 +1416,15 @@ define(['N/query', 'N/suiteAppInfo', 'N/log', 'N/xml', 'N/format', 'N/config', '
 
                                         // VALIDACIONES CUANDO ES INVOICE
                                         if (id_type == 'custinvc') {
-                                            if (id_status != 'open' && id_status != 'paidinfull') {
+                                            if(Rd_CheckPaid == '1'){ //Sin pago Alguno
+                                            if(id_amountpaid > 0 || id_status != 'open'){
                                                 continue;
                                             }
-
-                                            if (id_status == 'paidinfull' && Rd_CheckPaid == 'F') {
-                                                continue;
-                                            }
+                                          }else if(Rd_CheckPaid == '2'){//Totalmente Pagado
+                                              if(id_status != 'paidinfull'){
+                                                  continue;
+                                              }
+                                          }
 
                                             if (Rd_Country == 'BRA') {
                                                 // Si tiene pago parcial, sigue siendo open
@@ -1513,8 +1573,14 @@ define(['N/query', 'N/suiteAppInfo', 'N/log', 'N/xml', 'N/format', 'N/config', '
                             });
                         }
 
-                        f_date.defaultValue = Rd_Date;
-                        f_date_2.defaultValue = Rd_Date_2;
+                        if(Rd_Date) f_date.defaultValue = Rd_Date;
+                        if(Rd_Date_2) f_date_2.defaultValue = Rd_Date_2;
+
+                        if (activatedCustom) {
+                            if(Rd_DDate_From) fDDateFrom.defaultValue = Rd_DDate_From;
+                            if(Rd_DDate_To) fDDateTo.defaultValue = Rd_DDate_To;
+                        }
+                        
                         p_checkpaid.defaultValue = Rd_CheckPaid;
                         p_checkAutomaticSet.defaultValue = Rd_AutomaticSet;
 
@@ -1524,6 +1590,12 @@ define(['N/query', 'N/suiteAppInfo', 'N/log', 'N/xml', 'N/format', 'N/config', '
                                 text: Rd_Transaction[1]
                             });
                         }
+                        
+                        if (activatedCustom) {
+                            fDDateFrom.updateDisplayType({displayType: 'disabled'});
+                            fDDateTo.updateDisplayType({displayType: 'disabled'});
+                        }
+                        
 
                         f_date.updateDisplayType({
                             displayType: serverWidget.FieldDisplayType.DISABLED
@@ -1628,7 +1700,9 @@ define(['N/query', 'N/suiteAppInfo', 'N/log', 'N/xml', 'N/format', 'N/config', '
                                 custparam_automaticset: context.request.parameters.custpage_automatic_set,
                                 custparam_department: context.request.parameters.custpage_department,
                                 custparam_class: context.request.parameters.custpage_class,
-                                custparam_location: context.request.parameters.custpage_location
+                                custparam_location: context.request.parameters.custpage_location,
+                                custparam_ddate_from: context.request.parameters.custpage_ddate_from,
+                                custparam_ddate_to: context.request.parameters.custpage_ddate_to
                             }
                         });
                     } else {
@@ -2245,6 +2319,21 @@ define(['N/query', 'N/suiteAppInfo', 'N/log', 'N/xml', 'N/format', 'N/config', '
             }
         }
 
+        function activatedCustomization(subsidiaryId) {
+            var active = false;
+            if (!subsidiaryId) return false;
+            search.create({
+                type: 'customrecord_lmry_setup_tax_subsidiary',
+                filters: [
+                    ["custrecord_lmry_setuptax_subsidiary","anyof",subsidiaryId]
+                ],
+                columns: ['custrecord_lmry_setuptax_customfields']
+            }).run().each(function(result){
+                var fields = result.getValue("custrecord_lmry_setuptax_customfields")
+                if (fields && fields !=="{}") active = true;
+            });
+            return active
+        }
         function advanced(licenses, country, idFeature) {
             var country3country2 = {
                 ARG: 'AR',

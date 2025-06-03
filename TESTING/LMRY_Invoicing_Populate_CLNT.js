@@ -19,6 +19,16 @@ define(['N/search', './LMRY_IP_libSendingEmailsLBRY_V2.0', 'N/currentRecord', 'N
         var jsonTransaction = {};
 
         var jsonLanguage = {
+            dates: {
+                en: 'You must fill in both the From Date and To Date fields.',
+                es: 'Debe llenar ambos campos Fecha Desde y Fecha Hasta',
+                pt: 'Você deve preencher os campos "De" e "Para".'
+            },
+            ddates: {
+                en: 'You must fill in both fields Deposit Date',
+                es: 'Debe llenar ambos campos Fecha de Depósito',
+                pt: 'Você deve preencher ambos os campos Data do depósito'
+            },
             subsidiary: {
                 en: 'MANDATORY SUBSIDIARY FIELD',
                 es: 'EL CAMPO SUBSIDIARIA ES OBLIGATORIO',
@@ -78,6 +88,21 @@ define(['N/search', './LMRY_IP_libSendingEmailsLBRY_V2.0', 'N/currentRecord', 'N
                 en: 'MANDATORY TRANSACTION FIELD',
                 es: 'EL CAMPO TRANSACCIÓN ES OBLIGATORIO',
                 pt: 'O CAMPO TRANSAÇÃO É OBRIGATÓRIO'
+            },
+            department: {
+                en: 'MANDATORY DEPARTMENT FIELD',
+                es: 'EL CAMPO DEPARTAMENTO ES OBLIGATORIO',
+                pt: 'O CAMPO DEPARTAMENTO É OBRIGATÓRIO'
+            },
+            class: {
+                en: 'MANDATORY CLASS FIELD',
+                es: 'EL CAMPO CLASE ES OBLIGATORIO',
+                pt: 'O CAMPO CLASSE É OBRIGATÓRIO'
+            },
+            location: {
+                en: 'MANDATORY LOCATION FIELD',
+                es: 'EL CAMPO UBICACIÓN ES OBLIGATORIO',
+                pt: 'O CAMPO LOCALIZAÇÃO É OBRIGATÓRIO'
             }
         };
 
@@ -190,7 +215,7 @@ define(['N/search', './LMRY_IP_libSendingEmailsLBRY_V2.0', 'N/currentRecord', 'N
                 idCountry: 231
             }
         };
-
+        var activatedCustom = false;
         /**
          * Function to be executed after page is initialized.
          *
@@ -253,14 +278,10 @@ define(['N/search', './LMRY_IP_libSendingEmailsLBRY_V2.0', 'N/currentRecord', 'N
                     }
                 }
                 filtrarCampoAutomaticSet(scriptContext, subsi_OW);
-
+                
                 // P_HIDDEN ESTA LLENO EN EL SUITELET LOG
                 if (p_hidden == null || p_hidden == '') {
-                    if (objRecord.getValue({
-                        fieldId: 'custpage_date'
-                    }) == null || objRecord.getValue({
-                        fieldId: 'custpage_date'
-                    }) == '') {
+                    if (!objRecord.getValue('custpage_date') && !objRecord.getValue('custpage_ddate_from')) {
                         var newDate = new Date();
                         objRecord.setValue({
                             fieldId: 'custpage_date',
@@ -313,6 +334,15 @@ define(['N/search', './LMRY_IP_libSendingEmailsLBRY_V2.0', 'N/currentRecord', 'N
                             filtrarTransaction(scriptContext, subsi_OW);
                         }
                     }
+                }
+
+                activatedCustom = activatedCustomization(scriptContext, subsi_OW);
+                console.log("activatedCustom:", activatedCustom)
+                var fDDateFrom = objRecord.getField('custpage_ddate_from');
+                var fDDateTo = objRecord.getField('custpage_ddate_to');
+                if (!activatedCustom) {
+                    fDDateFrom.isDisplay = false;
+                    fDDateTo.isDisplay = false;
                 }
             } catch (error) {
                 // alert('Page Init: ' + error);
@@ -420,6 +450,17 @@ define(['N/search', './LMRY_IP_libSendingEmailsLBRY_V2.0', 'N/currentRecord', 'N
                     filtrarTransaction(scriptContext, subsi_OW);
                     filtrarSegmentaciones(scriptContext);
                     filtrarCampoAutomaticSet(scriptContext, subsi_OW);
+                    activatedCustom = activatedCustomization(scriptContext, subsi_OW);
+                    console.log("activatedCustom [validateField]: ",activatedCustom)
+                    var fDDateFrom = objRecord.getField('custpage_ddate_from');
+                    var fDDateTo = objRecord.getField('custpage_ddate_to');
+                    if (activatedCustom) {
+                        fDDateFrom.isDisplay = true;
+                        fDDateTo.isDisplay = true;
+                    }else{
+                        fDDateFrom.isDisplay = false;
+                        fDDateTo.isDisplay = false;
+                    }
                 }
 
                 if (scriptContext.fieldId == 'custpage_quantity' || scriptContext.fieldId == 'custpage_select') {
@@ -595,6 +636,12 @@ define(['N/search', './LMRY_IP_libSendingEmailsLBRY_V2.0', 'N/currentRecord', 'N
             var subsi_OW = runtime.isFeatureInEffect({
                 feature: 'SUBSIDIARIES'
             })
+            var DEPTMANDATORY = runtime.getCurrentUser().getPreference({ name: "DEPTMANDATORY" });
+            var LOCMANDATORY = runtime.getCurrentUser().getPreference({ name: "LOCMANDATORY" });
+            var CLASMANDATORY = runtime.getCurrentUser().getPreference({ name: "CLASSMANDATORY" });
+            var FEATURE_DEPT = runtime.isFeatureInEffect({ feature: "DEPARTMENTS" });
+            var FEATURE_LOC = runtime.isFeatureInEffect({ feature: "LOCATIONS" });
+            var FEATURE_CLASS = runtime.isFeatureInEffect({ feature: "CLASSES" });
             var Language = runtime.getCurrentScript().getParameter({
                 name: 'LANGUAGE'
             });
@@ -618,6 +665,8 @@ define(['N/search', './LMRY_IP_libSendingEmailsLBRY_V2.0', 'N/currentRecord', 'N
                 var date_2 = objRecord.getValue({
                     fieldId: 'custpage_date_2'
                 });
+                var ddateFrom = objRecord.getValue('custpage_ddate_from');
+                var ddateTo = objRecord.getValue('custpage_ddate_to');
                 var sv_transaction = objRecord.getValue({
                     fieldId: 'custpage_transaction'
                 });
@@ -631,16 +680,16 @@ define(['N/search', './LMRY_IP_libSendingEmailsLBRY_V2.0', 'N/currentRecord', 'N
                         }
                     }
 
-                    if (date == null || date == '' || date == 0) {
-                        alert(jsonLanguage.datefrom[Language]);
+                    if ((date && !date_2) || (!date && date_2)) {
+                        alert(jsonLanguage.dates[Language]);
                         return false;
                     }
 
-                    if (date_2 == null || date_2 == '' || date_2 == 0) {
-                        alert(jsonLanguage.dateto[Language]);
+                    if ((ddateFrom && !ddateTo) || (!ddateFrom && ddateTo)) {
+                        alert(jsonLanguage.ddates[Language]);
                         return false;
                     }
-
+ 
                     if (sv_transaction == null || sv_transaction == '' || sv_transaction == 0) {
                         alert(jsonLanguage.transaction[Language]);
                         return false;
@@ -1793,6 +1842,32 @@ define(['N/search', './LMRY_IP_libSendingEmailsLBRY_V2.0', 'N/currentRecord', 'N
             }
         }
 
+
+        function activatedCustomization(scriptContext,subsi_OW) {
+            var active = false;
+            var objRecord = scriptContext.currentRecord;
+            var subsidiaryId;
+            console.log("fields: ",fields)
+            if (subsi_OW == true || subsi_OW == "T") {
+                subsidiaryId = objRecord.getValue("custpage_subsi");
+                console.log("subsidiaryId: ",subsidiaryId)
+            }
+            if (!subsidiaryId) return false;
+            search.create({
+                type: 'customrecord_lmry_setup_tax_subsidiary',
+                filters: [
+                    ["custrecord_lmry_setuptax_subsidiary","anyof",subsidiaryId],
+                    "AND",
+                    ["isinactive","is","F"]
+                ],
+                columns: ['custrecord_lmry_setuptax_customfields']
+            }).run().each(function(result){
+                var fields = result.getValue("custrecord_lmry_setuptax_customfields")
+                console.log("fields: ",fields)
+                if (fields && fields !=="{}") active = true;
+            });
+            return active
+        }
         return {
             pageInit: pageInit,
             fieldChanged: fieldChanged,
