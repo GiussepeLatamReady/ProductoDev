@@ -1050,9 +1050,7 @@ define(['N/search', 'N/log', 'N/record', './LMRY_libSendingEmailsLBRY_V2.0', 'N/
         currentRCD.save({
           enableSourcing: true,
           ignoreMandatoryFields: true
-        });
-
-        
+        });     
       }
     }
 
@@ -2471,7 +2469,9 @@ define(['N/search', 'N/log', 'N/record', './LMRY_libSendingEmailsLBRY_V2.0', 'N/
       getEntityFields: getEntityFields,
       filterFields: filterFields,
       getFilteredFields: getFilteredFields,
-      hideFieldsRecord:hideFieldsRecord
+      hideFieldsRecord:hideFieldsRecord,
+      assignFieldsToSubsidiaries:assignFieldsToSubsidiaries,
+      createRecord:createRecord
     };
 
   });

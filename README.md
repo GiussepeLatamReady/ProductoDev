@@ -12,7 +12,9 @@ Actualmente, las entidades cuentan con campos visibles en función del país de 
 
 ## Scripts
 + Create
-
+    LatamReady - Set Entity Fields MPRD
+    LMRY_Set_Entity_Fields_MPRD.js
+    lmry_set_entity_fields_mprd
 + Update
     LMRY_EntityCLNT_V2.0.js
     LMRY_EntityURET_V2.0.js
