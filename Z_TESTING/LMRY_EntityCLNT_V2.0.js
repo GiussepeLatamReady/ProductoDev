@@ -60,6 +60,7 @@ define([
     // SuiteTax Feature
     var ST_FEATURE = false;
     var subsidiaries = {};
+    var entityFields = {};
     var featureInterCompany = runtime.getCurrentScript().getParameter({ name: "custscript_lmry_all_entity_fields" });
     /**
      * Function to be executed after page is initialized.
@@ -110,6 +111,7 @@ define([
         if (featureInterCompany && subsidiary) {
           Library_HideView.showEntityFieldsIntercompany(currentRCD,mode_type);
           subsidiaries = Library_HideView.getSubsidiaries(currentRCD,false,scriptContext.mode,true);
+          entityFields = Library_HideView.getFilteredFields()
         }
 
       } catch (err) {
@@ -145,8 +147,9 @@ define([
           (subListName == '' || subListName == null)) {
           var cf = currentRCD.getValue('customform');
           var sub = currentRCD.getValue('subsidiary');
-
-          if (cf != '' && cf != null && cf != -1 && sub != '' && sub != null && sub != -1) {
+          // 2025.04.23 - Parten - Sub Customer
+          var parent = currentRCD.getValue('parent');
+          if (cf != '' && cf != null && cf != -1 && sub != '' && sub != null && sub != -1 && parent=='') {
 
             setWindowChanged(window, false);
 
@@ -167,6 +170,9 @@ define([
         
         if (subListName == "submachine" && featureInterCompany) {
           Library_HideView.changeSubsidiary(currentRCD,subsidiaries);
+        }
+        if (featureInterCompany) {
+          Library_HideView.filterFields(entityFields,scriptContext);
         }
 
       } catch (err) {

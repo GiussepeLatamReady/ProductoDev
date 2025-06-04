@@ -13,7 +13,7 @@
 ||  2.0     17 ago 2018  LatamReady    Use Script 2.0           ||
  \= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = */
 
- define([
+define([
     'N/search',
     'N/runtime',
     'N/ui/serverWidget',

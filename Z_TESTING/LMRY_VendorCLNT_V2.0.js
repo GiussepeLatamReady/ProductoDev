@@ -51,6 +51,7 @@ define([
 
         var Val_Campos = new Array();
         var subsidiaries = {};
+        var entityFields = {};
         var featureInterCompany = runtime.getCurrentScript().getParameter({ name: "custscript_lmry_all_entity_fields" });
         /**
          * Function to be executed after page is initialized.
@@ -98,6 +99,7 @@ define([
                 if (featureInterCompany && subsidiary) {
                     Library_HideView.showEntityFieldsIntercompany(currentRCD,mode_type);
                     subsidiaries = Library_HideView.getSubsidiaries(currentRCD,false,scriptContext.mode,true);
+                    entityFields = Library_HideView.getFilteredFields()
                 }
             } catch (err) {
                 Library_Mail.sendemail('[pageInit] ' + err, LMRY_script);
@@ -136,6 +138,10 @@ define([
 
                 if (subListName == "submachine" && featureInterCompany) {
                     Library_HideView.changeSubsidiary(currentRCD, subsidiaries);
+                }
+
+                if (featureInterCompany) {
+                    Library_HideView.filterFields(entityFields,scriptContext);
                 }
             } catch (err) {
                 Library_Mail.sendemail('[fieldChanged] ' + err, LMRY_script);

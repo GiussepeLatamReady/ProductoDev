@@ -13,7 +13,7 @@
 ||  2.0     17 ago 2018  LatamReady    Use Script 2.0           ||
  \= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = */
 
- define(['N/search', 'N/runtime', 'N/ui/serverWidget', 'N/log', './Latam_Library/LMRY_libSendingEmailsLBRY_V2.0', './Latam_Library/LMRY_HideViewLBRY_V2.0', './Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_BR_Redirect_Payments_LBRY_V2.0'],
+define(['N/search', 'N/runtime', 'N/ui/serverWidget', 'N/log', './Latam_Library/LMRY_libSendingEmailsLBRY_V2.0', './Latam_Library/LMRY_HideViewLBRY_V2.0', './Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_BR_Redirect_Payments_LBRY_V2.0'],
 
     function (search, runtime, serverWidget, log, Library_Mail, Library_HideView, library_Uni_Setting, Library_RedirecPayment) {
 
