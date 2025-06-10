@@ -79,14 +79,14 @@ define([
                     transactions.push(value)
                     return true;
                 });
-                const fileContent = transactions.map(transaction => transaction + '\n').join('');
-                const title = Object.keys(transaction[0]).join("\t");
+                log.error("transactions",transactions)
+                let fileContent = transactions.map(transaction => transaction.line + '\n').join('');
+                const title = Object.keys(transactions[0].transaction).join("\t");
                 fileContent = `${title}${fileContent}\r\n`
-                saveFile(fileContent,"transaction_no_tax_BR_gadp.csv","371268")
+                saveFile(fileContent,"transaction_no_tax_BR_gadp.csv","969158");
 
                 const errorResults = transactions.filter(item => item.code === "ERROR");
-                log.error("errorResults", errorResults)
-                log.error("countEntityResults", countEntityResults(transactions))
+                log.error("errorResults",errorResults)
             } catch (error) {
 
                 log.error("error Summarize [interno]", error.message);
@@ -116,7 +116,7 @@ define([
         const getTransactions = () => {
 
             const transactionResult = [];
-            const periods = ["54"];
+            const periods = ["54"];// jan 2024
             const filters = [
                         ["type", "anyof", "VendBill"],
                         "AND",
@@ -125,16 +125,17 @@ define([
                         ["mainline", "is", "T"]
                     ];
             
-            filters.push(search.createFilter({
-                name: "formulatext",
-                formula: generatePeriodFormula(periods),
-                operator: search.Operator.IS,
-                values: "1"
-            }));
+            
             const transactionSearch = search.create({
                 type: "vendorbill",
                 settings: [{ "name": "consolidationtype", "value": "ACCTTYPE" }, { "name": "includeperiodendtransactions", "value": "F" }],
-                filters,
+                filters:[
+                        ["type", "anyof", "VendBill"],
+                        "AND",
+                        ["subsidiary", "anyof", "4"],
+                        "AND",
+                        ["mainline", "is", "T"]
+                    ],
                 columns:
                     [
                         search.createColumn({ name: "internalid", label: "Internal ID" }),
@@ -146,6 +147,13 @@ define([
                         search.createColumn({ name: "postingperiod", label: "Period" })
                     ]
             });
+            
+            transactionSearch.filters.push(search.createFilter({
+                name: "formulatext",
+                formula: generatePeriodFormula(periods),
+                operator: search.Operator.IS,
+                values: "1"
+            }));
 
             let pagedData = transactionSearch.runPaged({
                 pageSize: 1000
@@ -161,7 +169,7 @@ define([
                     let transaction = {};
                     transaction.internalid = result.getValue(columns[0]);
                     transaction.tranid = result.getValue(columns[1]);
-                    transaction.period = result.getValue(columns[2]);
+                    transaction.period = result.getText(columns[2]);
                   
                     transactionResult.push(transaction);
                 });
@@ -173,11 +181,6 @@ define([
             const periodsString = idsPeriod.map(id => `'${id}'`).join(', ');
             return `CASE WHEN {postingperiod.id} IN (${periodsString}) THEN 1 ELSE 0 END`;
         }
-
-        const generateLine = (transaction) => {
-            return Object.values(transaction).join("\t");
-
-        };
 
         return { getInputData, map, summarize }
 
