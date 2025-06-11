@@ -22,7 +22,8 @@ define([
                 const featureInterCompany = runtime.getCurrentScript().getParameter({ name: "custscript_lmry_all_entity_fields" });
                 let entities = [];
                 if (featureInterCompany) entities = getEntities();
-                log.error("entities",entities.length)
+                log.error("entities count", entities.length)
+                log.error("entities", entities.slice(0, 15))
                 return entities;
             } catch (error) {
                 log.error("Error [getInputData]", error);
@@ -45,21 +46,41 @@ define([
 
                 const entity = value;
                 try {
+
+                    const jsonType = {
+                        "Vendor": "vendor",
+                        "CustJob": "customer"
+                    }
+
                     if (entity.internalid) {
-                        if (!existEntityFields(entity.internalid)) {
+                        if (!existEntityFields(entity.internalid) && jsonType[entity.type]) {
                             const currentRecord = record.load({
-                                type: entity.type,
+                                type: jsonType[entity.type],
                                 id: entity.internalid
                             });
-                            const recordsEntityFields = saveEntityFields(currentRecord)
-                            mapContext.write({
-                                key: entity.internalid,
-                                value: {
-                                    code: "OK",
-                                    entity,
-                                    recordsEntityFields
-                                }
-                            });
+                            log.error("entity", entity)
+                            const subsidiaries = Library_HideView.getSubsidiaries(currentRecord, true, "create");
+                            log.error("subsidiaries", subsidiaries)
+                            const entityFields = Library_HideView.getEntityFields();
+                            const countriesCode = getAllCountryIDs(entityFields);
+                            let passCountry = false;
+                            for (const subsidiaryId in subsidiaries) {
+                                const subsidiary = subsidiaries[subsidiaryId];
+                                if (countriesCode.includes(subsidiary.countryCode)) passCountry = true;
+                            }
+                            log.error("passCountry", passCountry)
+                            if (passCountry) {
+                                const recordsEntityFields = saveEntityFields(currentRecord)
+                                mapContext.write({
+                                    key: entity.internalid,
+                                    value: {
+                                        code: "CREATE",
+                                        entity,
+                                        recordsEntityFields
+                                    }
+                                });
+                            }
+
                         } else {
                             mapContext.write({
                                 key: entity.internalid,
@@ -123,7 +144,8 @@ define([
             return {
                 ERROR: errorCount,
                 EXIST: existCount,
-                OK: okCount
+                CREATE: okCount,
+                TOTAL: errorCount + existCount + okCount
             };
         };
 
@@ -135,26 +157,43 @@ define([
             const entityTypes = ["customer", "vendor"];
             const entities = [];
 
-            entityTypes.forEach(type => {
-                const searchObj = search.create({
-                    type,
-                    filters: [
-                        ["msesubsidiary.country", "anyof", countriesCode],
-                        "AND",
-                        ["isinactive", "is", "F"]
-                    ],
-                    columns: ["internalid"].map(name => search.createColumn({ name }))
-                });
 
-                searchObj.runPaged({ pageSize: 1000 }).pageRanges.forEach(({ index }) => {
-                    searchObj.runPaged().fetch({ index }).data.forEach(result => {
-                        entities.push({
-                            internalid: result.getValue({ name: "internalid" }),
-                            type
-                        });
+            const searchObj = search.create({
+                type: "entity",
+                filters: [
+                    //["msesubsidiary.country", "anyof", countriesCode],
+                    //"AND",
+                    ["isinactive", "is", "F"]
+                ],
+                columns: ["internalid", "type"].map(name => search.createColumn({ name }))
+            });
+            /*
+            searchObj.runPaged({ pageSize: 1000 }).pageRanges.forEach(({ index }) => {
+                searchObj.runPaged().fetch({ index }).data.forEach(result => {
+                    entities.push({
+                        internalid: result.getValue({ name: "internalid" }),
+                        type: result.getValue(result.columns[1])
                     });
+
                 });
             });
+            */
+            let pageData = searchObj.runPaged({ pageSize: 1000 });
+            if (pageData && pageData.pageRanges) {
+                pageData.pageRanges.forEach(function (pageRange) {
+                    let page = pageData.fetch({ index: pageRange.index });
+                    let results = page.data;
+                    for (var i = 0; i < results.length; i++) {
+
+                        entities.push({
+                            internalid: results[i].getValue({ name: "internalid" }),
+                            type: results[i].getValue(results[i].columns[1])
+                        });
+
+                    }
+                });
+            }
+
 
             return entities;
         };
