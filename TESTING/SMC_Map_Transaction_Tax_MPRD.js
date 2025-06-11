@@ -20,8 +20,7 @@ define([
         const getInputData = (inputContext) => {
             try {
                 const transactions = getTransactions();
-                log.error("transactions",transactions.slice(0,5));
-                log.error("count transactions",transactions.length);
+                log.error("count transactions", transactions.length);
                 return transactions;
             } catch (error) {
                 log.error("Error [getInputData]", error);
@@ -44,9 +43,17 @@ define([
 
                 const transaction = value;
                 try {
-
+                    setCustomGL(transaction);
+                    transaction.modificado = false;
                     const line = Object.values(transaction).join("\t");
-
+                    if (!transaction.customgl) {
+                        record.load({
+                            type:"vendorbill",
+                            id:transaction.internalid
+                        }).save();
+                        log.error("save","guardado")
+                        transaction.modificado = true;
+                    }
                     mapContext.write({
                         key: transaction.internalid,
                         value: {
@@ -79,22 +86,39 @@ define([
                     transactions.push(value)
                     return true;
                 });
-                log.error("transactions",transactions)
+                log.error("transactions", transactions)
                 let fileContent = transactions.map(transaction => transaction.line + '\n').join('');
                 const title = Object.keys(transactions[0].transaction).join("\t");
                 fileContent = `${title}${fileContent}\r\n`
-                saveFile(fileContent,"transaction_no_tax_BR_gadp.csv","969158");
+                saveFile(fileContent, "transaction_no_tax_BR_gadp.csv", "969158");
 
                 const errorResults = transactions.filter(item => item.code === "ERROR");
-                log.error("errorResults",errorResults)
+                log.error("errorResults", errorResults)
+                setStatus(transactions);
             } catch (error) {
 
                 log.error("error Summarize [interno]", error.message);
             }
         };
 
+        const setStatus = (transactions) => {
+            const status = {
+                PROCESS:0,
+                NOT_PROCESS:0
+            }
+           transactions.forEach(line => {
+                if (line.transaction.customgl) {
+                    status.PROCESS++
+                }else{
+                    status.NOT_PROCESS++
+                }
+           });
+           status.TOTAL = status.PROCESS + status.NOT_PROCESS;
+           log.error("status",status)
+        };
+
         const saveFile = (fileContent, nameFile, folderId) => {
-           
+
             if (!folderId) return;
             const fileGenerate = file.create({
                 name: nameFile,
@@ -116,26 +140,22 @@ define([
         const getTransactions = () => {
 
             const transactionResult = [];
+            const transactionIds = {};
             const periods = ["54"];// jan 2024
-            const filters = [
-                        ["type", "anyof", "VendBill"],
-                        "AND",
-                        ["subsidiary", "anyof", "4"],
-                        "AND",
-                        ["mainline", "is", "T"]
-                    ];
-            
-            
+
+
             const transactionSearch = search.create({
                 type: "vendorbill",
                 settings: [{ "name": "consolidationtype", "value": "ACCTTYPE" }, { "name": "includeperiodendtransactions", "value": "F" }],
-                filters:[
-                        ["type", "anyof", "VendBill"],
-                        "AND",
-                        ["subsidiary", "anyof", "4"],
-                        "AND",
-                        ["mainline", "is", "T"]
-                    ],
+                filters: [
+                    ["type", "anyof", "VendBill"],
+                    "AND",
+                    ["subsidiary", "anyof", "4"],
+                    "AND",
+                    ["mainline", "is", "T"],
+                    "AND",
+                    ["internalid","anyof","1068888"]
+                ],
                 columns:
                     [
                         search.createColumn({ name: "internalid", label: "Internal ID" }),
@@ -147,13 +167,20 @@ define([
                         search.createColumn({ name: "postingperiod", label: "Period" })
                     ]
             });
-            
+
             transactionSearch.filters.push(search.createFilter({
                 name: "formulatext",
                 formula: generatePeriodFormula(periods),
                 operator: search.Operator.IS,
                 values: "1"
             }));
+
+            const glColumn = search.createColumn({
+                name: 'formulatext',
+                formula: "{customscript}"
+            });
+
+            transactionSearch.columns.push(glColumn);
 
             let pagedData = transactionSearch.runPaged({
                 pageSize: 1000
@@ -170,11 +197,47 @@ define([
                     transaction.internalid = result.getValue(columns[0]);
                     transaction.tranid = result.getValue(columns[1]);
                     transaction.period = result.getText(columns[2]);
-                  
                     transactionResult.push(transaction);
+                    //if (!transactionIds[transaction.internalid]) {
+                    //transactionIds[transaction.internalid] = transaction.internalid;
+                    //}
+
                 });
             });
             return transactionResult;
+        }
+
+
+        const setCustomGL = (transaction) => {
+
+            const customgl = []
+            search.create({
+                type: "vendorbill",
+                settings: [{ "name": "consolidationtype", "value": "ACCTTYPE" }, { "name": "includeperiodendtransactions", "value": "F" }],
+                filters: [
+                    ["type", "anyof", "VendBill"],
+                    "AND",
+                    ["subsidiary", "anyof", "4"],
+                    "AND",
+                    ["internalid", "anyof", transaction.internalid]
+                ],
+                columns:
+                    [
+                        search.createColumn({ name: "postingperiod", label: "Period" }),
+                        search.createColumn({
+                name: 'formulatext',
+                formula: "{customscript}"
+            })
+                    ]
+            }).run().each(result => {
+                const columns = result.columns;
+                const plugin = result.getValue(columns[1]);
+                //log.error("plugin",plugin)
+                if (plugin) customgl.push(plugin);
+                return true;
+            });
+            //log.error("customgl",customgl)
+            transaction.customgl = customgl.length > 0;
         }
 
         const generatePeriodFormula = (idsPeriod) => {
