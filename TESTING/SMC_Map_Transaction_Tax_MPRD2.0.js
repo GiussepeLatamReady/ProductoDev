@@ -1,5 +1,5 @@
 /**
- * @NApiVersion 2.1
+ * @NApiVersion 2.0
  * @NScriptType MapReduceScript
  * @NModuleScope Public
  * @Name SMC_Map_Transaction_Tax_MPRD.js
@@ -12,14 +12,15 @@ define([
     "N/search",
     "N/log",
     "N/file",
+    '../Latam_Library/LMRY_BR_LatamTax_Purchase_LBRY_V2.0',
 ],
 
-    (record, runtime, search, log, file) => {
+    function (record, runtime, search, log, file, libraryTaxPurchase) {
 
 
-        const getInputData = (inputContext) => {
+        function getInputData(inputContext) {
             try {
-                const transactions = getTransactions();
+                var transactions = getTransactions();
                 log.error("count transactions", transactions.length);
                 return transactions;
             } catch (error) {
@@ -31,9 +32,9 @@ define([
             }
         }
 
-        const map = (mapContext) => {
+        function map(mapContext) {
             //Library_HideView.saveEntityFields(currentRecord)
-            const value = JSON.parse(mapContext.value);
+            var value = JSON.parse(mapContext.value);
             if (value.code === "ERROR") {
                 mapContext.write({
                     key: value.code,
@@ -41,25 +42,31 @@ define([
                 });
             } else {
 
-                const transaction = value;
+                var transaction = value;
                 try {
                     setCustomGL(transaction);
                     transaction.modificado = false;
-                    const line = Object.values(transaction).join("\t");
+                    var line = Object.values(transaction).join("\t");
                     if (!transaction.customgl) {
-                        record.load({
-                            type:"vendorbill",
-                            id:transaction.internalid
-                        }).save();
-                        log.error("save","guardado")
+                        var recordObj = record.load({
+                            type: "vendorbill",
+                            id: transaction.internalid
+                        })
+                        var setup = libraryTaxPurchase.getSetupTaxSubsidiary("4");
+                        libraryTaxPurchase.getTaxPurchase(recordObj, setup, false);
+
+                        recordObj.save();
+                        log.error("save", "guardado")
+
                         transaction.modificado = true;
+
                     }
                     mapContext.write({
                         key: transaction.internalid,
                         value: {
                             code: "OK",
-                            transaction,
-                            line
+                            transaction: transaction,
+                            line: line
                         }
                     });
 
@@ -69,7 +76,7 @@ define([
                         key: entity.internalid,
                         value: {
                             code: "ERROR",
-                            transaction
+                            transaction: transaction
                         }
                     });
                 }
@@ -78,21 +85,38 @@ define([
         }
 
 
-        const summarize = summaryContext => {
+        function summarize(summaryContext) {
             try {
-                const transactions = []
+                var transactions = []
                 summaryContext.output.iterator().each(function (key, value) {
                     value = JSON.parse(value);
                     transactions.push(value)
                     return true;
                 });
                 log.error("transactions", transactions)
-                let fileContent = transactions.map(transaction => transaction.line + '\n').join('');
-                const title = Object.keys(transactions[0].transaction).join("\t");
-                fileContent = `${title}${fileContent}\r\n`
+                var fileContent = '';
+                for (var i = 0; i < transactions.length; i++) {
+                    fileContent += transactions[i].line + '\n';
+                }
+
+                var title = '';
+                for (var key in transactions[0].transaction) {
+                    if (transactions[0].transaction.hasOwnProperty(key)) {
+                        title += key + '\t';
+                    }
+                }
+                title = title.slice(0, -1) + '\n'; // Eliminar el último tab
+                fileContent = title + fileContent + '\r\n';
+
                 saveFile(fileContent, "transaction_no_tax_BR_gadp.csv", "969158");
 
-                const errorResults = transactions.filter(item => item.code === "ERROR");
+                var errorResults = [];
+                for (var i = 0; i < transactions.length; i++) {
+                    if (transactions[i].code === "ERROR") {
+                        errorResults.push(transactions[i]);
+                    }
+                }
+
                 log.error("errorResults", errorResults)
                 setStatus(transactions);
             } catch (error) {
@@ -101,26 +125,29 @@ define([
             }
         };
 
-        const setStatus = (transactions) => {
-            const status = {
-                PROCESS:0,
-                NOT_PROCESS:0
-            }
-           transactions.forEach(line => {
-                if (line.transaction.customgl) {
-                    status.PROCESS++
-                }else{
-                    status.NOT_PROCESS++
-                }
-           });
-           status.TOTAL = status.PROCESS + status.NOT_PROCESS;
-           log.error("status",status)
-        };
+        function setStatus(transactions) {
+            var status = {
+                PROCESS: 0,
+                NOT_PROCESS: 0
+            };
 
-        const saveFile = (fileContent, nameFile, folderId) => {
+            for (var i = 0; i < transactions.length; i++) {
+                if (transactions[i].transaction.customgl) {
+                    status.PROCESS++;
+                } else {
+                    status.NOT_PROCESS++;
+                }
+            }
+
+            status.TOTAL = status.PROCESS + status.NOT_PROCESS;
+            log.error("status", status);
+        }
+
+
+        function saveFile(fileContent, nameFile, folderId) {
 
             if (!folderId) return;
-            const fileGenerate = file.create({
+            var fileGenerate = file.create({
                 name: nameFile,
                 fileType: file.Type.CSV,
                 contents: fileContent,
@@ -131,20 +158,14 @@ define([
             return fileGenerate.save();
         };
 
-        const getAllCountryIDs = (data) => [
-            ...new Set(
-                Object.values(data)
-                    .flatMap(({ countries }) => countries ? Object.keys(countries) : [])
-            )
-        ];
-        const getTransactions = () => {
+        function getTransactions() {
 
-            const transactionResult = [];
-            const transactionIds = {};
-            const periods = ["54"];// jan 2024
+            var transactionResult = [];
+            var transactionIds = {};
+            var periods = ["54"];// jan 2024
 
 
-            const transactionSearch = search.create({
+            var transactionSearch = search.create({
                 type: "vendorbill",
                 settings: [{ "name": "consolidationtype", "value": "ACCTTYPE" }, { "name": "includeperiodendtransactions", "value": "F" }],
                 filters: [
@@ -154,7 +175,7 @@ define([
                     "AND",
                     ["mainline", "is", "T"],
                     "AND",
-                    ["internalid","anyof","1068888"]
+                    ["internalid", "anyof", "1090769"]
                 ],
                 columns:
                     [
@@ -175,25 +196,25 @@ define([
                 values: "1"
             }));
 
-            const glColumn = search.createColumn({
+            var glColumn = search.createColumn({
                 name: 'formulatext',
                 formula: "{customscript}"
             });
 
             transactionSearch.columns.push(glColumn);
 
-            let pagedData = transactionSearch.runPaged({
+            var pagedData = transactionSearch.runPaged({
                 pageSize: 1000
             });
 
-            let page, columns;
+            var page, columns;
             pagedData.pageRanges.forEach(function (pageRange) {
                 page = pagedData.fetch({
                     index: pageRange.index
                 });
                 page.data.forEach(function (result) {
                     columns = result.columns;
-                    let transaction = {};
+                    var transaction = {};
                     transaction.internalid = result.getValue(columns[0]);
                     transaction.tranid = result.getValue(columns[1]);
                     transaction.period = result.getText(columns[2]);
@@ -208,9 +229,9 @@ define([
         }
 
 
-        const setCustomGL = (transaction) => {
+        function setCustomGL(transaction) {
 
-            const customgl = []
+            var customgl = []
             search.create({
                 type: "vendorbill",
                 settings: [{ "name": "consolidationtype", "value": "ACCTTYPE" }, { "name": "includeperiodendtransactions", "value": "F" }],
@@ -225,13 +246,13 @@ define([
                     [
                         search.createColumn({ name: "postingperiod", label: "Period" }),
                         search.createColumn({
-                name: 'formulatext',
-                formula: "{customscript}"
-            })
+                            name: 'formulatext',
+                            formula: "{customscript}"
+                        })
                     ]
             }).run().each(result => {
-                const columns = result.columns;
-                const plugin = result.getValue(columns[1]);
+                var columns = result.columns;
+                var plugin = result.getValue(columns[1]);
                 //log.error("plugin",plugin)
                 if (plugin) customgl.push(plugin);
                 return true;
@@ -240,11 +261,13 @@ define([
             transaction.customgl = customgl.length > 0;
         }
 
-        const generatePeriodFormula = (idsPeriod) => {
-            const periodsString = idsPeriod.map(id => `'${id}'`).join(', ');
+        function generatePeriodFormula(idsPeriod) {
+            var periodsString = idsPeriod.map(id => `'${id}'`).join(', ');
             return `CASE WHEN {postingperiod.id} IN (${periodsString}) THEN 1 ELSE 0 END`;
         }
 
-        return { getInputData, map, summarize }
+
+
+        return { getInputData: getInputData, map: map, summarize: summarize }
 
     });
