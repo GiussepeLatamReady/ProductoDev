@@ -12,7 +12,7 @@ define([
     "N/search",
     "N/log",
     "N/file",
-    '../Latam_Library/LMRY_BR_LatamTax_Purchase_LBRY_V2.0',
+    '../Latam_Library/SMC_BR_LatamTax_Purchase_LBRY_V2.0',
 ],
 
     function (record, runtime, search, log, file, libraryTaxPurchase) {
@@ -43,21 +43,34 @@ define([
             } else {
 
                 var transaction = value;
+                log.error("transaction map", transaction)
                 try {
                     setCustomGL(transaction);
                     transaction.modificado = false;
-                    var line = Object.values(transaction).join("\t");
+                    var line = '';
+                    for (var key in transaction) {
+                        if (transaction.hasOwnProperty(key)) {
+                            line += transaction[key] + "\t";
+                        }
+                    }
+                    line = line.slice(0, -1); // Eliminar el último tab
+
+                    log.error("transaction map 2", transaction)
                     if (!transaction.customgl) {
                         var recordObj = record.load({
                             type: "vendorbill",
                             id: transaction.internalid
                         })
                         var setup = libraryTaxPurchase.getSetupTaxSubsidiary("4");
-                        libraryTaxPurchase.getTaxPurchase(recordObj, setup, false);
+                        var Jsonresult = libraryTaxPurchase.getTaxPurchase(recordObj, setup, false);
+                        log.error("Jsonresult map 2", Jsonresult)
 
-                        recordObj.save();
+                        /*
+                        recordObj.save({
+                            disableTriggers: true,
+                        });
                         log.error("save", "guardado")
-
+                        */
                         transaction.modificado = true;
 
                     }
@@ -71,9 +84,10 @@ define([
                     });
 
                 } catch (error) {
+                    log.error("error map", error)
                     entity.state = "Error";
                     mapContext.write({
-                        key: entity.internalid,
+                        key: transaction.internalid,
                         value: {
                             code: "ERROR",
                             transaction: transaction
@@ -250,7 +264,7 @@ define([
                             formula: "{customscript}"
                         })
                     ]
-            }).run().each(result => {
+            }).run().each(function (result) {
                 var columns = result.columns;
                 var plugin = result.getValue(columns[1]);
                 //log.error("plugin",plugin)
@@ -262,9 +276,16 @@ define([
         }
 
         function generatePeriodFormula(idsPeriod) {
-            var periodsString = idsPeriod.map(id => `'${id}'`).join(', ');
-            return `CASE WHEN {postingperiod.id} IN (${periodsString}) THEN 1 ELSE 0 END`;
+            var periodsString = '';
+            for (var i = 0; i < idsPeriod.length; i++) {
+                periodsString += "'" + idsPeriod[i] + "'";
+                if (i < idsPeriod.length - 1) {
+                    periodsString += ', ';
+                }
+            }
+            return 'CASE WHEN {postingperiod.id} IN (' + periodsString + ') THEN 1 ELSE 0 END';
         }
+
 
 
 
