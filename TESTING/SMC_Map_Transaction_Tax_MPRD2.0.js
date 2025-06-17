@@ -46,6 +46,7 @@ define([
                 log.error("transaction map", transaction)
                 try {
                     setCustomGL(transaction);
+                    existTaxResult(transaction);
                     transaction.modificado = false;
                     var line = '';
                     for (var key in transaction) {
@@ -57,13 +58,15 @@ define([
 
                     log.error("transaction map 2", transaction)
                     if (!transaction.customgl) {
+                        /*
                         var recordObj = record.load({
                             type: "vendorbill",
                             id: transaction.internalid
                         })
-                        var setup = libraryTaxPurchase.getSetupTaxSubsidiary("4");
-                        var Jsonresult = libraryTaxPurchase.getTaxPurchase(recordObj, setup, false);
-                        log.error("Jsonresult map 2", Jsonresult)
+                            */
+                        //var setup = libraryTaxPurchase.getSetupTaxSubsidiary("4");
+                        //var Jsonresult = libraryTaxPurchase.getTaxPurchase(recordObj, setup, false);
+                        //log.error("Jsonresult map 2", Jsonresult)
 
                         /*
                         recordObj.save({
@@ -172,6 +175,32 @@ define([
             return fileGenerate.save();
         };
 
+        function existTaxResult(transaction) {
+
+
+
+            
+            var count =  search.create({
+                type: "customrecord_lmry_br_transaction",
+                filters:
+                    [
+                        ["custrecord_lmry_br_transaction", "anyof", transaction.internalid]
+                    ],
+                columns:
+                    [
+                        search.createColumn({ name: "internalid", label: "Internal ID" })
+                    ]
+            }).runPaged().count;
+
+            if (count) {
+                transaction.taxresult = true;
+                transaction.countTaxresult = count;
+            }else{
+                transaction.taxresult = false;
+                transaction.countTaxresult = count;
+            }
+        }
+
         function getTransactions() {
 
             var transactionResult = [];
@@ -188,8 +217,8 @@ define([
                     ["subsidiary", "anyof", "4"],
                     "AND",
                     ["mainline", "is", "T"],
-                    "AND",
-                    ["internalid", "anyof", "1090769"]
+                    //"AND",
+                    //["internalid", "anyof", "1090769"]
                 ],
                 columns:
                     [
