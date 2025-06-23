@@ -109,16 +109,13 @@ define(["N/query", "N/search", "N/record", "N/log","N/runtime","N/format"], func
 
     function manageFieldVisibility(subsidiary,currentRecord){
         var isVisible = false;
-        console.log("subsidiary :",subsidiary)
         if (subsidiary) isVisible = isAutomaticPedimentos(subsidiary);
-        console.log("isVisible :",isVisible)
         var pedimentoFields = [
             "custpage_mx_nro_pedimento",
             "custpage_mx_pedimento_aduana",
             "custpage_mx_pedimento_date"
         ]
         pedimentoFields.forEach(function(field){
-            console.log("field :",field)
             currentRecord.getField(field).isDisplay = isVisible;
         });
     }
@@ -192,7 +189,7 @@ define(["N/query", "N/search", "N/record", "N/log","N/runtime","N/format"], func
             });
             
         }
-        if (type === 'returnauthorization' || type === 'vendorreturnauthorization') {
+        if (type === 'returnauthorization' || type === 'vendorreturnauthorization' || type == "creditmemo") {
             var lifoFiedl = form.addField({
                 label: "Latam - Pedimento automático LIFO",
                 id: "custpage_mx_pedimento_au_lifo",
@@ -204,8 +201,7 @@ define(["N/query", "N/search", "N/record", "N/log","N/runtime","N/format"], func
                 lifoFiedl.updateDisplayType({
                     displayType: serverWidget.FieldDisplayType.HIDDEN
                 });
-            });
-            
+            });       
         }
 
         var valuesMxTransaction = searchMxtransaction(id);
@@ -326,7 +322,6 @@ define(["N/query", "N/search", "N/record", "N/log","N/runtime","N/format"], func
                 kitItemxPediment[recordShipment.getSublistValue({ sublistId: 'item', fieldId: 'kitlineid', line: i })] = recordShipment.getSublistText({ sublistId: "item", fieldId: "custcol_lmry_mx_pediment", line: i });
             }
             if (recordShipment.getSublistValue({ sublistId: "item", fieldId: "itemtype", line: i }) === "Kit" || recordShipment.getSublistValue({ sublistId: 'item', fieldId: 'kitmemberof', line: i }) === "") continue;
-            if (kitItemxPediment[recordShipment.getSublistValue({ sublistId: 'item', fieldId: 'kitmemberof', line: i })] === "F" || kitItemxPediment[recordShipment.getSublistValue({ sublistId: 'item', fieldId: 'kitmemberof', line: i })] === false) continue;
 
             var trandate = recordShipment.getValue("trandate");
             var itemID = recordShipment.getSublistValue({ sublistId: 'item', fieldId: 'item', line: i });
@@ -406,7 +401,6 @@ define(["N/query", "N/search", "N/record", "N/log","N/runtime","N/format"], func
         for (var i = 0; i < numItems; i++) {
 
             if (recordShipment.getSublistValue({ sublistId: "item", fieldId: "itemtype", line: i }) === "Kit" || recordShipment.getSublistValue({ sublistId: 'item', fieldId: 'kitmemberof', line: i }) !== "") continue;
-            if (recordShipment.getSublistValue({ sublistId: 'item', fieldId: 'custcol_lmry_mx_pediment', line: i }) == 'F' || recordShipment.getSublistValue({ sublistId: 'item', fieldId: 'custcol_lmry_mx_pediment', line: i }) == false) continue;
             if (recordShipment.getSublistValue({ sublistId: 'item', fieldId: 'itemreceive', line: i }) === false || recordShipment.getSublistValue({ sublistId: 'item', fieldId: 'itemreceive', line: i }) === 'F') continue;
 
             var trandate = recordShipment.getValue("trandate");
@@ -638,6 +632,39 @@ define(["N/query", "N/search", "N/record", "N/log","N/runtime","N/format"], func
             return true;
         });
     }
+
+
+    function createPedimentos(createdfrom, transactionId) {
+        
+        require(['N/https'], function (https) {
+            var message = "";
+            var lifoInfo = search.create({
+                type: 'customrecord_lmry_mx_transaction_fields',
+                filters: [
+                    'custrecord_lmry_mx_transaction_related', 'anyof', createdfrom
+                ],
+                columns: ['custrecord_lmry_mx_pedimento_lifo', 'custrecord_lmry_mx_pedimento_fifo', 'custrecord_lmry_mx_pedimento']
+            }).run().getRange(0, 1);
+            if (lifoInfo.length > 0) {
+                if (lifoInfo[0].getValue('custrecord_lmry_mx_pedimento_lifo') == true || lifoInfo[0].getValue('custrecord_lmry_mx_pedimento_fifo') == true || lifoInfo[0].getValue('custrecord_lmry_mx_pedimento') != null) {
+                    message = https.requestRestlet({
+                        deploymentId: "customdeploy_lmry_pedimentos_rlt",
+                        scriptId: "customscript_lmry_pedimentos_rlt",
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        urlParams: {
+                            idRecord: transactionId
+                        }
+                    });
+                }
+            }
+            return message;
+        });
+
+    }
+
     return {
         showMXTransactionbyPedimentFields: showMXTransactionbyPedimentFields,
         createMXTransactionbyPediment: createMXTransactionbyPediment,
@@ -646,6 +673,7 @@ define(["N/query", "N/search", "N/record", "N/log","N/runtime","N/format"], func
         pedimentoIsValid:pedimentoIsValid,
         isAutomaticPedimentos: isAutomaticPedimentos,
         deletePedimentoDetails: deletePedimentoDetails,
-        manageFieldVisibility:manageFieldVisibility
+        manageFieldVisibility: manageFieldVisibility,
+        createPedimentos: createPedimentos
     };
 });
