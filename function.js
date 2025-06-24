@@ -30,6 +30,4 @@ if (LMRY_countr[0] === 'MX') {
         }
 
     }
-
-
 }

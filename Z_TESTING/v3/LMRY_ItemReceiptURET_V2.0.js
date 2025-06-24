@@ -11,7 +11,7 @@
  *@NScriptType UserEventScript
  *@NModuleScope Public
  */
-define(['N/search', 'N/record', 'N/https', 'N/runtime', 'N/query', 'N/log', './Latam_Library/LMRY_libSendingEmailsLBRY_V2.0',
+ define(['N/search', 'N/record', 'N/https', 'N/runtime', 'N/query', 'N/log', './Latam_Library/LMRY_libSendingEmailsLBRY_V2.0',
   './Latam_Library/LMRY_HideView3LBRY_V2.0', './Latam_Library/LMRY_GLImpact_LBRY_V2.0', "./Latam_Library/LMRY_Log_LBRY_V2.0", './Latam_Library/LMRY_UniversalSetting_Fulfillment_Receipt_LBRY', 'N/ui/serverWidget', "./WTH_Library/LMRY_ItemReceiptTaxResults_LBRY_v2.0",
   './Latam_Library/LMRY_libToolsFunctionsLBRY_V2.0','./Latam_Library/LMRY_MX_Pedimentos_LBRY_2.0'],
   function (search, record, https, runtime, query, log, library_mail, library_HideView, libraryGLImpact, lbryLog, library_Uni_Setting, serverWidget, libTaxResult, libtools, MXPedimentos) {
@@ -50,13 +50,6 @@ define(['N/search', 'N/record', 'N/https', 'N/runtime', 'N/query', 'N/log', './L
           var hasAccess = LMRY_Result[2];
 
           hideandViewFields(context, country, hasAccess, licences);
-          if (context.type == 'create') {
-            OBJ_FORM.addField({
-              id: 'custpage_uni_set_status',
-              label: 'Set Estatus',
-              type: serverWidget.FieldType.CHECKBOX
-            }).defaultValue = 'F';
-          }
 
           if (LMRY_Result[0] == "MX") {
             var featPedimentos = MXPedimentos.isAutomaticPedimentos(recordObj.getValue({ fieldId: 'subsidiary' }));
@@ -173,13 +166,11 @@ define(['N/search', 'N/record', 'N/https', 'N/runtime', 'N/query', 'N/log', './L
 
           if (library_Uni_Setting.auto_universal_setting(licenses, false)) {
             //Solo si el campo LATAM - LEGAL DOCUMENT TYPE se encuentra vacío
-
-            if (recordObj.getValue('custpage_uni_set_status') == 'F' && (type_document == '' || type_document == null)) {
+            if (type_document == '' || type_document == null) {
               //Seteo campos cabecera, numero pre impreso y template
               library_Uni_Setting.automatic_setfield(recordObj, false);
               library_Uni_Setting.set_preimpreso(recordObj, LMRY_Result, licenses);
               library_Uni_Setting.set_template(recordObj, licenses);
-              recordObj.setValue('custpage_uni_set_status', 'T');
             }
           }
         }
@@ -235,10 +226,7 @@ define(['N/search', 'N/record', 'N/https', 'N/runtime', 'N/query', 'N/log', './L
 
         //Universal Setting se realiza solo al momento de crear
         if (eventType == 'create' && type_interface == 'USERINTERFACE') {
-          var type_document = recordObj.getValue('custbody_lmry_document_type');
-
-          //Mediante el custpage se conoce que el seteo de cabecera fue realizado por Universal Setting
-          if (recordObj.getValue('custpage_uni_set_status') == 'T') {
+          if (library_Uni_Setting.auto_universal_setting(licenses, false)) {
             //Seteo de campos perteneciente a record anexado
             library_Uni_Setting.automatic_setfieldrecord(recordObj);
           }

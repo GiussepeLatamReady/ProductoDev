@@ -467,7 +467,7 @@ define([
                 return salesOrderOrInvoiceId;
             }
 
-            if (invoiceOrReturnAuthType ==="CustInvc") {
+            if (invoiceOrReturnAuthType === "CustInvc") {
                 return salesOrderOrInvoiceId;
             }
         
