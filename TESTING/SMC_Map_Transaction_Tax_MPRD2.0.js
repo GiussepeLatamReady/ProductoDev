@@ -22,6 +22,8 @@ define([
             try {
                 var transactions = getTransactions();
                 log.error("count transactions", transactions.length);
+                transactions = transactions.slice(0,1);
+                log.error("transactions", transactions);
                 return transactions;
             } catch (error) {
                 log.error("Error [getInputData]", error);
@@ -43,7 +45,7 @@ define([
             } else {
 
                 var transaction = value;
-                log.error("transaction map", transaction)
+                //log.error("transaction map", transaction)
                 try {
                     setCustomGL(transaction);
                     existTaxResult(transaction);
@@ -56,24 +58,24 @@ define([
                     }
                     line = line.slice(0, -1); // Eliminar el último tab
 
-                    log.error("transaction map 2", transaction)
+                    //log.error("transaction map 2", transaction)
                     if (!transaction.customgl) {
-                        /*
+                        
                         var recordObj = record.load({
                             type: "vendorbill",
                             id: transaction.internalid
                         })
-                            */
+                        
                         //var setup = libraryTaxPurchase.getSetupTaxSubsidiary("4");
                         //var Jsonresult = libraryTaxPurchase.getTaxPurchase(recordObj, setup, false);
                         //log.error("Jsonresult map 2", Jsonresult)
 
-                        /*
+                        
                         recordObj.save({
                             disableTriggers: true,
                         });
-                        log.error("save", "guardado")
-                        */
+                        //log.error("save", "guardado")
+                        
                         transaction.modificado = true;
 
                     }
@@ -205,7 +207,7 @@ define([
 
             var transactionResult = [];
             var transactionIds = {};
-            var periods = ["54"];// jan 2024
+            var periods = ["38"/*,"39","41","42","43","45","46","47","49","50","51"*/];// jan 2024
 
 
             var transactionSearch = search.create({
@@ -218,7 +220,7 @@ define([
                     "AND",
                     ["mainline", "is", "T"],
                     //"AND",
-                    //["internalid", "anyof", "1090769"]
+                    //["internalid", "anyof", "1167646"]
                 ],
                 columns:
                     [
