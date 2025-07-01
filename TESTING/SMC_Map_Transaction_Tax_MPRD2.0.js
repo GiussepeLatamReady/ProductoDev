@@ -22,8 +22,8 @@ define([
             try {
                 var transactions = getTransactions();
                 log.error("count transactions", transactions.length);
-                transactions = transactions.slice(0,1);
-                log.error("transactions", transactions);
+                //transactions = transactions.slice(0,1);
+                //log.error("transactions", transactions);
                 return transactions;
             } catch (error) {
                 log.error("Error [getInputData]", error);
@@ -112,7 +112,7 @@ define([
                     transactions.push(value)
                     return true;
                 });
-                log.error("transactions", transactions)
+                //log.error("transactions", transactions)
                 var fileContent = '';
                 for (var i = 0; i < transactions.length; i++) {
                     fileContent += transactions[i].line + '\n';
@@ -207,7 +207,7 @@ define([
 
             var transactionResult = [];
             var transactionIds = {};
-            var periods = ["38"/*,"39","41","42","43","45","46","47","49","50","51"*/];// jan 2024
+            var periods = ["38","39","41","42","43","45","46","47","49","50","51"];// jan 2024
 
 
             var transactionSearch = search.create({
