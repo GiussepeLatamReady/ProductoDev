@@ -11,9 +11,9 @@
  * @NScriptType ClientScript
  * @NModuleScope Public
  */
-define(['N/search', './LMRY_IP_libSendingEmailsLBRY_V2.0', 'N/currentRecord', 'N/record', 'N/url', 'N/runtime', './LMRY_EI_libSendingEmailsLBRY_V2.0'],
+define(['N/search','N/query', './LMRY_IP_libSendingEmailsLBRY_V2.0', 'N/currentRecord', 'N/record', 'N/url', 'N/runtime', './LMRY_EI_libSendingEmailsLBRY_V2.0'],
 
-    function (search, library, currentRecord, record, url, runtime, libraryFeature) {
+    function (search,query, library, currentRecord, record, url, runtime, libraryFeature) {
         var LMRY_script = 'LatamReady - Invoicing Populate CLNT';
         var flag = true;
         var jsonTransaction = {};
@@ -103,6 +103,11 @@ define(['N/search', './LMRY_IP_libSendingEmailsLBRY_V2.0', 'N/currentRecord', 'N
                 en: 'MANDATORY LOCATION FIELD',
                 es: 'EL CAMPO UBICACIÓN ES OBLIGATORIO',
                 pt: 'O CAMPO LOCALIZAÇÃO É OBRIGATÓRIO'
+            },
+            ispDepositDateFieldMissing: {
+                "en": "The field ISP - DEPOSIT DATE does not exist in the transaction",
+                "es": "El campo ISP - DEPOSIT DATE no existe en la transacción",
+                "pt": "O campo ISP - DEPOSIT DATE não existe na transação"
             }
         };
 
@@ -239,12 +244,12 @@ define(['N/search', './LMRY_IP_libSendingEmailsLBRY_V2.0', 'N/currentRecord', 'N
 
             try {
                 setLanguage(Language)
-
+                
                 var objRecord = scriptContext.currentRecord;
                 var p_hidden = objRecord.getValue('custpage_hidden');
                 var p_checkpaid = objRecord.getField('custpage_checkpaid');
                 var v_checkpaid = objRecord.getValue('custpage_checkpaid');
-
+                var p_checkpaid_multi = objRecord.getField('custpage_checkpaid_multi');
                 if (v_checkpaid == false) {
                     p_checkpaid.isVisible = false;
                     p_checkpaid.isDisplay = false;
@@ -255,7 +260,13 @@ define(['N/search', './LMRY_IP_libSendingEmailsLBRY_V2.0', 'N/currentRecord', 'N
                 }
 
                 var v_Country = Number(objRecord.getValue('custpage_country_id'));
+                console.log("v_Country","v_Country");
 
+                if (v_Country && v_Country !="0") {
+                    p_checkpaid_multi.isVisible = true;
+                }else{
+                    p_checkpaid_multi.isVisible = false;
+                }
                 if (FEATURE_DEPT == true || FEATURE_DEPT == 'T') {
                     var f_Department = objRecord.getField('custpage_department');
                     f_Department.isVisible = false;
@@ -347,6 +358,7 @@ define(['N/search', './LMRY_IP_libSendingEmailsLBRY_V2.0', 'N/currentRecord', 'N
             } catch (error) {
                 // alert('Page Init: ' + error);
                 library.sendemail(' [pageInit] ' + error, LMRY_script);
+                console.log("page init error:", error)
             }
         }
 
@@ -445,22 +457,16 @@ define(['N/search', './LMRY_IP_libSendingEmailsLBRY_V2.0', 'N/currentRecord', 'N
             })
             try {
                 var objRecord = scriptContext.currentRecord;
+                
+                console.log("activatedCustom [validateField]: ",activatedCustom)
+                
                 if (scriptContext.fieldId == 'custpage_subsi') {
                     setearCountry(scriptContext);
                     filtrarTransaction(scriptContext, subsi_OW);
                     filtrarSegmentaciones(scriptContext);
                     filtrarCampoAutomaticSet(scriptContext, subsi_OW);
                     activatedCustom = activatedCustomization(scriptContext, subsi_OW);
-                    console.log("activatedCustom [validateField]: ",activatedCustom)
-                    var fDDateFrom = objRecord.getField('custpage_ddate_from');
-                    var fDDateTo = objRecord.getField('custpage_ddate_to');
-                    if (activatedCustom) {
-                        fDDateFrom.isDisplay = true;
-                        fDDateTo.isDisplay = true;
-                    }else{
-                        fDDateFrom.isDisplay = false;
-                        fDDateTo.isDisplay = false;
-                    }
+                    setVisibleDates(objRecord,document)
                 }
 
                 if (scriptContext.fieldId == 'custpage_quantity' || scriptContext.fieldId == 'custpage_select') {
@@ -468,12 +474,44 @@ define(['N/search', './LMRY_IP_libSendingEmailsLBRY_V2.0', 'N/currentRecord', 'N
                 }
 
                 if (scriptContext.fieldId == 'custpage_transaction') {
+                    setVisibleDates(objRecord)
                     mostrarCheckPaidInvoices(scriptContext);
                 }
             } catch (error) {
                 library.sendemail(' [validateField] ' + error, LMRY_script);
+                console.log("error [validatefield]",error)
             }
             return true;
+        }
+
+        function setVisibleDates(objRecord) {
+            var fDDateFrom = objRecord.getField('custpage_ddate_from');
+            var fDDateTo = objRecord.getField('custpage_ddate_to');
+            var fDateFrom = objRecord.getField('custpage_date');
+            var fDateTo = objRecord.getField('custpage_date_2');
+            var transactionType = objRecord.getValue('custpage_transaction');
+            transactionType = transactionType.split(";")[0];
+            console.log("transactionType : ", transactionType)
+            var dateInput = document.getElementById('custpage_date');
+            var trElement = dateInput.closest('td[valign="top"][width="33%"]');
+            var fieldWrapper = document.querySelector('div[data-field-name="custpage_ddate_from"]');
+            //custpage_transaction
+            if (activatedCustom && (["customerpayment", "invoice"].indexOf(transactionType) != -1)) {
+                fDDateFrom.isDisplay = true;
+                fDDateTo.isDisplay = true;
+                fDateFrom.isDisplay = false;
+                fDateTo.isDisplay = false;
+                if (trElement) trElement.style.display = 'none';
+                if (fieldWrapper) fieldWrapper.style.paddingLeft = '8px';
+            } else {
+                fDDateFrom.isDisplay = false;
+                fDDateTo.isDisplay = false;
+                if (trElement) trElement.style.display = '';
+                if (fieldWrapper) fieldWrapper.style.paddingLeft = '0px';
+                fDateFrom.isDisplay = true;
+                fDateTo.isDisplay = true;
+
+            }
         }
 
         /**
@@ -568,6 +606,7 @@ define(['N/search', './LMRY_IP_libSendingEmailsLBRY_V2.0', 'N/currentRecord', 'N
             var objRecord = scriptContext.currentRecord;
             var transaction = objRecord.getField('custpage_transaction');
             var f_checkpaid = objRecord.getField('custpage_checkpaid');
+            var f_checkpaid_multi = objRecord.getField('custpage_checkpaid_multi');
             var country = objRecord.getValue({
                 fieldId: 'custpage_country'
             });
@@ -586,6 +625,7 @@ define(['N/search', './LMRY_IP_libSendingEmailsLBRY_V2.0', 'N/currentRecord', 'N
 
             f_checkpaid.isVisible = false;
             f_checkpaid.isDisplay = false;
+            f_checkpaid_multi.isDisplay = false;
             objRecord.setValue({
                 fieldId: 'custpage_checkpaid',
                 value: false
@@ -672,6 +712,8 @@ define(['N/search', './LMRY_IP_libSendingEmailsLBRY_V2.0', 'N/currentRecord', 'N
                 });
                 sv_transaction = sv_transaction.split(';')[0];
                 var v_Country = Number(objRecord.getValue('custpage_country_id'));
+                var typeTransaction = objRecord.getValue('custpage_transaction').split(";")[0];
+                console.log("typeTransaction",typeTransaction)
                 if (state == null || state == '') {
                     if (subsi_OW) {
                         if (subsidiary == null || subsidiary == '' || subsidiary == 0) {
@@ -684,8 +726,16 @@ define(['N/search', './LMRY_IP_libSendingEmailsLBRY_V2.0', 'N/currentRecord', 'N
                         alert(jsonLanguage.dates[Language]);
                         return false;
                     }
-
-                    if ((ddateFrom && !ddateTo) || (!ddateFrom && ddateTo)) {
+                    console.log("ddateFrom: ",ddateFrom)
+                    console.log("ddateTo: ",ddateTo)
+                    console.log("v_Country: ",v_Country)
+                    console.log("compare: ",["invoice","customerpayment"].indexOf(typeTransaction) !=-1)
+                    if (
+                        activatedCustom && 
+                        v_Country == 157 && 
+                        ["invoice","customerpayment"].indexOf(typeTransaction) !=-1 && 
+                        (!ddateFrom && !ddateTo)
+                    ) {
                         alert(jsonLanguage.ddates[Language]);
                         return false;
                     }
@@ -694,6 +744,16 @@ define(['N/search', './LMRY_IP_libSendingEmailsLBRY_V2.0', 'N/currentRecord', 'N
                         alert(jsonLanguage.transaction[Language]);
                         return false;
                     }
+                    if (v_Country == 157 && ["invoice","customerpayment"].indexOf(typeTransaction) !=-1) {
+                        if (activatedCustom) {
+                            var fieldCustomDate = validateDepositDateField();
+                            if (!fieldCustomDate){
+                                alert(jsonLanguage.ispDepositDateFieldMissing[Language]);
+                                return false;
+                            }
+                        }
+                    }
+                    
                 } else {
                     // VALIDACION DEPLOY YA EJECUTANDOSE
                     var country3country2 = {
@@ -1572,7 +1632,7 @@ define(['N/search', './LMRY_IP_libSendingEmailsLBRY_V2.0', 'N/currentRecord', 'N
                     }
                 }
 
-                return true;
+                return false;//gadp
             } catch (error) {
                 alert(jsonLanguage.error[Language]);
                 console.error(error)
@@ -1708,17 +1768,32 @@ define(['N/search', './LMRY_IP_libSendingEmailsLBRY_V2.0', 'N/currentRecord', 'N
             });
             v_transaction = v_transaction.split(';')[0];
             var f_checkpaid = objRecord.getField('custpage_checkpaid');
+            var f_checkpaid_multi = objRecord.getField('custpage_checkpaid_multi');
+            var countryValue = objRecord.getValue('custpage_country_id');
             objRecord.setValue({
                 fieldId: 'custpage_checkpaid',
                 value: false
             });
-
+            console.log("countryValue [mostrarCheckPaidInvoices]",countryValue)
             if (v_transaction == 'invoice') {
-                f_checkpaid.isVisible = true;
-                f_checkpaid.isDisplay = true;
+                if (countryValue == 157) {
+                    f_checkpaid.isVisible = false;
+                    f_checkpaid.isDisplay = false;
+                    f_checkpaid_multi.isVisible = true;
+                    f_checkpaid_multi.isDisplay = true;
+                }else{
+                    f_checkpaid_multi.isVisible = false;
+                    f_checkpaid_multi.isDisplay = false;
+                    f_checkpaid.isVisible = true;
+                    f_checkpaid.isDisplay = true;
+                }
             } else {
+                if (countryValue == 157) {
+                    f_checkpaid_multi.isVisible = false;
+                    f_checkpaid_multi.isDisplay = false;      
+                }
                 f_checkpaid.isVisible = false;
-                f_checkpaid.isDisplay = false;
+                f_checkpaid.isDisplay = false;                
             }
         }
 
@@ -1847,7 +1922,7 @@ define(['N/search', './LMRY_IP_libSendingEmailsLBRY_V2.0', 'N/currentRecord', 'N
             var active = false;
             var objRecord = scriptContext.currentRecord;
             var subsidiaryId;
-            console.log("fields: ",fields)
+            
             if (subsi_OW == true || subsi_OW == "T") {
                 subsidiaryId = objRecord.getValue("custpage_subsi");
                 console.log("subsidiaryId: ",subsidiaryId)
@@ -1862,12 +1937,49 @@ define(['N/search', './LMRY_IP_libSendingEmailsLBRY_V2.0', 'N/currentRecord', 'N
                 ],
                 columns: ['custrecord_lmry_setuptax_customfields']
             }).run().each(function(result){
-                var fields = result.getValue("custrecord_lmry_setuptax_customfields")
+                var fields = result.getValue("custrecord_lmry_setuptax_customfields");
                 console.log("fields: ",fields)
-                if (fields && fields !=="{}") active = true;
+                if (fields && fields !=="{}") {
+                    try {
+                        fields = JSON.parse(fields);
+                        if (fields["custbody_isp_deposit_date"]) active = true;
+
+                         console.log("fields 1: ",fields)
+                    } catch (error) {
+                        console.log("errorfields: ",error)
+                        active = false;
+                    }       
+                }
             });
             return active
         }
+
+
+        function validateDepositDateField() {
+            //Query Custom Field
+            var customFieldQuery = query.create({
+                type: query.Type.CUSTOM_FIELD
+            });
+            //Conditions
+            var conditions = [
+                customFieldQuery.createCondition({
+                    fieldId: "scriptid",
+                    operator: query.Operator.ANY_OF,
+                    values: "CUSTBODY_ISP_DEPOSIT_DATE"
+                })
+            ];
+            customFieldQuery.condition = customFieldQuery.and(conditions);
+            //Columns
+            customFieldQuery.columns = [
+                customFieldQuery.createColumn({
+                    fieldId: "internalid"
+                })
+            ];
+            //Results
+            var results = customFieldQuery.run().asMappedResults().length || 0;
+            return results;
+        }
+
         return {
             pageInit: pageInit,
             fieldChanged: fieldChanged,

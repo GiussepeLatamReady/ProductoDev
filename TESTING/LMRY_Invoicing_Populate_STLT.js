@@ -310,6 +310,7 @@ define(['N/query', 'N/suiteAppInfo', 'N/log', 'N/xml', 'N/format', 'N/config', '
                     var Rd_CountryId = context.request.parameters.custparam_country_id;
                     var Rd_Transaction = context.request.parameters.custparam_transaction;
                     var Rd_CheckPaid = context.request.parameters.custparam_checkpaid;
+                    var Rd_CheckPaid_multi = context.request.parameters.custparam_checkpaid_multi;
                     var Rd_AutomaticSet = context.request.parameters.custparam_automaticset;
                     var Rd_Department = context.request.parameters.custparam_department;
                     var Rd_Class = context.request.parameters.custparam_class;
@@ -435,6 +436,19 @@ define(['N/query', 'N/suiteAppInfo', 'N/log', 'N/xml', 'N/format', 'N/config', '
                     // Modificacion 02-03-2022: Checkbox - Include Paid Transactions
                     var p_checkpaid = form.addField({
                         id: 'custpage_checkpaid',
+                        type: 'checkbox',
+                        label: jsonLanguage.checkpaid[Language],
+                        container: 'group_pi'
+                    });
+
+                    p_checkpaid.defaultValue = 'F';
+                    p_checkpaid.updateDisplayType({
+                        displayType: serverWidget.FieldDisplayType.NODISPLAY
+                    });
+
+                    // OPciones multiples para mexico
+                    var p_checkpaid = form.addField({
+                        id: 'custpage_checkpaid_multi',
                         type: 'select',
                         label: jsonLanguage.checkpaid[Language],
                         container: 'group_pi'
@@ -443,8 +457,6 @@ define(['N/query', 'N/suiteAppInfo', 'N/log', 'N/xml', 'N/format', 'N/config', '
                     p_checkpaid.addSelectOption({value: '1', text: jsonLanguage['unpaid'][Language]});
                     p_checkpaid.addSelectOption({value: '2', text: jsonLanguage['fullypaid'][Language]});
                     p_checkpaid.addSelectOption({value: '3', text: jsonLanguage['all'][Language]});
-
-
                     // C1247: Se incluye Checkbox - Automatic Set
                     var p_checkAutomaticSet = form.addField({
                         id: 'custpage_automatic_set',
@@ -943,20 +955,21 @@ define(['N/query', 'N/suiteAppInfo', 'N/log', 'N/xml', 'N/format', 'N/config', '
                             operator: 'is',
                             values: 'T'
                         });
-
+                        log.error("filtros_invoice 1",filtros_invoice)
                         if(Rd_Date || Rd_Date_2){
+                            log.error("dates","dates normales")
 
                             filtros_invoice.push(search.createFilter({name: 'trandate', operator: 'within', values: [Rd_Date, Rd_Date_2]}));
-
+                            log.error("filtros_invoice 2",filtros_invoice)
                             /*filtros_invoice.push(search.createFilter({name: 'trandate', operator: 'onorafter', values: Rd_Date}));
                             filtros_invoice.push(search.createFilter({name: 'trandate', operator: 'onorbefore', values: Rd_Date_2}));*/
 
                         }
 
                         if(Rd_DDate_From || Rd_DDate_To){
-
+                            log.error("dates","dates deposit")
                             filtros_invoice.push(search.createFilter({name: 'custbody_isp_deposit_date', operator: 'within', values: [Rd_DDate_From, Rd_DDate_To]}));
-
+                            log.error("filtros_invoice 3",filtros_invoice)
                             /*filtros_invoice.push(search.createFilter({name: 'custbody_isp_deposit_date', operator: 'onorafter', values: Rd_DDate_From}));
                             filtros_invoice.push(search.createFilter({name: 'custbody_isp_deposit_date', operator: 'onorbefore', values: Rd_DDate_To}));*/
 
@@ -966,7 +979,7 @@ define(['N/query', 'N/suiteAppInfo', 'N/log', 'N/xml', 'N/format', 'N/config', '
                         // filtros_invoice[4] = search.createFilter({name:'amountpaid',operator:'equalto',values:0});
                         // filtros_invoice[4] = search.createFilter({name:'status',operator:'anyof',values:['CustInvc:A','CustCred:A']});
 
-                        var i = 4;
+                        var i = filtros_invoice.length;
                         if (subsiOW) {
                             filtros_invoice[i] = search.createFilter({
                                 name: 'subsidiary',
@@ -974,6 +987,7 @@ define(['N/query', 'N/suiteAppInfo', 'N/log', 'N/xml', 'N/format', 'N/config', '
                                 values: Rd_Subsi
                             });
                             i++;
+                            log.error("filtros_invoice 4",filtros_invoice)
                         }
 
                         if (type_transaction == 'transaction') {
@@ -990,6 +1004,7 @@ define(['N/query', 'N/suiteAppInfo', 'N/log', 'N/xml', 'N/format', 'N/config', '
                                     operator: 'anyof',
                                     values: ['CustCred', 'CustInvc', 'CustPymt', 'ItemShip', 'PymtCmpt']
                                 });
+                                log.error("filtros_invoice 5",filtros_invoice)
                             } else if (Rd_Country == 'ECU') {
                                 filtros_invoice[i] = search.createFilter({
                                     name: 'type',
@@ -1038,6 +1053,7 @@ define(['N/query', 'N/suiteAppInfo', 'N/log', 'N/xml', 'N/format', 'N/config', '
                                 values: ['@NONE@']
                             });
                             i++;
+                            log.error("filtros_invoice 6",filtros_invoice)
                         }
 
                         // Solo para colombia excluye las retenciones Latam - WHT
@@ -1064,6 +1080,7 @@ define(['N/query', 'N/suiteAppInfo', 'N/log', 'N/xml', 'N/format', 'N/config', '
                                     values: ['T']
                                 });
                                 i++;
+                                log.error("filtros_invoice 7",filtros_invoice)
                             }
                         }
 
@@ -1111,6 +1128,12 @@ define(['N/query', 'N/suiteAppInfo', 'N/log', 'N/xml', 'N/format', 'N/config', '
                         log.error("existCustomfield", existCustomfield);
 
                         // Crea la busqueda segun los filtros seleccionados
+                        /*
+                        filtros_invoice = filtros_invoice.filter(function (el) {
+                            return el;
+                        });
+                        */
+                        log.error("filtros_invoice final", filtros_invoice);
                         if (subsiOW) {
                             var search_invoice = search.create({
                                 type: type_transaction,
@@ -1400,10 +1423,24 @@ define(['N/query', 'N/suiteAppInfo', 'N/log', 'N/xml', 'N/format', 'N/config', '
                                                 }
                                             }
                                         }
+
+                                        if (id_invoice == "4314884") {
+                                            log.error("hasEIMXLMRYProd",hasEIMXLMRYProd)
+                                            log.error("hasEIMXLMRYTest",hasEIMXLMRYTest)
+                                            log.error("id_tran",id_tran)
+                                            log.error("existCustomfield",existCustomfield)
+                                            log.error("Rd_Country",Rd_Country)
+                                            log.error("id_type",id_type)
+                                            log.error("mx_code_payment",mx_code_payment)
+                                        }
+                                       
                                         if (hasEIMXLMRYProd == true || hasEIMXLMRYProd == 'T' || hasEIMXLMRYTest == true || hasEIMXLMRYTest == 'T') {
+                                            
                                             if (existCustomfield) {
                                                 //Código PUE del registro Latam - MX Code Payment Method se excluye solo para pagos
+                                                
                                                 if (Rd_Country == 'MEX' && id_type == "custpymt" && mx_code_payment == "PUE") {
+                                                    log.error("stop","afuera")
                                                     continue
                                                 }
                                             }
@@ -1416,15 +1453,28 @@ define(['N/query', 'N/suiteAppInfo', 'N/log', 'N/xml', 'N/format', 'N/config', '
 
                                         // VALIDACIONES CUANDO ES INVOICE
                                         if (id_type == 'custinvc') {
-                                            if(Rd_CheckPaid == '1'){ //Sin pago Alguno
-                                            if(id_amountpaid > 0 || id_status != 'open'){
-                                                continue;
+
+
+                                            if (Rd_Country == 'MEX') {
+                                                if (Rd_CheckPaid_multi == '1') { //Sin pago Alguno
+                                                    if (id_amountpaid > 0 || id_status != 'open') {
+                                                        continue;
+                                                    }
+                                                } else if (Rd_CheckPaid_multi == '2') {//Totalmente Pagado
+                                                    if (id_status != 'paidinfull') {
+                                                        continue;
+                                                    }
+                                                }
+                                            } else {
+                                                if (id_status != 'open' && id_status != 'paidinfull') {
+                                                    continue;
+                                                }
+
+                                                if (id_status == 'paidinfull' && Rd_CheckPaid == 'F') {
+                                                    continue;
+                                                }
                                             }
-                                          }else if(Rd_CheckPaid == '2'){//Totalmente Pagado
-                                              if(id_status != 'paidinfull'){
-                                                  continue;
-                                              }
-                                          }
+                                            
 
                                             if (Rd_Country == 'BRA') {
                                                 // Si tiene pago parcial, sigue siendo open
@@ -1702,7 +1752,8 @@ define(['N/query', 'N/suiteAppInfo', 'N/log', 'N/xml', 'N/format', 'N/config', '
                                 custparam_class: context.request.parameters.custpage_class,
                                 custparam_location: context.request.parameters.custpage_location,
                                 custparam_ddate_from: context.request.parameters.custpage_ddate_from,
-                                custparam_ddate_to: context.request.parameters.custpage_ddate_to
+                                custparam_ddate_to: context.request.parameters.custpage_ddate_to,
+                                custparam_checkpaid_multi: context.request.parameters.custpage_checkpaid_multi,
                             }
                         });
                     } else {
@@ -2330,7 +2381,14 @@ define(['N/query', 'N/suiteAppInfo', 'N/log', 'N/xml', 'N/format', 'N/config', '
                 columns: ['custrecord_lmry_setuptax_customfields']
             }).run().each(function(result){
                 var fields = result.getValue("custrecord_lmry_setuptax_customfields")
-                if (fields && fields !=="{}") active = true;
+                if (fields && fields !=="{}") {
+                    try {
+                        fields = JSON.parse(fields);
+                        if (fields["custbody_isp_deposit_date"]) active = true;
+                    } catch (error) {
+                        active = false;
+                    }       
+                }
             });
             return active
         }
