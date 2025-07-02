@@ -955,21 +955,16 @@ define(['N/query', 'N/suiteAppInfo', 'N/log', 'N/xml', 'N/format', 'N/config', '
                             operator: 'is',
                             values: 'T'
                         });
-                        log.error("filtros_invoice 1",filtros_invoice)
                         if(Rd_Date || Rd_Date_2){
-                            log.error("dates","dates normales")
 
                             filtros_invoice.push(search.createFilter({name: 'trandate', operator: 'within', values: [Rd_Date, Rd_Date_2]}));
-                            log.error("filtros_invoice 2",filtros_invoice)
                             /*filtros_invoice.push(search.createFilter({name: 'trandate', operator: 'onorafter', values: Rd_Date}));
                             filtros_invoice.push(search.createFilter({name: 'trandate', operator: 'onorbefore', values: Rd_Date_2}));*/
 
                         }
 
                         if(Rd_DDate_From || Rd_DDate_To){
-                            log.error("dates","dates deposit")
                             filtros_invoice.push(search.createFilter({name: 'custbody_isp_deposit_date', operator: 'within', values: [Rd_DDate_From, Rd_DDate_To]}));
-                            log.error("filtros_invoice 3",filtros_invoice)
                             /*filtros_invoice.push(search.createFilter({name: 'custbody_isp_deposit_date', operator: 'onorafter', values: Rd_DDate_From}));
                             filtros_invoice.push(search.createFilter({name: 'custbody_isp_deposit_date', operator: 'onorbefore', values: Rd_DDate_To}));*/
 
@@ -987,7 +982,6 @@ define(['N/query', 'N/suiteAppInfo', 'N/log', 'N/xml', 'N/format', 'N/config', '
                                 values: Rd_Subsi
                             });
                             i++;
-                            log.error("filtros_invoice 4",filtros_invoice)
                         }
 
                         if (type_transaction == 'transaction') {
@@ -1004,7 +998,6 @@ define(['N/query', 'N/suiteAppInfo', 'N/log', 'N/xml', 'N/format', 'N/config', '
                                     operator: 'anyof',
                                     values: ['CustCred', 'CustInvc', 'CustPymt', 'ItemShip', 'PymtCmpt']
                                 });
-                                log.error("filtros_invoice 5",filtros_invoice)
                             } else if (Rd_Country == 'ECU') {
                                 filtros_invoice[i] = search.createFilter({
                                     name: 'type',
@@ -1053,7 +1046,6 @@ define(['N/query', 'N/suiteAppInfo', 'N/log', 'N/xml', 'N/format', 'N/config', '
                                 values: ['@NONE@']
                             });
                             i++;
-                            log.error("filtros_invoice 6",filtros_invoice)
                         }
 
                         // Solo para colombia excluye las retenciones Latam - WHT
@@ -1080,7 +1072,6 @@ define(['N/query', 'N/suiteAppInfo', 'N/log', 'N/xml', 'N/format', 'N/config', '
                                     values: ['T']
                                 });
                                 i++;
-                                log.error("filtros_invoice 7",filtros_invoice)
                             }
                         }
 
@@ -1125,7 +1116,6 @@ define(['N/query', 'N/suiteAppInfo', 'N/log', 'N/xml', 'N/format', 'N/config', '
                         var hasEIMXLMRYTest = suiteAppInfo.isBundleInstalled({ bundleId: 195265 });
                         //Validar existencia de campo MX Payment Method
                         var existCustomfield = validateCustomField();
-                        log.error("existCustomfield", existCustomfield);
 
                         // Crea la busqueda segun los filtros seleccionados
                         /*
@@ -1133,7 +1123,6 @@ define(['N/query', 'N/suiteAppInfo', 'N/log', 'N/xml', 'N/format', 'N/config', '
                             return el;
                         });
                         */
-                        log.error("filtros_invoice final", filtros_invoice);
                         if (subsiOW) {
                             var search_invoice = search.create({
                                 type: type_transaction,
@@ -1423,16 +1412,6 @@ define(['N/query', 'N/suiteAppInfo', 'N/log', 'N/xml', 'N/format', 'N/config', '
                                                 }
                                             }
                                         }
-
-                                        if (id_invoice == "4314884") {
-                                            log.error("hasEIMXLMRYProd",hasEIMXLMRYProd)
-                                            log.error("hasEIMXLMRYTest",hasEIMXLMRYTest)
-                                            log.error("id_tran",id_tran)
-                                            log.error("existCustomfield",existCustomfield)
-                                            log.error("Rd_Country",Rd_Country)
-                                            log.error("id_type",id_type)
-                                            log.error("mx_code_payment",mx_code_payment)
-                                        }
                                        
                                         if (hasEIMXLMRYProd == true || hasEIMXLMRYProd == 'T' || hasEIMXLMRYTest == true || hasEIMXLMRYTest == 'T') {
                                             
@@ -1440,7 +1419,6 @@ define(['N/query', 'N/suiteAppInfo', 'N/log', 'N/xml', 'N/format', 'N/config', '
                                                 //Código PUE del registro Latam - MX Code Payment Method se excluye solo para pagos
                                                 
                                                 if (Rd_Country == 'MEX' && id_type == "custpymt" && mx_code_payment == "PUE") {
-                                                    log.error("stop","afuera")
                                                     continue
                                                 }
                                             }
@@ -2360,10 +2338,6 @@ define(['N/query', 'N/suiteAppInfo', 'N/log', 'N/xml', 'N/format', 'N/config', '
 
                 // Dibuja el Formulario
                 context.response.writePage(formError);
-                log.error({
-                    title: 'Se genero un error en suitelet',
-                    details: msgerr
-                });
 
                 // Envio de mail al clientes
                 library.sendemail(' [ onRequest ] ' + msgerr, LMRY_script);

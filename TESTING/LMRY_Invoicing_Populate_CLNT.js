@@ -260,7 +260,6 @@ define(['N/search','N/query', './LMRY_IP_libSendingEmailsLBRY_V2.0', 'N/currentR
                 }
 
                 var v_Country = Number(objRecord.getValue('custpage_country_id'));
-                console.log("v_Country","v_Country");
 
                 if (v_Country && v_Country !="0") {
                     p_checkpaid_multi.isVisible = true;
@@ -348,7 +347,6 @@ define(['N/search','N/query', './LMRY_IP_libSendingEmailsLBRY_V2.0', 'N/currentR
                 }
 
                 activatedCustom = activatedCustomization(scriptContext, subsi_OW);
-                console.log("activatedCustom:", activatedCustom)
                 var fDDateFrom = objRecord.getField('custpage_ddate_from');
                 var fDDateTo = objRecord.getField('custpage_ddate_to');
                 if (!activatedCustom) {
@@ -458,8 +456,6 @@ define(['N/search','N/query', './LMRY_IP_libSendingEmailsLBRY_V2.0', 'N/currentR
             try {
                 var objRecord = scriptContext.currentRecord;
                 
-                console.log("activatedCustom [validateField]: ",activatedCustom)
-                
                 if (scriptContext.fieldId == 'custpage_subsi') {
                     setearCountry(scriptContext);
                     filtrarTransaction(scriptContext, subsi_OW);
@@ -491,7 +487,6 @@ define(['N/search','N/query', './LMRY_IP_libSendingEmailsLBRY_V2.0', 'N/currentR
             var fDateTo = objRecord.getField('custpage_date_2');
             var transactionType = objRecord.getValue('custpage_transaction');
             transactionType = transactionType.split(";")[0];
-            console.log("transactionType : ", transactionType)
             var dateInput = document.getElementById('custpage_date');
             var trElement = dateInput.closest('td[valign="top"][width="33%"]');
             var fieldWrapper = document.querySelector('div[data-field-name="custpage_ddate_from"]');
@@ -713,7 +708,6 @@ define(['N/search','N/query', './LMRY_IP_libSendingEmailsLBRY_V2.0', 'N/currentR
                 sv_transaction = sv_transaction.split(';')[0];
                 var v_Country = Number(objRecord.getValue('custpage_country_id'));
                 var typeTransaction = objRecord.getValue('custpage_transaction').split(";")[0];
-                console.log("typeTransaction",typeTransaction)
                 if (state == null || state == '') {
                     if (subsi_OW) {
                         if (subsidiary == null || subsidiary == '' || subsidiary == 0) {
@@ -726,10 +720,6 @@ define(['N/search','N/query', './LMRY_IP_libSendingEmailsLBRY_V2.0', 'N/currentR
                         alert(jsonLanguage.dates[Language]);
                         return false;
                     }
-                    console.log("ddateFrom: ",ddateFrom)
-                    console.log("ddateTo: ",ddateTo)
-                    console.log("v_Country: ",v_Country)
-                    console.log("compare: ",["invoice","customerpayment"].indexOf(typeTransaction) !=-1)
                     if (
                         activatedCustom && 
                         v_Country == 157 && 
@@ -1632,7 +1622,7 @@ define(['N/search','N/query', './LMRY_IP_libSendingEmailsLBRY_V2.0', 'N/currentR
                     }
                 }
 
-                return false;//gadp
+                return true;
             } catch (error) {
                 alert(jsonLanguage.error[Language]);
                 console.error(error)
@@ -1774,7 +1764,6 @@ define(['N/search','N/query', './LMRY_IP_libSendingEmailsLBRY_V2.0', 'N/currentR
                 fieldId: 'custpage_checkpaid',
                 value: false
             });
-            console.log("countryValue [mostrarCheckPaidInvoices]",countryValue)
             if (v_transaction == 'invoice') {
                 if (countryValue == 157) {
                     f_checkpaid.isVisible = false;
@@ -1804,10 +1793,8 @@ define(['N/search','N/query', './LMRY_IP_libSendingEmailsLBRY_V2.0', 'N/currentR
                 })
                 var objRecord = scriptContext.currentRecord;
                 var countryId = Number(objRecord.getValue({ fieldId: "custpage_country_id" }));
-                console.log("countryId", Number(countryId));
 
                 var subsiId = objRecord.getValue({ fieldId: "custpage_subsi" });
-                console.log("subsiId", subsiId);
                 var segments = {
                     '1': {
                         field: 'custpage_department',
@@ -1925,7 +1912,6 @@ define(['N/search','N/query', './LMRY_IP_libSendingEmailsLBRY_V2.0', 'N/currentR
             
             if (subsi_OW == true || subsi_OW == "T") {
                 subsidiaryId = objRecord.getValue("custpage_subsi");
-                console.log("subsidiaryId: ",subsidiaryId)
             }
             if (!subsidiaryId) return false;
             search.create({
@@ -1938,13 +1924,11 @@ define(['N/search','N/query', './LMRY_IP_libSendingEmailsLBRY_V2.0', 'N/currentR
                 columns: ['custrecord_lmry_setuptax_customfields']
             }).run().each(function(result){
                 var fields = result.getValue("custrecord_lmry_setuptax_customfields");
-                console.log("fields: ",fields)
                 if (fields && fields !=="{}") {
                     try {
                         fields = JSON.parse(fields);
                         if (fields["custbody_isp_deposit_date"]) active = true;
 
-                         console.log("fields 1: ",fields)
                     } catch (error) {
                         console.log("errorfields: ",error)
                         active = false;
