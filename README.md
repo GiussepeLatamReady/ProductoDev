@@ -8,7 +8,11 @@ En el siguiente requerimiento se solicita la creación de un Automatic Set a niv
 
 ## Description of the solution
 
+## search
 
+    LatamReady - MX Pedimentos Lines
+    Se agrega el tipo de transaccion Credit Memo
+     
 ## Scripts
 + Create
 

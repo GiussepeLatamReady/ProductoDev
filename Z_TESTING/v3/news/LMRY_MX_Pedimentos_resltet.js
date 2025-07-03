@@ -41,6 +41,7 @@ define([
                 let flagTransfer = false;
                 let fromLocation;
                 let salesOrderID; // varaible para mapear el pedimento desde un return autorization
+                let locationDefault;
                 if (type == "InvAdjst") {
                     dataTransaction = search.lookupFields({
                         type: search.Type.INVENTORY_ADJUSTMENT,
@@ -55,8 +56,21 @@ define([
                     dataTransaction['isAdjustment'] = true;
                     return createPedimentoForInventoryAdj(dataTransaction, idRecord, translation);
                 }else if(type == "CustCred"){
+                    dataTransaction = search.lookupFields({
+                        type: "creditmemo",
+                        id: idRecord,
+                        columns: [
+                            'subsidiary',
+                            'createdfrom',
+                            'trandate',
+                            'location'
+                        ]
+                    });
+                    log.error("dataTransaction",dataTransaction)
                     isReceipt = true; // Se establece como valor para el rpoceso de entrada
                     salesOrderID = getTransactionOrigin(dataTransaction['createdfrom'][0]?.value)
+                    locationDefault = dataTransaction['location'][0]?.value
+                    //dataTransaction['createdfrom'][0]?.value = idRecord;
                 } else {
                     isReceipt = type === "ItemRcpt" ? true : false;
                     //INVENTORY_ADJUSTMENT
@@ -84,10 +98,10 @@ define([
 
                 }
 
-                const { isAutomatic, automaticType } = getAutomaticType(dataTransaction['createdfrom'][0]?.value);
-
+                const { isAutomatic, automaticType } = getAutomaticType(type == "CustCred" ? idRecord : dataTransaction['createdfrom'][0]?.value);
+                log.error("isAutomatic",isAutomatic)
                 if (isAutomatic) {
-                    const items = getItems(idRecord, isReceipt);
+                    const items = getItems(idRecord, isReceipt, type,locationDefault);
                     if (items.length === 0) return translation.NO_LINES_SELECTED;
                     let listSelected = [];
                     let listSendEmail = [];
@@ -98,7 +112,9 @@ define([
                         if (typeof auxJson === 'object')
                             listSelected = auxJson;
                     } else{
+                        
                         items.forEach((itemLine) => {
+                            log.error("itemLine",itemLine)
                             const listPediment = getPedimentos(itemLine.itemid, itemLine.location, itemLine.lote, salesOrderID);
                             let sumQuantityDisp = 0;
                             let quantitytotal = itemLine.quantity;
@@ -196,6 +212,7 @@ define([
                     title: 'error',
                     details: error
                 });
+                log.error("stack error",error.stack)
                 if (typeof error == 'string') return error;
                 library_mail.sendemail2(' [ pedimentosReslet ] ' + error, 'lmry_MX_pedimentos_resltet', null, 'tranid', 'entity');
                 return translation.PEDIMENTO_ERROR_DETAIL;
@@ -281,7 +298,7 @@ define([
             return translatedFields[language];
         }
 
-        function getItems(shipmentID, isReceipt) {
+        function getItems(shipmentID, isReceipt, type,locationDefault) {
 
             let FEAT_INVENTORY = runtime.isFeatureInEffect({ feature: "advbinseriallotmgmt" });
             const listItems = [];
@@ -325,7 +342,7 @@ define([
                     if (ITEM_DESCRIPTION != '' && ITEM_DESCRIPTION != null) {
                         pedimentoItem.itemDescription = ITEM_DESCRIPTION;
                     }
-
+                    if (!LOCATION_ID) LOCATION_ID = locationDefault;
                     pedimentoItem.location = LOCATION_ID;
                     pedimentoItem.date = result_items_ped[i].getValue(colFields[0]);
 
@@ -343,12 +360,21 @@ define([
             }
 
             //busqueda pedimentos de tipo kit package
-
-            let recordShipment = record.load({
-                type: !isReceipt ? search.Type.ITEM_FULFILLMENT : search.Type.ITEM_RECEIPT,
-                id: shipmentID,
-                isDynamic: false,
-            });
+            let recordShipment;
+            if (type == "CustCred") {
+                recordShipment = record.load({
+                    type: "creditmemo",
+                    id: shipmentID,
+                    isDynamic: false,
+                });
+            }else{
+                recordShipment = record.load({
+                    type: !isReceipt ? search.Type.ITEM_FULFILLMENT : search.Type.ITEM_RECEIPT,
+                    id: shipmentID,
+                    isDynamic: false,
+                });
+            }
+            
 
             let numItems = recordShipment.getLineCount({ sublistId: "item" });
             let index = 0;
@@ -443,6 +469,7 @@ define([
                 id: createdFromId,
                 columns: ['createdfrom', 'type']
             });
+            log.error("invoiceOrReturnAuth",invoiceOrReturnAuth)
             const salesOrderOrInvoiceId = invoiceOrReturnAuth?.createdfrom?.[0]?.value || null;
             const invoiceOrReturnAuthType = invoiceOrReturnAuth?.type?.[0]?.value || null;
             
@@ -556,6 +583,7 @@ define([
             const typeAutomatic = { isAutomatic: false, automaticType: null };
             if (!Number(idRecordOrigin)) return typeAutomatic;
             getInfoMXtransaction(idRecordOrigin, true).forEach(mxRecord => {
+                log.error("mxRecord",mxRecord)
                 if (mxRecord.custrecord_lmry_mx_pedimento_fifo === 'T') {
                     typeAutomatic.automaticType = 1;
                     typeAutomatic.isAutomatic = true;
