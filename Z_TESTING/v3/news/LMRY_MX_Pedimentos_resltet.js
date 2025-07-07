@@ -115,7 +115,7 @@ define([
                         
                         items.forEach((itemLine) => {
                             log.error("itemLine",itemLine)
-                            const listPediment = getPedimentos(itemLine.itemid, itemLine.location, itemLine.lote, salesOrderID);
+                            const listPediment = getPedimentos(itemLine.itemid, itemLine.location, itemLine.lote, salesOrderID,locationDefault);
                             let sumQuantityDisp = 0;
                             let quantitytotal = itemLine.quantity;
                             for (let i = 0; i < listPediment.length; i++) {
@@ -509,7 +509,7 @@ define([
          * @param {*} lote_id 
          * @returns {Array<Object>}
          */
-        function getPedimentos(item_id, location_id, lote_id, salesOrderID) {
+        function getPedimentos(item_id, location_id, lote_id, salesOrderID,locationDefault) {
 
             if (item_id === null || location_id === null) return [];
             let Filter_Pedimento = [];
@@ -520,6 +520,8 @@ define([
                 values: item_id,
             });
 
+            location_id = location_id || locationDefault;
+            
             let Filter_Location = search.createFilter({
                 name: "custrecord_lmry_mx_ped_location",
                 operator: search.Operator.IS,
