@@ -136,9 +136,11 @@ define([
                                 let addCount = 0;
                                 for (let i = 0; i < listPediment.length; i++) {
                                     const jsonPediment = JSON.parse(JSON.stringify(listPediment[i]));
+                                    log.error("jsonPediment",jsonPediment)
                                     let ped_quantity = Number(jsonPediment.values["SUM(custrecord_lmry_mx_ped_quantity)"]);
                                     let aduana = Number(jsonPediment.values["GROUP(custrecord_lmry_mx_ped_aduana)"][0]?.value);
                                     let datePediment = jsonPediment.values["GROUP(custrecord_lmry_mx_ped_date)"]
+                                    if (type == "CustCred") ped_quantity = Math.abs(ped_quantity);
                                     if (aduana > 0 && ped_quantity> 0) {
                                         itemLine['datePediment'] = datePediment;
                                         
