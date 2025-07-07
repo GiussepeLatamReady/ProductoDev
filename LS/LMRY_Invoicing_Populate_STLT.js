@@ -1255,8 +1255,6 @@ define(['N/log', 'N/xml', 'N/format', 'N/config', 'N/redirect', 'N/url', 'N/task
                                         // arregloFinal.push(result_invoice2[j].getValue('internalid'));
                                     }
 
-                                    
-
                                     var jsonPayment = {};
                                     if(Rd_Country == 'MEX' && type_transaction == 'customerpayment'){
                                         jsonPayment = verifyPaymentMethod(transacciones);

@@ -1123,6 +1123,8 @@ define(['N/query', 'N/suiteAppInfo', 'N/log', 'N/xml', 'N/format', 'N/config', '
                             return el;
                         });
                         */
+
+
                         if (subsiOW) {
                             var search_invoice = search.create({
                                 type: type_transaction,
@@ -1302,6 +1304,11 @@ define(['N/query', 'N/suiteAppInfo', 'N/log', 'N/xml', 'N/format', 'N/config', '
                                         transacciones.push(result_invoice2[j].getValue('internalid'));
                                         // arregloFinal.push(result_invoice2[j].getValue('internalid'));
                                     }
+
+                                    var jsonPayment = {};
+                                    if(Rd_Country == 'MEX' && type_transaction == 'customerpayment'){
+                                        jsonPayment = verifyPaymentMethod(transacciones);
+                                    }
                                     var json_response = status_invoice(Rd_Country, transacciones, Rd_Subsi);
                                     var transactionsId = [];
                                     var pymntCompFields = [];
@@ -1408,19 +1415,27 @@ define(['N/query', 'N/suiteAppInfo', 'N/log', 'N/xml', 'N/format', 'N/config', '
                                             id_process_transact = result_invoice2[i].getValue('custbody_lmry_processed_transaction');
                                             if (hasEIMXLMRYProd == true || hasEIMXLMRYProd == 'T' || hasEIMXLMRYTest == true || hasEIMXLMRYTest == 'T') {
                                                 if (existCustomfield) {
-                                                    mx_code_payment = result_invoice2[i].getValue({ name: "custrecord_lmry_mx_code_payment_method", join: "CUSTBODY_LMRY_MX_PAYMENTMETHOD" })
+                                                    //mx_code_payment = result_invoice2[i].getValue({ name: "custrecord_lmry_mx_code_payment_method", join: "CUSTBODY_LMRY_MX_PAYMENTMETHOD" })
+
+                                                    if (Rd_Country == 'MEX' && id_type == "custpymt") {
+                                                        mx_code_payment = search.lookupFields({
+                                                            type: search.Type.INVOICE,
+                                                            id: id_invoice,
+                                                            columns: ['custbody_lmry_mx_paymentmethod.custrecord_lmry_mx_code_payment_method']
+                                                        })["custbody_lmry_mx_paymentmethod.custrecord_lmry_mx_code_payment_method"];
+                                                    }else{
+                                                        mx_code_payment = result_invoice2[i].getValue({ name: "custrecord_lmry_mx_code_payment_method", join: "CUSTBODY_LMRY_MX_PAYMENTMETHOD" })
+                                                    }
+                                                    
                                                 }
                                             }
                                         }
                                        
-                                        if (hasEIMXLMRYProd == true || hasEIMXLMRYProd == 'T' || hasEIMXLMRYTest == true || hasEIMXLMRYTest == 'T') {
-                                            
-                                            if (existCustomfield) {
-                                                //Código PUE del registro Latam - MX Code Payment Method se excluye solo para pagos
-                                                
-                                                if (Rd_Country == 'MEX' && id_type == "custpymt" && mx_code_payment == "PUE") {
-                                                    continue
-                                                }
+                                        //Pago de México si tiene algun invoice con PUE
+                                        if(Rd_Country == 'MEX' && type_transaction == 'customerpayment'){
+                                            log.error("jsonPayment",jsonPayment)
+                                            if(jsonPayment[id_invoice] && jsonPayment[id_invoice]['exclude'] == true){
+                                                continue;
                                             }
                                         }
 
@@ -1443,7 +1458,7 @@ define(['N/query', 'N/suiteAppInfo', 'N/log', 'N/xml', 'N/format', 'N/config', '
                                                         continue;
                                                     }
                                                 }
-                                                if (id_status == "pendingapproval" || id_status == "rejected") {
+                                                if (id_status == "pendingapproval" || id_status == "rejected" || id_status == "voided") {
                                                     continue;
                                                 }
                                             } else {
@@ -2367,7 +2382,7 @@ define(['N/query', 'N/suiteAppInfo', 'N/log', 'N/xml', 'N/format', 'N/config', '
                     try {
                         if (fields.trim() == "custbody_isp_deposit_date") active = true;
                     } catch (error) {
-                        console.log("errorfields: ",error)
+                        log.debug("errorfields: ",error)
                         active = false;
                     }       
                 }
@@ -2675,6 +2690,49 @@ define(['N/query', 'N/suiteAppInfo', 'N/log', 'N/xml', 'N/format', 'N/config', '
             //Results
             var results = customFieldQuery.run().asMappedResults().length || 0;
             return results;
+        }
+
+        function verifyPaymentMethod(idPayments) {
+
+            var paymentsMap = {};
+
+            var paymentSearch = search.create({
+                type: 'customerpayment',
+                filters: [
+                    ["appliedtotransaction.type", "is", "CustInvc"], "AND",
+                    ["appliedtotransaction.mainline", "is", "T"], "AND",
+                    ["internalid", "anyof", idPayments]
+                ],
+                columns: [
+                    "internalid", // ID del Customer Payment
+                    "tranid", // Número de transacción
+                    { name: "custbody_lmry_mx_paymentmethod", join: "appliedToTransaction" } // Método de pago en facturas aplicadas
+                ]
+            });
+
+            paymentSearch.run().each(function (result) {
+                let paymentId = result.getValue("internalid");
+                let paymentMethod = result.getValue({ name: "custbody_lmry_mx_paymentmethod", join: "appliedToTransaction" });
+
+
+                if (!paymentsMap[paymentId]) {
+                    paymentsMap[paymentId] = {
+                        'exclude': false
+                    }
+                }
+
+                // Si alguna factura tiene el valor 1 (PUE)
+                if (paymentMethod == "1") {
+                    paymentsMap[paymentId]['exclude'] = true;
+                }
+
+                return true; // Continuar iterando
+            });
+
+            log.debug('paymentsMap', paymentsMap);
+
+            return paymentsMap;
+
         }
 
         return {
