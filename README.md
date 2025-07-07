@@ -1,7 +1,7 @@
-# [D1999 - Enhancement - Latam AR Padron Agip](https://docs.google.com/document/d/1u3M-0LJtTyr1ExinVNauhdHRpBcWyBr8AG2B6-AqkwM/edit?tab=t.0)
+# [D1999 - CASO PASE A URIARTE]()
 
 ## Description of the Requirement
-Quitar entidades del proceso del agip bajo un campo tipo check box
+
 
 ## Description of the solution
 
@@ -10,8 +10,12 @@ Quitar entidades del proceso del agip bajo un campo tipo check box
 + Create
  
 + Update
-    
-
+    LMRY_AutoPercepcionDesc_LBRY_V2.0.js
+    LS_Set_Discounts_URET.js
+    LMRY_Invoicing_Populate_MPRD.js
+    LMRY_CreditMemoURET_V2.0.js
+    LMRY_InvoiceURET_V2.0.js
+    LMRY_RecordSalesURET_V2.0.js
 + Delete
 
 
