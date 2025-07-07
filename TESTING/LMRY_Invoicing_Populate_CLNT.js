@@ -250,6 +250,12 @@ define(['N/search','N/query', './LMRY_IP_libSendingEmailsLBRY_V2.0', 'N/currentR
                 var p_checkpaid = objRecord.getField('custpage_checkpaid');
                 var v_checkpaid = objRecord.getValue('custpage_checkpaid');
                 var p_checkpaid_multi = objRecord.getField('custpage_checkpaid_multi');
+                var transactionType = objRecord.getValue('custpage_transaction');
+
+                if (transactionType) {
+                    transactionType = transactionType.split(";")[0];
+                }
+                
                 if (v_checkpaid == false) {
                     p_checkpaid.isVisible = false;
                     p_checkpaid.isDisplay = false;
@@ -260,9 +266,15 @@ define(['N/search','N/query', './LMRY_IP_libSendingEmailsLBRY_V2.0', 'N/currentR
                 }
 
                 var v_Country = Number(objRecord.getValue('custpage_country_id'));
-
                 if (v_Country && v_Country !="0") {
-                    p_checkpaid_multi.isVisible = true;
+                   
+                    if (transactionType == "invoice") {
+                        p_checkpaid_multi.isVisible = true;
+                        p_checkpaid_multi.isDisplay = true;
+                    }else{
+                        p_checkpaid_multi.isVisible = false;
+                        p_checkpaid_multi.isDisplay = false;
+                    }
                 }else{
                     p_checkpaid_multi.isVisible = false;
                 }
@@ -349,9 +361,18 @@ define(['N/search','N/query', './LMRY_IP_libSendingEmailsLBRY_V2.0', 'N/currentR
                 activatedCustom = activatedCustomization(scriptContext, subsi_OW);
                 var fDDateFrom = objRecord.getField('custpage_ddate_from');
                 var fDDateTo = objRecord.getField('custpage_ddate_to');
+                var fDateFrom = objRecord.getField('custpage_date');
+                var fDateTo = objRecord.getField('custpage_date_2');
                 if (!activatedCustom) {
                     fDDateFrom.isDisplay = false;
                     fDDateTo.isDisplay = false;
+                    fDateFrom.isDisplay = true;
+                    fDateTo.isDisplay = true;
+                }else{
+                    fDDateFrom.isDisplay = true;
+                    fDDateTo.isDisplay = true;
+                    fDateFrom.isDisplay = false;
+                    fDateTo.isDisplay = false;
                 }
             } catch (error) {
                 // alert('Page Init: ' + error);
@@ -453,6 +474,7 @@ define(['N/search','N/query', './LMRY_IP_libSendingEmailsLBRY_V2.0', 'N/currentR
             var subsi_OW = runtime.isFeatureInEffect({
                 feature: 'SUBSIDIARIES'
             })
+
             try {
                 var objRecord = scriptContext.currentRecord;
                 
@@ -1924,11 +1946,9 @@ define(['N/search','N/query', './LMRY_IP_libSendingEmailsLBRY_V2.0', 'N/currentR
                 columns: ['custrecord_lmry_setuptax_customfields']
             }).run().each(function(result){
                 var fields = result.getValue("custrecord_lmry_setuptax_customfields");
-                if (fields && fields !=="{}") {
+                if (fields) {
                     try {
-                        fields = JSON.parse(fields);
-                        if (fields["custbody_isp_deposit_date"]) active = true;
-
+                        if (fields.trim() == "custbody_isp_deposit_date") active = true;
                     } catch (error) {
                         console.log("errorfields: ",error)
                         active = false;

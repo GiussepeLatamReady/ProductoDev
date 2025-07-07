@@ -447,16 +447,16 @@ define(['N/query', 'N/suiteAppInfo', 'N/log', 'N/xml', 'N/format', 'N/config', '
                     });
 
                     // OPciones multiples para mexico
-                    var p_checkpaid = form.addField({
+                    var p_checkpaid_multi = form.addField({
                         id: 'custpage_checkpaid_multi',
                         type: 'select',
                         label: jsonLanguage.checkpaid[Language],
                         container: 'group_pi'
                     });
 
-                    p_checkpaid.addSelectOption({value: '1', text: jsonLanguage['unpaid'][Language]});
-                    p_checkpaid.addSelectOption({value: '2', text: jsonLanguage['fullypaid'][Language]});
-                    p_checkpaid.addSelectOption({value: '3', text: jsonLanguage['all'][Language]});
+                    p_checkpaid_multi.addSelectOption({value: '1', text: jsonLanguage['unpaid'][Language]});
+                    p_checkpaid_multi.addSelectOption({value: '2', text: jsonLanguage['fullypaid'][Language]});
+                    p_checkpaid_multi.addSelectOption({value: '3', text: jsonLanguage['all'][Language]});
                     // C1247: Se incluye Checkbox - Automatic Set
                     var p_checkAutomaticSet = form.addField({
                         id: 'custpage_automatic_set',
@@ -955,7 +955,7 @@ define(['N/query', 'N/suiteAppInfo', 'N/log', 'N/xml', 'N/format', 'N/config', '
                             operator: 'is',
                             values: 'T'
                         });
-                        if(Rd_Date || Rd_Date_2){
+                        if(!activatedCustom&&(Rd_Date || Rd_Date_2)){
 
                             filtros_invoice.push(search.createFilter({name: 'trandate', operator: 'within', values: [Rd_Date, Rd_Date_2]}));
                             /*filtros_invoice.push(search.createFilter({name: 'trandate', operator: 'onorafter', values: Rd_Date}));
@@ -963,7 +963,7 @@ define(['N/query', 'N/suiteAppInfo', 'N/log', 'N/xml', 'N/format', 'N/config', '
 
                         }
 
-                        if(Rd_DDate_From || Rd_DDate_To){
+                        if(activatedCustom && (Rd_DDate_From || Rd_DDate_To)){
                             filtros_invoice.push(search.createFilter({name: 'custbody_isp_deposit_date', operator: 'within', values: [Rd_DDate_From, Rd_DDate_To]}));
                             /*filtros_invoice.push(search.createFilter({name: 'custbody_isp_deposit_date', operator: 'onorafter', values: Rd_DDate_From}));
                             filtros_invoice.push(search.createFilter({name: 'custbody_isp_deposit_date', operator: 'onorbefore', values: Rd_DDate_To}));*/
@@ -1443,6 +1443,9 @@ define(['N/query', 'N/suiteAppInfo', 'N/log', 'N/xml', 'N/format', 'N/config', '
                                                         continue;
                                                     }
                                                 }
+                                                if (id_status == "pendingapproval" || id_status == "rejected") {
+                                                    continue;
+                                                }
                                             } else {
                                                 if (id_status != 'open' && id_status != 'paidinfull') {
                                                     continue;
@@ -1608,7 +1611,9 @@ define(['N/query', 'N/suiteAppInfo', 'N/log', 'N/xml', 'N/format', 'N/config', '
                             if(Rd_DDate_From) fDDateFrom.defaultValue = Rd_DDate_From;
                             if(Rd_DDate_To) fDDateTo.defaultValue = Rd_DDate_To;
                         }
-                        
+
+                        if (p_checkpaid_multi) p_checkpaid_multi.defaultValue = Rd_CheckPaid_multi;// gadp
+
                         p_checkpaid.defaultValue = Rd_CheckPaid;
                         p_checkAutomaticSet.defaultValue = Rd_AutomaticSet;
 
@@ -1638,6 +1643,9 @@ define(['N/query', 'N/suiteAppInfo', 'N/log', 'N/xml', 'N/format', 'N/config', '
                             displayType: serverWidget.FieldDisplayType.DISABLED
                         });
                         p_checkpaid.updateDisplayType({
+                            displayType: serverWidget.FieldDisplayType.DISABLED
+                        });
+                        p_checkpaid_multi.updateDisplayType({
                             displayType: serverWidget.FieldDisplayType.DISABLED
                         });
                         p_checkAutomaticSet.updateDisplayType({
@@ -2355,11 +2363,11 @@ define(['N/query', 'N/suiteAppInfo', 'N/log', 'N/xml', 'N/format', 'N/config', '
                 columns: ['custrecord_lmry_setuptax_customfields']
             }).run().each(function(result){
                 var fields = result.getValue("custrecord_lmry_setuptax_customfields")
-                if (fields && fields !=="{}") {
+                if (fields) {
                     try {
-                        fields = JSON.parse(fields);
-                        if (fields["custbody_isp_deposit_date"]) active = true;
+                        if (fields.trim() == "custbody_isp_deposit_date") active = true;
                     } catch (error) {
+                        console.log("errorfields: ",error)
                         active = false;
                     }       
                 }
