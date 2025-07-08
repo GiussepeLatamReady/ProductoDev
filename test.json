@@ -1,28 +1,40 @@
 {
-   type: "error.SuiteScriptError",
-   name: "INVALID_FLD_VALUE",
-   message: "You have entered an Invalid Field Value 4279909 for the following field: custrecord_lmry_mx_ped_trans_ref",
-   id: "",
-   stack: [
-      "Error\n    at RecordInvoker.setValue (suitescript/resources/javascript/record/serverRecordService.js:443:5)\n    
-      at NetSuiteObject.thenableFunction() (suitescript/resources/javascript/record/proxy.js:115:24)\n    
-      at /SuiteBundles/Bundle 35754/LMRY_MX_Pedimentos_resltet.js:926:33\n    
-      at Array.forEach (native)\n    
-      at createPedimenetByList (/SuiteBundles/Bundle 35754/LMRY_MX_Pedimentos_resltet.js:913:26)\n    
-      at /SuiteBundles/Bundle 35754/LMRY_MX_Pedimentos_resltet.js:850:62\n    
-      at createPedimentoForInventoryAdj (/SuiteBundles/Bundle 35754/LMRY_MX_Pedimentos_resltet.js:741:40)\n    
-      at Object.get (/SuiteBundles/Bundle 35754/LMRY_MX_Pedimentos_resltet.js:55:28)"
-   ],
-   cause: {
-      type: "internal error",
-      code: "INVALID_FLD_VALUE",
-      details: "You have entered an Invalid Field Value 4279909 for the following field: custrecord_lmry_mx_ped_trans_ref",
-      userEvent: null,
-      stackTrace: [
-         "Error\n    at RecordInvoker.setValue (suitescript/resources/javascript/record/serverRecordService.js:443:5)\n    at NetSuiteObject.thenableFunction() (suitescript/resources/javascript/record/proxy.js:115:24)\n    at /SuiteBundles/Bundle 35754/LMRY_MX_Pedimentos_resltet.js:926:33\n    at Array.forEach (native)\n    at createPedimenetByList (/SuiteBundles/Bundle 35754/LMRY_MX_Pedimentos_resltet.js:913:26)\n    at /SuiteBundles/Bundle 35754/LMRY_MX_Pedimentos_resltet.js:850:62\n    at createPedimentoForInventoryAdj (/SuiteBundles/Bundle 35754/LMRY_MX_Pedimentos_resltet.js:741:40)\n    at Object.get (/SuiteBundles/Bundle 35754/LMRY_MX_Pedimentos_resltet.js:55:28)"
-      ],
-      notifyOff: false
-   },
-   notifyOff: false,
-   userFacing: true
+    "subsidiary": [
+        {
+            "value": "6",
+            "text": "Honeycomb Holdings : HoneyComb MX"
+        }
+    ],
+    "createdfrom": [],
+    "trandate": "7/7/2025",
+    "location": [
+        {
+            "value": "7",
+            "text": "Mexico"
+        }
+    ],
+    "transferlocation": []
+}
+
+
+{
+    "recordType": "inventorytransfer",
+    "id": "272",
+    "values": {
+        "subsidiary": [
+            {
+                "value": "1",
+                "text": "Honeycomb Holdings : Honeycomb Mfg."
+            }
+        ],
+        "createdfrom": [],
+        "trandate": "16/2/2016",
+        "location": [
+            {
+                "value": "1",
+                "text": "02: Boston"
+            }
+        ],
+        "transferlocation": []
+    }
 }

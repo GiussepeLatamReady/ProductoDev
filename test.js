@@ -1,34 +1,15 @@
-const getQuantityItems = (idRecord) => {
+const inventoryTransfer = record.load({
+  type: "inventorytransfer",
+  id: "4350670",
+  isDynamic: true,
+});
 
-  const quantityItem = {}
-  const recordObj = record.load({
-    type: "inventoryadjustment",
-    id: idRecord,
-    isDynamic: true,
-  });
-  
-  const itemCount = recordObj.getLineCount({
-    sublistId: 'inventory'
-  });
+var fromLocation = inventoryTransfer.getValue("location");
+var toLocation = inventoryTransfer.getValue("transferlocation");
+var subsidiary = inventoryTransfer.getValue("subsidiary");
+console.log("toLocation:",toLocation)
+console.log("fromLocation:",fromLocation)
+console.log("subsidiary:",subsidiary)
 
-  for (let i = 0; i < itemCount; i++) {
 
-    const item = recordObj.getSublistValue({
-      sublistId: 'inventory',
-      fieldId: 'item',
-      line: i
-    });
 
-    const quantity = recordObj.getSublistValue({
-      sublistId: 'inventory',
-      fieldId: 'adjustqtyby',
-      line: i
-    });
-
-    quantityItem[item] = Number(quantity);
-
-  }
-  return quantityItem;
-}
-
-getQuantityItems("4279912")

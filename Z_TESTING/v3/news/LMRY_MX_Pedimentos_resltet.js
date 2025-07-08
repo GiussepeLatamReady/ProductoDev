@@ -42,6 +42,7 @@ define([
                 let fromLocation;
                 let salesOrderID; // varaible para mapear el pedimento desde un return autorization
                 let locationDefault;
+                let toLocation;
                 if (type == "InvAdjst") {
                     dataTransaction = search.lookupFields({
                         type: search.Type.INVENTORY_ADJUSTMENT,
@@ -55,7 +56,7 @@ define([
                     dataTransaction['createdfrom'] = [{ value: idRecord }];
                     dataTransaction['isAdjustment'] = true;
                     return createPedimentoForInventoryAdj(dataTransaction, idRecord, translation);
-                }else if(type == "CustCred"){
+                } else if(type == "CustCred"){
                     dataTransaction = search.lookupFields({
                         type: "creditmemo",
                         id: idRecord,
@@ -71,6 +72,20 @@ define([
                     salesOrderID = getTransactionOrigin(dataTransaction['createdfrom'][0]?.value)
                     locationDefault = dataTransaction['location'][0]?.value
                     //dataTransaction['createdfrom'][0]?.value = idRecord;
+                } else if(type == "InvTrnfr") {
+                    const inventoryTransfer = record.load({
+                        type: "inventorytransfer",
+                        id: idRecord,
+                        isDynamic: true,
+                    });
+
+                    fromLocation = inventoryTransfer.getValue("location");
+                    toLocation = inventoryTransfer.getValue("transferlocation");
+                    let subsidiary = inventoryTransfer.getValue("subsidiary");
+
+                    dataTransaction['subsidiary'] = [
+                        {value:subsidiary}
+                    ]
                 } else {
                     isReceipt = type === "ItemRcpt" ? true : false;
                     //INVENTORY_ADJUSTMENT
@@ -181,7 +196,14 @@ define([
                             };
                         });
                     }
-                    listSendEmail = listSendEmail.concat(createPedimenetByList(listSelected, dataTransaction, idRecord, isReceipt, flagTransfer && isReceipt ? fromLocation : null));
+
+                    if (type == "InvTrnfr") {
+                        listSendEmail = listSendEmail.concat(createPedimenetByList(listSelected, dataTransaction, idRecord, false,fromLocation));
+                        listSendEmail = listSendEmail.concat(createPedimenetByList(listSelected, dataTransaction, idRecord, true,toLocation));
+                    }else{
+                        listSendEmail = listSendEmail.concat(createPedimenetByList(listSelected, dataTransaction, idRecord, isReceipt, flagTransfer && isReceipt ? fromLocation : null));
+                    }
+                    
 
                     sendEmail(listSendEmail,dataTransaction['subsidiary'][0].value,idRecord)
 
