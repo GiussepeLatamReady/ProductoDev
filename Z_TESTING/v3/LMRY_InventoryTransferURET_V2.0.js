@@ -12,9 +12,9 @@
  *@NModuleScope Public
  */
 define(['N/runtime', 'N/log', 'N/search', 'N/record', 'N/ui/serverWidget', './Latam_Library/LMRY_libSendingEmailsLBRY_V2.0',
-  './Latam_Library/LMRY_HideViewLBRY_V2.0'],
+  './Latam_Library/LMRY_HideViewLBRY_V2.0','./Latam_Library/LMRY_MX_Pedimentos_LBRY_2.0'],
 
-  function (runtime, log, search, record, serverWidget, library_mail, library_HideView) {
+  function (runtime, log, search, record, serverWidget, library_mail, library_HideView,MXPedimentos) {
 
     var LMRY_script = 'LatamReady - Inventory Transfer URET V2.0';
     var licenses = [];
@@ -118,7 +118,9 @@ define(['N/runtime', 'N/log', 'N/search', 'N/record', 'N/ui/serverWidget', './La
         var LMRY_Result = ValidateAccessIFU(subsidiary);
 
 
-
+        if (LMRY_Result[0] == 'MX' && context.type == "delete") {
+          MXPedimentos.deletePedimentoDetails(recordObj.id)
+        }
 
       } catch (err) {
         library_mail.sendemail2(' [ beforeSubmit ] ' + err, LMRY_script, recordObj, 'tranid', 'entity');
@@ -141,6 +143,24 @@ define(['N/runtime', 'N/log', 'N/search', 'N/record', 'N/ui/serverWidget', './La
         licenses = library_mail.getLicenses(subsidiary);
         var LMRY_Result = ValidateAccessIFU(subsidiary);
 
+
+        if (LMRY_Result[0] === 'MX') {
+          const featPedimentos = MXPedimentos.isAutomaticPedimentos(subsidiary)
+          if (featPedimentos) {
+            if ((type === "create" || type === "edit" || type === "copy" || type === "view")) {
+              MXPedimentos.createMXTransactionbyPediment(RCD);
+            }
+            if (type == 'create' || type == 'edit') {
+
+              var message = MXPedimentos.createPedimentos(RCD.id, RCD.id);
+              if (typeof message != "object" && message.indexOf('Error')) {
+                throw message;
+              }
+            }
+
+          }
+        }
+           
       } catch (err) {
         library_mail.sendemail2(' [ afterSubmit ] ' + err, LMRY_script, RCD, 'tranid', 'entity');
       }

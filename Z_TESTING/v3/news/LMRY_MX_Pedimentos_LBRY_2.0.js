@@ -189,7 +189,7 @@ define(["N/query", "N/search", "N/record", "N/log","N/runtime","N/format"], func
             });
             
         }
-        if (type === 'returnauthorization' || type === 'vendorreturnauthorization' || type == "creditmemo") {
+        if (type === 'returnauthorization' || type === 'vendorreturnauthorization' || type == "creditmemo" || type == "inventorytransfer") {
             var lifoFiedl = form.addField({
                 label: "Latam - Pedimento automático LIFO",
                 id: "custpage_mx_pedimento_au_lifo",
@@ -665,6 +665,30 @@ define(["N/query", "N/search", "N/record", "N/log","N/runtime","N/format"], func
 
     }
 
+    function getPedimentoMXtransaction(transactionId) {
+
+        if (Number(transactionId) === 0 || transactionId === undefined) return [];
+        var consulta = 'SELECT TOP 1 CUSTOMRECORD_LMRY_MX_TRANSACTION_FIELDS.custrecord_lmry_mx_pedimento, CUSTOMRECORD_LMRY_MX_TRANSACTION_FIELDS.custrecord_lmry_mx_pedimento_aduana, CUSTOMRECORD_LMRY_MX_TRANSACTION_FIELDS.custrecord_lmry_mx_pedimento_fifo, CUSTOMRECORD_LMRY_MX_TRANSACTION_FIELDS.custrecord_lmry_mx_pedimento_lifo     FROM         CUSTOMRECORD_LMRY_MX_TRANSACTION_FIELDS        WHERE          CUSTOMRECORD_LMRY_MX_TRANSACTION_FIELDS.custrecord_lmry_mx_transaction_related = ' + transactionId + ' and       (CUSTOMRECORD_LMRY_MX_TRANSACTION_FIELDS.custrecord_lmry_mx_pedimento IS NOT NULL OR CUSTOMRECORD_LMRY_MX_TRANSACTION_FIELDS.custrecord_lmry_mx_pedimento_fifo IS NOT NULL OR CUSTOMRECORD_LMRY_MX_TRANSACTION_FIELDS.custrecord_lmry_mx_pedimento_lifo IS NOT NULL)';
+
+        var nroPedimentoandAduana = query.runSuiteQL({
+            query: consulta,
+        }).asMappedResults();
+        return nroPedimentoandAduana;
+    }
+
+    function translateAlert(textInit) {
+        var Language = runtime.getCurrentScript().getParameter({ name: 'LANGUAGE' });
+        Language = Language.substring(0, 2);
+        fetch("https://translate.googleapis.com/translate_a/single?client=gtx&dt=t&sl=auto&tl=" + Language + "&q=" + textInit)
+            .then(function (response) {
+                return response.text();
+            })
+            .then(function (text) {
+                alert(JSON.parse(text)[0][0][0]);
+            }
+            );
+    }
+
     return {
         showMXTransactionbyPedimentFields: showMXTransactionbyPedimentFields,
         createMXTransactionbyPediment: createMXTransactionbyPediment,
@@ -674,6 +698,8 @@ define(["N/query", "N/search", "N/record", "N/log","N/runtime","N/format"], func
         isAutomaticPedimentos: isAutomaticPedimentos,
         deletePedimentoDetails: deletePedimentoDetails,
         manageFieldVisibility: manageFieldVisibility,
-        createPedimentos: createPedimentos
+        createPedimentos: createPedimentos,
+        getPedimentoMXtransaction:getPedimentoMXtransaction,
+        translateAlert:translateAlert
     };
 });
