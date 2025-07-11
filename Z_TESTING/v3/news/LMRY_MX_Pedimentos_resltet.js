@@ -131,7 +131,6 @@ define([
                 }
 
                 const { isAutomatic, automaticType } = getAutomaticType(type == "CustCred" || type == "InvTrnfr" ? idRecord : dataTransaction['createdfrom'][0]?.value);
-                log.error("isAutomatic",isAutomatic)
                 if (isAutomatic) {
                     const items = getItems(idRecord, isReceipt, type,locationDefault);
                     if (items.length === 0) return translation.NO_LINES_SELECTED;
@@ -144,7 +143,6 @@ define([
                         if (typeof auxJson === 'object')
                             listSelected = auxJson;
                     } else{
-                        log.error("items",items)
                         items.forEach((itemLine) => {
                             
                             const listPediment = getPedimentos(itemLine.itemid, itemLine.location, itemLine.lote, salesOrderID,locationDefault);
@@ -251,7 +249,6 @@ define([
                     title: 'error',
                     details: error
                 });
-                log.error("stack error",error.stack)
                 if (typeof error == 'string') return error;
                 library_mail.sendemail2(' [ pedimentosReslet ] ' + error, 'lmry_MX_pedimentos_resltet', null, 'tranid', 'entity');
                 return translation.PEDIMENTO_ERROR_DETAIL;
@@ -408,7 +405,6 @@ define([
 
             //busqueda pedimentos de tipo kit package
             let recordShipment;
-            log.error("type",type)
             if (type == "InvTrnfr") return listItems;
             if (type == "CustCred") {
                 recordShipment = record.load({
@@ -518,7 +514,6 @@ define([
                 id: createdFromId,
                 columns: ['createdfrom', 'type']
             });
-            log.error("invoiceOrReturnAuth",invoiceOrReturnAuth)
             const salesOrderOrInvoiceId = invoiceOrReturnAuth?.createdfrom?.[0]?.value || null;
             const invoiceOrReturnAuthType = invoiceOrReturnAuth?.type?.[0]?.value || null;
             
@@ -634,7 +629,6 @@ define([
             const typeAutomatic = { isAutomatic: false, automaticType: null };
             if (!Number(idRecordOrigin)) return typeAutomatic;
             getInfoMXtransaction(idRecordOrigin, true).forEach(mxRecord => {
-                log.error("mxRecord",mxRecord)
                 if (mxRecord.custrecord_lmry_mx_pedimento_fifo === 'T') {
                     typeAutomatic.automaticType = 1;
                     typeAutomatic.isAutomatic = true;
@@ -1026,7 +1020,6 @@ define([
 
             } catch (err) {
                 log.error('existPediments', err);
-
             }
         }
         function getInfoMXtransaction(idPO, isAutomatic) {
@@ -1057,7 +1050,6 @@ define([
         function createPedimenetByList(listSelected, dataTransaction, idRecord, isReceipt, transferlocation,isAdjustment,isInventoryTranfer) {
 
             const listSendEmail = [];
-            log.error("listSelected",listSelected)
             listSelected.forEach((pedimentSelect) => {
                 const { pediment: jsonPediment, nroItems: quantity, itemLine: itemLineInfo} = pedimentSelect;
                 let inventoryStatus = true;

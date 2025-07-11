@@ -71,8 +71,6 @@ define(['N/runtime', 'N/log', 'N/search', 'N/record', 'N/ui/serverWidget', './La
             } 
           }
         }
-        log.error("country",country)
-        log.error("LMRY_Result[0]",LMRY_Result[0])
   
         if (LMRY_Result[0] === "MX") {
           var featPedimentos = MXPedimentos.isAutomaticPedimentos(subsidiary)

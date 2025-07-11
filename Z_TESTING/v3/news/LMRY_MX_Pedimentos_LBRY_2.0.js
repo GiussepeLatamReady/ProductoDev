@@ -309,14 +309,12 @@ define(["N/query", "N/search", "N/record", "N/log","N/runtime","N/format"], func
         //busqueda pedimentos de tipo kit package
         //var sublistId = "inventory";
         var recordShipment = recordObj;
-        console.log("recordShipment.type",recordShipment.type)
         
         if (recordShipment.type == "inventorytransfer") {
             recordShipment = record.load({
                 id:recordShipment.id,
                 type:recordShipment.type
             })
-            console.log("dentro.type","dentro.type")
             var listItems = [];
 
             var numItems = recordShipment.getLineCount({ sublistId: "inventory" });
@@ -400,7 +398,6 @@ define(["N/query", "N/search", "N/record", "N/log","N/runtime","N/format"], func
             var listItems = [];
 
             var numItems = recordShipment.getLineCount({ sublistId: "inventory" });
-            console.log("numItems", numItems)
             var kitItemxPediment = {};
             for (var i = 0; i < numItems; i++) {
                 var pedimentoItem = {};
@@ -569,10 +566,6 @@ define(["N/query", "N/search", "N/record", "N/log","N/runtime","N/format"], func
 
             }
         }
-        
-        console.log("recordShipment",recordShipment)
-        
-        console.log("listItems",listItems)
         //return []
         return listItems;
     }

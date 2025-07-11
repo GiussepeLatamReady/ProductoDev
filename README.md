@@ -16,8 +16,15 @@ En el siguiente requerimiento se solicita la creación de un Automatic Set a niv
 ## Scripts
 + Create
 
+LMRY_InventoryTransferCLNT_V2.1.js
+
 + Update
 
+LMRY_MX_Pedimentos_resltet.js
+LMRY_MX_Pedimentos_LBRY_2.0.js
+LMRY_CreditMemoURET_V2.0.js
+LMRY_CreditMemoCLNT_V2.0.js
+LMRY_InventoryTransferURET_V2.0.js
 
 + Delete
 
@@ -26,7 +33,10 @@ En el siguiente requerimiento se solicita la creación de un Automatic Set a niv
 + Create
 
     Se agrega el tipo Latam - col use pedimento para pedimentos en credit memo
-    se agrega en el record LatamReady - MX Pedimento Details la transaccion inventory transfer para los campos (custrecord_lmry_mx_ped_trans_ref, custrecord_lmry_mx_ped_trans)
+
+    Se agrega en el record LatamReady - MX Pedimento Details la transaccion inventory transfer y credit memo para los campos. (custrecord_lmry_mx_ped_trans_ref, custrecord_lmry_mx_ped_trans)
+
+    Mostrar los pedimento details en credit memo e inventory transfer
 
 + Update
     
