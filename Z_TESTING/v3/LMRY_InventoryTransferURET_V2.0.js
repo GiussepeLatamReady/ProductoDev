@@ -68,9 +68,7 @@ define(['N/runtime', 'N/log', 'N/search', 'N/record', 'N/ui/serverWidget', './La
               });
 
               OBJ_FORM.clientScriptModulePath = './Latam_Library/LMRY_GLImpact_CLNT_V2.0.js';
-            } else {
-              OBJ_FORM.removeButton('edit');
-            }
+            } 
           }
         }
         log.error("country",country)
@@ -79,7 +77,7 @@ define(['N/runtime', 'N/log', 'N/search', 'N/record', 'N/ui/serverWidget', './La
         if (LMRY_Result[0] === "MX") {
           var featPedimentos = MXPedimentos.isAutomaticPedimentos(subsidiary)
           if (featPedimentos && (runtime.executionContext == 'USERINTERFACE' && (type === "create" || type === "edit" || type === "copy" || type === "view"))) {
-            MXPedimentos.showMXTransactionbyPedimentFields(form, recordObj.id, recordObj.type, type);
+            MXPedimentos.showMXTransactionbyPedimentFields(OBJ_FORM, recordObj.id, recordObj.type, type);
           }
         }
 
@@ -102,7 +100,6 @@ define(['N/runtime', 'N/log', 'N/search', 'N/record', 'N/ui/serverWidget', './La
           return true;
         }
 
-        var formulario = context.form;
         var type = context.type;
 
         var subsidiary = '';

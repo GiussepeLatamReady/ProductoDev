@@ -27,6 +27,7 @@ define([
      */
     const pageInit = (scriptContext) => {
         type = scriptContext.mode;
+        console.log("type",type)
     };
     const saveRecord = (scriptContext) => {
         try {
@@ -46,6 +47,7 @@ define([
                         const mensaje = Lib_pedimento.isValidItemsTransaction(currentRecord);
                         if (mensaje !== "ok") {
                             Lib_pedimento.translateAlert(mensaje);
+                            console.log(mensaje)
                             if (mensaje.indexOf('Error') !== -1) {
                                 return false;
                             }

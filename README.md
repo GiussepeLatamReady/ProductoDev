@@ -25,7 +25,9 @@ En el siguiente requerimiento se solicita la creación de un Automatic Set a niv
 ## Records Configuration
 + Create
 
-    Se agrega el tipo Latam - col use pedimento para pedimentos
+    Se agrega el tipo Latam - col use pedimento para pedimentos en credit memo
+    se agrega en el record LatamReady - MX Pedimento Details la transaccion inventory transfer para los campos (custrecord_lmry_mx_ped_trans_ref, custrecord_lmry_mx_ped_trans)
+
 + Update
     
 ## Fields

@@ -307,178 +307,273 @@ define(["N/query", "N/search", "N/record", "N/log","N/runtime","N/format"], func
     }
     function getItems(recordObj) {
         //busqueda pedimentos de tipo kit package
-
+        //var sublistId = "inventory";
         var recordShipment = recordObj;
-        var listItems = [];
+        console.log("recordShipment.type",recordShipment.type)
+        
+        if (recordShipment.type == "inventorytransfer") {
+            recordShipment = record.load({
+                id:recordShipment.id,
+                type:recordShipment.type
+            })
+            console.log("dentro.type","dentro.type")
+            var listItems = [];
 
-        var numItems = recordShipment.getLineCount({ sublistId: "item" });
-        var kitItemxPediment = {};
-        for (var i = 0; i < numItems; i++) {
-            var pedimentoItem = {};
-            if (recordShipment.getSublistValue({ sublistId: "item", fieldId: "itemtype", line: i }) === "Kit" &&
-                (recordShipment.getSublistValue({ sublistId: 'item', fieldId: 'itemreceive', line: i }) == 'T' ||
-                    recordShipment.getSublistValue({ sublistId: 'item', fieldId: 'itemreceive', line: i }) == true)) {
-
-                kitItemxPediment[recordShipment.getSublistValue({ sublistId: 'item', fieldId: 'kitlineid', line: i })] = recordShipment.getSublistText({ sublistId: "item", fieldId: "custcol_lmry_mx_pediment", line: i });
-            }
-            if (recordShipment.getSublistValue({ sublistId: "item", fieldId: "itemtype", line: i }) === "Kit" || recordShipment.getSublistValue({ sublistId: 'item', fieldId: 'kitmemberof', line: i }) === "") continue;
-
+            var numItems = recordShipment.getLineCount({ sublistId: "inventory" });
             var trandate = recordShipment.getValue("trandate");
-            var itemID = recordShipment.getSublistValue({ sublistId: 'item', fieldId: 'item', line: i });
-            var location = recordShipment.getSublistValue({ sublistId: 'item', fieldId: 'location', line: i });
-            var quantity = recordShipment.getSublistValue({ sublistId: 'item', fieldId: 'quantity', line: i });
-            var itemDescription = recordShipment.getSublistValue({ sublistId: 'item', fieldId: 'itemdescription', line: i });
+            var location = recordShipment.getValue("location");
+            for (var i = 0; i < numItems; i++) {
+                var pedimentoItem = {};
+                var itemID = recordShipment.getSublistValue({ sublistId: 'inventory', fieldId: 'item', line: i });
+                var quantity = recordShipment.getSublistValue({ sublistId: 'inventory', fieldId: 'adjustqtyby', line: i });
+                var itemDescription = recordShipment.getSublistValue({ sublistId: 'inventory', fieldId: 'description', line: i });
+                var inventoryDetail = recordShipment.getSublistValue({ sublistId: 'inventory', fieldId: 'inventorydetailavail', line: i });
+                if (inventoryDetail === 'T' || inventoryDetail === true) {
+                    recordShipment.selectLine({
+                        sublistId: "inventory",
+                        line: i
+                    });
+                    var inventorydetailRecord = recordShipment.getCurrentSublistSubrecord({
+                        sublistId: "inventory", fieldId: 'inventorydetail'
+                    });
+                    var cLineas = inventorydetailRecord.getLineCount({ sublistId: 'inventoryassignment' });
+                    for (var j = 0; j < cLineas; j++) {
+                        var pedimentoItema = {};
+                        var lote = inventorydetailRecord.getSublistValue({ sublistId: 'inventoryassignment', fieldId: 'issueinventorynumber', line: j });
 
-            var inventoryDetail = recordShipment.getSublistValue({ sublistId: 'item', fieldId: 'inventorydetailavail', line: i });
-            if (inventoryDetail == 'T' || inventoryDetail == true) {
-                recordShipment.selectLine({
-                    sublistId: 'item',
-                    line: i
-                });
-                var inventorydetailRecord = recordShipment.getCurrentSublistSubrecord({
-                    sublistId: 'item', fieldId: 'inventorydetail'
-                });
-                var cLineas = inventorydetailRecord.getLineCount({ sublistId: 'inventoryassignment' });
-                for (var j = 0; j < cLineas; j++) {
-                    var pedimentoItema = {};
-                    var lote = inventorydetailRecord.getSublistValue({ sublistId: 'inventoryassignment', fieldId: 'issueinventorynumber', line: j });
+                        var loteQuantity = inventorydetailRecord.getSublistValue({ sublistId: 'inventoryassignment', fieldId: 'quantity', line: j });
+                        if (Number(itemID))
+                            pedimentoItema.itemid = itemID;
 
-                    var loteQuantity = inventorydetailRecord.getSublistValue({ sublistId: 'inventoryassignment', fieldId: 'quantity', line: j });
+                        if (itemDescription != null && itemDescription != "") {
+                            if (itemDescription.length > 300) {
+                                itemDescription = itemDescription.substring(0, 297) + "...";
+                            }
+                            pedimentoItema.itemDescription = itemDescription;
+                        }
+
+                        if (Number(location))
+                            pedimentoItema.location = location;
+
+                        if (trandate != null && trandate != "")
+                            pedimentoItema.date = trandate;
+
+                        if (Number(lote))
+                            pedimentoItema.lote = lote;
+
+                        if (Number(loteQuantity)) {
+                            pedimentoItema.quantity = Math.round(loteQuantity);
+
+                        } else {
+                            pedimentoItema.quantity = Math.round(quantity);
+
+                        }
+                        listItems.push(pedimentoItema);
+                    }
+                } else {
                     if (Number(itemID))
-                        pedimentoItema.itemid = itemID;
+                        pedimentoItem.itemid = itemID;
 
                     if (itemDescription != null && itemDescription != "") {
                         if (itemDescription.length > 300) {
                             itemDescription = itemDescription.substring(0, 297) + "...";
                         }
-                        pedimentoItema.itemDescription = itemDescription;
+                        pedimentoItem.itemDescription = itemDescription;
                     }
 
                     if (Number(location))
-                        pedimentoItema.location = location;
+                        pedimentoItem.location = location;
 
                     if (trandate != null && trandate != "")
-                        pedimentoItema.date = trandate;
+                        pedimentoItem.date = trandate;
 
-                    if (Number(lote))
-                        pedimentoItema.lote = lote;
+                    // if (Number(lote))
+                    //     SubTabla.setSublistValue({ id: 'custpage_lote', line: index, value: loteText });
+                    if (Number(quantity))
+                        pedimentoItem.quantity = Math.round(quantity);
+                    listItems.push(pedimentoItem);
 
-                    if (Number(loteQuantity)) {
-                        pedimentoItema.quantity = Math.round(loteQuantity);
-
-                    } else {
-                        pedimentoItema.quantity = Math.round(quantity);
-
-                    }
-                    listItems.push(pedimentoItema);
                 }
-            } else {
-                if (Number(itemID))
-                    pedimentoItem.itemid = itemID;
-
-                if (itemDescription != null && itemDescription != "") {
-                    if (itemDescription.length > 300) {
-                        itemDescription = itemDescription.substring(0, 297) + "...";
-                    }
-                    pedimentoItem.itemDescription = itemDescription;
-                }
-
-                if (Number(location))
-                    pedimentoItem.location = location;
-
-                if (trandate != null && trandate != "")
-                    pedimentoItem.date = trandate;
-
-                // if (Number(lote))
-                //     SubTabla.setSublistValue({ id: 'custpage_lote', line: index, value: loteText });
-                if (Number(quantity))
-                    pedimentoItem.quantity = Math.round(quantity);
-                listItems.push(pedimentoItem);
 
             }
+        } else {
+            var listItems = [];
 
-        }
-        for (var i = 0; i < numItems; i++) {
+            var numItems = recordShipment.getLineCount({ sublistId: "inventory" });
+            console.log("numItems", numItems)
+            var kitItemxPediment = {};
+            for (var i = 0; i < numItems; i++) {
+                var pedimentoItem = {};
+                if (recordShipment.getSublistValue({ sublistId: "item", fieldId: "itemtype", line: i }) === "Kit" &&
+                    (recordShipment.getSublistValue({ sublistId: 'item', fieldId: 'itemreceive', line: i }) == 'T' ||
+                        recordShipment.getSublistValue({ sublistId: 'item', fieldId: 'itemreceive', line: i }) == true)) {
 
-            if (recordShipment.getSublistValue({ sublistId: "item", fieldId: "itemtype", line: i }) === "Kit" || recordShipment.getSublistValue({ sublistId: 'item', fieldId: 'kitmemberof', line: i }) !== "") continue;
-            if (recordShipment.getSublistValue({ sublistId: 'item', fieldId: 'itemreceive', line: i }) === false || recordShipment.getSublistValue({ sublistId: 'item', fieldId: 'itemreceive', line: i }) === 'F') continue;
+                    kitItemxPediment[recordShipment.getSublistValue({ sublistId: 'item', fieldId: 'kitlineid', line: i })] = recordShipment.getSublistText({ sublistId: "item", fieldId: "custcol_lmry_mx_pediment", line: i });
+                }
+                if (recordShipment.getSublistValue({ sublistId: "item", fieldId: "itemtype", line: i }) === "Kit" || recordShipment.getSublistValue({ sublistId: 'item', fieldId: 'kitmemberof', line: i }) === "") continue;
 
-            var trandate = recordShipment.getValue("trandate");
-            var itemID = recordShipment.getSublistValue({ sublistId: 'item', fieldId: 'item', line: i });
-            var location = recordShipment.getSublistValue({ sublistId: 'item', fieldId: 'location', line: i });
-            var quantity = recordShipment.getSublistValue({ sublistId: 'item', fieldId: 'quantity', line: i });
-            var itemDescription = recordShipment.getSublistValue({ sublistId: 'item', fieldId: 'itemdescription', line: i });
+                var trandate = recordShipment.getValue("trandate");
+                var itemID = recordShipment.getSublistValue({ sublistId: 'item', fieldId: 'item', line: i });
+                var location = recordShipment.getSublistValue({ sublistId: 'item', fieldId: 'location', line: i });
+                var quantity = recordShipment.getSublistValue({ sublistId: 'item', fieldId: 'quantity', line: i });
+                var itemDescription = recordShipment.getSublistValue({ sublistId: 'item', fieldId: 'itemdescription', line: i });
 
-            var inventoryDetail = recordShipment.getSublistValue({ sublistId: 'item', fieldId: 'inventorydetailavail', line: i });
-            if (inventoryDetail == 'T' || inventoryDetail == true) {
+                var inventoryDetail = recordShipment.getSublistValue({ sublistId: 'item', fieldId: 'inventorydetailavail', line: i });
+                if (inventoryDetail == 'T' || inventoryDetail == true) {
+                    recordShipment.selectLine({
+                        sublistId: 'item',
+                        line: i
+                    });
+                    var inventorydetailRecord = recordShipment.getCurrentSublistSubrecord({
+                        sublistId: 'item', fieldId: 'inventorydetail'
+                    });
+                    var cLineas = inventorydetailRecord.getLineCount({ sublistId: 'inventoryassignment' });
+                    for (var j = 0; j < cLineas; j++) {
+                        var pedimentoItema = {};
+                        var lote = inventorydetailRecord.getSublistValue({ sublistId: 'inventoryassignment', fieldId: 'issueinventorynumber', line: j });
 
-                recordShipment.selectLine({
-                    sublistId: 'item',
-                    line: i
-                });
-                var inventorydetailRecord = recordShipment.getCurrentSublistSubrecord({
-                    sublistId: 'item', fieldId: 'inventorydetail'
-                });
-                var cLineas = inventorydetailRecord.getLineCount({ sublistId: 'inventoryassignment' });
-                for (var j = 0; j < cLineas; j++) {
-                    var pedimentoItema = {};
-                    var lote = inventorydetailRecord.getSublistValue({ sublistId: 'inventoryassignment', fieldId: 'issueinventorynumber', line: j });
+                        var loteQuantity = inventorydetailRecord.getSublistValue({ sublistId: 'inventoryassignment', fieldId: 'quantity', line: j });
+                        if (Number(itemID))
+                            pedimentoItema.itemid = itemID;
 
-                    var loteQuantity = inventorydetailRecord.getSublistValue({ sublistId: 'inventoryassignment', fieldId: 'quantity', line: j });
+                        if (itemDescription != null && itemDescription != "") {
+                            if (itemDescription.length > 300) {
+                                itemDescription = itemDescription.substring(0, 297) + "...";
+                            }
+                            pedimentoItema.itemDescription = itemDescription;
+                        }
+
+                        if (Number(location))
+                            pedimentoItema.location = location;
+
+                        if (trandate != null && trandate != "")
+                            pedimentoItema.date = trandate;
+
+                        if (Number(lote))
+                            pedimentoItema.lote = lote;
+
+                        if (Number(loteQuantity)) {
+                            pedimentoItema.quantity = Math.round(loteQuantity);
+
+                        } else {
+                            pedimentoItema.quantity = Math.round(quantity);
+
+                        }
+                        listItems.push(pedimentoItema);
+                    }
+                } else {
                     if (Number(itemID))
-                        pedimentoItema.itemid = itemID;
+                        pedimentoItem.itemid = itemID;
 
                     if (itemDescription != null && itemDescription != "") {
                         if (itemDescription.length > 300) {
                             itemDescription = itemDescription.substring(0, 297) + "...";
                         }
-                        pedimentoItema.itemDescription = itemDescription;
+                        pedimentoItem.itemDescription = itemDescription;
                     }
 
                     if (Number(location))
-                        pedimentoItema.location = location;
+                        pedimentoItem.location = location;
 
                     if (trandate != null && trandate != "")
-                        pedimentoItema.date = trandate;
+                        pedimentoItem.date = trandate;
 
-                    if (Number(lote))
-                        pedimentoItema.lote = lote;
+                    // if (Number(lote))
+                    //     SubTabla.setSublistValue({ id: 'custpage_lote', line: index, value: loteText });
+                    if (Number(quantity))
+                        pedimentoItem.quantity = Math.round(quantity);
+                    listItems.push(pedimentoItem);
 
-                    if (Number(loteQuantity)) {
-                        pedimentoItema.quantity = Math.round(loteQuantity);
-
-                    } else {
-                        pedimentoItema.quantity = Math.round(quantity);
-
-                    }
-                    listItems.push(pedimentoItema);
                 }
-            } else {
-                if (Number(itemID))
-                    pedimentoItem.itemid = itemID;
-
-                if (itemDescription != null && itemDescription != "") {
-                    if (itemDescription.length > 300) {
-                        itemDescription = itemDescription.substring(0, 297) + "...";
-                    }
-                    pedimentoItem.itemDescription = itemDescription;
-                }
-
-                if (Number(location))
-                    pedimentoItem.location = location;
-
-                if (trandate != null && trandate != "")
-                    pedimentoItem.date = trandate;
-
-                // if (Number(lote))
-                //     SubTabla.setSublistValue({ id: 'custpage_lote', line: index, value: loteText });
-                if (Number(quantity))
-                    pedimentoItem.quantity = Math.round(quantity);
-                listItems.push(pedimentoItem);
 
             }
+            for (var i = 0; i < numItems; i++) {
 
+                if (recordShipment.getSublistValue({ sublistId: "item", fieldId: "itemtype", line: i }) === "Kit" || recordShipment.getSublistValue({ sublistId: 'item', fieldId: 'kitmemberof', line: i }) !== "") continue;
+                if (recordShipment.getSublistValue({ sublistId: 'item', fieldId: 'itemreceive', line: i }) === false || recordShipment.getSublistValue({ sublistId: 'item', fieldId: 'itemreceive', line: i }) === 'F') continue;
+
+                var trandate = recordShipment.getValue("trandate");
+                var itemID = recordShipment.getSublistValue({ sublistId: 'item', fieldId: 'item', line: i });
+                var location = recordShipment.getSublistValue({ sublistId: 'item', fieldId: 'location', line: i });
+                var quantity = recordShipment.getSublistValue({ sublistId: 'item', fieldId: 'quantity', line: i });
+                var itemDescription = recordShipment.getSublistValue({ sublistId: 'item', fieldId: 'itemdescription', line: i });
+
+                var inventoryDetail = recordShipment.getSublistValue({ sublistId: 'item', fieldId: 'inventorydetailavail', line: i });
+                if (inventoryDetail == 'T' || inventoryDetail == true) {
+
+                    recordShipment.selectLine({
+                        sublistId: 'item',
+                        line: i
+                    });
+                    var inventorydetailRecord = recordShipment.getCurrentSublistSubrecord({
+                        sublistId: 'item', fieldId: 'inventorydetail'
+                    });
+                    var cLineas = inventorydetailRecord.getLineCount({ sublistId: 'inventoryassignment' });
+                    for (var j = 0; j < cLineas; j++) {
+                        var pedimentoItema = {};
+                        var lote = inventorydetailRecord.getSublistValue({ sublistId: 'inventoryassignment', fieldId: 'issueinventorynumber', line: j });
+
+                        var loteQuantity = inventorydetailRecord.getSublistValue({ sublistId: 'inventoryassignment', fieldId: 'quantity', line: j });
+                        if (Number(itemID))
+                            pedimentoItema.itemid = itemID;
+
+                        if (itemDescription != null && itemDescription != "") {
+                            if (itemDescription.length > 300) {
+                                itemDescription = itemDescription.substring(0, 297) + "...";
+                            }
+                            pedimentoItema.itemDescription = itemDescription;
+                        }
+
+                        if (Number(location))
+                            pedimentoItema.location = location;
+
+                        if (trandate != null && trandate != "")
+                            pedimentoItema.date = trandate;
+
+                        if (Number(lote))
+                            pedimentoItema.lote = lote;
+
+                        if (Number(loteQuantity)) {
+                            pedimentoItema.quantity = Math.round(loteQuantity);
+
+                        } else {
+                            pedimentoItema.quantity = Math.round(quantity);
+
+                        }
+                        listItems.push(pedimentoItema);
+                    }
+                } else {
+                    if (Number(itemID))
+                        pedimentoItem.itemid = itemID;
+
+                    if (itemDescription != null && itemDescription != "") {
+                        if (itemDescription.length > 300) {
+                            itemDescription = itemDescription.substring(0, 297) + "...";
+                        }
+                        pedimentoItem.itemDescription = itemDescription;
+                    }
+
+                    if (Number(location))
+                        pedimentoItem.location = location;
+
+                    if (trandate != null && trandate != "")
+                        pedimentoItem.date = trandate;
+
+                    // if (Number(lote))
+                    //     SubTabla.setSublistValue({ id: 'custpage_lote', line: index, value: loteText });
+                    if (Number(quantity))
+                        pedimentoItem.quantity = Math.round(quantity);
+                    listItems.push(pedimentoItem);
+
+                }
+
+            }
         }
+        
+        console.log("recordShipment",recordShipment)
+        
+        console.log("listItems",listItems)
+        //return []
         return listItems;
     }
     function getPedimentos(item_id, location_id, lote_id, isFifo) {

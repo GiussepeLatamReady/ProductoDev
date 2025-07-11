@@ -67,12 +67,24 @@ define([
                             'location'
                         ]
                     });
-                    log.error("dataTransaction",dataTransaction)
+
+                    if (dataTransaction['createdfrom'][0]?.value) {
+                        const typeCreatedFrom = search.lookupFields({
+                            type: 'transaction',
+                            id: dataTransaction['createdfrom'][0]?.value,
+                            columns: ['type']
+                        }).type[0].value;
+                        if (typeCreatedFrom == "RtnAuth") return false;
+                    } else {
+                        return false;
+                    }
                     isReceipt = true; // Se establece como valor para el rpoceso de entrada
                     salesOrderID = getTransactionOrigin(dataTransaction['createdfrom'][0]?.value)
                     locationDefault = dataTransaction['location'][0]?.value
+                    
                     //dataTransaction['createdfrom'][0]?.value = idRecord;
                 } else if(type == "InvTrnfr") {
+                    dataTransaction = {};
                     const inventoryTransfer = record.load({
                         type: "inventorytransfer",
                         id: idRecord,
@@ -80,11 +92,16 @@ define([
                     });
 
                     fromLocation = inventoryTransfer.getValue("location");
+                    locationDefault = inventoryTransfer.getValue("location");
                     toLocation = inventoryTransfer.getValue("transferlocation");
+                    dataTransaction['trandate'] = inventoryTransfer.getValue("trandate");
                     let subsidiary = inventoryTransfer.getValue("subsidiary");
-
+                    
                     dataTransaction['subsidiary'] = [
                         {value:subsidiary}
+                    ]
+                    dataTransaction['createdfrom'] = [
+                        {value:idRecord}
                     ]
                 } else {
                     isReceipt = type === "ItemRcpt" ? true : false;
@@ -113,7 +130,7 @@ define([
 
                 }
 
-                const { isAutomatic, automaticType } = getAutomaticType(type == "CustCred" ? idRecord : dataTransaction['createdfrom'][0]?.value);
+                const { isAutomatic, automaticType } = getAutomaticType(type == "CustCred" || type == "InvTrnfr" ? idRecord : dataTransaction['createdfrom'][0]?.value);
                 log.error("isAutomatic",isAutomatic)
                 if (isAutomatic) {
                     const items = getItems(idRecord, isReceipt, type,locationDefault);
@@ -127,9 +144,9 @@ define([
                         if (typeof auxJson === 'object')
                             listSelected = auxJson;
                     } else{
-                        
+                        log.error("items",items)
                         items.forEach((itemLine) => {
-                            log.error("itemLine",itemLine)
+                            
                             const listPediment = getPedimentos(itemLine.itemid, itemLine.location, itemLine.lote, salesOrderID,locationDefault);
                             let sumQuantityDisp = 0;
                             let quantitytotal = itemLine.quantity;
@@ -151,30 +168,28 @@ define([
                                 let addCount = 0;
                                 for (let i = 0; i < listPediment.length; i++) {
                                     const jsonPediment = JSON.parse(JSON.stringify(listPediment[i]));
-                                    log.error("jsonPediment",jsonPediment)
+                                    //log.error("jsonPediment",jsonPediment)
                                     let ped_quantity = Number(jsonPediment.values["SUM(custrecord_lmry_mx_ped_quantity)"]);
                                     let aduana = Number(jsonPediment.values["GROUP(custrecord_lmry_mx_ped_aduana)"][0]?.value);
                                     let datePediment = jsonPediment.values["GROUP(custrecord_lmry_mx_ped_date)"]
                                     if (type == "CustCred") ped_quantity = Math.abs(ped_quantity);
+                                    
                                     if (aduana > 0 && ped_quantity> 0) {
                                         itemLine['datePediment'] = datePediment;
-                                        
-                                        if (ped_quantity == quantitytotal) {
-                                            
+                                        if (ped_quantity == quantitytotal) {                                      
                                             listSelected.push({ pediment: jsonPediment, nroItems: quantitytotal, itemLine });
                                             quantitytotal = quantitytotal - ped_quantity;
                                             addCount++;
                                             break;
                                         };
                                         if (ped_quantity > quantitytotal) {
-                                            
+
                                             listSelected.push({ pediment: jsonPediment, nroItems: quantitytotal, itemLine });
                                             quantitytotal = quantitytotal - ped_quantity;
                                             addCount++;
                                             break;
                                         };
                                         if (ped_quantity < quantitytotal) {
-                                           
                                             listSelected.push({ pediment: jsonPediment, nroItems: ped_quantity, itemLine });
                                             quantitytotal = quantitytotal - ped_quantity;
                                             addCount++;
@@ -198,8 +213,8 @@ define([
                     }
 
                     if (type == "InvTrnfr") {
-                        listSendEmail = listSendEmail.concat(createPedimenetByList(listSelected, dataTransaction, idRecord, false,fromLocation));
-                        listSendEmail = listSendEmail.concat(createPedimenetByList(listSelected, dataTransaction, idRecord, true,toLocation));
+                        listSendEmail = listSendEmail.concat(createPedimenetByList(listSelected, dataTransaction, idRecord, false,fromLocation,false,true));
+                        listSendEmail = listSendEmail.concat(createPedimenetByList(listSelected, dataTransaction, idRecord, true,toLocation,false,true));
                     }else{
                         listSendEmail = listSendEmail.concat(createPedimenetByList(listSelected, dataTransaction, idRecord, isReceipt, flagTransfer && isReceipt ? fromLocation : null));
                     }
@@ -366,7 +381,7 @@ define([
                     if (ITEM_DESCRIPTION != '' && ITEM_DESCRIPTION != null) {
                         pedimentoItem.itemDescription = ITEM_DESCRIPTION;
                     }
-                    if (!LOCATION_ID) LOCATION_ID = locationDefault;
+                    if (!LOCATION_ID && type != "InvTrnfr") LOCATION_ID = locationDefault;
                     pedimentoItem.location = LOCATION_ID;
                     pedimentoItem.date = result_items_ped[i].getValue(colFields[0]);
 
@@ -379,12 +394,22 @@ define([
                     } else {
                         pedimentoItem.quantity = result_items_ped[i].getValue(colFields[4]);
                     }
-                    listItems.push(pedimentoItem);
+
+                    if (type == "InvTrnfr") {
+                        if (pedimentoItem.location == locationDefault) {
+                            listItems.push(pedimentoItem);
+                        }
+                    }else{
+                        listItems.push(pedimentoItem);
+                    }
+                    
                 }
             }
 
             //busqueda pedimentos de tipo kit package
             let recordShipment;
+            log.error("type",type)
+            if (type == "InvTrnfr") return listItems;
             if (type == "CustCred") {
                 recordShipment = record.load({
                     type: "creditmemo",
@@ -1029,10 +1054,10 @@ define([
             }).asMappedResults();
             return nroPedimentoandAduana;
         }
-        function createPedimenetByList(listSelected, dataTransaction, idRecord, isReceipt, transferlocation,isAdjustment) {
+        function createPedimenetByList(listSelected, dataTransaction, idRecord, isReceipt, transferlocation,isAdjustment,isInventoryTranfer) {
 
             const listSendEmail = [];
-            
+            log.error("listSelected",listSelected)
             listSelected.forEach((pedimentSelect) => {
                 const { pediment: jsonPediment, nroItems: quantity, itemLine: itemLineInfo} = pedimentSelect;
                 let inventoryStatus = true;
@@ -1057,11 +1082,14 @@ define([
     
                     ped_details.setValue({ fieldId: 'custrecord_lmry_mx_ped_item', value: itemLineInfo.itemid });
     
-                    let fecha2 = format.parse({ value: itemLineInfo.date, type: format.Type.DATE });
-    
-                    if (isReceipt) {
-                        fecha2 = format.parse({ value: itemLineInfo.datePediment, type: format.Type.DATE });
+                    let fechaString = itemLineInfo.date; // valor por defecto
+
+                    if (isReceipt || isInventoryTranfer) {
+                        fechaString = itemLineInfo.datePediment;
                     }
+
+                    let fecha2 = format.parse({ value: fechaString, type: format.Type.DATE });
+
                     ped_details.setValue({ fieldId: 'custrecord_lmry_mx_ped_date', value: fecha2 });
     
                     ped_details.setValue({ fieldId: 'custrecord_lmry_mx_ped_num', value: jsonPediment.values["GROUP(custrecord_lmry_mx_ped_num)"] });
