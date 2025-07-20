@@ -1,0 +1,26 @@
+{
+   type: "error.SuiteScriptError",
+   name: "INVALID_TRANS_TYP",
+   message: "Transaction type specified is incorrect.",
+   id: "",
+   stack: [
+      "Error\n    at suitescript/resources/javascript/record/recordImpl.js:96:12\n    
+      at Function.loadRecord_raw (suitescript/resources/javascript/record/recordImpl.js:94:24)\n    
+      at suitescript/resources/javascript/record/recordImpl.js:82:27\n    
+      at Object.loadRecord (suitescript/resources/javascript/record/recordImpl.js:80:24)\n    
+      at getItems (/SuiteBundles/Bundle 35754/LMRY_MX_Pedimentos_resltet.js:395:41)\n    
+      at Object.get (/SuiteBundles/Bundle 35754/LMRY_MX_Pedimentos_resltet.js:119:35)"
+   ],
+   cause: {
+      type: "internal error",
+      code: "INVALID_TRANS_TYP",
+      details: "Transaction type specified is incorrect.",
+      userEvent: null,
+      stackTrace: [
+         "Error\n    at suitescript/resources/javascript/record/recordImpl.js:96:12\n    at Function.loadRecord_raw (suitescript/resources/javascript/record/recordImpl.js:94:24)\n    at suitescript/resources/javascript/record/recordImpl.js:82:27\n    at Object.loadRecord (suitescript/resources/javascript/record/recordImpl.js:80:24)\n    at getItems (/SuiteBundles/Bundle 35754/LMRY_MX_Pedimentos_resltet.js:395:41)\n    at Object.get (/SuiteBundles/Bundle 35754/LMRY_MX_Pedimentos_resltet.js:119:35)"
+      ],
+      notifyOff: false
+   },
+   notifyOff: false,
+   userFacing: true
+}

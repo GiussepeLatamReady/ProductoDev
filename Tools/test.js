@@ -1,209 +1,94 @@
-function cargarEntity(type, subsidiary, juridicPerson, nroID, isvalidCuit, isOpenTransactions) {
-    var filters = [
-        search.createFilter({
-            name: 'isinactive',
-            operator: search.Operator.IS,
-            values: 'F'
-        }), search.createFilter({
-            name: 'vatregnumber',
-            operator: search.Operator.ISNOTEMPTY
-        }),
-        search.createFilter({
-            name: 'custentity_lmry_digito_verificator',
-            operator: search.Operator.ISNOTEMPTY
-        })];
+const { parameters: p } = context.request;
+const idrpts = p.custpage_lmry_reporte;
 
-    var FEAT_SUBS = runtime.isFeatureInEffect({ feature: "SUBSIDIARIES" });
-    var FEAT_MULTISUBS = runtime.isFeatureInEffect({
-        feature: "multisubsidiarycustomer"
-    });
+const features = {
+    SUBSIDIARIES: RUNTIME.isFeatureInEffect({ feature: "SUBSIDIARIES" }),
+    MULTIBOOK: RUNTIME.isFeatureInEffect({ feature: "MULTIBOOK" })
+};
 
-    if (FEAT_SUBS == true || FEAT_SUBS == "T") {
-        if (type == "customer") {
-            if (FEAT_MULTISUBS == true || FEAT_MULTISUBS == "T") {
-                filters.push(search.createFilter({
-                    name: "internalid",
-                    join: "msesubsidiary",
-                    operator: search.Operator.ANYOF,
-                    values: subsidiary
-                }));
-            } else {
-                filters.push(search.createFilter({
-                    name: "subsidiary",
-                    operator: search.Operator.ANYOF,
-                    values: subsidiary
-                }))
+const reportInfo = SEARCH.lookupFields({
+    type: 'customrecord_lmry_co_features',
+    id: idrpts,
+    columns: ['custrecord_lmry_co_id_schedule', 'custrecord_lmry_co_id_deploy', 'name']
+});
 
-            }
-
-        } else if (type == "vendor") {
-            filters.push(search.createFilter({
-                name: "internalid",
-                join: "msesubsidiary",
-                operator: search.Operator.ANYOF,
-                values: subsidiary
-            }));
-        }
-
-
-    }
-
-    filters.push(search.createFilter({
-        name: "custentity_lmry_ar_no_create_cc",
-        operator: search.Operator.IS,
-        values: false
-    }));
-
-    if (Number(juridicPerson)) {
-        filters.push(search.createFilter({
-            name: 'custentity_lmry_ar_cuitc_tsuj',
-            operator: search.Operator.IS,
-            values: juridicPerson
-        }));
-    }
-    if (Number(nroID)) {
-        filters.push(
-            search.createFilter({
-                name: 'internalid',
-                operator: 'is',
-                values: nroID
-            })
-        );
-    }
-    if (isvalidCuit === 'T') {
-        filters.push(
-            search.createFilter({
-                name: 'custentity_lmry_arba_cuit_invalid',
-                operator: 'is',
-                values: false
-            })
-        );
-    }
-    if (isOpenTransactions === 'T') {
-        filters.push(
-            search.createFilter({
-                name: 'status',
-                join: 'transaction',
-                operator: 'anyof',
-                values: ['VendBill:A', 'CustCred:A', 'CustInvc:A']
-            })
-        );
-    }
-    if (type === 'vendor') {
-        filters.push(
-            search.createFilter({
-                name: 'custentity_lmry_ar_cuitc',
-                operator: 'is',
-                values: '61'
-            })
-        );
-        filters.push(
-            search.createFilter({
-                name: 'custentity_lmry_ar_tiporespons',
-                operator: search.Operator.NONEOF,
-                values: '5'
-            })
-        );
-        filters.push(
-            search.createFilter({
-                name: 'custentity_lmry_ar_vendor_nivel',
-                operator: 'anyof',
-                values: ['@NONE@', '5']
-            })
-        );
-    }
-    if (type === 'customer') {
-        filters.push(
-            search.createFilter({
-                name: 'custentity_lmry_ar_tiporespons',
-                operator: search.Operator.NONEOF,
-                values: ['5', '7']
-            })
-        );
-        filters.push(
-            search.createFilter({
-                name: 'isdefaultbilling',
-                join: "address",
-                operator: search.Operator.IS,
-                values: 'T'
-            })
-        );
-    }
-
-    filters.push(
-        search.createFilter({
-            name: 'formulanumeric',
-            formula: 'LENGTH({vatregnumber})+LENGTH({custentity_lmry_digito_verificator})',
-            operator: search.Operator.EQUALTO,
-            values: 11
-        })
-    );
-    filters.push(
-        search.createFilter({
-            name: 'formulanumeric',
-            formula: `REGEXP_INSTR({vatregnumber} , '^([0-9]){9}\\d')`,
-            operator: search.Operator.EQUALTO,
-            values: 1
-        })
-    );
-    filters.push(
-        search.createFilter({
-            name: 'formulanumeric',
-            formula: `REGEXP_INSTR({custentity_lmry_digito_verificator} , '^([0-9]){0}\\d')`,
-            operator: search.Operator.EQUALTO,
-            values: 1
-        })
-    );
-    const columns = [
-        search.createColumn({
-            name: 'internalid',
-            sort: search.Sort.ASC
-        }),
-        'vatregnumber',
-        'custentity_lmry_digito_verificator',
-        'custentity_lmry_ar_tiporespons'
-    ];
-    if (type === 'customer') {
-        columns.push('address.state', 'address.city', 'address.isdefaultbilling', 'address.custrecord_lmry_addr_city');
-    }
-    let VendSearch = search.create({
-        type: type,
-        columns: columns,
-        filters: filters
-    });
-    const pagedData = VendSearch.runPaged({ pageSize: 1000 });
-    const entitys = [];
-
-    // iterate the pages
-    pagedData.pageRanges.forEach((pageRange, i) => {
-        const currentPage = pagedData.fetch(i);
-        currentPage.data.forEach(function (result) {
-            const entityParse = {
-                internalid: result.getValue('internalid'),
-                vatregnumber: result.getValue('vatregnumber'),
-                custentity_lmry_digito_verificator: result.getValue('custentity_lmry_digito_verificator'),
-                typeEntity: type,
-                responsibleType: result.getValue('custentity_lmry_ar_tiporespons')
-            };
-            if (type === 'customer') {
-                if ((result.getText('address.custrecord_lmry_addr_city') || '').trim().length > 0) {
-                    entityParse.stateBuenosAires = result.getText('address.custrecord_lmry_addr_city').toUpperCase().indexOf('CIUDAD AUTONOMA BUENOS AIRES') !== -1;
-                } else {
-                    const useBuenosAires =
-                        (result.getText({ name: 'state', join: "address" }) || '').toUpperCase().indexOf('CIUDAD AUTONOMA BUENOS AIRES') !== -1 ||
-                        (result.getValue({ name: 'city', join: "address" }) || '').toUpperCase().indexOf('CIUDAD AUTONOMA BUENOS AIRES') !== -1
-                    entityParse.stateBuenosAires = useBuenosAires;
-                }
-
-                // entityParse.billcity = ;
-                // entityParse.isdefaultbilling = result.getValue('isdefaultbilling');
-                // entityParse.state = (result.getValue('state') || '').toUpperCase();
-            }
-            entitys.push(entityParse);
-        });
-    });
-
-    return entitys;
+let periodName = '';
+if (idrpts == 56) {
+    periodName = SEARCH.lookupFields({
+        type: 'accountingperiod',
+        id: p.custpage_lmry_cr_anio,
+        columns: ['periodname']
+    }).periodname.replace(/\D/g, '');
+}
+if (idrpts == 59) {
+    const f = FORMAT.parse({ value: p.custpage_lmry_cr_fechaini, type: FORMAT.Type.DATE });
+    const mm = `${f.getMonth() + 1}`.padStart(2, '0');
+    periodName = `${TraePeriodo(mm)} ${f.getFullYear()}`;
 }
 
-cargarEntity("vendor","7",1,3747,"F","F")
+const subsidiaryName = features.SUBSIDIARIES
+    ? SEARCH.lookupFields({ type: 'subsidiary', id: p.custpage_subsidiary, columns: ['legalname'] }).legalname
+    : CONFIG.load({ type: CONFIG.Type.COMPANY_INFORMATION }).getValue('legalname');
+
+const multiBookName = features.MULTIBOOK
+    ? SEARCH.lookupFields({ type: 'accountingbook', id: p.custpage_multibook, columns: ['name'] }).name
+    : '';
+
+const { firstname, lastname } = SEARCH.lookupFields({
+    type: 'employee',
+    id: RUNTIME.getCurrentUser().id,
+    columns: ['firstname', 'lastname']
+});
+
+const logRecord = RECORD.create({ type: 'customrecord_lmry_co_rpt_generator_log' });
+logRecord.setValue('custrecord_lmry_co_rg_name', GLOBAL_LABELS['pending'][language]);
+logRecord.setValue('custrecord_lmry_co_rg_transaction', reportInfo.name);
+logRecord.setValue('custrecord_lmry_co_rg_postingperiod', periodName);
+logRecord.setValue('custrecord_lmry_co_rpt_type', 'C');
+logRecord.setValue('custrecord_lmry_co_rg_subsidiary', subsidiaryName);
+logRecord.setValue('custrecord_lmry_co_rg_multibook', multiBookName);
+logRecord.setValue('custrecord_lmry_co_rg_employee', `${firstname} ${lastname}`);
+logRecord.setValue('custrecord_lmry_co_rg_url_file', '');
+
+const rec_id = logRecord.save();
+const params = {};
+
+const add = (k, v, c = true) => { if (v && c) params[k] = v };
+
+if (idrpts == 56) {
+    add('custscript_lmry_co_subsi_withbk_ret_acum', p.custpage_subsidiary, features.SUBSIDIARIES);
+    add('custscript_lmry_co_multibook_wtbk_ret_ac', p.custpage_multibook, features.MULTIBOOK);
+    add('custscript_lmry_co_par_anio_wtbk_ret_ac', p.custpage_lmry_cr_anio);
+    add('custscript_lmry_co_vendor_withbk_ret_ac', p.custpage_proovedor_list);
+    add('custscript_lmry_co_type_withbk_ret_acum', p.custpage_tipo_retencion);
+    add('custscript_lmry_co_idrpt_wtbk_ret_acumul', rec_id);
+    add('custscript_lmry_co_group_month', p.custpage_grouping_by_months);
+    add('custscript_lmry_co_city_origin', p.custpage_lmry_city_origin);
+}
+
+if (idrpts == 59) {
+    add('custscript_lmry_co_subsi_withbook_v2', p.custpage_subsidiary, features.SUBSIDIARIES);
+    add('custscript_lmry_co_multibook_withbook_v2', p.custpage_multibook, features.MULTIBOOK);
+    add('custscript_lmry_co_periodini_withbook_v2', p.custpage_lmry_cr_fechaini);
+    add('custscript_lmry_co_periodfin_withbook_v2', p.custpage_lmry_cr_fechafin);
+    add('custscript_lmry_co_vendor_withbook_v2', p.custpage_proovedor_list);
+    add('custscript_lmry_co_type_withbook_v2', p.custpage_tipo_retencion);
+    add('custscript_lmry_co_idrpt_withbook_v2', rec_id);
+    add('custscript_lmry_co_city_origin_v2', p.custpage_lmry_city_origin);
+}
+
+try {
+    TASK.create({
+        taskType: idrpts == 59 ? TASK.TaskType.MAP_REDUCE : TASK.TaskType.SCHEDULED_SCRIPT,
+        scriptId: reportInfo.custrecord_lmry_co_id_schedule,
+        deploymentId: reportInfo.custrecord_lmry_co_id_deploy,
+        params
+    }).submit();
+
+    REDIRECT.toSuitelet({
+        scriptId: 'customscript_lmry_co_rpt_gen_wht_cert',
+        deploymentId: 'customdeploy_lmry_co_rpt_gen_wht_cert'
+    });
+} catch (e) {
+    LOG.error({ title: 'Error ejecutando tarea', details: e });
+}

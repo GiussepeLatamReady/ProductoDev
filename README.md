@@ -1,37 +1,34 @@
-# [D1999 - CASO PASE A URIARTE]()
+# [D1915 - Enhancement  CO - Certificado Envío masivo](https://docs.google.com/document/d/1U-xs36pa56XOKODykvpAWeM_ql_LhusSL1Wu6pKa6CE/edit?tab=t.0s)
 
 ## Description of the Requirement
+
+Covertir el proceso de singlevendor a multivendor
+
 
 
 ## Description of the solution
 
+## search
 
+    LatamReady - MX Pedimentos Lines
+    Se agrega el tipo de transaccion Credit Memo
+     
 ## Scripts
 + Create
- 
+
 + Update
-    LMRY_AutoPercepcionDesc_LBRY_V2.0.js
-    LS_Set_Discounts_URET.js
-    LMRY_Invoicing_Populate_MPRD.js
-    LMRY_CreditMemoURET_V2.0.js
-    LMRY_InvoiceURET_V2.0.js
-    LMRY_RecordSalesURET_V2.0.js
+
+
 + Delete
 
 
 ## Records Configuration
 + Create
 
-
 + Update
     
 ## Fields
 + Create
-    +   Latam - AR No Contributory Class
-        id: custentity_lmry_ar_no_create_cc
-        type: checkbox
-        Applies to: Customer
-                    Vendor
 + Update 
 + Delete
 
@@ -45,28 +42,22 @@
 
 ## Observations
  
-## Configuration
-
++ campo vendor
 
 ## SmartReady
 
 + Descripcion:
 
-    + 
 
 
-+ Documento funcional ( )
++ Documento funcional ( CO - Calculo de impuestos | Reclasificacion de VAT D1639)
 
-    + []()
+
 
 + Documento Tecnico:
 
-    + [Documento Técnico - PE Rentas No Domiciliadas incluir Bill Credit](https://docs.google.com/document/d/1fJ8PHYwBPUpw6ort3cpPIGCNqw3zx-8XaS5HuZeZfhU/edit?tab=t.0)
 
 + Bundle:
-
-    + 37714 Manager
-
 
 
 
