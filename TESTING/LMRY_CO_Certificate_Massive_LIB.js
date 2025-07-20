@@ -1,0 +1,540 @@
+/**
+ * @NApiVersion 2.0
+ * @NModuleScope Public
+ * @Name LMRY_CO_Certificate_Massive_LIB.js
+ * @Author LatamReady - Giussepe Delgado
+ * @Date 20/07/2025
+ */
+
+define(['N/search', 'N/runtime', 'N/currentRecord', 'N/record'],
+
+    function (search, runtime, currentRecord, record) {
+        var translations = getTranslations();
+
+        function createButtonVendor() {
+            console.log("set buttom")
+            var input = document.getElementById('custpage_proovedor_list');
+            console.log("input: ", input)
+            if (!input) {
+                console.log('Input "custpage_proovedor_list" no encontrado.');
+                return;
+            }
+
+            // Buscar el span padre manualmente (sin closest)
+            var parentSpan = input;
+            while (parentSpan && !/uir-field-input/.test(parentSpan.className)) {
+                parentSpan = parentSpan.parentNode;
+            }
+            console.log("parentSpan: ", parentSpan)
+            if (!parentSpan) {
+                console.log('No se encontró el contenedor .uir-field-input');
+                return;
+            }
+
+            var wrapper = document.createElement('div');
+            wrapper.style.display = 'flex';
+            wrapper.style.alignItems = 'center';
+            wrapper.style.gap = '8px';
+
+            var parent = parentSpan.parentNode;
+            parent.replaceChild(wrapper, parentSpan);
+            wrapper.appendChild(parentSpan);
+            console.log("adicion: ", parent)
+            // Crear botón
+            var button = document.createElement('button');
+            button.type = 'button';
+            button.textContent = translations.SELECT_VENDOR;
+
+            // Estilos
+            button.style.padding = '6px 12px';
+            button.style.fontSize = '13px';
+            button.style.backgroundColor = '#0073aa';
+            button.style.color = '#fff';
+            button.style.border = 'none';
+            button.style.borderRadius = '4px';
+            button.style.cursor = 'pointer';
+            button.style.transition = 'background 0.2s ease';
+
+            // Hover effects
+            button.onmouseenter = function () {
+                button.style.backgroundColor = '#005f8d';
+            };
+            button.onmouseleave = function () {
+                button.style.backgroundColor = '#0073aa';
+            };
+
+            // Acción del botón
+            button.onclick = function () {
+                executeModal();
+            };
+
+            wrapper.appendChild(button);
+
+        }
+
+        function getTranslations() {
+            var language = runtime.getCurrentScript().getParameter({ name: "LANGUAGE" }).substring(0, 2);
+            language = language === "es" || language === "pt" ? language : "en";
+            var translatedFields = {
+                "en": {
+                    "SELECT_VENDOR": "Select",
+                },
+                "es": {
+                    "SELECT_VENDOR": "Seleccionar",
+                },
+                "pt": {
+                    "SELECT_VENDOR": "Selecionar",
+                }
+            }
+            return translatedFields[language];
+        }
+
+        function executeModal() {
+            const colorTheme = getColor();
+            // Modal de bloqueo (fondo oscuro)
+            var overlay = document.createElement('div');
+            overlay.id = 'modal-overlay';
+            overlay.style.position = 'fixed';
+            overlay.style.top = '0';
+            overlay.style.left = '0';
+            overlay.style.width = '100%';
+            overlay.style.height = '100%';
+            overlay.style.background = 'rgba(0, 0, 0, 0.6)';
+            overlay.style.zIndex = '9999';
+            overlay.style.transition = 'opacity 0.3s ease-in-out';
+            document.body.appendChild(overlay);
+
+            // Contenedor - Ventana Modal
+            var container = document.createElement('div');
+            container.id = 'modal-container';
+            container.style.position = 'fixed';
+            container.style.top = '50%';
+            container.style.left = '50%';
+            container.style.transform = 'translate(-50%, -50%)';
+            container.style.height = 'auto';
+            container.style.maxHeight = '80vh';
+            container.style.background = 'white';
+            container.style.padding = '20px';
+            container.style.borderRadius = '12px';
+            container.style.border = '1px solid #ddd';
+            container.style.boxShadow = '0px 4px 15px rgba(0, 0, 0, 0.3)';
+            container.style.overflowY = 'auto';
+            container.style.zIndex = '10000';
+            container.style.transition = 'all 0.3s ease-in-out';
+
+            // Función para ajustar el ancho dinámicamente
+            function adjustModalWidth() {
+                var viewportWidth = window.innerWidth;
+                if (viewportWidth > 1200) {
+                    container.style.width = '70%';
+                } else if (viewportWidth > 768) {
+                    container.style.width = '80%';
+                } else {
+                    container.style.width = '95%';
+                }
+            };
+
+            adjustModalWidth();
+            window.addEventListener('DOMContentLoaded', adjustModalWidth);
+            window.addEventListener('resize', adjustModalWidth);
+
+            // Animación de apertura
+            container.style.opacity = '0';
+            setTimeout(function () { container.style.opacity = '1'; }, 100);
+
+            // Cabecera - Ventana Modal
+            var header = document.createElement('div');
+            header.id = 'subsidiary-modal';
+            header.className = 'latam-tab';
+            header.style.width = '100%';
+            header.style.height = '40px';
+            header.style.background = colorTheme;
+            header.style.padding = '15px 20px';
+            header.style.borderTopLeftRadius = '12px';
+            header.style.borderTopRightRadius = '12px';
+            header.style.display = 'flex';
+            header.style.alignItems = 'center';
+            header.style.justifyContent = 'space-between';
+            header.style.position = 'relative';
+            header.style.boxShadow = '0px 2px 10px rgba(0,0,0,0.1)';
+
+            // Título - Cabecera
+            var titleHeader = document.createElement('h2');
+            titleHeader.id = 'title-header';
+            titleHeader.innerText = "Vendors"; //transalations_need
+            titleHeader.style.color = 'white';
+            titleHeader.style.cursor = 'default';
+            titleHeader.style.fontSize = '17px';
+            titleHeader.style.fontWeight = 'bold';
+            titleHeader.style.fontFamily = 'Arial, sans-serif';
+
+            // Botón de Cierre de Ventana
+            var closeButton = document.createElement('button');
+            closeButton.id = 'close-button';
+            closeButton.textContent = '✖';
+            closeButton.style.border = 'none';
+            closeButton.style.color = 'white';
+            closeButton.style.cursor = 'pointer';
+            closeButton.style.fontSize = '16px';
+            closeButton.style.width = '25px';
+            closeButton.style.height = '25px';
+            closeButton.style.borderRadius = '50%';
+            closeButton.style.background = 'rgba(255, 255, 255, 0.3)';
+            closeButton.style.display = 'flex';
+            closeButton.style.alignItems = 'center';
+            closeButton.style.justifyContent = 'center';
+            closeButton.style.transition = 'background 0.3s ease-in-out';
+
+            // Efecto hover en botón de cierre
+            closeButton.addEventListener('mouseenter', function () {
+                closeButton.style.background = 'rgba(255, 255, 255, 0.6)';
+            });
+            closeButton.addEventListener('mouseleave', function () {
+                closeButton.style.background = 'rgba(255, 255, 255, 0.3)';
+            });
+
+            // Acción de cierre
+            closeButton.addEventListener('click', function () {
+                container.style.opacity = '0';
+                overlay.style.opacity = '0';
+                setTimeout(function () {
+                    //currentRecord.setCurrentSublistValue({ sublistId: type, fieldId: fieldCheckId, value: false })
+                    document.body.removeChild(container);
+                    document.body.removeChild(overlay);
+                }, 300);
+            });
+
+            header.appendChild(titleHeader);
+            header.appendChild(closeButton);
+
+            container.appendChild(header);
+            document.body.appendChild(container);
+
+            // Contenedor principal
+            var contentContainer = document.createElement('div');
+            contentContainer.style.display = 'flex';
+            contentContainer.style.flexDirection = 'column';
+            contentContainer.style.gap = '20px';
+            contentContainer.style.padding = '10px 20px';
+            contentContainer.style.fontFamily = 'Arial, sans-serif';
+
+            // Altura fija + scroll interno
+            //contentContainer.style.height = '500px'; // o usa '60vh' si prefieres altura relativa a la pantalla
+            //contentContainer.style.overflowY = 'auto';
+
+
+            // Contenedor principal
+            var contentEntitySearch = document.createElement('div');
+            contentEntitySearch.style.display = 'flex';
+            contentEntitySearch.style.flexDirection = 'column';
+            contentEntitySearch.style.gap = '20px';
+            contentEntitySearch.style.fontFamily = 'Arial, sans-serif';
+
+            // Altura fija + scroll interno
+            contentEntitySearch.style.height = '400px'; // o usa '60vh' si prefieres altura relativa a la pantalla
+            contentEntitySearch.style.overflowY = 'auto';
+
+            // Campo de búsqueda
+            var entitySearch = document.createElement('input');
+            entitySearch.type = 'text';
+            entitySearch.placeholder = 'Buscar entidades...';
+            entitySearch.style.padding = '10px 10px';
+            entitySearch.style.margin = '10px 0px 0px 0px';
+            entitySearch.style.width = '100%';
+            entitySearch.style.fontSize = '13px';
+            entitySearch.style.border = '1px solid #ccc';
+            entitySearch.style.borderRadius = '6px';
+            entitySearch.style.marginBottom = '10px';
+
+            // Tabla principal
+            var entityTable = document.createElement('table');
+            entityTable.style.width = '100%';
+            entityTable.style.borderCollapse = 'collapse';
+            entityTable.style.fontSize = '13px';
+
+            var thead = document.createElement('thead');
+            thead.innerHTML = '' +
+                '<tr>' +
+                '<th style="padding: 6px; border: 1px solid #ccc;">Apply</th>' +
+                '<th style="padding: 6px; border: 1px solid #ccc;">Internal ID</th>' +
+                '<th style="padding: 6px; border: 1px solid #ccc;">Name</th>' +
+                '</tr>';
+                
+
+            //thead.style.display = 'table';
+            thead.style.width = '100%';
+            thead.style.tableLayout = 'fixed';
+            thead.style.position = 'sticky';
+            thead.style.top = '0';
+            thead.style.background = '#f9f9f9';
+            thead.style.zIndex = '1';
+            thead.style.borderBottom = '2px solid #ccc';
+            thead.style.boxShadow = '0 2px 5px rgba(0, 0, 0, 0.1)';
+
+            entityTable.appendChild(thead);
+
+            var tbody = document.createElement('tbody');
+            tbody.id = 'entity-table-body';
+             // Altura fija + scroll interno
+            //tbody.style.height = '400px'; // o usa '60vh' si prefieres altura relativa a la pantalla
+            //tbody.style.overflowY = 'auto';
+            entityTable.appendChild(tbody);
+
+            // Botones de seleccionar/deseleccionar
+            var btnGroup = document.createElement('div');
+            btnGroup.style.display = 'flex';
+            btnGroup.style.gap = '10px';
+            btnGroup.style.marginTop = '10px';
+
+            var btnSelectAll = document.createElement('button');
+            btnSelectAll.textContent = 'Seleccionar todo';
+            btnSelectAll.style.padding = '5px 12px';
+            btnSelectAll.style.background = '#0073aa';
+            btnSelectAll.style.color = 'white';
+            btnSelectAll.style.border = 'none';
+            btnSelectAll.style.borderRadius = '4px';
+            btnSelectAll.style.cursor = 'pointer';
+            btnSelectAll.onclick = function () {
+                var boxes = document.querySelectorAll('.entity-checkbox');
+                for (var i = 0; i < boxes.length; i++) {
+                    boxes[i].checked = true;
+                }
+            };
+
+            var btnDeselectAll = document.createElement('button');
+            btnDeselectAll.textContent = 'Deseleccionar todo';
+            btnDeselectAll.style.padding = '5px 12px';
+            btnDeselectAll.style.background = '#0073aa';
+            btnDeselectAll.style.color = 'white';
+            btnDeselectAll.style.border = 'none';
+            btnDeselectAll.style.borderRadius = '4px';
+            btnDeselectAll.style.cursor = 'pointer';
+            btnDeselectAll.onclick = function () {
+                var boxes = document.querySelectorAll('.entity-checkbox');
+                for (var i = 0; i < boxes.length; i++) {
+                    boxes[i].checked = false;
+                }
+            };
+
+            btnGroup.appendChild(btnSelectAll);
+            btnGroup.appendChild(btnDeselectAll);
+
+            // Lista de entidades (ejemplo)
+            var entityList = [
+                { id: 101, name: 'Entidad Alpha' },
+                { id: 102, name: 'Entidad Beta' },
+                { id: 103, name: 'Entidad Gamma' },
+                { id: 104, name: 'Entidad Delta' },
+                { id: 105, name: 'Entidad Omega' },
+                { id: 106, name: 'Entidad Sigma' },
+                { id: 107, name: 'Entidad Zeta' },
+                { id: 108, name: 'Entidad Lambda' },
+                { id: 109, name: 'Entidad Epsilon' },
+                { id: 110, name: 'Entidad Theta' },
+                { id: 111, name: 'Entidad Iota' },
+                { id: 112, name: 'Entidad Kappa' },
+                { id: 113, name: 'Entidad Mu' },
+                { id: 114, name: 'Entidad Nu' },
+                { id: 115, name: 'Entidad Xi' },
+                { id: 116, name: 'Entidad Omicron' },
+                { id: 117, name: 'Entidad Pi' },
+                { id: 118, name: 'Entidad Rho' },
+                { id: 119, name: 'Entidad Tau' },
+                { id: 120, name: 'Entidad Upsilon' },
+                { id: 121, name: 'Entidad Phi' },
+                { id: 122, name: 'Entidad Chi' },
+                { id: 123, name: 'Entidad Psi' },
+                { id: 124, name: 'Entidad Omega 2' },
+                { id: 125, name: 'Entidad Ares' },
+                { id: 126, name: 'Entidad Apolo' },
+                { id: 127, name: 'Entidad Hermes' },
+                { id: 128, name: 'Entidad Hefesto' },
+                { id: 129, name: 'Entidad Afrodita' },
+                { id: 130, name: 'Entidad Demeter' },
+                { id: 131, name: 'Entidad Hestia' },
+                { id: 132, name: 'Entidad Cronos' },
+                { id: 133, name: 'Entidad Gaia' },
+                { id: 134, name: 'Entidad Urano' },
+                { id: 135, name: 'Entidad Nyx' },
+                { id: 136, name: 'Entidad Eros' },
+                { id: 137, name: 'Entidad Helios' },
+                { id: 138, name: 'Entidad Selene' },
+                { id: 139, name: 'Entidad Tanatos' },
+                { id: 140, name: 'Entidad Morfeo' },
+                { id: 141, name: 'Entidad Morf' },
+                { id: 141, name: 'Entidad Morf2' },
+                { id: 141, name: 'Entidad Morf3' },
+                { id: 141, name: 'Entidad Morf5' },
+
+            ];
+
+
+            // Render de entidades
+            function renderEntities(filter) {
+                tbody.innerHTML = '';
+                for (var i = 0; i < entityList.length; i++) {
+                    var ent = entityList[i];
+                    if (!filter || ent.name.toLowerCase().indexOf(filter.toLowerCase()) !== -1) {
+                        var row = document.createElement('tr');
+                        row.innerHTML =
+                            '<td style="padding: 6px; border: 1px solid #ccc;"><input type="checkbox" class="entity-checkbox" /></td>' +
+                            '<td style="padding: 6px; border: 1px solid #ccc;">' + ent.id + '</td>' +
+                            '<td style="padding: 6px; border: 1px solid #ccc;">' + ent.name + '</td>';
+                        tbody.appendChild(row);
+                    }
+                }
+            }
+
+            // Filtro dinámico por input
+            entitySearch.addEventListener('input', function () {
+                var val = this.value.trim();
+                if (val.length >= 3 || val.length === 0) {
+                    renderEntities(val);
+                }
+            });
+
+            // Checkbox maestro
+            /*
+            thead.querySelector('#masterCheckbox').addEventListener('change', function () {
+                var checked = this.checked;
+                var boxes = document.querySelectorAll('.entity-checkbox');
+                for (var i = 0; i < boxes.length; i++) {
+                    boxes[i].checked = checked;
+                }
+            });
+            */
+            // Agregar al contenedor del modal (dentro de contentContainer)
+            contentContainer.appendChild(entitySearch);
+            contentContainer.appendChild(btnGroup);
+            contentEntitySearch.appendChild(entityTable);
+            contentContainer.appendChild(contentEntitySearch);
+            
+            container.appendChild(contentContainer);
+            // Inicializar con todos
+
+
+
+            //Agregar botones
+            var buttonContainer = document.createElement('div');
+            buttonContainer.style.display = 'flex';
+            buttonContainer.style.justifyContent = 'flex-end';
+            buttonContainer.style.gap = '15px';
+            buttonContainer.style.padding = '10px 20px';
+            buttonContainer.style.marginTop = '5px';
+
+            // Estilos base para los botones
+            function createButton(text, bgColor, textColor, hoverBg, hoverText, action){
+                var button = document.createElement('button');
+                button.innerText = text;
+                button.style.padding = '6px 20px';
+                button.style.border = 'none';
+                button.style.borderRadius = '6px';
+                button.style.cursor = 'pointer';
+                button.style.fontSize = '14px';
+                button.style.fontWeight = 'bold';
+                button.style.transition = 'all 0.3s ease-in-out';
+                button.style.backgroundColor = bgColor;
+                button.style.color = textColor;
+                button.style.boxShadow = '0px 4px 6px rgba(0, 0, 0, 0.1)';
+
+                // Efecto hover
+                button.addEventListener('mouseenter', function(){
+                    button.style.backgroundColor = hoverBg;
+                    button.style.color = hoverText;
+                });
+                button.addEventListener('mouseleave', function(){
+                    button.style.backgroundColor = bgColor;
+                    button.style.color = textColor;
+                });
+
+                // Acción al hacer clic
+                button.addEventListener('click', action);
+
+                return button;
+            };
+
+            // Botón de Guardar
+            var saveButton = createButton(
+                "Save",//translation.LMRY_SAVE,
+                '#006AFF',      // Verde éxito 
+                '#FFFFFF',      // Texto blanco 
+                '#0055CC',      // Verde más oscuro en hover
+                '#FFFFFF',
+                function(){
+                    var allValid = true; // Variable para verificar si todos son válidos
+
+
+
+                    // Si todos los valores son válidos, proceder con el guardado
+                    if (allValid) {
+                        document.body.removeChild(container);
+                        document.body.removeChild(overlay);
+
+                        //currentRecord.setCurrentSublistValue({ sublistId: type, fieldId: fieldCheckId, value: false })
+                        //checkvariableRate.classList.replace('checkbox_ck', 'checkbox_unck');
+                    } else {
+                        alert('⚠️ Error: validacion');
+                    }
+                }
+            );
+
+            // Botón de Cancelar
+            var cancelButton = createButton(
+                "Cancel",//translation.LMRY_CANCEL,
+                '#D2D2D2',      // Rojo alerta 
+                '#030000',      // Texto blanco
+                '#B3B3B3',      // Rojo más oscuro en hover
+                '#030000',
+                function(){
+                    document.body.removeChild(container);
+                    document.body.removeChild(overlay);
+                }
+            );
+
+            // Agregar botones al contenedor
+            buttonContainer.appendChild(cancelButton);
+            buttonContainer.appendChild(saveButton);
+
+            // Agregar el contenedor de botones al modal
+            container.appendChild(buttonContainer);
+            // Fin de agregar botones
+
+            document.body.appendChild(container);
+            renderEntities();
+
+        }
+
+        function getColor() {
+            var colorIds = ["-358", "-5", "-16", "-14", "-15", "-8", "10", "-9", "-7",
+                "-13", "-12", "-6", "-11", "-100", "-101", "-102", "-103", "-104", "-105", "-106", "-107", "-108",
+                "-109", "-110", "-111", "-112", "-113", "-114", "-115", "-116", "-117", "-118", "-119", "-120",
+                "-350", "-351", "-352", "-353", "-354", "-355", "-356", "-357",
+                "-361", "-362", "-359", "-360", "-363", "-364", "-365", "-121", "-122", "-123", "-124", "-125",
+                "-126", "-127", "-128", "-129", "-130", "-131", "-366", "-367",
+                "-368", "-369", "-370", "-371", "-372", "-373", "-132", "-133", "-134", "-136", "-137", "-138", "-139",
+                "-148", "-135", "-141", "-142", "-143", "-144", "-145",
+                "-146", "-147", "-148", "-149", "-150", "-151", "-152", "-153", "-154", "-155", "-156", "-157",
+                "-158", "-159", "-160", "-161", "-374", "-375", "-376", "-377",
+                "-378", "-380", "-379", "-481"
+            ];
+
+            var colorBackgrounds = ["#002157", "#607799", "#444444", "#674218", "#888888", "#6D8C1E", "#85C1CF", "#8CB49A", "#E5772A", "#DC64A2", "#6E609D", "#AD4B4B", "#287587", "#FF6600", "#0C2475",
+                "#660000", "#EAB200", "#CC0000", "#7595CC", "#D60039", "#000066", "#FFCC66", "#006600", "#BD9C00", "#CC0000", "#000066", "#663399", "#CC9900", "#B40000", "#830506",
+                "#FF6600", "#CC6600", "#660000", "#CC0000", "#075699", "#001E58", "#241D4E", "#222222", "#CC0000", "#023EAD", "#990000", "#FF571C", "#222222", "#CC0000", "#000066",
+                "#041C43", "#00543D", "#013875", "#000056", "#FF6600", "#8C2108", "#333333", "#000063", "#017400", "#752132", "#702C7E", "#CC0000", "#35457C", "#B69B29", "#990000",
+                "#990000", "#004576", "#222222", "#990000", "#000066", "#004A83", "#00287A", "#F76507", "#990000", "#004A85", "#CC0000", "#305930", "#990000", "#002649", "#FF9900",
+                "#1A2E57", "#002868", "#840029", "#211F5E", "#044520", "#FF6600", "#AD3118", "#003399", "#A20012", "#330066", "#990000", "#990032", "#990000", "#000067", "#0034AE",
+                "#DE0018", "#000066", "#2B0A4F", "#000066", "#880029", "#980033", "#EF9218", "#B5AD63", "#000066", "#8B0222", "#333399", "#000066", "#892020", "#3A027C", "#03492F", "#002654"
+            ]
+
+            var colorId = runtime.getCurrentUser().getPreference({
+                name: 'COLORTHEME'
+            });
+            var i = colorIds.indexOf(colorId);
+            if (i == -1) i = 0;
+            return colorBackgrounds[i];
+        }
+        return {
+            createButtonVendor: createButtonVendor
+        };
+    });

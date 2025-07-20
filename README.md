@@ -15,7 +15,8 @@ Covertir el proceso de singlevendor a multivendor
      
 ## Scripts
 + Create
-
+    LBRY  -
+    SCHDL  
 + Update
 
 
@@ -43,6 +44,13 @@ Covertir el proceso de singlevendor a multivendor
 ## Observations
  
 + campo vendor
+
+ + names file
+    Certificado de Retención
+    LMRY_CO_CertificadoRetencion_MPRD_V2.0.js
+
+    Certificado de Retención Acumulada
+    LMRY_CO_CertifiRetencionesAcumulado_SCHDL_v2.0.js
 
 ## SmartReady
 

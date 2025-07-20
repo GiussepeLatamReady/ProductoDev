@@ -18,7 +18,7 @@ var UI, SEARCH, RECORD, RUNTIME, REDIRECT, TASK, LOG, CONFIG, REQUIRE;
 var LMRY_script = "LMRY Report Generator - Withholding Certificate CO STLT";
 var namereport = "";
 var language;
-
+var GLOBAL_LABELS = {};
 function runSuitelet(ui, search, runtime, record, redirect, task, log, config, format, require) {
 
     UI = ui;
@@ -35,7 +35,7 @@ function runSuitelet(ui, search, runtime, record, redirect, task, log, config, f
     REQUIRE = require;
     LR_PermissionManager = null;
     LR_libfeature = null;
-    var GLOBAL_LABELS = {};
+    
     language = RUNTIME.getCurrentScript().getParameter({
         name: 'LANGUAGE'
     }).substring(0, 2);
@@ -322,16 +322,17 @@ function execute(context) {
 
                 var provedorList = form.addField({
                     id: 'custpage_proovedor_list',
-                    type: UI.FieldType.SELECT,
+                    type: UI.FieldType.TEXT,
                     label: GLOBAL_LABELS['listvendor'][language],
                     container: 'custpage_filran2'
                 });
-
+                provedorList.defaultValue = GLOBAL_LABELS["select_vendor"][language];
+                /*
                 provedorList.addSelectOption({
                     value: ' ',
                     text: ' '
                 });
-
+                */
                 //******************************************
                 //***  Origen de Municipalidad   ***//
                 //* POR SUBSIDIARIA
@@ -1020,6 +1021,11 @@ function getGlobalLabels() {
             'es': 'LatamReady - CO Generador de Reportes Certificados',
             'pt': 'LatamReady - CO Gerador de Relatório Certificados',
             'en': 'LatamReady - CO Certificates Report Generator'
+        },
+        "select_vendor": {
+            "es": "-- No se han seleccionado proveedores --",
+            "pt": "-- Nenhum fornecedor selecionado --",
+            "en": "-- No vendors selected --"
         }
     }
 

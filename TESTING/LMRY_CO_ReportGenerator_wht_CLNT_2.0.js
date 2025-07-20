@@ -11,9 +11,16 @@
  * @NScriptType ClientScript
  * @NModuleScope SameAccount
  */
-define(['N/runtime', 'N/currentRecord', 'N/search', "N/log", "N/url", 'N/https', 'N/format', "/SuiteBundles/Bundle 37714/Latam_Library/LMRY_LibraryReport_LBRY_V2.js", "N/record"],
+define([
+    'N/runtime', 'N/currentRecord', 'N/search', "N/log", "N/url", 'N/https', 'N/format', 
+    "/SuiteBundles/Bundle 37714/Latam_Library/LMRY_LibraryReport_LBRY_V2.js",
+    "./LMRY_CO_Certificate_Massive_LIB.js"],
 
-    function (runtime, currentRecord, search, log, url, https, format, libFeature, recordModulo) {
+    function (
+        runtime, currentRecord, search, log, url, https, format, 
+        libFeature,
+        Lib_certificate_massive
+    ) {
 
         var LMRY_script = "LatamReady - CO Report Generator CLNT";
         var objContext = runtime.getCurrentScript();
@@ -53,7 +60,7 @@ define(['N/runtime', 'N/currentRecord', 'N/search', "N/log", "N/url", 'N/https',
             }
 
             var field = scriptContext.currentRecord.getField({
-                fieldId: 'custpage_entity'
+                fieldId: 'custpage_proovedor_list'
             });
 
             if (field != null) {
@@ -70,6 +77,9 @@ define(['N/runtime', 'N/currentRecord', 'N/search', "N/log", "N/url", 'N/https',
             }
 
             arrProcessedYears = ObtenerAñosProcesados();
+
+            Lib_certificate_massive.createButtonVendor();
+            
         }
 
         function ObtenerAñosProcesados() {
@@ -587,6 +597,8 @@ define(['N/runtime', 'N/currentRecord', 'N/search', "N/log", "N/url", 'N/https',
 
                 console.log('LLEGO HASTA AQUI: ' + subsidiary);
 
+
+                /*
                 var vendorSearchObj = search.create({
                     type: "vendor",
                     filters:
@@ -652,10 +664,10 @@ define(['N/runtime', 'N/currentRecord', 'N/search', "N/log", "N/url", 'N/https',
                         DbolStop = true;
                     }
                 }
-
+                */
                 console.log('PASO EL CAMBIO : ' + subsidiary);
 
-
+                
                 /***************** De Edwin */
                 if (feamultibook == true || feamultibook == 'T') {
                     //MULTIBOOK DE ACUERDO A SUBSIDIARIA
@@ -806,7 +818,8 @@ define(['N/runtime', 'N/currentRecord', 'N/search', "N/log", "N/url", 'N/https',
                         fieldId: 'custpage_grouping_by_months'
                     }).isDisplay = true;
                 }
-
+                
+                
                 if (reporteSunat == 56 || reporteSunat == 59) {
                     scriptContext.currentRecord.getField({
                         fieldId: 'custpage_proovedor_list'
