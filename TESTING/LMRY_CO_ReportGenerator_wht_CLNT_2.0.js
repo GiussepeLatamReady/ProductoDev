@@ -40,7 +40,7 @@ define([
         var calendarSubsiName = '';
 
         var varFiscalCalendar = null;
-
+        var saveEntities = []
         function pageInit(scriptContext) {
 
             var varRecordRpt = scriptContext.currentRecord.getValue({
@@ -79,7 +79,8 @@ define([
             arrProcessedYears = ObtenerAñosProcesados();
 
             Lib_certificate_massive.createButtonVendor();
-            
+            if (scriptContext.currentRecord) Lib_certificate_massive.setCurrentRecord(scriptContext.currentRecord);
+
         }
 
         function ObtenerAñosProcesados() {
@@ -421,9 +422,13 @@ define([
                     alert('A file is generated and an email will be sent with the confirmation of the process.\n\nThis process can take several minutes.\n\nPlease update the log for download.');
                 }
 
+
+                Lib_certificate_massive.createRecordMassive();
+                
                 return true;
             } catch (err) {
                 alert(err);
+                console.log("err [saveRecord]: ",err)
                 //libreria.sendMail(LMRY_script , ' [ clientSaveRecord ] ' + err );
                 return false;
             }
@@ -458,12 +463,10 @@ define([
 
             if (name == 'custpage_subsidiary') {
 
-
                 var subsidiary_id = scriptContext.currentRecord.getValue({
                     fieldId: 'custpage_subsidiary'
                 });
-                console.log('llego y la subsidiaria es:' + subsidiary_id);
-                console.log('reporteSunat es: ' + reporteSunat);
+                if (subsidiary_id) Lib_certificate_massive.setSubsidiary(subsidiary_id);
 
                 if (reporteSunat == 60 || reporteSunat == 61) {
                     var licenses = new Array();

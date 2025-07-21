@@ -1,1 +1,25 @@
-https://tstdrv1774174.app.netsuite.com/app/site/hosting/scriptlet.nl?script=2464&deploy=1&compid=TSTDRV1774174&custparam_location=0&custparam_date=24%2F5%2F2025&custparam_country=Mexico&custparam_doctype=&custparam_date_2=24%2F5%2F2025&custparam_department=0&custparam_country_id=157&custparam_transaction=invoice%3BInvoice&custparam_automaticset=T&custparam_checkpaid=T&custparam_class=0&custparam_subsi=6&whence=
+{
+    "type": "error.SuiteScriptError",
+    "name": "USER_ERROR",
+    "message": "Please enter value(s) for: Name",
+    "id": null,
+    "stack": [
+        "USER_ERROR: Please enter value(s) for: Name",
+        "    at Object.createError [as nlapiCreateError] (https://tstdrv1774174.app.netsuite.com/javascript/suitescript/2.1/client/N.js?NS_VER=2025.1&minver=15&buildver=30178:828:16)",
+        "    at Object.createError [as create] (https://tstdrv1774174.app.netsuite.com/javascript/suitescript/2.1/client/N.js?NS_VER=2025.1&minver=15&buildver=30178:2144:42)",
+        "    at _assertValidation (https://tstdrv1774174.app.netsuite.com/javascript/suitescript/2.1/client/N.js?NS_VER=2025.1&minver=15&buildver=30178:65266:25)",
+        "    at https://tstdrv1774174.app.netsuite.com/javascript/suitescript/2.1/client/N.js?NS_VER=2025.1&minver=15&buildver=30178:65158:6",
+        "    at Result.then (https://tstdrv1774174.app.netsuite.com/javascript/suitescript/2.1/client/N.js?NS_VER=2025.1&minver=15&buildver=30178:2506:21)",
+        "    at thenableFunction(runAndAssertInternalScript).runAndAssertInternalScript (https://tstdrv1774174.app.netsuite.com/javascript/suitescript/2.1/client/N.js?NS_VER=2025.1&minver=15&buildver=30178:65156:8)",
+        "    at thenableFunction(runAndAssertInternalScript).thenable (https://tstdrv1774174.app.netsuite.com/javascript/suitescript/2.1/client/N.js?NS_VER=2025.1&minver=15&buildver=30178:3826:26)",
+        "    at thenableFunction(runMergeAndAssertInternalScript).runMergeAndAssertInternalScript (https://tstdrv1774174.app.netsuite.com/javascript/suitescript/2.1/client/N.js?NS_VER=2025.1&minver=15&buildver=30178:65143:39)",
+        "    at thenableFunction(runMergeAndAssertInternalScript).thenable (https://tstdrv1774174.app.netsuite.com/javascript/suitescript/2.1/client/N.js?NS_VER=2025.1&minver=15&buildver=30178:3826:26)",
+        "    at https://tstdrv1774174.app.netsuite.com/javascript/suitescript/2.1/client/N.js?NS_VER=2025.1&minver=15&buildver=30178:65458:46"
+    ],
+    "cause": {
+        "name": "USER_ERROR",
+        "message": "Please enter value(s) for: Name"
+    },
+    "notifyOff": false,
+    "userFacing": true
+}

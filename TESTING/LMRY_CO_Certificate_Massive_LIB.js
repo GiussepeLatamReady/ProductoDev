@@ -9,12 +9,85 @@
 define(['N/search', 'N/runtime', 'N/currentRecord', 'N/record'],
 
     function (search, runtime, currentRecord, record) {
-        var translations = getTranslations();
+        var translations = getTranslations()
+        var defaultEntities = [];
+        var allEntities = []
+        var saveEntities = [];
+        var subsidiary;
+        var currentRecord;
+        var selectedCount = 0;
+        var entities = {};
+        var page = 100;
+        function loadvendors() {
+
+            function generateStruct(ids) {
+                var result = [];
+                for (var i = 0; i < ids.length; i++) {
+                    result.push(["formulanumeric: {msesubsidiary.internalid}", "equalto", ids[i]]);
+                    if (i < ids.length - 1) {
+                        result.push("OR");
+                    }
+                }
+                return result;
+            }
+
+            function getSubsidiariries() {
+                var subsidiaries = [];
+
+                search.create({
+                    type: "subsidiary",
+                    filters: [
+                        ["country", "anyof", "CO"],
+                        "AND",
+                        ["isinactive", "is", "F"]
+                    ],
+                    columns: ["internalid"]
+                }).run().each(function (result) {
+                    subsidiaries.push(result.id);
+                    return true;
+                });
+
+                return subsidiaries;
+            }
+
+            var subsidiaries = getSubsidiariries();
+
+            var filters = [
+                ["isinactive", "is", "F"]
+            ];
+
+            filters.push("AND", generateStruct(subsidiaries))
+            var pageData = search.create({
+                type: "vendor",
+                filters: filters,
+                columns:
+                    [
+                        search.createColumn({ name: "internalid", label: "Internal ID" }),
+                        search.createColumn({ name: "subsidiary", label: "Subsidiary" }),
+                        search.createColumn({
+                            name: 'formulatext',
+                            formula: "CASE WHEN {isperson} = 'T' THEN CONCAT({firstname}, CONCAT(' ', CONCAT({middlename}, CONCAT(' ', {lastname})))) ELSE {companyname} END"
+                        })
+                    ]
+            }).runPaged({ pageSize: 1000 });
+            if (pageData) {
+                pageData.pageRanges.forEach(function (pageRange) {
+                    var page = pageData.fetch({ index: pageRange.index });
+                    page.data.forEach(function (result) {
+                        var subsidiaryId = result.getValue(result.columns[1]);
+                        var internalid = result.getValue(result.columns[0]);
+                        var nameEntity = result.getValue(result.columns[2]);
+                        if (!entities[subsidiaryId]) entities[subsidiaryId] = [];
+                        entities[subsidiaryId].push({ id: internalid, name: nameEntity, checked: false, status: "PENDING" })
+                    });
+                });
+            }
+        }
+
 
         function createButtonVendor() {
-            console.log("set buttom")
+
             var input = document.getElementById('custpage_proovedor_list');
-            console.log("input: ", input)
             if (!input) {
                 console.log('Input "custpage_proovedor_list" no encontrado.');
                 return;
@@ -25,7 +98,6 @@ define(['N/search', 'N/runtime', 'N/currentRecord', 'N/record'],
             while (parentSpan && !/uir-field-input/.test(parentSpan.className)) {
                 parentSpan = parentSpan.parentNode;
             }
-            console.log("parentSpan: ", parentSpan)
             if (!parentSpan) {
                 console.log('No se encontró el contenedor .uir-field-input');
                 return;
@@ -39,7 +111,6 @@ define(['N/search', 'N/runtime', 'N/currentRecord', 'N/record'],
             var parent = parentSpan.parentNode;
             parent.replaceChild(wrapper, parentSpan);
             wrapper.appendChild(parentSpan);
-            console.log("adicion: ", parent)
             // Crear botón
             var button = document.createElement('button');
             button.type = 'button';
@@ -63,9 +134,16 @@ define(['N/search', 'N/runtime', 'N/currentRecord', 'N/record'],
                 button.style.backgroundColor = '#0073aa';
             };
 
+            loadvendors();
             // Acción del botón
+
             button.onclick = function () {
-                executeModal();
+                if (subsidiary) {
+                    executeModal();
+                } else {
+                    alert("⚠️ Selecciona una subsidiaria")
+                }
+
             };
 
             wrapper.appendChild(button);
@@ -78,18 +156,30 @@ define(['N/search', 'N/runtime', 'N/currentRecord', 'N/record'],
             var translatedFields = {
                 "en": {
                     "SELECT_VENDOR": "Select",
+                    "PENDING": "Pending",
                 },
                 "es": {
                     "SELECT_VENDOR": "Seleccionar",
+                    "PENDING": "Pendiente",
                 },
                 "pt": {
                     "SELECT_VENDOR": "Selecionar",
+                    "PENDING": "Pendente",
                 }
             }
             return translatedFields[language];
         }
 
         function executeModal() {
+
+            defaultEntities = entities[subsidiary];
+            if (saveEntities.length) {
+                allEntities = JSON.parse(JSON.stringify(saveEntities));
+            } else {
+                allEntities = JSON.parse(JSON.stringify(defaultEntities));
+            }
+
+            var entityList = allEntities.slice(0, page);
             const colorTheme = getColor();
             // Modal de bloqueo (fondo oscuro)
             var overlay = document.createElement('div');
@@ -227,7 +317,7 @@ define(['N/search', 'N/runtime', 'N/currentRecord', 'N/record'],
             var contentEntitySearch = document.createElement('div');
             contentEntitySearch.style.display = 'flex';
             contentEntitySearch.style.flexDirection = 'column';
-            contentEntitySearch.style.gap = '20px';
+            contentEntitySearch.style.gap = '10px';
             contentEntitySearch.style.fontFamily = 'Arial, sans-serif';
 
             // Altura fija + scroll interno
@@ -259,7 +349,7 @@ define(['N/search', 'N/runtime', 'N/currentRecord', 'N/record'],
                 '<th style="padding: 6px; border: 1px solid #ccc;">Internal ID</th>' +
                 '<th style="padding: 6px; border: 1px solid #ccc;">Name</th>' +
                 '</tr>';
-                
+
 
             //thead.style.display = 'table';
             thead.style.width = '100%';
@@ -275,10 +365,19 @@ define(['N/search', 'N/runtime', 'N/currentRecord', 'N/record'],
 
             var tbody = document.createElement('tbody');
             tbody.id = 'entity-table-body';
-             // Altura fija + scroll interno
+            // Altura fija + scroll interno
             //tbody.style.height = '400px'; // o usa '60vh' si prefieres altura relativa a la pantalla
             //tbody.style.overflowY = 'auto';
             entityTable.appendChild(tbody);
+
+
+            var paginationLabel = document.createElement('div');
+            paginationLabel.id = 'pagination-label';
+            paginationLabel.style.fontSize = '13px';
+            paginationLabel.style.color = '#333';
+            paginationLabel.style.alignSelf = 'flex-end'; // Si usas flexbox
+            paginationLabel.textContent = 'Mostrando 0 entidades'; // valor inicial
+
 
             // Botones de seleccionar/deseleccionar
             var btnGroup = document.createElement('div');
@@ -296,9 +395,22 @@ define(['N/search', 'N/runtime', 'N/currentRecord', 'N/record'],
             btnSelectAll.style.cursor = 'pointer';
             btnSelectAll.onclick = function () {
                 var boxes = document.querySelectorAll('.entity-checkbox');
+
                 for (var i = 0; i < boxes.length; i++) {
                     boxes[i].checked = true;
+
                 }
+                // Actualiza en allEntities
+                for (var j = 0; j < allEntities.length; j++) {
+                    allEntities[j].checked = true;
+                }
+
+                // Actualiza en entityList (paginado actual o filtrado)
+                for (var k = 0; k < entityList.length; k++) {
+                    entityList[k].checked = true;
+                }
+
+                updateSelectedLabel(); // Actualiza el contador
             };
 
             var btnDeselectAll = document.createElement('button');
@@ -310,105 +422,104 @@ define(['N/search', 'N/runtime', 'N/currentRecord', 'N/record'],
             btnDeselectAll.style.borderRadius = '4px';
             btnDeselectAll.style.cursor = 'pointer';
             btnDeselectAll.onclick = function () {
+
                 var boxes = document.querySelectorAll('.entity-checkbox');
+
                 for (var i = 0; i < boxes.length; i++) {
                     boxes[i].checked = false;
                 }
+                for (var j = 0; j < allEntities.length; j++) {
+                    allEntities[j].checked = false;
+                }
+
+                for (var k = 0; k < entityList.length; k++) {
+                    entityList[k].checked = false;
+                }
+
+                updateSelectedLabel(); // Actualiza contador
             };
+
+            var selectedLabel = document.createElement('div');
+            selectedLabel.id = 'selected-label';
+            selectedLabel.style.fontSize = '13px';
+            selectedLabel.style.color = '#0073aa';
+            selectedLabel.style.marginTop = '10px';
+            selectedLabel.style.alignSelf = 'flex-start'; // Puedes ajustar según el layout
+            selectedLabel.textContent = '0 entidades seleccionadas';
+
+            function updateSelectedLabel() {
+                selectedCount = 0;
+
+                for (var i = 0; i < allEntities.length; i++) {
+                    if (allEntities[i].checked) {
+                        selectedCount++;
+                    }
+                }
+
+                selectedLabel.textContent =
+                    selectedCount + ' entidad' + (selectedCount !== 1 ? 'es' : '') +
+                    ' seleccionada' + (selectedCount !== 1 ? 's' : '');
+            }
 
             btnGroup.appendChild(btnSelectAll);
             btnGroup.appendChild(btnDeselectAll);
+            btnGroup.appendChild(selectedLabel);
 
             // Lista de entidades (ejemplo)
-            var entityList = [
-                { id: 101, name: 'Entidad Alpha' },
-                { id: 102, name: 'Entidad Beta' },
-                { id: 103, name: 'Entidad Gamma' },
-                { id: 104, name: 'Entidad Delta' },
-                { id: 105, name: 'Entidad Omega' },
-                { id: 106, name: 'Entidad Sigma' },
-                { id: 107, name: 'Entidad Zeta' },
-                { id: 108, name: 'Entidad Lambda' },
-                { id: 109, name: 'Entidad Epsilon' },
-                { id: 110, name: 'Entidad Theta' },
-                { id: 111, name: 'Entidad Iota' },
-                { id: 112, name: 'Entidad Kappa' },
-                { id: 113, name: 'Entidad Mu' },
-                { id: 114, name: 'Entidad Nu' },
-                { id: 115, name: 'Entidad Xi' },
-                { id: 116, name: 'Entidad Omicron' },
-                { id: 117, name: 'Entidad Pi' },
-                { id: 118, name: 'Entidad Rho' },
-                { id: 119, name: 'Entidad Tau' },
-                { id: 120, name: 'Entidad Upsilon' },
-                { id: 121, name: 'Entidad Phi' },
-                { id: 122, name: 'Entidad Chi' },
-                { id: 123, name: 'Entidad Psi' },
-                { id: 124, name: 'Entidad Omega 2' },
-                { id: 125, name: 'Entidad Ares' },
-                { id: 126, name: 'Entidad Apolo' },
-                { id: 127, name: 'Entidad Hermes' },
-                { id: 128, name: 'Entidad Hefesto' },
-                { id: 129, name: 'Entidad Afrodita' },
-                { id: 130, name: 'Entidad Demeter' },
-                { id: 131, name: 'Entidad Hestia' },
-                { id: 132, name: 'Entidad Cronos' },
-                { id: 133, name: 'Entidad Gaia' },
-                { id: 134, name: 'Entidad Urano' },
-                { id: 135, name: 'Entidad Nyx' },
-                { id: 136, name: 'Entidad Eros' },
-                { id: 137, name: 'Entidad Helios' },
-                { id: 138, name: 'Entidad Selene' },
-                { id: 139, name: 'Entidad Tanatos' },
-                { id: 140, name: 'Entidad Morfeo' },
-                { id: 141, name: 'Entidad Morf' },
-                { id: 141, name: 'Entidad Morf2' },
-                { id: 141, name: 'Entidad Morf3' },
-                { id: 141, name: 'Entidad Morf5' },
-
-            ];
 
 
-            // Render de entidades
-            function renderEntities(filter) {
-                tbody.innerHTML = '';
-                for (var i = 0; i < entityList.length; i++) {
-                    var ent = entityList[i];
-                    if (!filter || ent.name.toLowerCase().indexOf(filter.toLowerCase()) !== -1) {
-                        var row = document.createElement('tr');
-                        row.innerHTML =
-                            '<td style="padding: 6px; border: 1px solid #ccc;"><input type="checkbox" class="entity-checkbox" /></td>' +
-                            '<td style="padding: 6px; border: 1px solid #ccc;">' + ent.id + '</td>' +
-                            '<td style="padding: 6px; border: 1px solid #ccc;">' + ent.name + '</td>';
-                        tbody.appendChild(row);
-                    }
+
+            entitySearch.addEventListener('input', function () {
+                var searchValue = entitySearch.value.trim().toLowerCase();
+
+                if (searchValue.length >= 3) {
+                    var filtered = allEntities.filter(function (ent) {
+                        var idMatch = String(ent.id).toLowerCase().includes(searchValue);
+                        var nameMatch = ent.name.toLowerCase().includes(searchValue);
+                        return idMatch || nameMatch;
+                    });
+
+                    renderTable(filtered);
+                } else {
+                    renderTable(entityList); // Mostramos solo las primeras 100
                 }
+            });
+
+
+
+            function renderTable(list) {
+                // Limpia tabla
+                tbody.innerHTML = '';
+
+                for (var i = 0; i < list.length; i++) {
+                    var entity = list[i];
+
+                    var row = document.createElement('tr');
+                    row.innerHTML =
+                        '<td style="padding: 6px; border: 1px solid #ccc;">' +
+                        '<input type="checkbox" class="entity-checkbox" data-id="' + entity.id + '"' +
+                        (entity.checked ? ' checked' : '') + '/>' +
+                        '</td>' +
+                        '<td style="padding: 6px; border: 1px solid #ccc;">' + entity.id + '</td>' +
+                        '<td style="padding: 6px; border: 1px solid #ccc;">' + entity.name + '</td>';
+                    tbody.appendChild(row);
+                }
+
+                //updateSelectedLabel()
+                // También podrías actualizar un label de cantidad:
+                paginationLabel.textContent = 'Mostrando ' + list.length + ' entidades de ' + allEntities.length;
             }
 
-            // Filtro dinámico por input
-            entitySearch.addEventListener('input', function () {
-                var val = this.value.trim();
-                if (val.length >= 3 || val.length === 0) {
-                    renderEntities(val);
-                }
-            });
 
-            // Checkbox maestro
-            /*
-            thead.querySelector('#masterCheckbox').addEventListener('change', function () {
-                var checked = this.checked;
-                var boxes = document.querySelectorAll('.entity-checkbox');
-                for (var i = 0; i < boxes.length; i++) {
-                    boxes[i].checked = checked;
-                }
-            });
-            */
+
+
+
             // Agregar al contenedor del modal (dentro de contentContainer)
             contentContainer.appendChild(entitySearch);
             contentContainer.appendChild(btnGroup);
             contentEntitySearch.appendChild(entityTable);
             contentContainer.appendChild(contentEntitySearch);
-            
+            contentContainer.appendChild(paginationLabel);
             container.appendChild(contentContainer);
             // Inicializar con todos
 
@@ -423,7 +534,7 @@ define(['N/search', 'N/runtime', 'N/currentRecord', 'N/record'],
             buttonContainer.style.marginTop = '5px';
 
             // Estilos base para los botones
-            function createButton(text, bgColor, textColor, hoverBg, hoverText, action){
+            function createButton(text, bgColor, textColor, hoverBg, hoverText, action) {
                 var button = document.createElement('button');
                 button.innerText = text;
                 button.style.padding = '6px 20px';
@@ -438,11 +549,11 @@ define(['N/search', 'N/runtime', 'N/currentRecord', 'N/record'],
                 button.style.boxShadow = '0px 4px 6px rgba(0, 0, 0, 0.1)';
 
                 // Efecto hover
-                button.addEventListener('mouseenter', function(){
+                button.addEventListener('mouseenter', function () {
                     button.style.backgroundColor = hoverBg;
                     button.style.color = hoverText;
                 });
-                button.addEventListener('mouseleave', function(){
+                button.addEventListener('mouseleave', function () {
                     button.style.backgroundColor = bgColor;
                     button.style.color = textColor;
                 });
@@ -460,7 +571,7 @@ define(['N/search', 'N/runtime', 'N/currentRecord', 'N/record'],
                 '#FFFFFF',      // Texto blanco 
                 '#0055CC',      // Verde más oscuro en hover
                 '#FFFFFF',
-                function(){
+                function () {
                     var allValid = true; // Variable para verificar si todos son válidos
 
 
@@ -469,7 +580,30 @@ define(['N/search', 'N/runtime', 'N/currentRecord', 'N/record'],
                     if (allValid) {
                         document.body.removeChild(container);
                         document.body.removeChild(overlay);
+                        saveEntities = JSON.parse(JSON.stringify(allEntities));
+                        console.log("saveEntities", saveEntities)
+                        console.log("currentRecord: ", currentRecord)
+                        if (selectedCount == 1) {
 
+                            var singleEntity = saveEntities.filter(function (ent) {
+                                return ent.checked;
+                            });
+
+                            if (currentRecord) {
+                                currentRecord.setValue({
+                                    fieldId: 'custpage_proovedor_list',
+                                    value: singleEntity[0].name
+                                });
+                            }
+                        } else {
+                            if (currentRecord) {
+                                currentRecord.setValue({
+                                    fieldId: 'custpage_proovedor_list',
+                                    value: selectedCount + ' entidades selccionadas '
+                                });
+                            }
+
+                        }
                         //currentRecord.setCurrentSublistValue({ sublistId: type, fieldId: fieldCheckId, value: false })
                         //checkvariableRate.classList.replace('checkbox_ck', 'checkbox_unck');
                     } else {
@@ -485,7 +619,7 @@ define(['N/search', 'N/runtime', 'N/currentRecord', 'N/record'],
                 '#030000',      // Texto blanco
                 '#B3B3B3',      // Rojo más oscuro en hover
                 '#030000',
-                function(){
+                function () {
                     document.body.removeChild(container);
                     document.body.removeChild(overlay);
                 }
@@ -500,7 +634,34 @@ define(['N/search', 'N/runtime', 'N/currentRecord', 'N/record'],
             // Fin de agregar botones
 
             document.body.appendChild(container);
-            renderEntities();
+            //renderEntities();
+
+            updateSelectedLabel()
+            renderTable(entityList);
+
+
+            document.getElementById('entity-table-body').addEventListener('change', function (event) {
+                var target = event.target;
+                console.log("entity check")
+
+                if (target && target.classList.contains('entity-checkbox')) {
+                    var id = parseInt(target.getAttribute('data-id'));
+                    console.log("entity check [id]", id)
+                    console.log("allEntities", allEntities.slice(0, 10))
+                    for (var i = 0; i < allEntities.length; i++) {
+                        if (allEntities[i].id == id) {
+                            allEntities[i].checked = target.checked;
+                            console.log("allEntities[i].checked [id]", allEntities[i])
+                            console.log("target.checked [id]", target.checked)
+                            break;
+                        }
+                    }
+                    updateSelectedLabel();
+                }
+            });
+
+            // Escuchar cambios en cualquier checkbox de entidad (por delegación)
+
 
         }
 
@@ -534,7 +695,41 @@ define(['N/search', 'N/runtime', 'N/currentRecord', 'N/record'],
             if (i == -1) i = 0;
             return colorBackgrounds[i];
         }
+        function setSubsidiary(subsidiaryId) {
+            subsidiary = subsidiaryId;
+        }
+        function setCurrentRecord(RCD) {
+            currentRecord = RCD;
+        }
+
+        function createRecordMassive() {
+
+            var activeAntities = saveEntities.filter(function (ent) {
+                return ent.checked;
+            });
+
+            function compactEntityArray(arr) {
+                var result = {};
+                for (var i = 0; i < arr.length; i++) {
+                    result[arr[i].id] = arr[i].status;
+                }
+                return result;
+            }
+            var logRecord = record.create({ type: 'customrecord_lmry_co_massive_cer_log' });
+            logRecord.setValue('custrecord_lmry_co_mass_vendors', JSON.stringify(compactEntityArray(activeAntities)));
+            var rec_id = logRecord.save();
+
+            currentRecord.setValue({
+                fieldId: 'custpage_record_massive_id',
+                value: rec_id
+            });
+        }
         return {
-            createButtonVendor: createButtonVendor
+            createButtonVendor: createButtonVendor,
+            saveEntities: saveEntities,
+            subsidiary: subsidiary,
+            setSubsidiary: setSubsidiary,
+            setCurrentRecord: setCurrentRecord,
+            createRecordMassive: createRecordMassive
         };
     });

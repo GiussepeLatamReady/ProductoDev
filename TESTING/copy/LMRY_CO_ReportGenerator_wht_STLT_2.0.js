@@ -12,7 +12,7 @@
  * @NModuleScope Public
  */
 define(["N/ui/serverWidget", "N/search", "N/runtime", "N/record", "N/redirect", "N/task", "N/log", "N/config", 'N/format', require], runSuitelet);
-var UI, SEARCH, RECORD, RUNTIME, REDIRECT, TASK, LOG, CONFIG, REQUIRE,FORMAT;
+var UI, SEARCH, RECORD, RUNTIME, REDIRECT, TASK, LOG, CONFIG, REQUIRE;
 // Titulo del Suitelet
 
 var LMRY_script = "LMRY Report Generator - Withholding Certificate CO STLT";
@@ -35,7 +35,7 @@ function runSuitelet(ui, search, runtime, record, redirect, task, log, config, f
     REQUIRE = require;
     LR_PermissionManager = null;
     LR_libfeature = null;
-
+    
     language = RUNTIME.getCurrentScript().getParameter({
         name: 'LANGUAGE'
     }).substring(0, 2);
@@ -48,7 +48,7 @@ function runSuitelet(ui, search, runtime, record, redirect, task, log, config, f
 function getSecurityLibrary() {
     try {
 
-        require(["/SuiteBundles/Bundle 35754/Latam_Library/LMRY_LibraryReport_LBRY_V2.js", "/SuiteBundles/Bundle 35754/Latam_Security/LMRY_SECURITY_LICENSES_LBRY_V2.0"], function (libfeature, library) {
+        require(["/SuiteBundles/Bundle 35754/Latam_Library/LMRY_LibraryReport_LBRY_V2.js", "/SuiteBundles/Bundle 35754/Latam_Security/LMRY_SECURITY_LICENSES_LBRY_V2.0"], function (libfeature , library) {
             LR_PermissionManager = library;
             LR_libfeature = libfeature;
         });
@@ -103,7 +103,7 @@ function execute(context) {
 
         if (!reponseLicense.status) {
 
-            LR_PermissionManager.createFormError(context, GLOBAL_LABELS['namereport'][language], reponseLicense.error);
+            LR_PermissionManager.createFormError(context,  GLOBAL_LABELS['namereport'][language], reponseLicense.error);
 
         } else {
             if (varMethod == 'GET') {
@@ -111,7 +111,7 @@ function execute(context) {
                 // Crea el folder
                 search_folder();
                 //Creacion de Folder
-                var form = UI.createForm(GLOBAL_LABELS['namereport'][language]);
+                var form = UI.createForm( GLOBAL_LABELS['namereport'][language]);
 
                 var featuresubs = RUNTIME.isFeatureInEffect({
                     feature: "SUBSIDIARIES"
@@ -165,7 +165,7 @@ function execute(context) {
                         var reportNM = varRecordRpt[i].getValue('name');
                         var reportType = varRecordRpt[i].getValue('custrecord_lmry_co_id_type');
 
-                        if (reportType == 'C') {
+                        if(reportType == 'C'){
                             fieldreports.addSelectOption({
                                 value: reportID,
                                 text: reportNM
@@ -228,7 +228,7 @@ function execute(context) {
 
                             var subID = varRecordSub[i].getValue('internalid');
                             var subNM = varRecordSub[i].getValue('name');
-
+                            
                             fieldsubs.addSelectOption({
                                 value: subID,
                                 text: subNM
@@ -348,7 +348,7 @@ function execute(context) {
                 var fieldCityOrigen = form.addField({
                     id: 'custpage_lmry_city_origin',
                     type: UI.FieldType.SELECT,
-                    label: GLOBAL_LABELS['custpage_lmry_city_origin'][language],
+                    label:  GLOBAL_LABELS['custpage_lmry_city_origin'][language],
                     container: 'custpage_filran2'
                 });
 
@@ -472,7 +472,7 @@ function execute(context) {
                          * ************************************************************/
                         if (auxfield != idField && idField != '' && idField != null && idField != 'custpage_locagroup' && idField != 'custpage_multibook' && reportType == 'C') {
                             auxfield = idField;
-                            if (idField == 'custpage_tipo_retencion' || idField == 'custpage_lmry_cr_fechaini' || idField == 'custpage_lmry_cr_fechafin' || idField == 'custpage_digits' || idField == 'custpage_op_balance' || idField == 'custpage_insert_head' || idField == 'custpage_lmry_cr_anio' || idField == 'custpage_muniline'/*agregar mas id si es que se quiere traducir rpt filters*/) {
+                            if (idField == 'custpage_tipo_retencion' || idField == 'custpage_lmry_cr_fechaini' || idField == 'custpage_lmry_cr_fechafin' || idField == 'custpage_digits' || idField == 'custpage_op_balance' || idField == 'custpage_insert_head' || idField =='custpage_lmry_cr_anio' || idField == 'custpage_muniline'/*agregar mas id si es que se quiere traducir rpt filters*/) {
                                 var addFieldAux = form.addField({
                                     id: idField,
                                     label: GLOBAL_LABELS[idField][language],
@@ -508,7 +508,7 @@ function execute(context) {
                         }
                     }
                 }
-
+                
                 varGrupoEspecial.setShowBorder = true;
 
                 // Mensaje para el cliente
@@ -721,41 +721,96 @@ function execute(context) {
                     MULTIBOOK: RUNTIME.isFeatureInEffect({ feature: "MULTIBOOK" })
                 };
 
+                var reportInfo = SEARCH.lookupFields({
+                    type: 'customrecord_lmry_co_features',
+                    id: idrpts,
+                    columns: ['custrecord_lmry_co_id_schedule', 'custrecord_lmry_co_id_deploy', 'name']
+                });
 
-
-
-                var logRecord = RECORD.load({ type: 'customrecord_lmry_co_massive_cer_log', id: p.custpage_record_massive_id });
-                logRecord.setValue('custrecord_lmry_co_mass_name', GLOBAL_LABELS['pending'][language]);
-                logRecord.setValue('custrecord_lmry_co_mass_tran', idrpts);
+                var periodName = '';
                 if (idrpts == 56) {
-                    logRecord.setValue('custrecord_lmry_co_mass_peri_year', p.custpage_lmry_cr_anio);
-                    logRecord.setValue('custrecord_lmry_co_mass_group_mon', p.custpage_grouping_by_months);
-                }
-                if (idrpts == 59) {
-                    logRecord.setValue('custrecord_lmry_co_mass_peri', formatDate(p.custpage_lmry_cr_fechaini));
-                    logRecord.setValue('custrecord_lmry_co_mass_peri_end', formatDate(p.custpage_lmry_cr_fechafin));
+                    var periodData = SEARCH.lookupFields({
+                        type: 'accountingperiod',
+                        id: p.custpage_lmry_cr_anio,
+                        columns: ['periodname']
+                    });
+                    periodName = periodData.periodname.replace(/\D/g, '');
                 }
 
-                logRecord.setValue('custrecord_lmry_co_mass_type', 'C');
-                if (features.SUBSIDIARIES) {
-                    logRecord.setValue('custrecord_lmry_co_mass_sub', p.custpage_subsidiary);
+                if (idrpts == 59) {
+                    var fechaIni = FORMAT.parse({ value: p.custpage_lmry_cr_fechaini, type: FORMAT.Type.DATE });
+                    var m = fechaIni.getMonth() + 1;
+                    if (m < 10) m = '0' + m;
+                    periodName = TraePeriodo(m) + ' ' + fechaIni.getFullYear();
                 }
-                if (features.MULTIBOOK) {
-                    logRecord.setValue('custrecord_lmry_co_mass_ibook', p.custpage_multibook);
-                }
-                logRecord.setValue('custrecord_lmry_co_mass_wht_type', p.custpage_tipo_retencion);
-                logRecord.setValue('custrecord_lmry_co_mass_city_origin', p.custpage_lmry_city_origin);
-                logRecord.setValue('custrecord_lmry_co_mass_empl', RUNTIME.getCurrentUser().id);
-                logRecord.setValue('custrecord_lmry_co_mass_file', '');
+
+                var subsidiaryName = features.SUBSIDIARIES
+                    ? SEARCH.lookupFields({
+                        type: 'subsidiary',
+                        id: p.custpage_subsidiary,
+                        columns: ['legalname']
+                    }).legalname
+                    : CONFIG.load({ type: CONFIG.Type.COMPANY_INFORMATION }).getValue('legalname');
+
+                var multiBookName = features.MULTIBOOK
+                    ? SEARCH.lookupFields({
+                        type: 'accountingbook',
+                        id: p.custpage_multibook,
+                        columns: ['name']
+                    }).name
+                    : '';
+
+                var empData = SEARCH.lookupFields({
+                    type: 'employee',
+                    id: RUNTIME.getCurrentUser().id,
+                    columns: ['firstname', 'lastname']
+                });
+                var employeeName = empData.firstname + ' ' + empData.lastname;
+
+                var logRecord = RECORD.create({ type: 'customrecord_lmry_co_rpt_generator_log' });
+                logRecord.setValue('custrecord_lmry_co_rg_name', GLOBAL_LABELS['pending'][language]);
+                logRecord.setValue('custrecord_lmry_co_rg_transaction', reportInfo.name);
+                logRecord.setValue('custrecord_lmry_co_rg_postingperiod', periodName);
+                logRecord.setValue('custrecord_lmry_co_rpt_type', 'C');
+                logRecord.setValue('custrecord_lmry_co_rg_subsidiary', subsidiaryName);
+                logRecord.setValue('custrecord_lmry_co_rg_multibook', multiBookName);
+                logRecord.setValue('custrecord_lmry_co_rg_employee', employeeName);
+                logRecord.setValue('custrecord_lmry_co_rg_url_file', '');
 
                 var rec_id = logRecord.save();
-                var params = {
-                    "custscript_lmry_co_massive_record_id": rec_id
-                };
+
+                var params = {};
+                function addParam(k, v, cond) {
+                    if ((typeof cond === 'undefined' || cond) && v) params[k] = v;
+                }
+
+                if (idrpts == 56) {
+                    addParam('custscript_lmry_co_subsi_withbk_ret_acum', p.custpage_subsidiary, features.SUBSIDIARIES);
+                    addParam('custscript_lmry_co_multibook_wtbk_ret_ac', p.custpage_multibook, features.MULTIBOOK);
+                    addParam('custscript_lmry_co_par_anio_wtbk_ret_ac', p.custpage_lmry_cr_anio);
+                    addParam('custscript_lmry_co_vendor_withbk_ret_ac', p.custpage_proovedor_list);
+                    addParam('custscript_lmry_co_type_withbk_ret_acum', p.custpage_tipo_retencion);
+                    addParam('custscript_lmry_co_idrpt_wtbk_ret_acumul', rec_id);
+                    addParam('custscript_lmry_co_group_month', p.custpage_grouping_by_months);
+                    addParam('custscript_lmry_co_city_origin', p.custpage_lmry_city_origin);
+                }
+
+                if (idrpts == 59) {
+                    addParam('custscript_lmry_co_subsi_withbook_v2', p.custpage_subsidiary, features.SUBSIDIARIES);
+                    addParam('custscript_lmry_co_multibook_withbook_v2', p.custpage_multibook, features.MULTIBOOK);
+                    addParam('custscript_lmry_co_periodini_withbook_v2', p.custpage_lmry_cr_fechaini);
+                    addParam('custscript_lmry_co_periodfin_withbook_v2', p.custpage_lmry_cr_fechafin);
+                    addParam('custscript_lmry_co_vendor_withbook_v2', p.custpage_proovedor_list);
+                    addParam('custscript_lmry_co_type_withbook_v2', p.custpage_tipo_retencion);
+                    addParam('custscript_lmry_co_idrpt_withbook_v2', rec_id);
+                    addParam('custscript_lmry_co_city_origin_v2', p.custpage_lmry_city_origin);
+                }
+
                 try {
                     var task = TASK.create({
-                        taskType: TASK.TaskType.SCHEDULED_SCRIPT,
-                        scriptId: "customscript_lmry_co_cert_massive_schdl",
+                        taskType: (idrpts == 59) ? TASK.TaskType.MAP_REDUCE : TASK.TaskType.SCHEDULED_SCRIPT,
+                        scriptId: reportInfo.custrecord_lmry_co_id_schedule,
+                        deploymentId: reportInfo.custrecord_lmry_co_id_deploy,
                         params: params
                     });
                     task.submit();
@@ -778,27 +833,11 @@ function execute(context) {
             title: 'Se genero un error en suitelet 2 :' + err.lineNumber,
             details: err
         });
-        
         //  LIBRARY.CreacionFormError(namereport, LMRY_script, varMsgError, err);
         //sendemail(err, LMRY_script);
     }
     return true;
 }
-
-function formatDate(date) {
-    var parseDate = FORMAT.parse({
-        value: date,
-        type: FORMAT.Type.DATE
-    });
-    /*
-    parseDate = FORMAT.format({
-        type: FORMAT.Type.DATE,
-        value: parseDate
-    });
-    */
-    return parseDate;
-}
-
 
 /* ------------------------------------------------------------------------------------------------------
  * Nota: Valida si existe el folder donde se guardaran los archivos
@@ -916,12 +955,12 @@ function getGlobalLabels() {
             "pt": "Data desde",
             "en": "Date from"
         },
-        "custpage_lmry_cr_anio": {
+        "custpage_lmry_cr_anio":{
             "es": "Año",
             "pt": "Ano",
             "en": "Year"
         },
-        "custpage_muniline": {
+        "custpage_muniline":{
             "es": "Municipalidad en certificados RETEICA",
             "pt": "Município em certificados RETEICA",
             "en": "Municipality in RETEICA certificates"
@@ -986,7 +1025,7 @@ function getGlobalLabels() {
             'pt': 'Origem do municipio',
             'en': 'Origin of the Municipality'
         },
-        'namereport': {
+        'namereport' : {
             'es': 'LatamReady - CO Generador de Reportes Certificados',
             'pt': 'LatamReady - CO Gerador de Relatório Certificados',
             'en': 'LatamReady - CO Certificates Report Generator'
