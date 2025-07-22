@@ -6,9 +6,9 @@
  * @Date 20/07/2025
  */
 
-define(['N/search', 'N/runtime', 'N/currentRecord', 'N/record'],
+define(['N/search', 'N/runtime', 'N/currentRecord', 'N/record', 'N/task'],
 
-    function (search, runtime, currentRecord, record) {
+    function (search, runtime, currentRecord, record, task) {
         var translations = getTranslations()
         var defaultEntities = [];
         var allEntities = []
@@ -724,12 +724,32 @@ define(['N/search', 'N/runtime', 'N/currentRecord', 'N/record'],
                 value: rec_id
             });
         }
+
+        function continueExecutionFlow(vendor, recordMassiveId) {
+
+            var recordMasive = record.load({ id: recordMassiveId, type: "customrecord_lmry_co_massive_cer_log" });
+            var vendors = JSON.parse(recordMasive.getValue("custrecord_lmry_co_mass_vendors"));
+            vendors[vendor] = "FINISH";
+            recordMasive.setValue('custrecord_lmry_co_mass_vendors', JSON.stringify(vendors));
+            recordMasive.save();
+
+            var params = {
+                "custscript_lmry_co_massive_record_id": recordMassiveId
+            };
+            task.create({
+                taskType: task.TaskType.SCHEDULED_SCRIPT,
+                scriptId: "customscript_lmry_co_cert_massive_schdl",
+                params: params
+            }).submit();
+        }
+
         return {
             createButtonVendor: createButtonVendor,
             saveEntities: saveEntities,
             subsidiary: subsidiary,
             setSubsidiary: setSubsidiary,
             setCurrentRecord: setCurrentRecord,
-            createRecordMassive: createRecordMassive
+            createRecordMassive: createRecordMassive,
+            continueExecutionFlow: continueExecutionFlow
         };
     });

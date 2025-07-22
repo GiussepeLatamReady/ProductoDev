@@ -20,6 +20,7 @@ Covertir el proceso de singlevendor a multivendor
     LMRY_CO_Certificate_Massive_SCHDL_2.1.js
     LatamReady - Certificate Massive SCHDL
     _lmry_co_cert_massive_schdl
+    custscript_lmry_co_massive_record_id
 + Update
 
 
