@@ -725,11 +725,11 @@ define(['N/search', 'N/runtime', 'N/currentRecord', 'N/record', 'N/task'],
             });
         }
 
-        function continueExecutionFlow(vendor, recordMassiveId) {
-
+        function continueExecutionFlow(vendor, recordMassiveId, isError) {
+            if (!recordMassiveId) return false;
             var recordMasive = record.load({ id: recordMassiveId, type: "customrecord_lmry_co_massive_cer_log" });
             var vendors = JSON.parse(recordMasive.getValue("custrecord_lmry_co_mass_vendors"));
-            vendors[vendor] = "FINISH";
+            vendors[vendor] = isError ? "ERROR" : "FINISH";
             recordMasive.setValue('custrecord_lmry_co_mass_vendors', JSON.stringify(vendors));
             recordMasive.save();
 
@@ -741,6 +741,44 @@ define(['N/search', 'N/runtime', 'N/currentRecord', 'N/record', 'N/task'],
                 scriptId: "customscript_lmry_co_cert_massive_schdl",
                 params: params
             }).submit();
+        }
+
+        function createSublistMassiveProcess(form,serverWidget) {
+            form.addTab({
+                id: 'tab_massive',
+                label: "Massive generation Log"
+            });
+
+            var sublist = form.addSublist({
+                id: 'custpage_list_massive',
+                label: "Massive generation Log",
+                tab: 'tab_massive',
+                type: serverWidget.SublistType.LIST
+            });
+
+            var fields = [
+                { id: "row_date", label: "Created by", type: serverWidget.FieldType.TEXT },
+                { id: "row_report", label: "Report", type: serverWidget.FieldType.TEXT },
+                { id: "row_period", label: "Period", type: serverWidget.FieldType.TEXT },
+                { id: "row_subsidiary", label: "Subsidiary", type: serverWidget.FieldType.TEXT },
+                { id: "row_multibook", label: "Multibook", type: serverWidget.FieldType.TEXT },
+                { id: "row_created_by", label: "Created by", type: serverWidget.FieldType.TEXT },
+                { id: "row_file_name", label: "File Name", type: serverWidget.FieldType.TEXTAREA },
+                { id: "row_details", label: "Datails", type: serverWidget.FieldType.TEXTAREA },
+                { id: "row_summary", label: "Summary", type: serverWidget.FieldType.TEXTAREA },
+                { id: "row_download", label: "Download", type: serverWidget.FieldType.TEXTAREA }
+            ];
+
+            fields.forEach(fieldInfo => {
+                let field = this.sublist.addField(fieldInfo);
+                if (fieldInfo.displayType) {
+                    field.updateDisplayType({ displayType: fieldInfo.displayType });
+                }
+            });
+
+            sublist.addRefreshButton();
+
+            
         }
 
         return {

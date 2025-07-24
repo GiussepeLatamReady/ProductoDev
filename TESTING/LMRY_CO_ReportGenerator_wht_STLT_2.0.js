@@ -11,7 +11,7 @@
  * @NScriptType Suitelet
  * @NModuleScope Public
  */
-define(["N/ui/serverWidget", "N/search", "N/runtime", "N/record", "N/redirect", "N/task", "N/log", "N/config", 'N/format', require], runSuitelet);
+define(["N/ui/serverWidget", "N/search", "N/runtime", "N/record", "N/redirect", "N/task", "N/log", "N/config", 'N/format',"./LMRY_CO_Certificate_Massive_LIB.js", require], runSuitelet);
 var UI, SEARCH, RECORD, RUNTIME, REDIRECT, TASK, LOG, CONFIG, REQUIRE,FORMAT;
 // Titulo del Suitelet
 
@@ -19,7 +19,7 @@ var LMRY_script = "LMRY Report Generator - Withholding Certificate CO STLT";
 var namereport = "";
 var language;
 var GLOBAL_LABELS = {};
-function runSuitelet(ui, search, runtime, record, redirect, task, log, config, format, require) {
+function runSuitelet(ui, search, runtime, record, redirect, task, log, config, format, require,Lib_certificate_massive) {
 
     UI = ui;
     SEARCH = search;
@@ -702,6 +702,7 @@ function execute(context) {
                         });
                     }
                 }
+                
 
                 // Botones del formulario
                 form.addSubmitButton(GLOBAL_LABELS['btnGenerar'][language]);
