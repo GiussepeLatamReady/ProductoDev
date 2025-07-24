@@ -11,19 +11,17 @@ define([
     "N/runtime",
     "N/search",
     "N/log",
-    "N/file",
-    '../Latam_Library/SMC_BR_LatamTax_Purchase_LBRY_V2.0',
+    "N/file"
 ],
 
-    function (record, runtime, search, log, file, libraryTaxPurchase) {
+    function (record, runtime, search, log, file) {
 
 
         function getInputData(inputContext) {
             try {
                 var transactions = getTransactions();
                 log.error("count transactions", transactions.length);
-                //transactions = transactions.slice(0,1);
-                //log.error("transactions", transactions);
+                log.error("transactions", transactions.slice(0, 10));
                 return transactions;
             } catch (error) {
                 log.error("Error [getInputData]", error);
@@ -47,38 +45,21 @@ define([
                 var transaction = value;
                 //log.error("transaction map", transaction)
                 try {
-                    setCustomGL(transaction);
-                    existTaxResult(transaction);
-                    transaction.modificado = false;
-                    var line = '';
-                    for (var key in transaction) {
-                        if (transaction.hasOwnProperty(key)) {
-                            line += transaction[key] + "\t";
-                        }
-                    }
-                    line = line.slice(0, -1); // Eliminar el último tab
 
-                    //log.error("transaction map 2", transaction)
-                    if (!transaction.customgl) {
-                        
-                        var recordObj = record.load({
-                            type: "vendorbill",
-                            id: transaction.internalid
-                        })
-                        
-                        //var setup = libraryTaxPurchase.getSetupTaxSubsidiary("4");
-                        //var Jsonresult = libraryTaxPurchase.getTaxPurchase(recordObj, setup, false);
-                        //log.error("Jsonresult map 2", Jsonresult)
 
-                        
-                        recordObj.save({
-                            disableTriggers: true,
-                        });
-                        //log.error("save", "guardado")
-                        
-                        transaction.modificado = true;
+                    var recordObj = record.load({
+                        type: transaction.recordtype,
+                        id: transaction.internalid
+                    })
 
-                    }
+
+                    recordObj.save({
+                        //disableTriggers: true,
+                    });
+
+                    transaction.modificado = true;
+
+
                     mapContext.write({
                         key: transaction.internalid,
                         value: {
@@ -127,7 +108,7 @@ define([
                 title = title.slice(0, -1) + '\n'; // Eliminar el último tab
                 fileContent = title + fileContent + '\r\n';
 
-                saveFile(fileContent, "transaction_no_tax_BR_gadp.csv", "969158");
+                saveFile(fileContent, "transaction_no_tax_CO_gadp.csv", "969158");
 
                 var errorResults = [];
                 for (var i = 0; i < transactions.length; i++) {
@@ -181,8 +162,8 @@ define([
 
 
 
-            
-            var count =  search.create({
+
+            var count = search.create({
                 type: "customrecord_lmry_br_transaction",
                 filters:
                     [
@@ -197,7 +178,7 @@ define([
             if (count) {
                 transaction.taxresult = true;
                 transaction.countTaxresult = count;
-            }else{
+            } else {
                 transaction.taxresult = false;
                 transaction.countTaxresult = count;
             }
@@ -206,47 +187,30 @@ define([
         function getTransactions() {
 
             var transactionResult = [];
-            var transactionIds = {};
-            var periods = ["38","39","41","42","43","45","46","47","49","50","51"];// jan 2024
-
-
             var transactionSearch = search.create({
-                type: "vendorbill",
+                type: "transaction",
                 settings: [{ "name": "consolidationtype", "value": "ACCTTYPE" }, { "name": "includeperiodendtransactions", "value": "F" }],
-                filters: [
-                    ["type", "anyof", "VendBill"],
-                    "AND",
-                    ["subsidiary", "anyof", "4"],
-                    "AND",
-                    ["mainline", "is", "T"],
-                    //"AND",
-                    //["internalid", "anyof", "1167646"]
-                ],
+                filters:
+                    [
+                        ["subsidiary.country", "anyof", "CO"],
+                        "AND",
+                        ["mainline", "is", "T"],
+                        "AND",
+                        ["trandate", "within", "1/1/2024", "31/7/2024"],
+                        "AND",
+                        ["type", "anyof", "VendBill", "VendCred", "CustCred", "CustInvc", "Check", "CustRfnd", "CustPymt", "Deposit", "Transfer", "Journal", "VPrep", "VendPymt", "CashSale", "RtnAuth", "VendAuth"]
+                    ],
                 columns:
                     [
                         search.createColumn({ name: "internalid", label: "Internal ID" }),
+                        search.createColumn({ name: "recordtype", label: "Internal ID" }),
                         search.createColumn({
                             name: "formulatext",
                             formula: "{tranid}",
                             label: "Formula (Text)"
-                        }),
-                        search.createColumn({ name: "postingperiod", label: "Period" })
+                        })
                     ]
             });
-
-            transactionSearch.filters.push(search.createFilter({
-                name: "formulatext",
-                formula: generatePeriodFormula(periods),
-                operator: search.Operator.IS,
-                values: "1"
-            }));
-
-            var glColumn = search.createColumn({
-                name: 'formulatext',
-                formula: "{customscript}"
-            });
-
-            transactionSearch.columns.push(glColumn);
 
             var pagedData = transactionSearch.runPaged({
                 pageSize: 1000
@@ -259,15 +223,11 @@ define([
                 });
                 page.data.forEach(function (result) {
                     columns = result.columns;
-                    var transaction = {};
-                    transaction.internalid = result.getValue(columns[0]);
-                    transaction.tranid = result.getValue(columns[1]);
-                    transaction.period = result.getText(columns[2]);
-                    transactionResult.push(transaction);
-                    //if (!transactionIds[transaction.internalid]) {
-                    //transactionIds[transaction.internalid] = transaction.internalid;
-                    //}
-
+                    transactionResult.push({
+                        internalid: result.getValue(columns[0]),
+                        recordtype: result.getValue(columns[1]),
+                        tranid: result.getValue(columns[2])
+                    });
                 });
             });
             return transactionResult;
@@ -320,6 +280,6 @@ define([
 
 
 
-        return { getInputData: getInputData, map: map, summarize: summarize }
+        return { getInputData: getInputData, map: map }
 
     });
