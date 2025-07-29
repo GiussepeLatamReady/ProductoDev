@@ -11,15 +11,16 @@
  * @NScriptType Suitelet
  * @NModuleScope Public
  */
-define(["N/ui/serverWidget", "N/search", "N/runtime", "N/record", "N/redirect", "N/task", "N/log", "N/config", 'N/format',"./LMRY_CO_Certificate_Massive_LIB.js", require], runSuitelet);
-var UI, SEARCH, RECORD, RUNTIME, REDIRECT, TASK, LOG, CONFIG, REQUIRE,FORMAT;
+define(["N/ui/serverWidget", "N/search", "N/runtime", "N/record", "N/redirect", "N/task", "N/log", "N/config", 'N/format', 'N/url', require], runSuitelet);
+var UI, SEARCH, RECORD, RUNTIME, REDIRECT, TASK, LOG, CONFIG, REQUIRE, FORMAT, URLAPI;
 // Titulo del Suitelet
 
 var LMRY_script = "LMRY Report Generator - Withholding Certificate CO STLT";
 var namereport = "";
 var language;
 var GLOBAL_LABELS = {};
-function runSuitelet(ui, search, runtime, record, redirect, task, log, config, format, require,Lib_certificate_massive) {
+var Lib_certificate_massive;
+function runSuitelet(ui, search, runtime, record, redirect, task, log, config, format, url, require) {
 
     UI = ui;
     SEARCH = search;
@@ -29,13 +30,13 @@ function runSuitelet(ui, search, runtime, record, redirect, task, log, config, f
     TASK = task;
     LOG = log;
     CONFIG = config;
+    URLAPI = url
     //LIBRARY = library;
     //LIBFEATURE = libfeature;
     FORMAT = format;
     REQUIRE = require;
     LR_PermissionManager = null;
     LR_libfeature = null;
-
     language = RUNTIME.getCurrentScript().getParameter({
         name: 'LANGUAGE'
     }).substring(0, 2);
@@ -48,14 +49,17 @@ function runSuitelet(ui, search, runtime, record, redirect, task, log, config, f
 function getSecurityLibrary() {
     try {
 
-        require(["/SuiteBundles/Bundle 35754/Latam_Library/LMRY_LibraryReport_LBRY_V2.js", "/SuiteBundles/Bundle 35754/Latam_Security/LMRY_SECURITY_LICENSES_LBRY_V2.0"], function (libfeature, library) {
+        require([
+            "/SuiteBundles/Bundle 35754/Latam_Library/LMRY_LibraryReport_LBRY_V2.js",
+            "/SuiteBundles/Bundle 35754/Latam_Security/LMRY_SECURITY_LICENSES_LBRY_V2.0"
+        ], function (libfeature, library) {
             LR_PermissionManager = library;
             LR_libfeature = libfeature;
         });
         LOG.error('SecurityLibrary.Bundle', 'Bundle 35754');
 
     } catch (err) {
-
+        LOG.error('SecurityLibrary.err [BUNDLE]', err);
         try {
             require(["/SuiteBundles/Bundle 37714/Latam_Library/LMRY_LibraryReport_LBRY_V2.js", "/SuiteBundles/Bundle 37714/Latam_Security/LMRY_SECURITY_LICENSES_LBRY_V2.0"], function (libfeature, library) {
                 LR_PermissionManager = library;
@@ -702,7 +706,8 @@ function execute(context) {
                         });
                     }
                 }
-                
+
+                createSublistMassiveProcess(form, UI);
 
                 // Botones del formulario
                 form.addSubmitButton(GLOBAL_LABELS['btnGenerar'][language]);
@@ -749,6 +754,40 @@ function execute(context) {
                 logRecord.setValue('custrecord_lmry_co_mass_empl', RUNTIME.getCurrentUser().id);
                 logRecord.setValue('custrecord_lmry_co_mass_file', '');
 
+
+                if (idrpts == 56) {
+                    var varPeriodo = SEARCH.lookupFields({
+                        type: 'accountingperiod',
+                        id: context.request.parameters.custpage_lmry_cr_anio,
+                        columns: ['periodname']
+                    });
+                    //Period Name
+                    var periodName = varPeriodo.periodname;
+                    periodName = periodName.replace(/\D/g, '');
+                    logRecord.setValue('custrecord_lmry_co_mass_periodname', periodName);
+                }
+
+                if (idrpts == 59) {
+                    var fecha_format = context.request.parameters.custpage_lmry_cr_fechaini;
+                    var aux_fecha_per = FORMAT.parse({
+                        value: fecha_format,
+                        type: FORMAT.Type.DATE
+                    });
+                    var MM = aux_fecha_per.getMonth() + 1;
+                    var YYYY = aux_fecha_per.getFullYear();
+                    var DD = aux_fecha_per.getDate();
+
+                    if (('' + MM).length == 1) {
+                        MM = '0' + MM;
+                    }
+                    fecha_format = DD + '/' + MM + '/' + YYYY;
+                    var auxiliar = fecha_format.split('/');
+                    fecha_format = TraePeriodo(auxiliar[1]) + ' ' + auxiliar[2];
+
+                    logRecord.setValue('custrecord_lmry_co_mass_periodname', fecha_format);
+
+                }
+
                 var rec_id = logRecord.save();
                 var params = {
                     "custscript_lmry_co_massive_record_id": rec_id
@@ -779,7 +818,7 @@ function execute(context) {
             title: 'Se genero un error en suitelet 2 :' + err.lineNumber,
             details: err
         });
-        
+
         //  LIBRARY.CreacionFormError(namereport, LMRY_script, varMsgError, err);
         //sendemail(err, LMRY_script);
     }
@@ -996,6 +1035,36 @@ function getGlobalLabels() {
             "es": "-- No se han seleccionado proveedores --",
             "pt": "-- Nenhum fornecedor selecionado --",
             "en": "-- No vendors selected --"
+        },
+        "LMRY_PROCESING": {
+            "en": "Processing",
+            "es": "Procesando",
+            "pt": "Processando"
+        },
+        "LMRY_DETAILS": {
+            "en": "Details",
+            "es": "Detalles",
+            "pt": "Detalhes"
+        },
+        "LMRY_SUCESS": {
+            "en": "successful",
+            "es": "con éxito",
+            "pt": "com sucesso"
+        },
+        "LMRY_RAW": {
+            "en": "unprocessed",
+            "es": "sin procesar",
+            "pt": "não processado"
+        },
+        "LMRY_WITH_ERROR": {
+            "en": "with error",
+            "es": "con error",
+            "pt": "com erro"
+        },
+        "LMRY_ENTITIES_FOUND": {
+            "en": "entities found",
+            "es": "entidades encontradas",
+            "pt": "entidades encontradas"
         }
     }
 
@@ -1264,4 +1333,143 @@ function TraePeriodo(periodo) {
     }
     //nlapiLogExecution('DEBUG', 'auxmess2-> ',auxmess);
     return mes;
+}
+
+function createSublistMassiveProcess(form, serverWidget) {
+
+    form.addTab({
+        id: 'tab_massive',
+        label: "Massive generation Log"
+    });
+
+    var sublist = form.addSublist({
+        id: 'custpage_list_massive',
+        label: "Massive generation Log",
+        tab: 'tab_massive',
+        type: serverWidget.SublistType.LIST
+    });
+
+    var fields = [
+        { id: "row_date", label: "Created by", type: serverWidget.FieldType.TEXT },
+        { id: "row_report", label: "Report", type: serverWidget.FieldType.TEXT },
+        { id: "row_period", label: "Period", type: serverWidget.FieldType.TEXT },
+        { id: "row_subsidiary", label: "Subsidiary", type: serverWidget.FieldType.TEXT },
+        { id: "row_multibook", label: "Multibook", type: serverWidget.FieldType.TEXT },
+        { id: "row_created_by", label: "Created by", type: serverWidget.FieldType.TEXT },
+        { id: "row_file_name", label: "File Name", type: serverWidget.FieldType.TEXTAREA },
+        { id: "row_details", label: "Datails", type: serverWidget.FieldType.TEXTAREA },
+        { id: "row_summary", label: "Summary", type: serverWidget.FieldType.TEXTAREA },
+        { id: "row_download", label: "Download", type: serverWidget.FieldType.TEXTAREA }
+    ];
+
+    fields.forEach(function (fieldInfo) {
+        var field = sublist.addField(fieldInfo);
+        if (fieldInfo.displayType) {
+            field.updateDisplayType({ displayType: fieldInfo.displayType });
+        }
+    });
+
+    sublist.addRefreshButton();
+
+
+    var recordList = getRecordMassive();
+
+    recordList.forEach(function (process, i) {
+
+        var recordUrl = URLAPI.resolveRecord({ recordType: "customrecord_lmry_co_massive_cer_log", recordId: process.internalid, isEditMode: false });
+        var details =
+            '<a href="' + recordUrl + '" target="_blank" style="text-decoration: none; color: inherit;">' +
+            '<div style="display: grid; place-items: center; background: white; border-radius: 6px; transition: background-color 0.3s; border: 0.5px solid #bbd1e9;" onmouseover="this.style.backgroundColor=\'#bbd1e9\'" onmouseout="this.style.backgroundColor=\'white\';">' +
+            '<div style="color: #424950; font-size: 14px;">' + GLOBAL_LABELS["LMRY_DETAILS"][language] + '</div>' +
+            '</div>' +
+            '</a>';
+        var dataFormat = FORMAT.format({
+            value: process.created,
+            type: FORMAT.Type.DATE
+        });
+
+        sublist.setSublistValue({ id: "row_date", line: i, value: " " });
+        sublist.setSublistValue({ id: "row_report", line: i, value: process.reportName });
+        sublist.setSublistValue({ id: "row_period", line: i, value: process.periodName });
+        sublist.setSublistValue({ id: "row_subsidiary", line: i, value: process.subsidiary });
+        sublist.setSublistValue({ id: "row_multibook", line: i, value: process.multibook });
+        sublist.setSublistValue({ id: "row_created_by", line: i, value: process.employee });
+        sublist.setSublistValue({ id: "row_file_name", line: i, value: process.fileName });
+        sublist.setSublistValue({ id: "row_details", line: i, value: details });
+        sublist.setSublistValue({ id: "row_summary", line: i, value: getSummary(process.summary) });
+        sublist.setSublistValue({ id: "row_download", line: i, value: "Download" });
+
+
+    });
+
+}
+
+function getRecordMassive() {
+    var processList = [];
+    var pageData = SEARCH.create({
+        type: "customrecord_lmry_co_massive_cer_log",
+        filters: ["isinactive", "is", "F"],
+        columns:
+            [
+                SEARCH.createColumn({ name: 'formulatext', formula: "{created}" }),
+                SEARCH.createColumn({ name: 'formulatext', formula: "{custrecord_lmry_co_mass_tran}" }),
+                SEARCH.createColumn({ name: 'formulatext', formula: "{custrecord_lmry_co_mass_periodname}" }),
+                SEARCH.createColumn({ name: 'formulatext', formula: "{custrecord_lmry_co_mass_sub}" }),
+                SEARCH.createColumn({ name: 'formulatext', formula: "{custrecord_lmry_co_mass_ibook}" }),
+                SEARCH.createColumn({ name: 'formulatext', formula: "{custrecord_lmry_co_mass_empl}" }),
+                SEARCH.createColumn({ name: 'formulatext', formula: "{custrecord_lmry_co_mass_name}" }),
+                SEARCH.createColumn({ name: 'formulatext', formula: "{custrecord_lmry_co_mass_summary}" }),
+            ]
+    }).runPaged({ pageSize: 1000 });
+    if (pageData) {
+        pageData.pageRanges.forEach(function (pageRange) {
+            var page = pageData.fetch({ index: pageRange.index });
+            page.data.forEach(function (result) {
+
+                var process = {
+                    internalid: result.id,
+                    created: result.getValue(result.columns[0]) || " ",
+                    reportName: result.getValue(result.columns[1]) || " ",
+                    periodName: result.getValue(result.columns[2]) || " ",
+                    subsidiary: result.getValue(result.columns[3]) || " ",
+                    multibook: result.getValue(result.columns[4]) || " ",
+                    employee: result.getValue(result.columns[5]) || " ",
+                    fileName: result.getValue(result.columns[6]) || " ",
+                    summary: result.getValue(result.columns[7]) || " ",
+                }
+                processList.push(process);
+            });
+        });
+    }
+    log.error("processList", processList)
+    return processList;
+}
+
+function getSummary(summary) {
+    if (!summary || summary == " ") return " ";
+
+    var jsonSummary = JSON.parse(summary);
+    var s = jsonSummary.s;
+    var p = jsonSummary.p;
+    var n = jsonSummary.n;
+    var e = jsonSummary.e;
+    var total = s + p + n + e;
+
+    function getLi(count, text, color) {
+        return count === 0 ? '' : '<li style="color: ' + color + ';" margin: 5px 0>' + count + ' ' + text + '</li>';
+    }
+
+    var html = (
+        '<div style="display:flex; flex-direction: column; justify-content: center;  height: 80%; font-family: Arial, sans-serif;">' +
+        '<h3 style="margin-top: 20px;">' + total + ' ' + GLOBAL_LABELS["LMRY_ENTITIES_FOUND"][language] + '</h3>' +
+        '<ul style="margin-top: 10px; padding-left: 0px;">' +
+        getLi(s, GLOBAL_LABELS["LMRY_SUCESS"][language], 'rgb(18, 179, 18)') +
+        getLi(p, GLOBAL_LABELS["LMRY_PROCESING"][language], 'blue') +
+        getLi(n, GLOBAL_LABELS["LMRY_RAW"][language], 'orange') +
+        getLi(e, GLOBAL_LABELS["LMRY_WITH_ERROR"][language], 'red') +
+        '</ul>' +
+        '</div>'
+    ).replace(/\s+/g, ' ');
+
+    return html;
 }

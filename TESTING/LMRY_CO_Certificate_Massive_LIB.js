@@ -6,9 +6,9 @@
  * @Date 20/07/2025
  */
 
-define(['N/search', 'N/runtime', 'N/currentRecord', 'N/record', 'N/task'],
+define(['N/search', 'N/runtime', 'N/currentRecord', 'N/record','N/url'],
 
-    function (search, runtime, currentRecord, record, task) {
+    function (search, runtime, currentRecord, record, url) {
         var translations = getTranslations()
         var defaultEntities = [];
         var allEntities = []
@@ -715,8 +715,17 @@ define(['N/search', 'N/runtime', 'N/currentRecord', 'N/record', 'N/task'],
                 }
                 return result;
             }
+            var summary = {
+                s: 0,
+                p: result.length,
+                n: 0,
+                e: 0
+            }
+
+
             var logRecord = record.create({ type: 'customrecord_lmry_co_massive_cer_log' });
             logRecord.setValue('custrecord_lmry_co_mass_vendors', JSON.stringify(compactEntityArray(activeAntities)));
+            logRecord.setValue('custrecord_lmry_co_mass_summary', JSON.stringify(summary));
             var rec_id = logRecord.save();
 
             currentRecord.setValue({
@@ -726,60 +735,35 @@ define(['N/search', 'N/runtime', 'N/currentRecord', 'N/record', 'N/task'],
         }
 
         function continueExecutionFlow(vendor, recordMassiveId, isError) {
-            if (!recordMassiveId) return false;
-            var recordMasive = record.load({ id: recordMassiveId, type: "customrecord_lmry_co_massive_cer_log" });
-            var vendors = JSON.parse(recordMasive.getValue("custrecord_lmry_co_mass_vendors"));
-            vendors[vendor] = isError ? "ERROR" : "FINISH";
-            recordMasive.setValue('custrecord_lmry_co_mass_vendors', JSON.stringify(vendors));
-            recordMasive.save();
-
-            var params = {
-                "custscript_lmry_co_massive_record_id": recordMassiveId
-            };
-            task.create({
-                taskType: task.TaskType.SCHEDULED_SCRIPT,
-                scriptId: "customscript_lmry_co_cert_massive_schdl",
-                params: params
-            }).submit();
-        }
-
-        function createSublistMassiveProcess(form,serverWidget) {
-            form.addTab({
-                id: 'tab_massive',
-                label: "Massive generation Log"
-            });
-
-            var sublist = form.addSublist({
-                id: 'custpage_list_massive',
-                label: "Massive generation Log",
-                tab: 'tab_massive',
-                type: serverWidget.SublistType.LIST
-            });
-
-            var fields = [
-                { id: "row_date", label: "Created by", type: serverWidget.FieldType.TEXT },
-                { id: "row_report", label: "Report", type: serverWidget.FieldType.TEXT },
-                { id: "row_period", label: "Period", type: serverWidget.FieldType.TEXT },
-                { id: "row_subsidiary", label: "Subsidiary", type: serverWidget.FieldType.TEXT },
-                { id: "row_multibook", label: "Multibook", type: serverWidget.FieldType.TEXT },
-                { id: "row_created_by", label: "Created by", type: serverWidget.FieldType.TEXT },
-                { id: "row_file_name", label: "File Name", type: serverWidget.FieldType.TEXTAREA },
-                { id: "row_details", label: "Datails", type: serverWidget.FieldType.TEXTAREA },
-                { id: "row_summary", label: "Summary", type: serverWidget.FieldType.TEXTAREA },
-                { id: "row_download", label: "Download", type: serverWidget.FieldType.TEXTAREA }
-            ];
-
-            fields.forEach(fieldInfo => {
-                let field = this.sublist.addField(fieldInfo);
-                if (fieldInfo.displayType) {
-                    field.updateDisplayType({ displayType: fieldInfo.displayType });
+            require(['N/task'], function (task) {
+                if (!recordMassiveId) return false;
+                var recordMasive = record.load({ id: recordMassiveId, type: "customrecord_lmry_co_massive_cer_log" });
+                var vendors = JSON.parse(recordMasive.getValue("custrecord_lmry_co_mass_vendors"));
+                var summary = JSON.parse(recordMasive.getValue("custrecord_lmry_co_mass_summary"));
+                summary.p--;
+                if (isError) {
+                    summary.e++;
+                } else {
+                    summary.s++;
                 }
+
+                vendors[vendor] = isError ? "ERROR" : "FINISH";
+                recordMasive.setValue('custrecord_lmry_co_mass_vendors', JSON.stringify(vendors));
+                recordMasive.setValue('custrecord_lmry_co_mass_summary', JSON.stringify(summary));
+                recordMasive.save();
+
+                var params = {
+                    "custscript_lmry_co_massive_record_id": recordMassiveId
+                };
+                task.create({
+                    taskType: task.TaskType.SCHEDULED_SCRIPT,
+                    scriptId: "customscript_lmry_co_cert_massive_schdl",
+                    params: params
+                }).submit();
             });
 
-            sublist.addRefreshButton();
-
-            
         }
+
 
         return {
             createButtonVendor: createButtonVendor,

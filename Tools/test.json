@@ -1,24 +1,20 @@
-{
+Fail to evaluate script: {
     "type": "error.SuiteScriptError",
-    "name": "USER_ERROR",
-    "message": "Please enter value(s) for: Name",
-    "id": null,
+    "name": "SUITESCRIPT_API_UNAVAILABLE_IN_DEFINE",
+    "message": "All SuiteScript API Modules are unavailable while executing your define callback.",
+    "id": "",
     "stack": [
-        "USER_ERROR: Please enter value(s) for: Name",
-        "    at Object.createError [as nlapiCreateError] (https://tstdrv1774174.app.netsuite.com/javascript/suitescript/2.1/client/N.js?NS_VER=2025.1&minver=15&buildver=30178:828:16)",
-        "    at Object.createError [as create] (https://tstdrv1774174.app.netsuite.com/javascript/suitescript/2.1/client/N.js?NS_VER=2025.1&minver=15&buildver=30178:2144:42)",
-        "    at _assertValidation (https://tstdrv1774174.app.netsuite.com/javascript/suitescript/2.1/client/N.js?NS_VER=2025.1&minver=15&buildver=30178:65266:25)",
-        "    at https://tstdrv1774174.app.netsuite.com/javascript/suitescript/2.1/client/N.js?NS_VER=2025.1&minver=15&buildver=30178:65158:6",
-        "    at Result.then (https://tstdrv1774174.app.netsuite.com/javascript/suitescript/2.1/client/N.js?NS_VER=2025.1&minver=15&buildver=30178:2506:21)",
-        "    at thenableFunction(runAndAssertInternalScript).runAndAssertInternalScript (https://tstdrv1774174.app.netsuite.com/javascript/suitescript/2.1/client/N.js?NS_VER=2025.1&minver=15&buildver=30178:65156:8)",
-        "    at thenableFunction(runAndAssertInternalScript).thenable (https://tstdrv1774174.app.netsuite.com/javascript/suitescript/2.1/client/N.js?NS_VER=2025.1&minver=15&buildver=30178:3826:26)",
-        "    at thenableFunction(runMergeAndAssertInternalScript).runMergeAndAssertInternalScript (https://tstdrv1774174.app.netsuite.com/javascript/suitescript/2.1/client/N.js?NS_VER=2025.1&minver=15&buildver=30178:65143:39)",
-        "    at thenableFunction(runMergeAndAssertInternalScript).thenable (https://tstdrv1774174.app.netsuite.com/javascript/suitescript/2.1/client/N.js?NS_VER=2025.1&minver=15&buildver=30178:3826:26)",
-        "    at https://tstdrv1774174.app.netsuite.com/javascript/suitescript/2.1/client/N.js?NS_VER=2025.1&minver=15&buildver=30178:65458:46"
+        "Error\n at /SuiteBundles/Bundle 91257/LMRY_CO_Certificate_Massive_SCHDL_2.1.js:25:29"
     ],
     "cause": {
-        "name": "USER_ERROR",
-        "message": "Please enter value(s) for: Name"
+        "type": "internal error",
+        "code": "SUITESCRIPT_API_UNAVAILABLE_IN_DEFINE",
+        "details": "All SuiteScript API Modules are unavailable while executing your define callback.",
+        "userEvent": null,
+        "stackTrace": [
+            "Error\n at /SuiteBundles/Bundle 91257/LMRY_CO_Certificate_Massive_SCHDL_2.1.js:25:29"
+        ],
+        "notifyOff": false
     },
     "notifyOff": false,
     "userFacing": true

@@ -21,10 +21,7 @@ define([
     task,
     config
 ) => {
-    const features = {
-        SUBSIDIARY: runtime.isFeatureInEffect({ feature: "SUBSIDIARIES" }),
-        MULTIBOOK: runtime.isFeatureInEffect({ feature: "MULTIBOOK" })
-    }
+
 
     const execute = (scriptContext) => {
         try {
@@ -42,7 +39,7 @@ define([
                 if (!isRunning) {
                     const recordLogId = createRecordLog(recordMassive, name);
                     updateVendorStatus(vendors, pendingVendor, paramRecordMassiveId);
-                    executeReport(recordMassive,pendingVendor,recordLogId,reportInfo);
+                    executeReport(recordMassive, pendingVendor, recordLogId, reportInfo);
                 }
             }
 
@@ -67,7 +64,7 @@ define([
             "custrecord_lmry_co_mass_sub",
             "custrecord_lmry_co_mass_ibook",
             "custrecord_lmry_co_mass_wht_type",
-            "custrecord_lmry_co_mass_city_origin"
+            "custrecord_lmry_co_mass_city_origin",
         ]
         search.create({
             type: "customrecord_lmry_co_massive_cer_log",
@@ -125,6 +122,10 @@ define([
 
     const createRecordLog = (recordMasive, nameReport) => {
         const translations = getTranslations();
+        const features = {
+            SUBSIDIARY: runtime.isFeatureInEffect({ feature: "SUBSIDIARIES" }),
+            MULTIBOOK: runtime.isFeatureInEffect({ feature: "MULTIBOOK" })
+        }
         const {
             custrecord_lmry_co_mass_tran: tran,
             custrecord_lmry_co_mass_peri_year: periodYear,
@@ -225,6 +226,7 @@ define([
             id: paramRecordMassiveId,
             values: {
                 custrecord_lmry_co_mass_vendors: JSON.stringify(vendors),
+                custrecord_lmry_co_mass_summary: JSON.stringify(vendors),
             },
             options: {
                 enableSourcing: false,
@@ -235,6 +237,10 @@ define([
     }
 
     const executeReport = (recordMasive, pendingVendor, recordLogId, reportInfo) => {
+        const features = {
+            SUBSIDIARY: runtime.isFeatureInEffect({ feature: "SUBSIDIARIES" }),
+            MULTIBOOK: runtime.isFeatureInEffect({ feature: "MULTIBOOK" })
+        }
         const {
             custrecord_lmry_co_mass_tran: reportId,
             custrecord_lmry_co_mass_sub: subsidiary,
