@@ -548,7 +548,8 @@ function execute(context) {
                 var listaLog = form.addSublist({
                     id: 'custpage_sublista',
                     type: UI.SublistType.STATICLIST,
-                    label: GLOBAL_LABELS['logGeneracion'][language]
+                    label: GLOBAL_LABELS['logGeneracion'][language],
+                    tab: "custpage_maintab"
                 });
                 listaLog.addField({
                     id: 'custpage_lmry_rg_trandate',
@@ -1339,14 +1340,14 @@ function createSublistMassiveProcess(form, serverWidget) {
 
     form.addTab({
         id: 'tab_massive',
-        label: "Massive generation Log"
+        label: "Tab Massive generation Log"
     });
 
     var sublist = form.addSublist({
         id: 'custpage_list_massive',
         label: "Massive generation Log",
         tab: 'tab_massive',
-        type: serverWidget.SublistType.LIST
+        type: serverWidget.SublistType.STATICLIST
     });
 
     var fields = [
@@ -1355,10 +1356,10 @@ function createSublistMassiveProcess(form, serverWidget) {
         { id: "row_period", label: "Period", type: serverWidget.FieldType.TEXT },
         { id: "row_subsidiary", label: "Subsidiary", type: serverWidget.FieldType.TEXT },
         { id: "row_multibook", label: "Multibook", type: serverWidget.FieldType.TEXT },
-        { id: "row_created_by", label: "Created by", type: serverWidget.FieldType.TEXT },
-        { id: "row_file_name", label: "File Name", type: serverWidget.FieldType.TEXTAREA },
+        { id: "row_created_by", label: "Created by", type: serverWidget.FieldType.TEXT },    
         { id: "row_details", label: "Datails", type: serverWidget.FieldType.TEXTAREA },
         { id: "row_summary", label: "Summary", type: serverWidget.FieldType.TEXTAREA },
+        { id: "row_file_name", label: "File Name", type: serverWidget.FieldType.TEXTAREA },
         { id: "row_download", label: "Download", type: serverWidget.FieldType.TEXTAREA }
     ];
 
@@ -1388,7 +1389,7 @@ function createSublistMassiveProcess(form, serverWidget) {
             type: FORMAT.Type.DATE
         });
 
-        sublist.setSublistValue({ id: "row_date", line: i, value: " " });
+        sublist.setSublistValue({ id: "row_date", line: i, value: process.created });
         sublist.setSublistValue({ id: "row_report", line: i, value: process.reportName });
         sublist.setSublistValue({ id: "row_period", line: i, value: process.periodName });
         sublist.setSublistValue({ id: "row_subsidiary", line: i, value: process.subsidiary });
@@ -1419,6 +1420,7 @@ function getRecordMassive() {
                 SEARCH.createColumn({ name: 'formulatext', formula: "{custrecord_lmry_co_mass_empl}" }),
                 SEARCH.createColumn({ name: 'formulatext', formula: "{custrecord_lmry_co_mass_name}" }),
                 SEARCH.createColumn({ name: 'formulatext', formula: "{custrecord_lmry_co_mass_summary}" }),
+                SEARCH.createColumn({ name: "internalid", sort: SEARCH.Sort.DESC }),
             ]
     }).runPaged({ pageSize: 1000 });
     if (pageData) {
