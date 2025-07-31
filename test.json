@@ -1,21 +1,2963 @@
 {
-   type: "error.SuiteScriptError",
-   name: "INVALID_TRANS_TYP",
-   message: "Transaction type specified is incorrect.",
-   id: "",
-   stack: [
-      "Error\n    at suitescript/resources/javascript/record/recordImpl.js:96:12\n    at Function.loadRecord_raw (suitescript/resources/javascript/record/recordImpl.js:94:24)\n    at suitescript/resources/javascript/record/recordImpl.js:82:27\n    at Object.loadRecord (suitescript/resources/javascript/record/recordImpl.js:80:24)\n    at getItems (/SuiteBundles/Bundle 35754/LMRY_MX_Pedimentos_resltet.js:395:41)\n    at Object.get (/SuiteBundles/Bundle 35754/LMRY_MX_Pedimentos_resltet.js:119:35)"
-   ],
-   cause: {
-      type: "internal error",
-      code: "INVALID_TRANS_TYP",
-      details: "Transaction type specified is incorrect.",
-      userEvent: null,
-      stackTrace: [
-         "Error\n    at suitescript/resources/javascript/record/recordImpl.js:96:12\n    at Function.loadRecord_raw (suitescript/resources/javascript/record/recordImpl.js:94:24)\n    at suitescript/resources/javascript/record/recordImpl.js:82:27\n    at Object.loadRecord (suitescript/resources/javascript/record/recordImpl.js:80:24)\n    at getItems (/SuiteBundles/Bundle 35754/LMRY_MX_Pedimentos_resltet.js:395:41)\n    at Object.get (/SuiteBundles/Bundle 35754/LMRY_MX_Pedimentos_resltet.js:119:35)"
-      ],
-      notifyOff: false
-   },
-   notifyOff: false,
-   userFacing: true
+    "applyWhtCode": true,
+    "documentType": "669",
+    "eiStatus": {
+        "field": {
+            "id": "custbody_psg_ei_status",
+            "label": "E-Document Status",
+            "type": "select"
+        },
+        "value": "1"
+    },
+    "type": {
+        "text": "creditmemo",
+        "value": 8
+    },
+    "trandate": "24/7/2025",
+    "entity": "2960304",
+    "subsidiary": "49",
+    "currency": "24",
+    "countryCode": "AR",
+    "createdFrom": "88016683",
+    "unapplied": 0,
+    "validateTotalCreditMemo": true,
+    "amountPerception": 266409,
+    "notSend": true,
+    "responsableType": "1",
+    "items": {
+        "362279996": {
+            "lineuniquekey": "362279996",
+            "isTribute": false,
+            "amount": 2131272,
+            "revised": false,
+            "perceptionPercentage": "",
+            "grossAmount": 2578839.12,
+            "taxAmount": 447567.12,
+            "id": "1033",
+            "catalog": "no catalogo",
+            "line": 0,
+            "description": "",
+            "type": "Service"
+        },
+        "362279997": {
+            "lineuniquekey": "362279997",
+            "isTribute": false,
+            "amount": 532818,
+            "revised": false,
+            "perceptionPercentage": "",
+            "grossAmount": 644709.78,
+            "taxAmount": 111891.78,
+            "id": "1033",
+            "catalog": "no catalogo",
+            "line": 1,
+            "description": "",
+            "type": "Service"
+        },
+        "362279998": {
+            "lineuniquekey": "362279998",
+            "isTribute": false,
+            "amount": 2131272,
+            "revised": false,
+            "perceptionPercentage": "",
+            "grossAmount": 2578839.12,
+            "taxAmount": 447567.12,
+            "id": "1031",
+            "catalog": "no catalogo",
+            "line": 2,
+            "description": "",
+            "type": "Service"
+        },
+        "362279999": {
+            "lineuniquekey": "362279999",
+            "isTribute": false,
+            "amount": 532818,
+            "revised": false,
+            "perceptionPercentage": "",
+            "grossAmount": 644709.78,
+            "taxAmount": 111891.78,
+            "id": "1031",
+            "catalog": "no catalogo",
+            "line": 3,
+            "description": "",
+            "type": "Service"
+        },
+        "362281255": {
+            "lineuniquekey": "362281255",
+            "isTribute": true,
+            "amount": 266409,
+            "revised": true,
+            "perceptionPercentage": 0.05,
+            "grossAmount": 266409,
+            "taxAmount": 0,
+            "id": "4478", //bsAs
+            "catalog": "no catalogo",
+            "line": 4,
+            "description": "IBB BSAS Percepcion Ventas - CC242445 - Total",
+            "type": "OthCharge"
+        },
+        "362281256": {
+            "lineuniquekey": "362281256",
+            "isTribute": true,
+            "amount": 0,
+            "revised": true,
+            "perceptionPercentage": 0,
+            "grossAmount": 0,
+            "taxAmount": 0,
+            "id": "4479",//CABA
+            "catalog": "no catalogo",
+            "line": 5,
+            "description": "IIBB CABA Percepcion Ventas - CC242782 - Total",
+            "type": "OthCharge"
+        }
+    },
+    "exchangerate": 1,
+    "subtotalCurrency": 5328180,
+    "totalCurrency": 6447097.800000001,
+    "subtotal": 5328180,
+    "total": 6447097.800000001,
+    "taxtotal": 1118917.8,
+    "currentRecord": {
+        "id": 88095560,
+        "type": "creditmemo",
+        "isDynamic": false,
+        "fields": {
+            "_csrf": {
+                "legacyStringValue": "S8_FwbARm6QsLdVxLc8Kue8kpNdq_1yBZdf_k27CrgOW4yXYKuA5UEGaKGEECiJwq2otq7fhKKwnbQv1Vny2XMVT7fSL_1UA_L2fW8yOfaPRjOW4Zf3Lk1lYuNO7aCyUyTcNQlmazhSbRCQ4-TaOxMaNyDkSFiQj_Voy0zFUZNg="
+            },
+            "_eml_nkey_": {
+                "legacyStringValue": "3719513~3136266~1303~N"
+            },
+            "account": {
+                "legacyStringValue": "124"
+            },
+            "amountpaid": {
+                "legacyStringValue": "6713506.80"
+            },
+            "amountremaining": {
+                "legacyStringValue": "0.00"
+            },
+            "applied": {
+                "legacyStringValue": "6713506.80"
+            },
+            "balance": {
+                "legacyStringValue": "6713506.80"
+            },
+            "balreadyrefunded": {
+                "legacyStringValue": "F"
+            },
+            "baserecordtype": {
+                "legacyStringValue": "creditmemo"
+            },
+            "billaddress": {
+                "legacyStringValue": "AHASA S.A\nPOSADAS 1232 - BARRIO : RECOLETA\nRecoleta C 1011\nArgentina"
+            },
+            "billingaddress": {
+                "legacyStringValue": "25568517"
+            },
+            "billingaddress2_set": {
+                "legacyStringValue": "var subrecord = nlapiViewSubrecord('billingaddress');\nvar addresstext;\nif (subrecord) {\n   addresstext = subrecord.getFieldValue('addrtext');\n} else {\n}\nnlapiSetFieldValue('billingaddress_text', addresstext);\n"
+            },
+            "billingaddress_key": {
+                "legacyStringValue": "25568517"
+            },
+            "billingaddress_text": {
+                "legacyStringValue": "AHASA S.A\nPOSADAS 1232 - BARRIO : RECOLETA\nRecoleta C 1011\nArgentina"
+            },
+            "billingaddress_type": {
+                "legacyStringValue": "shipaddr"
+            },
+            "billisresidential": {
+                "legacyStringValue": "F"
+            },
+            "canhavestackable": {
+                "legacyStringValue": "F"
+            },
+            "carrier": {
+                "legacyStringValue": "nonups"
+            },
+            "checkcommitted": {
+                "legacyStringValue": "F"
+            },
+            "class": {
+                "legacyStringValue": "21"
+            },
+            "companyid": {
+                "legacyStringValue": "2960304"
+            },
+            "contribpct": {
+                "legacyStringValue": "(80%)"
+            },
+            "createddate": {
+                "legacyStringValue": "24/7/2025 6:17 pm"
+            },
+            "createdfrom": {
+                "value": "88016683",
+                "legacyStringValue": "88016683"
+            },
+            "credholdentity": {
+                "legacyStringValue": "2960304"
+            },
+            "credholdoverride": {
+                "legacyStringValue": "F"
+            },
+            "credlim": {
+                "legacyStringValue": "70100.00"
+            },
+            "currency": {
+                "value": "24",
+                "legacyStringValue": "24"
+            },
+            "currencyname": {
+                "legacyStringValue": "ARS"
+            },
+            "currencyprecision": {
+                "legacyStringValue": "2"
+            },
+            "currencysymbol": {
+                "legacyStringValue": "ARS"
+            },
+            "custbody_15699_exclude_from_ep_process": {
+                "legacyStringValue": "F"
+            },
+            "custbody_3805_dunning_letters_toemail": {
+                "legacyStringValue": "F"
+            },
+            "custbody_3805_dunning_letters_toprint": {
+                "legacyStringValue": "F"
+            },
+            "custbody_3805_dunning_paused": {
+                "legacyStringValue": "F"
+            },
+            "custbody_4601_appliesto": {
+                "legacyStringValue": "F"
+            },
+            "custbody_4601_entitytype": {
+                "legacyStringValue": "2"
+            },
+            "custbody_add_contact1": {
+                "legacyStringValue": "belenrossi@michaelpage.com.ar"
+            },
+            "custbody_add_contact2": {
+                "legacyStringValue": "belenrossi@michaelpage.com.ar"
+            },
+            "custbody_adv_pdf_country": {
+                "legacyStringValue": "Argentina"
+            },
+            "custbody_apply_tds": {
+                "legacyStringValue": "F"
+            },
+            "custbody_apply_wht": {
+                "legacyStringValue": "F"
+            },
+            "custbody_autolataminvoiceemailsent": {
+                "legacyStringValue": "T"
+            },
+            "custbody_bs_ddr_donot_reprocess": {
+                "legacyStringValue": "F"
+            },
+            "custbody_check_advance_payment": {
+                "legacyStringValue": "F"
+            },
+            "custbody_com_sent": {
+                "legacyStringValue": "F"
+            },
+            "custbody_createdfromcc": {
+                "legacyStringValue": "T"
+            },
+            "custbody_display_vat_information": {
+                "legacyStringValue": "No"
+            },
+            "custbody_dom_ref": {
+                "legacyStringValue": "F"
+            },
+            "custbody_dup_inv": {
+                "legacyStringValue": "F"
+            },
+            "custbody_duplicate_invoice_value_en": {
+                "legacyStringValue": "No"
+            },
+            "custbody_edoc_gen_trans_pdf": {
+                "legacyStringValue": "F"
+            },
+            "custbody_ei_ds_txn_identifier": {
+                "legacyStringValue": "F"
+            },
+            "custbody_emea_transaction_type": {
+                "legacyStringValue": "custcred"
+            },
+            "custbody_ff_br_exclude_transaction": {
+                "legacyStringValue": "F"
+            },
+            "custbody_gfs_hub_bill_addre_upd_integr": {
+                "legacyStringValue": "F"
+            },
+            "custbody_gfs_hub_so_address_to_check": {
+                "legacyStringValue": "F"
+            },
+            "custbody_grp_so_po": {
+                "legacyStringValue": "F"
+            },
+            "custbody_iit_advance_tds_paid": {
+                "legacyStringValue": "F"
+            },
+            "custbody_iit_export": {
+                "legacyStringValue": "F"
+            },
+            "custbody_iit_gst_apply_advance_check": {
+                "legacyStringValue": "F"
+            },
+            "custbody_iit_isindiasubsidiary": {
+                "legacyStringValue": "F"
+            },
+            "custbody_iit_pos_invoice": {
+                "legacyStringValue": "1"
+            },
+            "custbody_iit_tran_body_revision": {
+                "legacyStringValue": "F"
+            },
+            "custbody_kyr_gl_code": {
+                "legacyStringValue": "salesord"
+            },
+            "custbody_kyr_sub": {
+                "legacyStringValue": "AR-MPI"
+            },
+            "custbody_latamicpaired": {
+                "legacyStringValue": "F"
+            },
+            "custbody_latamstagreccreated": {
+                "legacyStringValue": "F"
+            },
+            "custbody_lay_sent": {
+                "legacyStringValue": "F"
+            },
+            "custbody_lmry_alternate_account_credit": {
+                "legacyStringValue": "F"
+            },
+            "custbody_lmry_apply_wht_code": {
+                "value": true,
+                "legacyStringValue": "T"
+            },
+            "custbody_lmry_asiento_apertura": {
+                "legacyStringValue": "F"
+            },
+            "custbody_lmry_carga_inicial": {
+                "legacyStringValue": "F"
+            },
+            "custbody_lmry_co_incomesource": {
+                "legacyStringValue": "1"
+            },
+            "custbody_lmry_doc_ref_date": {
+                "legacyStringValue": "13/5/2025"
+            },
+            "custbody_lmry_doc_ref_type": {
+                "legacyStringValue": "667"
+            },
+            "custbody_lmry_doc_serie_ref": {
+                "legacyStringValue": "0004"
+            },
+            "custbody_lmry_document_type": {
+                "value": "669",
+                "legacyStringValue": "669"
+            },
+            "custbody_lmry_es_detraccion": {
+                "legacyStringValue": "F"
+            },
+            "custbody_lmry_guia_direccion_local_des": {
+                "legacyStringValue": "AHASA S.A\nPOSADAS 1232 - BARRIO : RECOLETA\nRecoleta C 1011\nArgentina"
+            },
+            "custbody_lmry_installments_details": {
+                "legacyStringValue": "{}"
+            },
+            "custbody_lmry_iva_uso_comun_cl": {
+                "legacyStringValue": "F"
+            },
+            "custbody_lmry_mx_ei_automatic": {
+                "legacyStringValue": "F"
+            },
+            "custbody_lmry_num_doc_ref": {
+                "legacyStringValue": "00001533"
+            },
+            "custbody_lmry_num_preimpreso": {
+                "legacyStringValue": "00001592"
+            },
+            "custbody_lmry_processed_transaction": {
+                "legacyStringValue": "2"
+            },
+            "custbody_lmry_scheduled_process": {
+                "legacyStringValue": "F"
+            },
+            "custbody_lmry_serie_doc_cxc": {
+                "legacyStringValue": "17"
+            },
+            "custbody_lmry_subsidiary_country": {
+                "legacyStringValue": "11"
+            },
+            "custbody_lmry_tax_tranf_gratu": {
+                "legacyStringValue": "F"
+            },
+            "custbody_lmry_tranf_gratuita": {
+                "legacyStringValue": "F"
+            },
+            "custbody_lmry_webserviceresponse": {
+                "legacyStringValue": "https://3719513.app.netsuite.com/core/media/media.nl?id=88008361&c=3719513&h=lqrMs_Dyb1Fq6M7RszzjvaKLiuccLghFMwiDuheYQph6gt_m&_xt=.pdf"
+            },
+            "custbody_locale": {
+                "legacyStringValue": "60"
+            },
+            "custbody_myei_debit_note": {
+                "legacyStringValue": "F"
+            },
+            "custbody_nexil_acc_invoice": {
+                "legacyStringValue": "F"
+            },
+            "custbody_nexil_billing_country": {
+                "legacyStringValue": "11"
+            },
+            "custbody_nexil_company_name": {
+                "legacyStringValue": "AHASA S.A"
+            },
+            "custbody_nexil_credit_term": {
+                "legacyStringValue": "2"
+            },
+            "custbody_nexil_customize_install_not_s": {
+                "legacyStringValue": "F"
+            },
+            "custbody_nexil_customize_installments": {
+                "legacyStringValue": "F"
+            },
+            "custbody_nexil_debit_memo": {
+                "legacyStringValue": "F"
+            },
+            "custbody_nexil_disable_custom_rec_calc": {
+                "legacyStringValue": "F"
+            },
+            "custbody_nexil_dl_skipdunning": {
+                "legacyStringValue": "F"
+            },
+            "custbody_nexil_eleinv_art73": {
+                "legacyStringValue": "F"
+            },
+            "custbody_nexil_eleinv_billableitem": {
+                "legacyStringValue": "F"
+            },
+            "custbody_nexil_eleinv_deposit": {
+                "legacyStringValue": "F"
+            },
+            "custbody_nexil_eleinv_discountitem": {
+                "legacyStringValue": "F"
+            },
+            "custbody_nexil_eleinv_enable": {
+                "legacyStringValue": "T"
+            },
+            "custbody_nexil_eleinv_items": {
+                "legacyStringValue": "F"
+            },
+            "custbody_nexil_end_of_month": {
+                "legacyStringValue": "F"
+            },
+            "custbody_nexil_exclude_from_decl": {
+                "legacyStringValue": "F"
+            },
+            "custbody_nexil_exclude_from_intrastat": {
+                "legacyStringValue": "F"
+            },
+            "custbody_nexil_exclude_tr_cr_comp": {
+                "legacyStringValue": "F"
+            },
+            "custbody_nexil_is_individual": {
+                "legacyStringValue": "F"
+            },
+            "custbody_nexil_isconsolidated": {
+                "legacyStringValue": "F"
+            },
+            "custbody_nexil_next_month": {
+                "legacyStringValue": "F"
+            },
+            "custbody_nexil_numb_forcerenum": {
+                "legacyStringValue": "F"
+            },
+            "custbody_nexil_numb_is_manual": {
+                "legacyStringValue": "F"
+            },
+            "custbody_nexil_numb_is_periodic": {
+                "legacyStringValue": "F"
+            },
+            "custbody_nexil_numb_seq_check": {
+                "legacyStringValue": "F"
+            },
+            "custbody_nexil_numb_skipnumb": {
+                "legacyStringValue": "F"
+            },
+            "custbody_nexil_operation_with_invoice": {
+                "legacyStringValue": "T"
+            },
+            "custbody_nexil_vat_reg_number": {
+                "legacyStringValue": "3371136396"
+            },
+            "custbody_non_call": {
+                "legacyStringValue": "F"
+            },
+            "custbody_nsts_ci_exclude": {
+                "legacyStringValue": "F"
+            },
+            "custbody_o2g_cep_end_sub": {
+                "legacyStringValue": "C1054AAA"
+            },
+            "custbody_o2g_logr_end_sub": {
+                "legacyStringValue": "Av. Córdoba 111 – Piso 14"
+            },
+            "custbody_o2g_transaction_cod_nfe": {
+                "legacyStringValue": "99999999"
+            },
+            "custbody_o2s_att_info_c_status_nota": {
+                "legacyStringValue": "F"
+            },
+            "custbody_o2s_c_memo_is_cancel": {
+                "legacyStringValue": "F"
+            },
+            "custbody_o2s_c_overwrite_tax": {
+                "legacyStringValue": "F"
+            },
+            "custbody_o2s_c_transaction_autoapprove": {
+                "legacyStringValue": "F"
+            },
+            "custbody_o2s_c_transaction_emite_gnre": {
+                "legacyStringValue": "F"
+            },
+            "custbody_o2s_c_truncate_campos": {
+                "legacyStringValue": "F"
+            },
+            "custbody_o2s_cod_pagto_c_diluir_taxa_c": {
+                "legacyStringValue": "F"
+            },
+            "custbody_o2s_cod_pagto_c_rec_autom_cli": {
+                "legacyStringValue": "F"
+            },
+            "custbody_o2s_invoice_c_complement_icms": {
+                "legacyStringValue": "F"
+            },
+            "custbody_o2s_invoice_c_complementar": {
+                "legacyStringValue": "F"
+            },
+            "custbody_o2s_parcela_c_pre_parcelament": {
+                "legacyStringValue": "F"
+            },
+            "custbody_o2s_payment_c_pcc": {
+                "legacyStringValue": "F"
+            },
+            "custbody_o2s_t_transac_dig_veri_nfe": {
+                "legacyStringValue": "NaN"
+            },
+            "custbody_o2s_tran_c_gera_cred_pis_cof": {
+                "legacyStringValue": "F"
+            },
+            "custbody_o2s_tran_c_parcelas_inativas": {
+                "legacyStringValue": "F"
+            },
+            "custbody_o2s_transacation_c_reclas_can": {
+                "legacyStringValue": "F"
+            },
+            "custbody_o2s_transaction_c_ant_zerada": {
+                "legacyStringValue": "F"
+            },
+            "custbody_o2s_transaction_c_contingenci": {
+                "legacyStringValue": "F"
+            },
+            "custbody_o2s_transaction_c_dev_omnicha": {
+                "legacyStringValue": "F"
+            },
+            "custbody_o2s_transaction_c_dig_dados": {
+                "legacyStringValue": "F"
+            },
+            "custbody_o2s_transaction_c_emitir_nota": {
+                "legacyStringValue": "F"
+            },
+            "custbody_o2s_transaction_c_n_c_icms_st": {
+                "legacyStringValue": "F"
+            },
+            "custbody_o2s_transaction_c_n_conta_ipi": {
+                "legacyStringValue": "F"
+            },
+            "custbody_o2s_transaction_c_sub_br": {
+                "legacyStringValue": "F"
+            },
+            "custbody_ops_app_email": {
+                "legacyStringValue": "1478578"
+            },
+            "custbody_ori_inv_date": {
+                "legacyStringValue": "13/5/2025"
+            },
+            "custbody_ori_inv_numb": {
+                "legacyStringValue": "FJ FA 0004-000001541"
+            },
+            "custbody_ori_inv_numb_link": {
+                "legacyStringValue": "86920340"
+            },
+            "custbody_page_fields_vatprepared": {
+                "legacyStringValue": "F"
+            },
+            "custbody_payment_exported_to_kyriba": {
+                "legacyStringValue": "F"
+            },
+            "custbody_pg_add_info_cancel": {
+                "legacyStringValue": "Debe salir confidencial y en descripción \"servicio de consultoría\"."
+            },
+            "custbody_pg_bad_debt_prov_type": {
+                "legacyStringValue": "1"
+            },
+            "custbody_pg_bad_debt_provisioned": {
+                "legacyStringValue": "F"
+            },
+            "custbody_pg_bank_check_box": {
+                "legacyStringValue": "F"
+            },
+            "custbody_pg_billing_hold_cc": {
+                "legacyStringValue": "F"
+            },
+            "custbody_pg_billing_hold_type": {
+                "legacyStringValue": "5"
+            },
+            "custbody_pg_bonus_total": {
+                "legacyStringValue": "6600000.00"
+            },
+            "custbody_pg_cc_inv_regenerate_notes": {
+                "legacyStringValue": "F"
+            },
+            "custbody_pg_cc_inv_regenerate_po": {
+                "legacyStringValue": "F"
+            },
+            "custbody_pg_changeowner_perm": {
+                "legacyStringValue": "2"
+            },
+            "custbody_pg_client_dunning_mgr": {
+                "legacyStringValue": "E10020595 Didac Padulles Plancheria"
+            },
+            "custbody_pg_client_fac_comp_bank_det": {
+                "legacyStringValue": "Account Name : Michael Page International Argentina S.A<BR>Bank Account No : 0943-25482/5<BR>Swift Code : BACOARBA<BR>Bank Name : HSBC Bank Argentina S.A<BR>Bank Address : Alem 653, CABA"
+            },
+            "custbody_pg_client_language": {
+                "legacyStringValue": "36"
+            },
+            "custbody_pg_co_retenciones_auto_ex_cn": {
+                "legacyStringValue": "F"
+            },
+            "custbody_pg_co_retenciones_auto_execut": {
+                "legacyStringValue": "F"
+            },
+            "custbody_pg_comm_reduction": {
+                "legacyStringValue": "F"
+            },
+            "custbody_pg_commission": {
+                "legacyStringValue": "F"
+            },
+            "custbody_pg_compliance_status_notemp": {
+                "legacyStringValue": "16"
+            },
+            "custbody_pg_confidential_sale": {
+                "legacyStringValue": "F"
+            },
+            "custbody_pg_cre_int_proc_exec_id": {
+                "legacyStringValue": "execution-d9fb0be4-4e8e-40f3-a9f8-d40b41a0f367-2025.04.29"
+            },
+            "custbody_pg_createdmanuallyo2c": {
+                "legacyStringValue": "F"
+            },
+            "custbody_pg_credit_contact_email": {
+                "legacyStringValue": "cobranzasargentina@michaelpage.com"
+            },
+            "custbody_pg_credit_origin": {
+                "legacyStringValue": "2"
+            },
+            "custbody_pg_currency_symbol": {
+                "legacyStringValue": "$"
+            },
+            "custbody_pg_current_accounting_period": {
+                "legacyStringValue": "1055"
+            },
+            "custbody_pg_current_ar_end_date": {
+                "legacyStringValue": "31/5/2025"
+            },
+            "custbody_pg_current_ar_period": {
+                "legacyStringValue": "1055"
+            },
+            "custbody_pg_domref_auto_approval": {
+                "legacyStringValue": "F"
+            },
+            "custbody_pg_ebni_journal_number": {
+                "legacyStringValue": "86683236"
+            },
+            "custbody_pg_ebni_journal_rev": {
+                "legacyStringValue": "86920341"
+            },
+            "custbody_pg_finance_approval_date": {
+                "legacyStringValue": "29/4/2025"
+            },
+            "custbody_pg_finance_approver": {
+                "legacyStringValue": "1000"
+            },
+            "custbody_pg_has_ad_item_value": {
+                "legacyStringValue": "No"
+            },
+            "custbody_pg_has_advertising_items": {
+                "legacyStringValue": "F"
+            },
+            "custbody_pg_hub_escalation_inv": {
+                "legacyStringValue": "F"
+            },
+            "custbody_pg_international_referral": {
+                "legacyStringValue": "F"
+            },
+            "custbody_pg_intg_migratedrecord": {
+                "legacyStringValue": "F"
+            },
+            "custbody_pg_intg_paid_in_full_updated": {
+                "legacyStringValue": "F"
+            },
+            "custbody_pg_intg_prs_instance_id": {
+                "legacyStringValue": "salesforce-live"
+            },
+            "custbody_pg_intg_prs_so_status_list": {
+                "legacyStringValue": "8"
+            },
+            "custbody_pg_intg_so_closed_via_intg": {
+                "legacyStringValue": "F"
+            },
+            "custbody_pg_intg_status_upd_in_prs": {
+                "legacyStringValue": "T"
+            },
+            "custbody_pg_intg_updated_timestamp": {
+                "legacyStringValue": "13/5/2025 3:24:45 PM"
+            },
+            "custbody_pg_invoicebothlayout": {
+                "legacyStringValue": "F"
+            },
+            "custbody_pg_is_confidential_value": {
+                "legacyStringValue": "No"
+            },
+            "custbody_pg_item_details": {
+                "legacyStringValue": "[{\"ID\":\"1033\",\"Name\":\"Honorarios de reclutamiento\",\"Amount\":\"2664090\",\"Quantity\":\"1\",\"Rate\":\"5328180\",\"GroupLineNumber\":\"1\",\"Description\":\"Honorarios de reclutamiento\",\"CandidateReference\":\"JN -042025-6711926\",\"CandidateName\":\"\",\"CandidatePosition\":\"Controller – Jefe de administración y finanzas\",\"PeriodEnd\":\"\",\"RateType\":\"Honorarios de reclutamiento\",\"AssignmentRef\":\"\",\"UnitText\":\"\",\"HasRetainerAssignment\":\"No\",\"Esdescription\":\"\",\"Esfeetype\":\"\"},{\"ID\":\"1031\",\"Name\":\"Honorarios de reclutamiento\",\"Amount\":\"2664090\",\"Quantity\":\"1\",\"Rate\":\"5328180\",\"GroupLineNumber\":\"2\",\"Description\":\"Honorarios de reclutamiento\",\"CandidateReference\":\"JN -042025-6711926\",\"CandidateName\":\"\",\"CandidatePosition\":\"Controller – Jefe de administración y finanzas\",\"PeriodEnd\":\"\",\"RateType\":\"Honorarios de reclutamiento\",\"AssignmentRef\":\"\",\"UnitText\":\"\",\"HasRetainerAssignment\":\"No\",\"Esdescription\":\"\",\"Esfeetype\":\"\"},{\"ID\":\"4478\",\"Name\":\"IIBB BsAs Percepcion - Ventas\",\"Amount\":\"266409\",\"Quantity\":\"2\",\"Rate\":\"266409\",\"GroupLineNumber\":\"0\",\"Description\":\"IBB BSAS Percepcion Ventas\",\"CandidateReference\":\"JN -042025-6711926\",\"CandidateName\":\"\",\"CandidatePosition\":\"Controller – Jefe de administración y finanzas\",\"PeriodEnd\":\"\",\"RateType\":\"IIBB BsAs Percepcion - Ventas\",\"AssignmentRef\":\"\",\"UnitText\":\"\",\"HasRetainerAssignment\":\"No\",\"Esdescription\":\"\",\"Esfeetype\":\"\"}]"
+            },
+            "custbody_pg_job_title": {
+                "legacyStringValue": "Controller – Jefe de administración y finanzas"
+            },
+            "custbody_pg_last_ack_int_proc_exec_id": {
+                "legacyStringValue": "execution-1ef0488b-8076-4dd4-8ada-65abb27a71ee-2025.05.13"
+            },
+            "custbody_pg_latam_clientaddr1": {
+                "legacyStringValue": "POSADAS 1232 - BARRIO : RECOLETA"
+            },
+            "custbody_pg_man_mark_cos_email": {
+                "legacyStringValue": "F"
+            },
+            "custbody_pg_manuallly_actioned": {
+                "legacyStringValue": "F"
+            },
+            "custbody_pg_massapprovedyn": {
+                "legacyStringValue": "F"
+            },
+            "custbody_pg_memo2": {
+                "legacyStringValue": "Se factura retainer por comienzo de busqueda y presentacion de Shortlist."
+            },
+            "custbody_pg_nextperiod_tf": {
+                "legacyStringValue": "F"
+            },
+            "custbody_pg_o2c_mx_email_cancel_sent": {
+                "legacyStringValue": "F"
+            },
+            "custbody_pg_o2c_so_status": {
+                "legacyStringValue": "8"
+            },
+            "custbody_pg_package_bonus": {
+                "legacyStringValue": "6600000.00"
+            },
+            "custbody_pg_package_discount": {
+                "legacyStringValue": "0"
+            },
+            "custbody_pg_package_total": {
+                "legacyStringValue": "92400000.00"
+            },
+            "custbody_pg_po_mg_st_latam": {
+                "legacyStringValue": "6"
+            },
+            "custbody_pg_postingperiodoverride": {
+                "legacyStringValue": "1054"
+            },
+            "custbody_pg_preferred_billing_date": {
+                "legacyStringValue": "37"
+            },
+            "custbody_pg_proforma_approval_date": {
+                "legacyStringValue": "13/5/2025"
+            },
+            "custbody_pg_proforma_required": {
+                "legacyStringValue": "F"
+            },
+            "custbody_pg_prs_sale_number": {
+                "legacyStringValue": "SO0000636905"
+            },
+            "custbody_pg_prs_sale_status": {
+                "legacyStringValue": "3"
+            },
+            "custbody_pg_reason_cancel_perm": {
+                "legacyStringValue": "12"
+            },
+            "custbody_pg_refund_requestor": {
+                "legacyStringValue": "1478578"
+            },
+            "custbody_pg_refund_status": {
+                "legacyStringValue": "1"
+            },
+            "custbody_pg_salary": {
+                "legacyStringValue": "85800000.00"
+            },
+            "custbody_pg_salary_total": {
+                "legacyStringValue": "85800000.00"
+            },
+            "custbody_pg_sale_po_required": {
+                "legacyStringValue": "Not Required"
+            },
+            "custbody_pg_sale_rev_type": {
+                "legacyStringValue": "1"
+            },
+            "custbody_pg_service_provided_bogota": {
+                "legacyStringValue": "F"
+            },
+            "custbody_pg_so_cc_tran_date": {
+                "legacyStringValue": "29/4/2025"
+            },
+            "custbody_pg_so_client_id": {
+                "legacyStringValue": "C10298552"
+            },
+            "custbody_pg_sotobemassapproved": {
+                "legacyStringValue": "F"
+            },
+            "custbody_pg_sr_approval_status": {
+                "legacyStringValue": "2"
+            },
+            "custbody_pg_tax_details": {
+                "legacyStringValue": "[{\"Rate\":\"21.0%\",\"Amount\":\"1118917.8\"}]"
+            },
+            "custbody_pg_tax_rate": {
+                "legacyStringValue": "20"
+            },
+            "custbody_pg_total_fees": {
+                "legacyStringValue": "5328180.00"
+            },
+            "custbody_pg_trx_companyname": {
+                "legacyStringValue": "AHASA S.A"
+            },
+            "custbody_pg_vacancy_number": {
+                "legacyStringValue": "JN -042025-6711926"
+            },
+            "custbody_pos_spesometro": {
+                "legacyStringValue": "F"
+            },
+            "custbody_psg_br_tran_sub_country": {
+                "legacyStringValue": "11"
+            },
+            "custbody_psg_ei_sending_method": {
+                "legacyStringValue": "19"
+            },
+            "custbody_psg_ei_status": {
+                "value": "1",
+                "legacyStringValue": "1"
+            },
+            "custbody_psg_ei_template": {
+                "legacyStringValue": "9"
+            },
+            "custbody_psg_ei_trans_edoc_standard": {
+                "legacyStringValue": "3"
+            },
+            "custbody_report_timestamp": {
+                "legacyStringValue": "29/04/2025 12:24:34"
+            },
+            "custbody_req_tax_red": {
+                "legacyStringValue": "F"
+            },
+            "custbody_serv_del_date": {
+                "legacyStringValue": "May 2025"
+            },
+            "custbody_sii_article_61d": {
+                "legacyStringValue": "F"
+            },
+            "custbody_sii_article_72_73": {
+                "legacyStringValue": "F"
+            },
+            "custbody_sii_is_third_party": {
+                "legacyStringValue": "F"
+            },
+            "custbody_sii_not_reported_in_time": {
+                "legacyStringValue": "F"
+            },
+            "custbody_sit_calc_impost": {
+                "legacyStringValue": "F"
+            },
+            "custbody_sit_invoce_h_status_prc": {
+                "legacyStringValue": "inserido"
+            },
+            "custbody_sit_invoce_t_raz_soc_sub": {
+                "legacyStringValue": "MICHAEL PAGE INTERNATIONAL ARGENTINA S.A."
+            },
+            "custbody_sit_recalc_parc_reten": {
+                "legacyStringValue": "F"
+            },
+            "custbody_sit_transaction_c_aluguel": {
+                "legacyStringValue": "F"
+            },
+            "custbody_sit_transaction_chave_nfe": {
+                "legacyStringValue": "250700199999999NaN"
+            },
+            "custbody_sit_transaction_t_aliq_iss": {
+                "legacyStringValue": "0.0"
+            },
+            "custbody_sit_transaction_t_base_iss": {
+                "legacyStringValue": "0.00"
+            },
+            "custbody_sit_transaction_t_parcelament": {
+                "legacyStringValue": "/app/site/hosting/scriptlet.nl?script=1920&deploy=1&compid=3719513&view=1&tpTran=salesorder&idTran='+nlapiGetFieldValue('id')+'&idCli=2960304"
+            },
+            "custbody_sit_transaction_t_val_cofins": {
+                "legacyStringValue": "0.00"
+            },
+            "custbody_sit_transaction_t_val_csll": {
+                "legacyStringValue": "0.00"
+            },
+            "custbody_sit_transaction_t_val_inss": {
+                "legacyStringValue": "0.00"
+            },
+            "custbody_sit_transaction_t_val_ir": {
+                "legacyStringValue": "0.00"
+            },
+            "custbody_sit_transaction_t_val_pis": {
+                "legacyStringValue": "0.00"
+            },
+            "custbody_sit_transaction_t_valor_iss": {
+                "legacyStringValue": "0.00"
+            },
+            "custbody_sit_transaction_t_vl_ret_bar": {
+                "legacyStringValue": "0.00"
+            },
+            "custbody_sononcompliant": {
+                "legacyStringValue": "F"
+            },
+            "custbody_sr_created": {
+                "legacyStringValue": "F"
+            },
+            "custbody_stc_amount_after_discount": {
+                "legacyStringValue": "5328180.00"
+            },
+            "custbody_stc_tax_after_discount": {
+                "legacyStringValue": "1118917.80"
+            },
+            "custbody_stc_total_after_discount": {
+                "legacyStringValue": "6447097.80"
+            },
+            "custbody_subs_address": {
+                "legacyStringValue": "Av. Córdoba 111 – Piso 14"
+            },
+            "custbody_subsidiary_language": {
+                "legacyStringValue": "36"
+            },
+            "custbody_time_doc_att": {
+                "legacyStringValue": "F"
+            },
+            "custpage_cs_msgs": {
+                "legacyStringValue": "{\"ERR_FIELD_TAXREPORTING_COUNTERPARTYVAT_VALUE\":\"Enter a valid VAT number in the Partner ID field on the Tax Reporting subtab.\",\"ERR_FIELD_COUNTERPARTYVAT_VALUE\":\"Enter a valid VAT number in the Partner ID field.\"}"
+            },
+            "custpage_inline_html": {
+                "legacyStringValue": "<script> function popupCallback(str) { window.location.reload(); } function customclose(params) { window.close() }function updatebutton() {window.popupCallback = popupCallback; window.open('/app/site/hosting/scriptlet.nl?script=9839&deploy=1&compid=3719513&recordid=88095560&recordtype=creditmemo', '_blank', 'location=yes,height=570,width=1512,scrollbars=yes,status=yes'); }</script>"
+            },
+            "custpage_itr_nexus": {
+                "legacyStringValue": "AR"
+            },
+            "custpage_lrcfm_datacarrier_text": {
+                "legacyStringValue": "{}"
+            },
+            "custpage_taf_subsidiarycache": {
+                "legacyStringValue": "{\"38\":\"AR\",\"43\":\"AR\",\"49\":\"AR\",\"51\":\"AR\",\"37\":\"BR\",\"44\":\"BR\",\"61\":\"BR\",\"65\":\"BR\",\"66\":\"BR\",\"67\":\"BR\",\"68\":\"BR\",\"69\":\"BR\",\"70\":\"BR\",\"71\":\"BR\",\"64\":\"BR\",\"78\":\"BR\",\"63\":\"BR\",\"73\":\"BR\",\"72\":\"BR\",\"62\":\"BR\",\"75\":\"BR\",\"76\":\"BR\",\"77\":\"BR\",\"74\":\"BR\",\"42\":\"CL\",\"48\":\"CL\",\"59\":\"CL\",\"57\":\"CL\",\"60\":\"CL\",\"58\":\"CL\",\"41\":\"CO\",\"47\":\"CO\",\"52\":\"CO\",\"208\":\"CO\",\"39\":\"MX\",\"224\":\"MX\",\"45\":\"MX\",\"55\":\"MX\",\"54\":\"MX\",\"225\":\"MX\",\"226\":\"MX\",\"56\":\"MX\",\"227\":\"MX\",\"215\":\"PA\",\"218\":\"PA\",\"40\":\"PE\",\"46\":\"PE\",\"53\":\"PE\",\"205\":\"PE\"}"
+            },
+            "dbstrantype": {
+                "legacyStringValue": "CustCred"
+            },
+            "edition": {
+                "legacyStringValue": "XX"
+            },
+            "email": {
+                "legacyStringValue": "karina.iozzolino@accor.com,karina.iozzolino@accor.com"
+            },
+            "emailaddr": {
+                "legacyStringValue": "karina.iozzolino@accor.com,karina.iozzolino@accor.com"
+            },
+            "entity": {
+                "value": "2960304",
+                "legacyStringValue": "2960304"
+            },
+            "entityfieldname": {
+                "legacyStringValue": "entity"
+            },
+            "entityname": {
+                "legacyStringValue": "C10298552 AHASA S.A"
+            },
+            "entitynexus": {
+                "legacyStringValue": "36"
+            },
+            "entryformquerystring": {
+                "legacyStringValue": "e=T&id=88095560"
+            },
+            "exchangerate": {
+                "legacyStringValue": "1.00"
+            },
+            "excludecommission": {
+                "legacyStringValue": "F"
+            },
+            "excludefromglnumbering": {
+                "legacyStringValue": "F"
+            },
+            "hasfedexfreightservice": {
+                "legacyStringValue": "F"
+            },
+            "hasprecalcs": {
+                "legacyStringValue": "F"
+            },
+            "id": {
+                "legacyStringValue": "88095560"
+            },
+            "initialtranid": {
+                "legacyStringValue": "CNFJ00000486"
+            },
+            "isbasecurrency": {
+                "legacyStringValue": "T"
+            },
+            "iseitf81on": {
+                "legacyStringValue": "F"
+            },
+            "isonlinetransaction": {
+                "legacyStringValue": "F"
+            },
+            "itemshippingcostfxrate": {
+                "legacyStringValue": "0.000565"
+            },
+            "lastmodifieddate": {
+                "legacyStringValue": "30/7/2025 8:39 pm"
+            },
+            "linked": {
+                "legacyStringValue": "F"
+            },
+            "linkedclosedperioddiscounts": {
+                "legacyStringValue": "F"
+            },
+            "linkedrevrecje": {
+                "legacyStringValue": "F"
+            },
+            "manualcredithold": {
+                "legacyStringValue": "F"
+            },
+            "nexttranid": {
+                "legacyStringValue": "CNFJ00000488"
+            },
+            "nexus": {
+                "legacyStringValue": "36"
+            },
+            "nexus_country": {
+                "legacyStringValue": "AR"
+            },
+            "nlapiCC": {
+                "legacyStringValue": "F"
+            },
+            "nldept": {
+                "legacyStringValue": "0"
+            },
+            "nlloc": {
+                "legacyStringValue": "0"
+            },
+            "nlrole": {
+                "legacyStringValue": "1303"
+            },
+            "nlsub": {
+                "legacyStringValue": "49"
+            },
+            "nluser": {
+                "legacyStringValue": "3136266"
+            },
+            "nsapiCT": {
+                "legacyStringValue": "1753994089778"
+            },
+            "ntype": {
+                "legacyStringValue": "10"
+            },
+            "oldrevenuecommitment": {
+                "legacyStringValue": "F"
+            },
+            "oncredithold": {
+                "legacyStringValue": "(On Hold)"
+            },
+            "origcurrency": {
+                "legacyStringValue": "24"
+            },
+            "origexchangerate": {
+                "legacyStringValue": "1.00"
+            },
+            "origtotal": {
+                "legacyStringValue": "-6713506.8"
+            },
+            "origtotal2": {
+                "legacyStringValue": "6713506.8"
+            },
+            "overallbalance": {
+                "legacyStringValue": "6713506.80"
+            },
+            "overallunbilledorders": {
+                "legacyStringValue": "0.00"
+            },
+            "postingperiod": {
+                "legacyStringValue": "1058"
+            },
+            "pp_e": {
+                "legacyStringValue": "31/7/2025"
+            },
+            "pp_s": {
+                "legacyStringValue": "1/7/2025"
+            },
+            "ppsetbyuser": {
+                "legacyStringValue": "F"
+            },
+            "prevdate": {
+                "legacyStringValue": "18/7/2025"
+            },
+            "prevrep": {
+                "legacyStringValue": "3502959"
+            },
+            "primarybookbasecurrency": {
+                "legacyStringValue": "24"
+            },
+            "primarycurrency": {
+                "legacyStringValue": "24.00"
+            },
+            "primarycurrencyfxrate": {
+                "legacyStringValue": "1.00"
+            },
+            "recordcreatedby": {
+                "legacyStringValue": "1000"
+            },
+            "recordcreateddate": {
+                "legacyStringValue": "04/29/2025 12:24:44"
+            },
+            "saleseffectivedate": {
+                "legacyStringValue": "18/7/2025"
+            },
+            "salesrep": {
+                "legacyStringValue": "3502959"
+            },
+            "salesteamtotal": {
+                "legacyStringValue": "100"
+            },
+            "shipaddress": {
+                "legacyStringValue": "AHASA S.A\nPOSADAS 1232 - BARRIO : RECOLETA\nRecoleta C 1011\nArgentina"
+            },
+            "shipcountry": {
+                "legacyStringValue": "AR"
+            },
+            "shipisresidential": {
+                "legacyStringValue": "F"
+            },
+            "shipoverride": {
+                "legacyStringValue": "F"
+            },
+            "shippingaddress": {
+                "legacyStringValue": "25568517"
+            },
+            "shippingaddress2_set": {
+                "legacyStringValue": "var subrecord = nlapiViewSubrecord('shippingaddress');\nvar addresstext;\nif (subrecord) {\n   addresstext = subrecord.getFieldValue('addrtext');\n} else {\n}\nnlapiSetFieldValue('shippingaddress_text', addresstext);\n"
+            },
+            "shippingaddress_key": {
+                "legacyStringValue": "25568517"
+            },
+            "shippingaddress_text": {
+                "legacyStringValue": "AHASA S.A\nPOSADAS 1232 - BARRIO : RECOLETA\nRecoleta C 1011\nArgentina"
+            },
+            "shippingaddress_type": {
+                "legacyStringValue": "shipaddr"
+            },
+            "shipstate": {
+                "legacyStringValue": "C"
+            },
+            "shipzip": {
+                "legacyStringValue": "1011"
+            },
+            "status": {
+                "legacyStringValue": "Fully Applied"
+            },
+            "statusRef": {
+                "legacyStringValue": "applied"
+            },
+            "subsidiary": {
+                "value": "49",
+                "legacyStringValue": "49"
+            },
+            "subtotal": {
+                "legacyStringValue": "5594589.00"
+            },
+            "syncsalesteams": {
+                "legacyStringValue": "F"
+            },
+            "sys_id": {
+                "legacyStringValue": "19004826097706182"
+            },
+            "tax_affecting_address_fields_before_recalc": {
+                "legacyStringValue": "city\u0003Recoleta\u0004state\u0003C\u0004zip\u00031011\u0004country\u0003AR"
+            },
+            "taxperiod": {
+                "legacyStringValue": "1797"
+            },
+            "taxtotal": {
+                "value": 1118917.8,
+                "legacyStringValue": "1118917.80"
+            },
+            "tobeemailed": {
+                "legacyStringValue": "F"
+            },
+            "tobefaxed": {
+                "legacyStringValue": "F"
+            },
+            "tobeprinted": {
+                "legacyStringValue": "F"
+            },
+            "total": {
+                "legacyStringValue": "6713506.80"
+            },
+            "trandate": {
+                "value": "2025-07-24T05:00:00.000Z",
+                "legacyStringValue": "24/7/2025"
+            },
+            "tranid": {
+                "legacyStringValue": "CNFJ00000486"
+            },
+            "transactionnumber": {
+                "legacyStringValue": "CUSTCRED288469"
+            },
+            "type": {
+                "legacyStringValue": "custcred"
+            },
+            "unapplied": {
+                "value": 0,
+                "legacyStringValue": "0.00"
+            },
+            "unbilledorders": {
+                "legacyStringValue": "0.00"
+            },
+            "vatregnum": {
+                "legacyStringValue": "3371136396"
+            },
+            "version": {
+                "legacyStringValue": "17"
+            },
+            "voided": {
+                "legacyStringValue": "F"
+            },
+            "warnnexuschange": {
+                "legacyStringValue": "F"
+            },
+            "weekendpreference": {
+                "legacyStringValue": "ASIS"
+            },
+            "discountrate": {
+                "value": ""
+            }
+        },
+        "sublists": {
+            "item": {
+                "currentline": {},
+                "line 0": {
+                    "_sequence": {
+                        "value": 0
+                    },
+                    "_id": {
+                        "value": "785ff431-81ce-4aae-b548-835586ac2c71"
+                    },
+                    "account": {
+                        "legacyStringValue": "777"
+                    },
+                    "amount": {
+                        "value": 2131272,
+                        "legacyStringValue": "2131272.00"
+                    },
+                    "amounthasbeenset": {
+                        "legacyStringValue": "F"
+                    },
+                    "class": {
+                        "legacyStringValue": "42057"
+                    },
+                    "class_display": {
+                        "legacyStringValue": "MP : MP03029"
+                    },
+                    "custcol_4601_witaxapplies": {
+                        "legacyStringValue": "F"
+                    },
+                    "custcol_5892_eutriangulation": {
+                        "legacyStringValue": "F"
+                    },
+                    "custcol_cseg_cust_op_type": {
+                        "legacyStringValue": "1"
+                    },
+                    "custcol_cseg_pg_employee_id": {
+                        "legacyStringValue": "45339"
+                    },
+                    "custcol_lmry_ar_code_unit_measure": {
+                        "legacyStringValue": "07"
+                    },
+                    "custcol_lmry_ar_item_code": {
+                        "legacyStringValue": "Retainer Shortlist"
+                    },
+                    "custcol_lmry_ar_item_ref_unit": {
+                        "legacyStringValue": "1"
+                    },
+                    "custcol_lmry_col_es_ttg": {
+                        "legacyStringValue": "F"
+                    },
+                    "custcol_lmry_invoicing_id": {
+                        "legacyStringValue": "67"
+                    },
+                    "custcol_lmry_invoicing_id_code": {
+                        "legacyStringValue": "5"
+                    },
+                    "custcol_lmry_invoicing_id_display": {
+                        "legacyStringValue": "21%"
+                    },
+                    "custcol_lmry_mx_claveunidad_sat": {
+                        "legacyStringValue": "E48"
+                    },
+                    "custcol_lmry_mx_clavprodserv_sat": {
+                        "legacyStringValue": "80111700"
+                    },
+                    "custcol_lmry_pe_product_sunat_code": {
+                        "legacyStringValue": "80111701"
+                    },
+                    "custcol_lmry_unit_of_measure": {
+                        "legacyStringValue": "Unid"
+                    },
+                    "custcol_lmry_unit_of_measure_code": {
+                        "legacyStringValue": "[{\"Country\" : \"BO\", \"CountryID\" : \"29\", \"Code\" : \"7\"}, {\"Country\" : \"AR\", \"CountryID\" : \"11\", \"Code\" : \"7\"}, {\"Country\" : \"BR\", \"CountryID\" : \"30\", \"Code\" : \"UNID\"}, {\"Country\" : \"CL\", \"CountryID\" : \"45\", \"Code\" : \"10\"}, {\"Country\" : \"PA\", \"CountryID\" : \"173\", \"Code\" : \"und\"}]"
+                    },
+                    "custcol_myei_item_classification": {
+                        "legacyStringValue": "22"
+                    },
+                    "custcol_nexil_eleinv_isdiscountitem": {
+                        "legacyStringValue": "T"
+                    },
+                    "custcol_nexil_otc_useinfulfill": {
+                        "legacyStringValue": "F"
+                    },
+                    "custcol_o2s_imp_ret": {
+                        "legacyStringValue": "F"
+                    },
+                    "custcol_pg_arabic_item_descrip": {
+                        "legacyStringValue": "خدمات استشارية"
+                    },
+                    "custcol_pg_arabic_item_transl": {
+                        "legacyStringValue": "قائمة مختصرة للأتعاب"
+                    },
+                    "custcol_pg_basic_salary": {
+                        "legacyStringValue": "42900000.00"
+                    },
+                    "custcol_pg_current_fee_percent": {
+                        "legacyStringValue": "6.0%"
+                    },
+                    "custcol_pg_employee_selection": {
+                        "legacyStringValue": "3502959"
+                    },
+                    "custcol_pg_group_line_number": {
+                        "legacyStringValue": "1"
+                    },
+                    "custcol_pg_item_display_name": {
+                        "legacyStringValue": "Retainer Shortlist"
+                    },
+                    "custcol_pg_package_value": {
+                        "legacyStringValue": "42900000.00"
+                    },
+                    "custcol_pg_revenue_split_percent": {
+                        "legacyStringValue": "80.0%"
+                    },
+                    "custcol_pg_tax_amount": {
+                        "legacyStringValue": "447567.12"
+                    },
+                    "custcol_revenue_type": {
+                        "legacyStringValue": "15"
+                    },
+                    "custcol_sale_net_value_latam": {
+                        "legacyStringValue": "2131272.00"
+                    },
+                    "custcol_sit_item_consumo_pro": {
+                        "legacyStringValue": "F"
+                    },
+                    "custcol_statistical_value_base_curr": {
+                        "legacyStringValue": "0.00"
+                    },
+                    "description": {
+                        "legacyStringValue": "Honorarios de reclutamiento"
+                    },
+                    "fulfillable": {
+                        "legacyStringValue": "F"
+                    },
+                    "grossamt": {
+                        "value": 2578839.12,
+                        "legacyStringValue": "2578839.12"
+                    },
+                    "history": {
+                        "legacyStringValue": "History"
+                    },
+                    "historyurl": {
+                        "legacyStringValue": "/app/accounting/transactions/history.nl?id=88095560"
+                    },
+                    "id": {
+                        "legacyStringValue": "88095560_1"
+                    },
+                    "includegroupwrapper": {
+                        "legacyStringValue": "F"
+                    },
+                    "isnoninventory": {
+                        "legacyStringValue": "F"
+                    },
+                    "isposting": {
+                        "legacyStringValue": "T"
+                    },
+                    "item": {
+                        "value": "1033",
+                        "legacyStringValue": "1033"
+                    },
+                    "item_display": {
+                        "legacyStringValue": "Retainer Shortlist"
+                    },
+                    "itemsubtype": {
+                        "legacyStringValue": "Sale"
+                    },
+                    "itemtype": {
+                        "value": "Service",
+                        "legacyStringValue": "Service"
+                    },
+                    "line": {
+                        "legacyStringValue": "1"
+                    },
+                    "lineuniquekey": {
+                        "value": "362279996",
+                        "legacyStringValue": "362279996"
+                    },
+                    "mandatoryclass": {
+                        "legacyStringValue": "T"
+                    },
+                    "mandatoryitem": {
+                        "legacyStringValue": "T"
+                    },
+                    "mandatorytaxcode": {
+                        "legacyStringValue": "T"
+                    },
+                    "olditemid": {
+                        "legacyStringValue": "1033"
+                    },
+                    "printitems": {
+                        "legacyStringValue": "F"
+                    },
+                    "quantity": {
+                        "legacyStringValue": ".8"
+                    },
+                    "rate": {
+                        "legacyStringValue": "2664090.00"
+                    },
+                    "sys_id": {
+                        "legacyStringValue": "19004826098214140"
+                    },
+                    "sys_parentid": {
+                        "legacyStringValue": "19004826097706182"
+                    },
+                    "tax1amt": {
+                        "value": 447567.12,
+                        "legacyStringValue": "447567.12"
+                    },
+                    "taxcode": {
+                        "legacyStringValue": "3439"
+                    },
+                    "taxcode_display": {
+                        "legacyStringValue": "VAT_AR:S-AR"
+                    },
+                    "taxrate1": {
+                        "legacyStringValue": "21.0%"
+                    },
+                    "custcol_lmry_ar_item_tributo": {
+                        "value": false
+                    },
+                    "custcol_lmry_ar_perception_percentage": {
+                        "value": ""
+                    },
+                    "custcol_lmry_br_taxc_rsp": {
+                        "value": ""
+                    }
+                },
+                "line 1": {
+                    "_sequence": {
+                        "value": 1
+                    },
+                    "_id": {
+                        "value": "c6ba3964-e611-445a-b866-473c704555e2"
+                    },
+                    "account": {
+                        "legacyStringValue": "777"
+                    },
+                    "amount": {
+                        "value": 532818,
+                        "legacyStringValue": "532818.00"
+                    },
+                    "amounthasbeenset": {
+                        "legacyStringValue": "F"
+                    },
+                    "class": {
+                        "legacyStringValue": "5238"
+                    },
+                    "class_display": {
+                        "legacyStringValue": "MP : MP00955"
+                    },
+                    "custcol_4601_witaxapplies": {
+                        "legacyStringValue": "F"
+                    },
+                    "custcol_5892_eutriangulation": {
+                        "legacyStringValue": "F"
+                    },
+                    "custcol_cseg_cust_op_type": {
+                        "legacyStringValue": "1"
+                    },
+                    "custcol_cseg_pg_employee_id": {
+                        "legacyStringValue": "33542"
+                    },
+                    "custcol_lmry_ar_code_unit_measure": {
+                        "legacyStringValue": "07"
+                    },
+                    "custcol_lmry_ar_item_code": {
+                        "legacyStringValue": "Retainer Shortlist"
+                    },
+                    "custcol_lmry_ar_item_ref_unit": {
+                        "legacyStringValue": "1"
+                    },
+                    "custcol_lmry_col_es_ttg": {
+                        "legacyStringValue": "F"
+                    },
+                    "custcol_lmry_invoicing_id": {
+                        "legacyStringValue": "67"
+                    },
+                    "custcol_lmry_invoicing_id_code": {
+                        "legacyStringValue": "5"
+                    },
+                    "custcol_lmry_invoicing_id_display": {
+                        "legacyStringValue": "21%"
+                    },
+                    "custcol_lmry_mx_claveunidad_sat": {
+                        "legacyStringValue": "E48"
+                    },
+                    "custcol_lmry_mx_clavprodserv_sat": {
+                        "legacyStringValue": "80111700"
+                    },
+                    "custcol_lmry_pe_product_sunat_code": {
+                        "legacyStringValue": "80111701"
+                    },
+                    "custcol_lmry_unit_of_measure": {
+                        "legacyStringValue": "Unid"
+                    },
+                    "custcol_lmry_unit_of_measure_code": {
+                        "legacyStringValue": "[{\"Country\" : \"BO\", \"CountryID\" : \"29\", \"Code\" : \"7\"}, {\"Country\" : \"AR\", \"CountryID\" : \"11\", \"Code\" : \"7\"}, {\"Country\" : \"BR\", \"CountryID\" : \"30\", \"Code\" : \"UNID\"}, {\"Country\" : \"CL\", \"CountryID\" : \"45\", \"Code\" : \"10\"}, {\"Country\" : \"PA\", \"CountryID\" : \"173\", \"Code\" : \"und\"}]"
+                    },
+                    "custcol_myei_item_classification": {
+                        "legacyStringValue": "22"
+                    },
+                    "custcol_nexil_eleinv_isdiscountitem": {
+                        "legacyStringValue": "T"
+                    },
+                    "custcol_nexil_otc_useinfulfill": {
+                        "legacyStringValue": "F"
+                    },
+                    "custcol_o2s_imp_ret": {
+                        "legacyStringValue": "F"
+                    },
+                    "custcol_pg_arabic_item_descrip": {
+                        "legacyStringValue": "خدمات استشارية"
+                    },
+                    "custcol_pg_arabic_item_transl": {
+                        "legacyStringValue": "قائمة مختصرة للأتعاب"
+                    },
+                    "custcol_pg_basic_salary": {
+                        "legacyStringValue": "42900000.00"
+                    },
+                    "custcol_pg_current_fee_percent": {
+                        "legacyStringValue": "6.0%"
+                    },
+                    "custcol_pg_employee_selection": {
+                        "legacyStringValue": "1056104"
+                    },
+                    "custcol_pg_group_line_number": {
+                        "legacyStringValue": "1"
+                    },
+                    "custcol_pg_item_display_name": {
+                        "legacyStringValue": "Retainer Shortlist"
+                    },
+                    "custcol_pg_package_value": {
+                        "legacyStringValue": "42900000.00"
+                    },
+                    "custcol_pg_revenue_split_percent": {
+                        "legacyStringValue": "20.0%"
+                    },
+                    "custcol_pg_tax_amount": {
+                        "legacyStringValue": "111891.78"
+                    },
+                    "custcol_revenue_type": {
+                        "legacyStringValue": "15"
+                    },
+                    "custcol_sale_net_value_latam": {
+                        "legacyStringValue": "532818.00"
+                    },
+                    "custcol_sit_item_consumo_pro": {
+                        "legacyStringValue": "F"
+                    },
+                    "custcol_statistical_value_base_curr": {
+                        "legacyStringValue": "0.00"
+                    },
+                    "description": {
+                        "legacyStringValue": "Honorarios de reclutamiento"
+                    },
+                    "fulfillable": {
+                        "legacyStringValue": "F"
+                    },
+                    "grossamt": {
+                        "value": 644709.78,
+                        "legacyStringValue": "644709.78"
+                    },
+                    "history": {
+                        "legacyStringValue": "History"
+                    },
+                    "historyurl": {
+                        "legacyStringValue": "/app/accounting/transactions/history.nl?id=88095560"
+                    },
+                    "id": {
+                        "legacyStringValue": "88095560_2"
+                    },
+                    "includegroupwrapper": {
+                        "legacyStringValue": "F"
+                    },
+                    "isnoninventory": {
+                        "legacyStringValue": "F"
+                    },
+                    "isposting": {
+                        "legacyStringValue": "T"
+                    },
+                    "item": {
+                        "value": "1033",
+                        "legacyStringValue": "1033"
+                    },
+                    "item_display": {
+                        "legacyStringValue": "Retainer Shortlist"
+                    },
+                    "itemsubtype": {
+                        "legacyStringValue": "Sale"
+                    },
+                    "itemtype": {
+                        "value": "Service",
+                        "legacyStringValue": "Service"
+                    },
+                    "line": {
+                        "legacyStringValue": "2"
+                    },
+                    "lineuniquekey": {
+                        "value": "362279997",
+                        "legacyStringValue": "362279997"
+                    },
+                    "mandatoryclass": {
+                        "legacyStringValue": "T"
+                    },
+                    "mandatoryitem": {
+                        "legacyStringValue": "T"
+                    },
+                    "mandatorytaxcode": {
+                        "legacyStringValue": "T"
+                    },
+                    "olditemid": {
+                        "legacyStringValue": "1033"
+                    },
+                    "printitems": {
+                        "legacyStringValue": "F"
+                    },
+                    "quantity": {
+                        "legacyStringValue": ".2"
+                    },
+                    "rate": {
+                        "legacyStringValue": "2664090.00"
+                    },
+                    "sys_id": {
+                        "legacyStringValue": "19004826098152817"
+                    },
+                    "sys_parentid": {
+                        "legacyStringValue": "19004826097706182"
+                    },
+                    "tax1amt": {
+                        "value": 111891.78,
+                        "legacyStringValue": "111891.78"
+                    },
+                    "taxcode": {
+                        "legacyStringValue": "3439"
+                    },
+                    "taxcode_display": {
+                        "legacyStringValue": "VAT_AR:S-AR"
+                    },
+                    "taxrate1": {
+                        "legacyStringValue": "21.0%"
+                    },
+                    "custcol_lmry_ar_item_tributo": {
+                        "value": false
+                    },
+                    "custcol_lmry_ar_perception_percentage": {
+                        "value": ""
+                    },
+                    "custcol_lmry_br_taxc_rsp": {
+                        "value": ""
+                    }
+                },
+                "line 2": {
+                    "_sequence": {
+                        "value": 2
+                    },
+                    "_id": {
+                        "value": "d57cd9c5-3f8c-4a5f-8861-74dd627b35d3"
+                    },
+                    "account": {
+                        "legacyStringValue": "776"
+                    },
+                    "amount": {
+                        "value": 2131272,
+                        "legacyStringValue": "2131272.00"
+                    },
+                    "amounthasbeenset": {
+                        "legacyStringValue": "F"
+                    },
+                    "class": {
+                        "legacyStringValue": "42057"
+                    },
+                    "class_display": {
+                        "legacyStringValue": "MP : MP03029"
+                    },
+                    "custcol_4601_witaxapplies": {
+                        "legacyStringValue": "F"
+                    },
+                    "custcol_5892_eutriangulation": {
+                        "legacyStringValue": "F"
+                    },
+                    "custcol_cseg_cust_op_type": {
+                        "legacyStringValue": "1"
+                    },
+                    "custcol_cseg_pg_employee_id": {
+                        "legacyStringValue": "45339"
+                    },
+                    "custcol_lmry_ar_code_unit_measure": {
+                        "legacyStringValue": "07"
+                    },
+                    "custcol_lmry_ar_item_code": {
+                        "legacyStringValue": "Retainer Commencement"
+                    },
+                    "custcol_lmry_ar_item_ref_unit": {
+                        "legacyStringValue": "1"
+                    },
+                    "custcol_lmry_col_es_ttg": {
+                        "legacyStringValue": "F"
+                    },
+                    "custcol_lmry_invoicing_id": {
+                        "legacyStringValue": "67"
+                    },
+                    "custcol_lmry_invoicing_id_code": {
+                        "legacyStringValue": "5"
+                    },
+                    "custcol_lmry_invoicing_id_display": {
+                        "legacyStringValue": "21%"
+                    },
+                    "custcol_lmry_mx_claveunidad_sat": {
+                        "legacyStringValue": "E48"
+                    },
+                    "custcol_lmry_mx_clavprodserv_sat": {
+                        "legacyStringValue": "80111700"
+                    },
+                    "custcol_lmry_pe_product_sunat_code": {
+                        "legacyStringValue": "80111701"
+                    },
+                    "custcol_lmry_unit_of_measure": {
+                        "legacyStringValue": "Unid"
+                    },
+                    "custcol_lmry_unit_of_measure_code": {
+                        "legacyStringValue": "[{\"Country\" : \"BO\", \"CountryID\" : \"29\", \"Code\" : \"7\"}, {\"Country\" : \"AR\", \"CountryID\" : \"11\", \"Code\" : \"7\"}, {\"Country\" : \"BR\", \"CountryID\" : \"30\", \"Code\" : \"UNID\"}, {\"Country\" : \"CL\", \"CountryID\" : \"45\", \"Code\" : \"10\"}, {\"Country\" : \"PA\", \"CountryID\" : \"173\", \"Code\" : \"und\"}]"
+                    },
+                    "custcol_myei_item_classification": {
+                        "legacyStringValue": "22"
+                    },
+                    "custcol_nexil_eleinv_isdiscountitem": {
+                        "legacyStringValue": "T"
+                    },
+                    "custcol_nexil_otc_useinfulfill": {
+                        "legacyStringValue": "F"
+                    },
+                    "custcol_o2s_imp_ret": {
+                        "legacyStringValue": "F"
+                    },
+                    "custcol_pg_arabic_item_descrip": {
+                        "legacyStringValue": "خدمات استشارية"
+                    },
+                    "custcol_pg_arabic_item_transl": {
+                        "legacyStringValue": "بدء سداد الأتعاب"
+                    },
+                    "custcol_pg_basic_salary": {
+                        "legacyStringValue": "42900000.00"
+                    },
+                    "custcol_pg_current_fee_percent": {
+                        "legacyStringValue": "5.0%"
+                    },
+                    "custcol_pg_employee_selection": {
+                        "legacyStringValue": "3502959"
+                    },
+                    "custcol_pg_group_line_number": {
+                        "legacyStringValue": "2"
+                    },
+                    "custcol_pg_item_display_name": {
+                        "legacyStringValue": "Retainer Commencement"
+                    },
+                    "custcol_pg_package_value": {
+                        "legacyStringValue": "49500000.00"
+                    },
+                    "custcol_pg_revenue_split_percent": {
+                        "legacyStringValue": "80.0%"
+                    },
+                    "custcol_pg_tax_amount": {
+                        "legacyStringValue": "447567.12"
+                    },
+                    "custcol_revenue_type": {
+                        "legacyStringValue": "14"
+                    },
+                    "custcol_sale_net_value_latam": {
+                        "legacyStringValue": "2131272.00"
+                    },
+                    "custcol_sit_item_consumo_pro": {
+                        "legacyStringValue": "F"
+                    },
+                    "custcol_statistical_value_base_curr": {
+                        "legacyStringValue": "0.00"
+                    },
+                    "description": {
+                        "legacyStringValue": "Honorarios de reclutamiento"
+                    },
+                    "fulfillable": {
+                        "legacyStringValue": "F"
+                    },
+                    "grossamt": {
+                        "value": 2578839.12,
+                        "legacyStringValue": "2578839.12"
+                    },
+                    "history": {
+                        "legacyStringValue": "History"
+                    },
+                    "historyurl": {
+                        "legacyStringValue": "/app/accounting/transactions/history.nl?id=88095560"
+                    },
+                    "id": {
+                        "legacyStringValue": "88095560_3"
+                    },
+                    "includegroupwrapper": {
+                        "legacyStringValue": "F"
+                    },
+                    "isnoninventory": {
+                        "legacyStringValue": "F"
+                    },
+                    "isposting": {
+                        "legacyStringValue": "T"
+                    },
+                    "item": {
+                        "value": "1031",
+                        "legacyStringValue": "1031"
+                    },
+                    "item_display": {
+                        "legacyStringValue": "Retainer Commencement"
+                    },
+                    "itemsubtype": {
+                        "legacyStringValue": "Sale"
+                    },
+                    "itemtype": {
+                        "value": "Service",
+                        "legacyStringValue": "Service"
+                    },
+                    "line": {
+                        "legacyStringValue": "3"
+                    },
+                    "lineuniquekey": {
+                        "value": "362279998",
+                        "legacyStringValue": "362279998"
+                    },
+                    "mandatoryclass": {
+                        "legacyStringValue": "T"
+                    },
+                    "mandatoryitem": {
+                        "legacyStringValue": "T"
+                    },
+                    "mandatorytaxcode": {
+                        "legacyStringValue": "T"
+                    },
+                    "olditemid": {
+                        "legacyStringValue": "1031"
+                    },
+                    "printitems": {
+                        "legacyStringValue": "F"
+                    },
+                    "quantity": {
+                        "legacyStringValue": ".8"
+                    },
+                    "rate": {
+                        "legacyStringValue": "2664090.00"
+                    },
+                    "sys_id": {
+                        "legacyStringValue": "19004826098087139"
+                    },
+                    "sys_parentid": {
+                        "legacyStringValue": "19004826097706182"
+                    },
+                    "tax1amt": {
+                        "value": 447567.12,
+                        "legacyStringValue": "447567.12"
+                    },
+                    "taxcode": {
+                        "legacyStringValue": "3439"
+                    },
+                    "taxcode_display": {
+                        "legacyStringValue": "VAT_AR:S-AR"
+                    },
+                    "taxrate1": {
+                        "legacyStringValue": "21.0%"
+                    },
+                    "custcol_lmry_ar_item_tributo": {
+                        "value": false
+                    },
+                    "custcol_lmry_ar_perception_percentage": {
+                        "value": ""
+                    },
+                    "custcol_lmry_br_taxc_rsp": {
+                        "value": ""
+                    }
+                },
+                "line 3": {
+                    "_sequence": {
+                        "value": 3
+                    },
+                    "_id": {
+                        "value": "518ff96e-d834-4d7c-9dd1-63b48117f5a3"
+                    },
+                    "account": {
+                        "legacyStringValue": "776"
+                    },
+                    "amount": {
+                        "value": 532818,
+                        "legacyStringValue": "532818.00"
+                    },
+                    "amounthasbeenset": {
+                        "legacyStringValue": "F"
+                    },
+                    "class": {
+                        "legacyStringValue": "5238"
+                    },
+                    "class_display": {
+                        "legacyStringValue": "MP : MP00955"
+                    },
+                    "custcol_4601_witaxapplies": {
+                        "legacyStringValue": "F"
+                    },
+                    "custcol_5892_eutriangulation": {
+                        "legacyStringValue": "F"
+                    },
+                    "custcol_cseg_cust_op_type": {
+                        "legacyStringValue": "1"
+                    },
+                    "custcol_cseg_pg_employee_id": {
+                        "legacyStringValue": "33542"
+                    },
+                    "custcol_lmry_ar_code_unit_measure": {
+                        "legacyStringValue": "07"
+                    },
+                    "custcol_lmry_ar_item_code": {
+                        "legacyStringValue": "Retainer Commencement"
+                    },
+                    "custcol_lmry_ar_item_ref_unit": {
+                        "legacyStringValue": "1"
+                    },
+                    "custcol_lmry_col_es_ttg": {
+                        "legacyStringValue": "F"
+                    },
+                    "custcol_lmry_invoicing_id": {
+                        "legacyStringValue": "67"
+                    },
+                    "custcol_lmry_invoicing_id_code": {
+                        "legacyStringValue": "5"
+                    },
+                    "custcol_lmry_invoicing_id_display": {
+                        "legacyStringValue": "21%"
+                    },
+                    "custcol_lmry_mx_claveunidad_sat": {
+                        "legacyStringValue": "E48"
+                    },
+                    "custcol_lmry_mx_clavprodserv_sat": {
+                        "legacyStringValue": "80111700"
+                    },
+                    "custcol_lmry_pe_product_sunat_code": {
+                        "legacyStringValue": "80111701"
+                    },
+                    "custcol_lmry_unit_of_measure": {
+                        "legacyStringValue": "Unid"
+                    },
+                    "custcol_lmry_unit_of_measure_code": {
+                        "legacyStringValue": "[{\"Country\" : \"BO\", \"CountryID\" : \"29\", \"Code\" : \"7\"}, {\"Country\" : \"AR\", \"CountryID\" : \"11\", \"Code\" : \"7\"}, {\"Country\" : \"BR\", \"CountryID\" : \"30\", \"Code\" : \"UNID\"}, {\"Country\" : \"CL\", \"CountryID\" : \"45\", \"Code\" : \"10\"}, {\"Country\" : \"PA\", \"CountryID\" : \"173\", \"Code\" : \"und\"}]"
+                    },
+                    "custcol_myei_item_classification": {
+                        "legacyStringValue": "22"
+                    },
+                    "custcol_nexil_eleinv_isdiscountitem": {
+                        "legacyStringValue": "T"
+                    },
+                    "custcol_nexil_otc_useinfulfill": {
+                        "legacyStringValue": "F"
+                    },
+                    "custcol_o2s_imp_ret": {
+                        "legacyStringValue": "F"
+                    },
+                    "custcol_pg_arabic_item_descrip": {
+                        "legacyStringValue": "خدمات استشارية"
+                    },
+                    "custcol_pg_arabic_item_transl": {
+                        "legacyStringValue": "بدء سداد الأتعاب"
+                    },
+                    "custcol_pg_basic_salary": {
+                        "legacyStringValue": "42900000.00"
+                    },
+                    "custcol_pg_current_fee_percent": {
+                        "legacyStringValue": "5.0%"
+                    },
+                    "custcol_pg_employee_selection": {
+                        "legacyStringValue": "1056104"
+                    },
+                    "custcol_pg_group_line_number": {
+                        "legacyStringValue": "2"
+                    },
+                    "custcol_pg_item_display_name": {
+                        "legacyStringValue": "Retainer Commencement"
+                    },
+                    "custcol_pg_package_value": {
+                        "legacyStringValue": "49500000.00"
+                    },
+                    "custcol_pg_revenue_split_percent": {
+                        "legacyStringValue": "20.0%"
+                    },
+                    "custcol_pg_tax_amount": {
+                        "legacyStringValue": "111891.78"
+                    },
+                    "custcol_revenue_type": {
+                        "legacyStringValue": "14"
+                    },
+                    "custcol_sale_net_value_latam": {
+                        "legacyStringValue": "532818.00"
+                    },
+                    "custcol_sit_item_consumo_pro": {
+                        "legacyStringValue": "F"
+                    },
+                    "custcol_statistical_value_base_curr": {
+                        "legacyStringValue": "0.00"
+                    },
+                    "description": {
+                        "legacyStringValue": "Honorarios de reclutamiento"
+                    },
+                    "fulfillable": {
+                        "legacyStringValue": "F"
+                    },
+                    "grossamt": {
+                        "value": 644709.78,
+                        "legacyStringValue": "644709.78"
+                    },
+                    "history": {
+                        "legacyStringValue": "History"
+                    },
+                    "historyurl": {
+                        "legacyStringValue": "/app/accounting/transactions/history.nl?id=88095560"
+                    },
+                    "id": {
+                        "legacyStringValue": "88095560_4"
+                    },
+                    "includegroupwrapper": {
+                        "legacyStringValue": "F"
+                    },
+                    "isnoninventory": {
+                        "legacyStringValue": "F"
+                    },
+                    "isposting": {
+                        "legacyStringValue": "T"
+                    },
+                    "item": {
+                        "value": "1031",
+                        "legacyStringValue": "1031"
+                    },
+                    "item_display": {
+                        "legacyStringValue": "Retainer Commencement"
+                    },
+                    "itemsubtype": {
+                        "legacyStringValue": "Sale"
+                    },
+                    "itemtype": {
+                        "value": "Service",
+                        "legacyStringValue": "Service"
+                    },
+                    "line": {
+                        "legacyStringValue": "4"
+                    },
+                    "lineuniquekey": {
+                        "value": "362279999",
+                        "legacyStringValue": "362279999"
+                    },
+                    "mandatoryclass": {
+                        "legacyStringValue": "T"
+                    },
+                    "mandatoryitem": {
+                        "legacyStringValue": "T"
+                    },
+                    "mandatorytaxcode": {
+                        "legacyStringValue": "T"
+                    },
+                    "olditemid": {
+                        "legacyStringValue": "1031"
+                    },
+                    "printitems": {
+                        "legacyStringValue": "F"
+                    },
+                    "quantity": {
+                        "legacyStringValue": ".2"
+                    },
+                    "rate": {
+                        "legacyStringValue": "2664090.00"
+                    },
+                    "sys_id": {
+                        "legacyStringValue": "19004826098012566"
+                    },
+                    "sys_parentid": {
+                        "legacyStringValue": "19004826097706182"
+                    },
+                    "tax1amt": {
+                        "value": 111891.78,
+                        "legacyStringValue": "111891.78"
+                    },
+                    "taxcode": {
+                        "legacyStringValue": "3439"
+                    },
+                    "taxcode_display": {
+                        "legacyStringValue": "VAT_AR:S-AR"
+                    },
+                    "taxrate1": {
+                        "legacyStringValue": "21.0%"
+                    },
+                    "custcol_lmry_ar_item_tributo": {
+                        "value": false
+                    },
+                    "custcol_lmry_ar_perception_percentage": {
+                        "value": ""
+                    },
+                    "custcol_lmry_br_taxc_rsp": {
+                        "value": ""
+                    }
+                },
+                "line 4": {
+                    "_sequence": {
+                        "value": 4
+                    },
+                    "_id": {
+                        "value": "19d5979d-da11-4fd5-9d2d-e52e8c1cf6c1"
+                    },
+                    "account": {
+                        "legacyStringValue": "6162"
+                    },
+                    "amount": {
+                        "value": 266409,
+                        "legacyStringValue": "266409.00"
+                    },
+                    "amounthasbeenset": {
+                        "legacyStringValue": "F"
+                    },
+                    "class": {
+                        "value": "14300",
+                        "legacyStringValue": "14300"
+                    },
+                    "class_display": {
+                        "legacyStringValue": "FL : FL00361"
+                    },
+                    "custcol_4601_witaxapplies": {
+                        "legacyStringValue": "F"
+                    },
+                    "custcol_5892_eutriangulation": {
+                        "legacyStringValue": "F"
+                    },
+                    "custcol_cseg_cust_op_type": {
+                        "legacyStringValue": "3"
+                    },
+                    "custcol_cseg_pg_employee_id": {
+                        "legacyStringValue": "1"
+                    },
+                    "custcol_lmry_ar_col_jurisd_iibb": {
+                        "value": "2",
+                        "legacyStringValue": "2"
+                    },
+                    "custcol_lmry_ar_item_code": {
+                        "legacyStringValue": "IIBB BsAs Percepcion - Ventas"
+                    },
+                    "custcol_lmry_ar_item_tributo": {
+                        "value": true,
+                        "legacyStringValue": "T"
+                    },
+                    "custcol_lmry_ar_norma_iibb_arciba": {
+                        "value": "119",
+                        "legacyStringValue": "119"
+                    },
+                    "custcol_lmry_ar_perception_account": {
+                        "value": "266409;",
+                        "legacyStringValue": "266409;"
+                    },
+                    "custcol_lmry_ar_perception_percentage": {
+                        "value": 0.05,
+                        "legacyStringValue": "0.05"
+                    },
+                    "custcol_lmry_ar_perception_type": {
+                        "legacyStringValue": "2"
+                    },
+                    "custcol_lmry_br_taxc_rsp": {
+                        "value": "IBB BSAS Percepcion Ventas - CC242445 - Total",
+                        "legacyStringValue": "IBB BSAS Percepcion Ventas - CC242445 - Total"
+                    },
+                    "custcol_lmry_col_es_ttg": {
+                        "legacyStringValue": "F"
+                    },
+                    "custcol_lmry_iva_uso_comun_cl": {
+                        "legacyStringValue": "F"
+                    },
+                    "custcol_nexil_eleinv_isdiscountitem": {
+                        "legacyStringValue": "T"
+                    },
+                    "custcol_nexil_otc_useinfulfill": {
+                        "legacyStringValue": "F"
+                    },
+                    "custcol_o2s_imp_ret": {
+                        "legacyStringValue": "F"
+                    },
+                    "custcol_pg_group_line_number": {
+                        "legacyStringValue": "3"
+                    },
+                    "custcol_pg_item_display_name": {
+                        "legacyStringValue": "D10336"
+                    },
+                    "custcol_pg_tax_amount": {
+                        "legacyStringValue": "0.00"
+                    },
+                    "custcol_pg_team_description": {
+                        "legacyStringValue": "FL-SFX-Argentina- Tax"
+                    },
+                    "custcol_rech_item": {
+                        "legacyStringValue": "F"
+                    },
+                    "custcol_sit_item_consumo_pro": {
+                        "legacyStringValue": "F"
+                    },
+                    "custcol_statistical_value_base_curr": {
+                        "legacyStringValue": "0.00"
+                    },
+                    "description": {
+                        "value": "IBB BSAS Percepcion Ventas",
+                        "legacyStringValue": "IBB BSAS Percepcion Ventas"
+                    },
+                    "fulfillable": {
+                        "legacyStringValue": "T"
+                    },
+                    "grossamt": {
+                        "value": 266409,
+                        "legacyStringValue": "266409.00"
+                    },
+                    "history": {
+                        "legacyStringValue": "History"
+                    },
+                    "historyurl": {
+                        "legacyStringValue": "/app/accounting/transactions/history.nl?id=88095560"
+                    },
+                    "id": {
+                        "legacyStringValue": "88095560_8"
+                    },
+                    "includegroupwrapper": {
+                        "legacyStringValue": "F"
+                    },
+                    "isnoninventory": {
+                        "legacyStringValue": "F"
+                    },
+                    "isposting": {
+                        "legacyStringValue": "T"
+                    },
+                    "item": {
+                        "value": "4478",
+                        "legacyStringValue": "4478"
+                    },
+                    "item_display": {
+                        "legacyStringValue": "IIBB BsAs Percepcion - Ventas"
+                    },
+                    "itemsubtype": {
+                        "legacyStringValue": "Sale"
+                    },
+                    "itemtype": {
+                        "value": "OthCharge",
+                        "legacyStringValue": "OthCharge"
+                    },
+                    "line": {
+                        "legacyStringValue": "8"
+                    },
+                    "lineuniquekey": {
+                        "value": "362281255",
+                        "legacyStringValue": "362281255"
+                    },
+                    "mandatoryclass": {
+                        "legacyStringValue": "T"
+                    },
+                    "mandatoryitem": {
+                        "legacyStringValue": "T"
+                    },
+                    "mandatorytaxcode": {
+                        "legacyStringValue": "T"
+                    },
+                    "olditemid": {
+                        "legacyStringValue": "4478"
+                    },
+                    "printitems": {
+                        "legacyStringValue": "F"
+                    },
+                    "quantity": {
+                        "value": 1,
+                        "legacyStringValue": "1"
+                    },
+                    "rate": {
+                        "value": 266409,
+                        "legacyStringValue": "266409"
+                    },
+                    "sys_id": {
+                        "legacyStringValue": "19004826097931353"
+                    },
+                    "sys_parentid": {
+                        "legacyStringValue": "19004826097706182"
+                    },
+                    "tax1amt": {
+                        "value": 0,
+                        "legacyStringValue": "0.00"
+                    },
+                    "taxcode": {
+                        "value": "1176",
+                        "legacyStringValue": "1176"
+                    },
+                    "taxcode_display": {
+                        "legacyStringValue": "VAT_AR:UNDEF-AR"
+                    },
+                    "taxrate1": {
+                        "legacyStringValue": "0.0%"
+                    },
+                    "custcol_lmry_base_amount": {
+                        "value": 5328180,
+                        "legacyStringValue": "5328180"
+                    },
+                    "custcol_lmry_ar_perception_adjustment": {
+                        "value": "0.0000",
+                        "legacyStringValue": "0.0000"
+                    }
+                },
+                "line 5": {
+                    "_sequence": {
+                        "value": 5
+                    },
+                    "_id": {
+                        "value": "2bfc073e-0b6d-41d5-8655-5bfdbcec4eb4"
+                    },
+                    "account": {
+                        "legacyStringValue": "6161"
+                    },
+                    "amount": {
+                        "value": 0,
+                        "legacyStringValue": "0.00"
+                    },
+                    "amounthasbeenset": {
+                        "legacyStringValue": "F"
+                    },
+                    "class": {
+                        "value": "14300",
+                        "legacyStringValue": "14300"
+                    },
+                    "class_display": {
+                        "legacyStringValue": "FL : FL00361"
+                    },
+                    "custcol_4601_witaxapplies": {
+                        "legacyStringValue": "F"
+                    },
+                    "custcol_5892_eutriangulation": {
+                        "legacyStringValue": "F"
+                    },
+                    "custcol_cseg_cust_op_type": {
+                        "legacyStringValue": "3"
+                    },
+                    "custcol_cseg_pg_employee_id": {
+                        "legacyStringValue": "1"
+                    },
+                    "custcol_lmry_ar_col_jurisd_iibb": {
+                        "value": "1",
+                        "legacyStringValue": "1"
+                    },
+                    "custcol_lmry_ar_item_code": {
+                        "legacyStringValue": "IIBB CABA Percepcion - Ventas"
+                    },
+                    "custcol_lmry_ar_item_tributo": {
+                        "value": true,
+                        "legacyStringValue": "T"
+                    },
+                    "custcol_lmry_ar_norma_iibb_arciba": {
+                        "value": "119",
+                        "legacyStringValue": "119"
+                    },
+                    "custcol_lmry_ar_perception_account": {
+                        "value": "0;",
+                        "legacyStringValue": "0;"
+                    },
+                    "custcol_lmry_ar_perception_percentage": {
+                        "value": 0,
+                        "legacyStringValue": "0"
+                    },
+                    "custcol_lmry_ar_perception_type": {
+                        "legacyStringValue": "2"
+                    },
+                    "custcol_lmry_br_taxc_rsp": {
+                        "value": "IIBB CABA Percepcion Ventas - CC242782 - Total",
+                        "legacyStringValue": "IIBB CABA Percepcion Ventas - CC242782 - Total"
+                    },
+                    "custcol_lmry_col_es_ttg": {
+                        "legacyStringValue": "F"
+                    },
+                    "custcol_lmry_iva_uso_comun_cl": {
+                        "legacyStringValue": "F"
+                    },
+                    "custcol_nexil_eleinv_isdiscountitem": {
+                        "legacyStringValue": "T"
+                    },
+                    "custcol_nexil_otc_useinfulfill": {
+                        "legacyStringValue": "F"
+                    },
+                    "custcol_o2s_imp_ret": {
+                        "legacyStringValue": "F"
+                    },
+                    "custcol_pg_group_line_number": {
+                        "legacyStringValue": "4"
+                    },
+                    "custcol_pg_item_display_name": {
+                        "legacyStringValue": "D10336"
+                    },
+                    "custcol_pg_tax_amount": {
+                        "legacyStringValue": "0.00"
+                    },
+                    "custcol_pg_team_description": {
+                        "legacyStringValue": "FL-SFX-Argentina- Tax"
+                    },
+                    "custcol_rech_item": {
+                        "legacyStringValue": "F"
+                    },
+                    "custcol_sit_item_consumo_pro": {
+                        "legacyStringValue": "F"
+                    },
+                    "custcol_statistical_value_base_curr": {
+                        "legacyStringValue": "0.00"
+                    },
+                    "description": {
+                        "value": "IIBB CABA Percepcion Ventas",
+                        "legacyStringValue": "IIBB CABA Percepcion Ventas"
+                    },
+                    "fulfillable": {
+                        "legacyStringValue": "T"
+                    },
+                    "grossamt": {
+                        "value": 0,
+                        "legacyStringValue": "0.00"
+                    },
+                    "history": {
+                        "legacyStringValue": "History"
+                    },
+                    "historyurl": {
+                        "legacyStringValue": "/app/accounting/transactions/history.nl?id=88095560"
+                    },
+                    "id": {
+                        "legacyStringValue": "88095560_9"
+                    },
+                    "includegroupwrapper": {
+                        "legacyStringValue": "F"
+                    },
+                    "isnoninventory": {
+                        "legacyStringValue": "F"
+                    },
+                    "isposting": {
+                        "legacyStringValue": "T"
+                    },
+                    "item": {
+                        "value": "4479",
+                        "legacyStringValue": "4479"
+                    },
+                    "item_display": {
+                        "legacyStringValue": "IIBB CABA Percepcion - Ventas"
+                    },
+                    "itemsubtype": {
+                        "legacyStringValue": "Sale"
+                    },
+                    "itemtype": {
+                        "value": "OthCharge",
+                        "legacyStringValue": "OthCharge"
+                    },
+                    "line": {
+                        "legacyStringValue": "9"
+                    },
+                    "lineuniquekey": {
+                        "value": "362281256",
+                        "legacyStringValue": "362281256"
+                    },
+                    "mandatoryclass": {
+                        "legacyStringValue": "T"
+                    },
+                    "mandatoryitem": {
+                        "legacyStringValue": "T"
+                    },
+                    "mandatorytaxcode": {
+                        "legacyStringValue": "T"
+                    },
+                    "olditemid": {
+                        "legacyStringValue": "4479"
+                    },
+                    "printitems": {
+                        "legacyStringValue": "F"
+                    },
+                    "quantity": {
+                        "value": 1,
+                        "legacyStringValue": "1"
+                    },
+                    "rate": {
+                        "value": 0,
+                        "legacyStringValue": "0"
+                    },
+                    "sys_id": {
+                        "legacyStringValue": "19004826097846404"
+                    },
+                    "sys_parentid": {
+                        "legacyStringValue": "19004826097706182"
+                    },
+                    "tax1amt": {
+                        "value": 0,
+                        "legacyStringValue": "0.00"
+                    },
+                    "taxcode": {
+                        "value": "1176",
+                        "legacyStringValue": "1176"
+                    },
+                    "taxcode_display": {
+                        "legacyStringValue": "VAT_AR:UNDEF-AR"
+                    },
+                    "taxrate1": {
+                        "legacyStringValue": "0.0%"
+                    },
+                    "custcol_lmry_base_amount": {
+                        "value": 5328180,
+                        "legacyStringValue": "5328180"
+                    },
+                    "custcol_lmry_ar_perception_adjustment": {
+                        "value": "0.0000",
+                        "legacyStringValue": "0.0000"
+                    }
+                }
+            },
+            "accountingbookdetail": {
+                "currentline": {},
+                "line 0": {
+                    "_sequence": {
+                        "value": 0
+                    },
+                    "_id": {
+                        "value": "d820e5ab-187d-494a-b2cf-1020f37651a3"
+                    },
+                    "accountingbook": {
+                        "legacyStringValue": "2"
+                    },
+                    "apply": {
+                        "legacyStringValue": "T"
+                    },
+                    "bookid": {
+                        "legacyStringValue": "2"
+                    },
+                    "bookstatus": {
+                        "legacyStringValue": "ACTIVE"
+                    },
+                    "currency": {
+                        "legacyStringValue": "24"
+                    },
+                    "exchangerate": {
+                        "legacyStringValue": "1.0"
+                    },
+                    "origexchangerate": {
+                        "legacyStringValue": "1.00"
+                    },
+                    "sys_id": {
+                        "legacyStringValue": "19004826098255794"
+                    },
+                    "sys_parentid": {
+                        "legacyStringValue": "19004826097706182"
+                    }
+                }
+            },
+            "apply": {
+                "currentline": {},
+                "line 0": {
+                    "_sequence": {
+                        "value": 0
+                    },
+                    "_id": {
+                        "value": "9775c26e-e92a-48b3-9490-88ea6c72f3bb"
+                    },
+                    "amount": {
+                        "value": 6713506.800000001,
+                        "legacyStringValue": "6713506.800000001"
+                    },
+                    "apply": {
+                        "value": true,
+                        "legacyStringValue": "T"
+                    },
+                    "applydate": {
+                        "legacyStringValue": "13/5/2025"
+                    },
+                    "createdfrom": {
+                        "legacyStringValue": "86683233"
+                    },
+                    "currency": {
+                        "legacyStringValue": "ARS"
+                    },
+                    "doc": {
+                        "legacyStringValue": "86920340"
+                    },
+                    "due": {
+                        "legacyStringValue": "6713506.80"
+                    },
+                    "duedate": {
+                        "legacyStringValue": "12/6/2025"
+                    },
+                    "internalid": {
+                        "value": "86920340",
+                        "legacyStringValue": "86920340"
+                    },
+                    "line": {
+                        "legacyStringValue": "0"
+                    },
+                    "refnum": {
+                        "legacyStringValue": "FJ FA 0004-000001541"
+                    },
+                    "sys_id": {
+                        "legacyStringValue": "19004826098236013"
+                    },
+                    "sys_parentid": {
+                        "legacyStringValue": "19004826097706182"
+                    },
+                    "total": {
+                        "legacyStringValue": "6713506.80"
+                    },
+                    "trantype": {
+                        "legacyStringValue": "CustInvc"
+                    },
+                    "type": {
+                        "legacyStringValue": "Invoice"
+                    }
+                }
+            },
+            "salesteam": {
+                "currentline": {},
+                "line 0": {
+                    "_sequence": {
+                        "value": 0
+                    },
+                    "_id": {
+                        "value": "85754f5f-bfa0-4648-b1da-9173cc0716d1"
+                    },
+                    "contribution": {
+                        "legacyStringValue": "80.0%"
+                    },
+                    "employee": {
+                        "legacyStringValue": "3502959"
+                    },
+                    "id": {
+                        "legacyStringValue": "88095560_3502959"
+                    },
+                    "isprimary": {
+                        "legacyStringValue": "T"
+                    },
+                    "issalesrep": {
+                        "legacyStringValue": "T"
+                    },
+                    "salesrole": {
+                        "legacyStringValue": "-2"
+                    },
+                    "sys_id": {
+                        "legacyStringValue": "19004826098250025"
+                    },
+                    "sys_parentid": {
+                        "legacyStringValue": "19004826097706182"
+                    },
+                    "transaction": {
+                        "legacyStringValue": "88095560"
+                    }
+                },
+                "line 1": {
+                    "_sequence": {
+                        "value": 1
+                    },
+                    "_id": {
+                        "value": "da37cbee-0c62-4a6a-9d4e-9c6345d8e6a7"
+                    },
+                    "contribution": {
+                        "legacyStringValue": "20.0%"
+                    },
+                    "employee": {
+                        "legacyStringValue": "1056104"
+                    },
+                    "id": {
+                        "legacyStringValue": "88095560_1056104"
+                    },
+                    "isprimary": {
+                        "legacyStringValue": "F"
+                    },
+                    "issalesrep": {
+                        "legacyStringValue": "T"
+                    },
+                    "salesrole": {
+                        "legacyStringValue": "-2"
+                    },
+                    "sys_id": {
+                        "legacyStringValue": "19004826098243785"
+                    },
+                    "sys_parentid": {
+                        "legacyStringValue": "19004826097706182"
+                    },
+                    "transaction": {
+                        "legacyStringValue": "88095560"
+                    }
+                }
+            },
+            "links": {
+                "currentline": {}
+            },
+            "glimpactchanges": {
+                "currentline": {}
+            },
+            "transformations": {
+                "currentline": {}
+            },
+            "recmachcustbody_pg_cos_journal_no": {
+                "currentline": {}
+            },
+            "recmachcustrecord_lmry_uy_transaction_related": {
+                "currentline": {}
+            },
+            "recmachcustrecord_lmry_mx_audi_transaction": {
+                "currentline": {}
+            },
+            "recmachcustrecord_billbillno": {
+                "currentline": {}
+            },
+            "recmachcustrecord_lmry_mx_add_amz_transaction": {
+                "currentline": {}
+            },
+            "recmachcustrecord_lmry_document_transaction": {
+                "currentline": {}
+            },
+            "recmachcustrecord_lmry_whtdet_sourcetra": {
+                "currentline": {}
+            },
+            "recmachcustrecord_lmry_fel_docu_refe_transa": {
+                "currentline": {}
+            },
+            "recmachcustrecord_lmry_ar_transaction_related": {
+                "currentline": {}
+            },
+            "recmachcustrecord_lmry_cl_ei_doc": {
+                "currentline": {}
+            },
+            "recmachcustrecordpg_cost_split_details": {
+                "currentline": {}
+            },
+            "recmachcustbody_lmry_reference_transaction": {
+                "currentline": {}
+            },
+            "recmachcustrecord_lmry_mx_ei_doc": {
+                "currentline": {}
+            },
+            "recmachcustrecord_pg_expense_details_attendees": {
+                "currentline": {}
+            },
+            "recmachcustrecord_lmry_cr_transaction_related": {
+                "currentline": {}
+            },
+            "recmachcustrecord_lmry_br_transaction": {
+                "currentline": {}
+            },
+            "recmachcustrecord_lmry_br_related_transaction": {
+                "currentline": {}
+            },
+            "recmachcustrecord_lmry_mx_transaction_related": {
+                "currentline": {}
+            },
+            "recmachcustbody_nexil_cash_acc_related_trans": {
+                "currentline": {}
+            },
+            "recmachcustbody_nexil_cash_acc_related_pym": {
+                "currentline": {}
+            },
+            "recmachcustrecord_lmry_ei_con_rel_txn": {
+                "currentline": {}
+            },
+            "recmachcustrecord_lmry_ei_ds_doc": {
+                "currentline": {}
+            },
+            "recmachcustrecord_lmry_ei_ld_doc": {
+                "currentline": {}
+            },
+            "recmachcustrecord_lmry_transaction_f": {
+                "currentline": {}
+            },
+            "recmachcustrecord_lmry_mx_add_transaction": {
+                "currentline": {}
+            },
+            "recmachcustrecord_lmry_mx_related_transaction": {
+                "currentline": {}
+            },
+            "recmachcustrecord_lmry_cl_related_transaction": {
+                "currentline": {}
+            },
+            "recmachcustrecord_lmry_co_related_transaction": {
+                "currentline": {}
+            },
+            "recmachcustrecord_lmry_pe_transaction_related": {
+                "currentline": {}
+            },
+            "recmachcustrecord_lmry_ec_related_transaction": {
+                "currentline": {}
+            },
+            "recmachcustrecord_lmry_gt_related_transaction": {
+                "currentline": {}
+            },
+            "recmachcustrecord_lmry_mx_addenda_transaction": {
+                "currentline": {}
+            },
+            "recmachcustrecord_lmry_mx_walmart_transaction": {
+                "currentline": {}
+            },
+            "recmachcustrecord_lmry_ste_related_transaction": {
+                "currentline": {}
+            },
+            "recmachcustrecord_lmry_mx_add_chedraui_city_fre": {
+                "currentline": {}
+            },
+            "recmachcustrecord_lmry_mx_addenda_w_transaction": {
+                "currentline": {}
+            },
+            "recmachcustrecord_lmry_pe_transaction_zero": {
+                "currentline": {}
+            },
+            "recmachcustrecord_lmry_py_transaction": {
+                "currentline": {}
+            },
+            "recmachcustrecord_lmry_bo_transaction": {
+                "currentline": {}
+            },
+            "recmachcustrecord_lmry_mx_addenda_g_transaction": {
+                "currentline": {}
+            },
+            "recmachcustrecord_lmry_pa_transaction": {
+                "currentline": {}
+            },
+            "recmachcustrecord_lmry_mx_third_transaction": {
+                "currentline": {}
+            },
+            "recmachcustrecord_lmry_mx_casa_transaction": {
+                "currentline": {}
+            },
+            "recmachcustrecord_lmry_transac_costco": {
+                "currentline": {}
+            },
+            "recmachcustrecord_lmry_mx_soriana_transaction": {
+                "currentline": {}
+            },
+            "recmachcustrecord_lmry_mx_add_transac_loreal": {
+                "currentline": {}
+            },
+            "recmachcustrecord_lmry_mx_vkwg_transaction": {
+                "currentline": {}
+            },
+            "recmachcustrecord_lmry_mx_coppel_transaction": {
+                "currentline": {}
+            },
+            "recmachcustrecord_lmry_do_transaction_related": {
+                "currentline": {}
+            },
+            "customsublist31": {
+                "currentline": {}
+            },
+            "customsublist30": {
+                "currentline": {}
+            },
+            "customsublist51": {
+                "currentline": {}
+            },
+            "glimpact": {
+                "currentline": {}
+            },
+            "contacts": {
+                "currentline": {}
+            },
+            "messages": {
+                "currentline": {}
+            },
+            "output": {
+                "currentline": {}
+            },
+            "activities": {
+                "currentline": {}
+            },
+            "usernotes": {
+                "currentline": {}
+            },
+            "mediaitem": {
+                "currentline": {}
+            },
+            "systemnotes": {
+                "currentline": {}
+            },
+            "activeworkflows": {
+                "currentline": {}
+            },
+            "workflowhistory": {
+                "currentline": {}
+            },
+            "custom60": {
+                "currentline": {}
+            },
+            "custom59": {
+                "currentline": {}
+            },
+            "custom58": {
+                "currentline": {}
+            },
+            "calls": {
+                "currentline": {}
+            },
+            "tasks": {
+                "currentline": {}
+            },
+            "events": {
+                "currentline": {}
+            }
+        }
+    },
+    "amountRemoved": 0
 }
