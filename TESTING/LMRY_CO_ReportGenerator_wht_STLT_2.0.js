@@ -540,7 +540,7 @@ function execute(context) {
 
                 var tab = form.addTab({
                     id: 'custpage_maintab',
-                    label: 'Tab'
+                    label: GLOBAL_LABELS['LMRY_INDIVIDUAL_GENERATION_LOG'][language]
                 });
 
 
@@ -548,7 +548,7 @@ function execute(context) {
                 var listaLog = form.addSublist({
                     id: 'custpage_sublista',
                     type: UI.SublistType.STATICLIST,
-                    label: GLOBAL_LABELS['logGeneracion'][language],
+                    label: GLOBAL_LABELS['LMRY_INDIVIDUAL_GENERATION_LOG'][language],
                     tab: "custpage_maintab"
                 });
                 listaLog.addField({
@@ -918,7 +918,7 @@ function getGlobalLabels() {
             "en": "Subsidiary"
         },
         "creadoPor": {
-            "es": "Creado por",
+            "es": "Creado por", 
             "pt": "Criado por",
             "en": "Created by"
         },
@@ -1053,9 +1053,9 @@ function getGlobalLabels() {
             "pt": "com sucesso"
         },
         "LMRY_RAW": {
-            "en": "unprocessed",
-            "es": "sin procesar",
-            "pt": "não processado"
+            "en": "Loading...",
+            "es": "Cargando...",
+            "pt": "Carregando..."
         },
         "LMRY_WITH_ERROR": {
             "en": "with error",
@@ -1066,7 +1066,25 @@ function getGlobalLabels() {
             "en": "entities found",
             "es": "entidades encontradas",
             "pt": "entidades encontradas"
+        },
+        "LMRY_SUNNARY": {
+            "en": "Summary",
+            "es": "Resumen",
+            "pt": "Resumen"
+        },
+        "LMRY_MASSIVE_GENERATION_LOG": {
+            "en": "Massive Generation Log",
+            "es": "Registro de Generación Masiva",
+            "pt": "Registro de Geração Massiva"
+        },
+        "LMRY_INDIVIDUAL_GENERATION_LOG": {
+            "en": "Individual Generation Log",
+            "es": "Registro de Generación Individual",
+            "pt": "Registro de Geração Individual"
         }
+
+
+        
     }
 
     return labels;
@@ -1340,27 +1358,27 @@ function createSublistMassiveProcess(form, serverWidget) {
 
     form.addTab({
         id: 'tab_massive',
-        label: "Tab Massive generation Log"
+        label: GLOBAL_LABELS['LMRY_MASSIVE_GENERATION_LOG'][language]
     });
 
     var sublist = form.addSublist({
         id: 'custpage_list_massive',
-        label: "Massive generation Log",
+        label: GLOBAL_LABELS['LMRY_MASSIVE_GENERATION_LOG'][language],
         tab: 'tab_massive',
         type: serverWidget.SublistType.STATICLIST
     });
 
     var fields = [
-        { id: "row_date", label: "Created by", type: serverWidget.FieldType.TEXT },
-        { id: "row_report", label: "Report", type: serverWidget.FieldType.TEXT },
-        { id: "row_period", label: "Period", type: serverWidget.FieldType.TEXT },
-        { id: "row_subsidiary", label: "Subsidiary", type: serverWidget.FieldType.TEXT },
-        { id: "row_multibook", label: "Multibook", type: serverWidget.FieldType.TEXT },
-        { id: "row_created_by", label: "Created by", type: serverWidget.FieldType.TEXT },    
-        { id: "row_details", label: "Datails", type: serverWidget.FieldType.TEXTAREA },
-        { id: "row_summary", label: "Summary", type: serverWidget.FieldType.TEXTAREA },
-        { id: "row_file_name", label: "File Name", type: serverWidget.FieldType.TEXTAREA },
-        { id: "row_download", label: "Download", type: serverWidget.FieldType.TEXTAREA }
+        { id: "row_date", label: GLOBAL_LABELS['fechaCreacion'][language], type: serverWidget.FieldType.TEXT },
+        { id: "row_report", label: GLOBAL_LABELS['reporte'][language], type: serverWidget.FieldType.TEXT },
+        { id: "row_period", label: GLOBAL_LABELS['periodoLog'][language], type: serverWidget.FieldType.TEXT },
+        { id: "row_subsidiary", label: GLOBAL_LABELS['subsidiariaLog'][language], type: serverWidget.FieldType.TEXT },
+        { id: "row_multibook", label:  GLOBAL_LABELS['multibookTranslator'][language], type: serverWidget.FieldType.TEXT },
+        { id: "row_created_by", label: GLOBAL_LABELS['creadoPor'][language], type: serverWidget.FieldType.TEXT },    
+        { id: "row_details", label: GLOBAL_LABELS['LMRY_DETAILS'][language], type: serverWidget.FieldType.TEXTAREA },
+        { id: "row_summary", label: GLOBAL_LABELS['LMRY_SUNNARY'][language], type: serverWidget.FieldType.TEXTAREA },
+        { id: "row_file_name", label: GLOBAL_LABELS['nombreArchivo'][language], type: serverWidget.FieldType.TEXTAREA },
+        { id: "row_download", label: GLOBAL_LABELS['descargar'][language], type: serverWidget.FieldType.TEXTAREA }
     ];
 
     fields.forEach(function (fieldInfo) {

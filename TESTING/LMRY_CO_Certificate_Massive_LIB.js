@@ -6,7 +6,7 @@
  * @Date 20/07/2025
  */
 
-define(['N/search', 'N/runtime', 'N/currentRecord', 'N/record','N/url'],
+define(['N/search', 'N/runtime', 'N/currentRecord', 'N/record', 'N/url'],
 
     function (search, runtime, currentRecord, record, url) {
         var translations = getTranslations()
@@ -141,7 +141,7 @@ define(['N/search', 'N/runtime', 'N/currentRecord', 'N/record','N/url'],
                 if (subsidiary) {
                     executeModal();
                 } else {
-                    alert("⚠️ Selecciona una subsidiaria")
+                    alert(translations.SELECT_SUBSIDIARY)
                 }
 
             };
@@ -157,21 +157,61 @@ define(['N/search', 'N/runtime', 'N/currentRecord', 'N/record','N/url'],
                 "en": {
                     "SELECT_VENDOR": "Select",
                     "PENDING": "Pending",
+                    "SELECT_SUBSIDIARY": "⚠️ Select a subsidiary",
+                    "SEARCH_ENTITIES": "Search entities...",
+                    "SELECT_ALL": "Select all",
+                    "DESELECT_ALL": "Deselect all",
+                    "NO_ENTITIES_SELECTED": "0 entities selected",
+                    "SAVE": "Save",
+                    "CANCEL": "Cancel",
+                    "APPLY": "Apply",
+                    "INTERNAL_ID": "Internal ID",
+                    "NAME": "Name",
+                    "SHOWING_ENTITIES": "Showing 0 entities",
+                    "PAGINATION_LABEL": "Showing {shown} entit{suffix1} of {total}",
+                    "TITLE_HEADER": "Vendors"
                 },
                 "es": {
                     "SELECT_VENDOR": "Seleccionar",
                     "PENDING": "Pendiente",
+                    "SELECT_SUBSIDIARY": "⚠️ Selecciona una subsidiaria",
+                    "SEARCH_ENTITIES": "Buscar entidades...",
+                    "SELECT_ALL": "Seleccionar todo",
+                    "DESELECT_ALL": "Deseleccionar todo",
+                    "NO_ENTITIES_SELECTED": "0 entidades seleccionadas",
+                    "SAVE": "Guardar",
+                    "CANCEL": "Cancelar",
+                    "APPLY": "Aplicar",
+                    "INTERNAL_ID": "ID interno",
+                    "NAME": "Nombre",
+                    "SHOWING_ENTITIES": "Mostrando 0 entidad",
+                    "PAGINATION_LABEL": "Mostrando {shown} entidad{suffix1} de {total}",
+                    "TITLE_HEADER": "Proveedores"
                 },
                 "pt": {
                     "SELECT_VENDOR": "Selecionar",
                     "PENDING": "Pendente",
+                    "SELECT_SUBSIDIARY": "⚠️ Selecionar uma subsidiária",
+                    "SEARCH_ENTITIES": "Buscar entidades...",
+                    "SELECT_ALL": "Selecionar tudo",
+                    "DESELECT_ALL": "Deselecionar tudo",
+                    "NO_ENTITIES_SELECTED": "0 entidades selecionadas",
+                    "SAVE": "Salvar",
+                    "CANCEL": "Cancelar",
+                    "APPLY": "Aplicar",
+                    "INTERNAL_ID": "ID interno",
+                    "NAME": "Nome",
+                    "SHOWING_ENTITIES": "Mostrando 0 entidades",
+                    "PAGINATION_LABEL": "Mostrando {shown} entidade{suffix1} de {total}",
+                    "TITLE_HEADER": "Fornecedores"
                 }
-            }
+            };
+
             return translatedFields[language];
         }
 
         function executeModal() {
-
+            var language = runtime.getCurrentScript().getParameter({ name: "LANGUAGE" }).substring(0, 2);
             defaultEntities = entities[subsidiary];
             if (saveEntities.length) {
                 allEntities = JSON.parse(JSON.stringify(saveEntities));
@@ -251,7 +291,7 @@ define(['N/search', 'N/runtime', 'N/currentRecord', 'N/record','N/url'],
             // Título - Cabecera
             var titleHeader = document.createElement('h2');
             titleHeader.id = 'title-header';
-            titleHeader.innerText = "Vendors"; //transalations_need
+            titleHeader.innerText = translations.TITLE_HEADER; //transalations_need
             titleHeader.style.color = 'white';
             titleHeader.style.cursor = 'default';
             titleHeader.style.fontSize = '17px';
@@ -321,13 +361,13 @@ define(['N/search', 'N/runtime', 'N/currentRecord', 'N/record','N/url'],
             contentEntitySearch.style.fontFamily = 'Arial, sans-serif';
 
             // Altura fija + scroll interno
-            contentEntitySearch.style.height = '400px'; // o usa '60vh' si prefieres altura relativa a la pantalla
+            contentEntitySearch.style.height = '400px';
             contentEntitySearch.style.overflowY = 'auto';
 
             // Campo de búsqueda
             var entitySearch = document.createElement('input');
             entitySearch.type = 'text';
-            entitySearch.placeholder = 'Buscar entidades...';
+            entitySearch.placeholder = translations.SEARCH_ENTITIES;
             entitySearch.style.padding = '10px 10px';
             entitySearch.style.margin = '10px 0px 0px 0px';
             entitySearch.style.width = '100%';
@@ -345,9 +385,9 @@ define(['N/search', 'N/runtime', 'N/currentRecord', 'N/record','N/url'],
             var thead = document.createElement('thead');
             thead.innerHTML = '' +
                 '<tr>' +
-                '<th style="padding: 6px; border: 1px solid #ccc;">Apply</th>' +
-                '<th style="padding: 6px; border: 1px solid #ccc;">Internal ID</th>' +
-                '<th style="padding: 6px; border: 1px solid #ccc;">Name</th>' +
+                '<th style="padding: 6px; border: 1px solid #ccc;">' + translations.APPLY + '</th>' +
+                '<th style="padding: 6px; border: 1px solid #ccc;">' + translations.INTERNAL_ID + '</th>' +
+                '<th style="padding: 6px; border: 1px solid #ccc;">' + translations.NAME + '</th>' +
                 '</tr>';
 
 
@@ -365,9 +405,6 @@ define(['N/search', 'N/runtime', 'N/currentRecord', 'N/record','N/url'],
 
             var tbody = document.createElement('tbody');
             tbody.id = 'entity-table-body';
-            // Altura fija + scroll interno
-            //tbody.style.height = '400px'; // o usa '60vh' si prefieres altura relativa a la pantalla
-            //tbody.style.overflowY = 'auto';
             entityTable.appendChild(tbody);
 
 
@@ -376,7 +413,7 @@ define(['N/search', 'N/runtime', 'N/currentRecord', 'N/record','N/url'],
             paginationLabel.style.fontSize = '13px';
             paginationLabel.style.color = '#333';
             paginationLabel.style.alignSelf = 'flex-end'; // Si usas flexbox
-            paginationLabel.textContent = 'Mostrando 0 entidades'; // valor inicial
+            paginationLabel.textContent = translations.SHOWING_ENTITIES; // valor inicial
 
 
             // Botones de seleccionar/deseleccionar
@@ -386,7 +423,7 @@ define(['N/search', 'N/runtime', 'N/currentRecord', 'N/record','N/url'],
             btnGroup.style.marginTop = '10px';
 
             var btnSelectAll = document.createElement('button');
-            btnSelectAll.textContent = 'Seleccionar todo';
+            btnSelectAll.textContent = translations.SELECT_ALL;
             btnSelectAll.style.padding = '5px 12px';
             btnSelectAll.style.background = '#0073aa';
             btnSelectAll.style.color = 'white';
@@ -414,7 +451,7 @@ define(['N/search', 'N/runtime', 'N/currentRecord', 'N/record','N/url'],
             };
 
             var btnDeselectAll = document.createElement('button');
-            btnDeselectAll.textContent = 'Deseleccionar todo';
+            btnDeselectAll.textContent = translations.DESELECT_ALL;
             btnDeselectAll.style.padding = '5px 12px';
             btnDeselectAll.style.background = '#0073aa';
             btnDeselectAll.style.color = 'white';
@@ -436,7 +473,7 @@ define(['N/search', 'N/runtime', 'N/currentRecord', 'N/record','N/url'],
                     entityList[k].checked = false;
                 }
 
-                updateSelectedLabel(); // Actualiza contador
+                updateSelectedLabel();
             };
 
             var selectedLabel = document.createElement('div');
@@ -444,8 +481,8 @@ define(['N/search', 'N/runtime', 'N/currentRecord', 'N/record','N/url'],
             selectedLabel.style.fontSize = '13px';
             selectedLabel.style.color = '#0073aa';
             selectedLabel.style.marginTop = '10px';
-            selectedLabel.style.alignSelf = 'flex-start'; // Puedes ajustar según el layout
-            selectedLabel.textContent = '0 entidades seleccionadas';
+            selectedLabel.style.alignSelf = 'flex-start';
+            selectedLabel.textContent = translations.NO_ENTITIES_SELECTED;
 
             function updateSelectedLabel() {
                 selectedCount = 0;
@@ -456,9 +493,19 @@ define(['N/search', 'N/runtime', 'N/currentRecord', 'N/record','N/url'],
                     }
                 }
 
-                selectedLabel.textContent =
-                    selectedCount + ' entidad' + (selectedCount !== 1 ? 'es' : '') +
-                    ' seleccionada' + (selectedCount !== 1 ? 's' : '');
+                if (language === 'es') {
+                    selectedLabel.textContent =
+                        selectedCount + ' entidad' + (selectedCount !== 1 ? 'es' : '') +
+                        ' seleccionada' + (selectedCount !== 1 ? 's' : '');
+                } else if (language === 'en') {
+                    selectedLabel.textContent =
+                        selectedCount + ' ' + (selectedCount === 1 ? 'entity' : 'entities') +
+                        ' selected';
+                } else if (language === 'pt') {
+                    selectedLabel.textContent =
+                        selectedCount + ' entidade' + (selectedCount !== 1 ? 's' : '') +
+                        ' selecionada' + (selectedCount !== 1 ? 's' : '');
+                }
             }
 
             btnGroup.appendChild(btnSelectAll);
@@ -481,9 +528,25 @@ define(['N/search', 'N/runtime', 'N/currentRecord', 'N/record','N/url'],
 
                     renderTable(filtered);
                 } else {
-                    renderTable(entityList); // Mostramos solo las primeras 100
+                    renderTable(entityList);
                 }
             });
+
+            function getPaginationLabel(shown, total, language) {
+                const template = translations["PAGINATION_LABEL"];
+                const isPlural = shown !== 1;
+
+                const suffixMap = {
+                    en: isPlural ? 'ies' : 'y',       
+                    es: isPlural ? 'es' : '',         
+                    pt: isPlural ? 's' : ''           
+                };
+
+                return template
+                    .replace('{shown}', shown)
+                    .replace('{suffix1}', suffixMap[language])
+                    .replace('{total}', total);
+            }
 
 
 
@@ -507,7 +570,7 @@ define(['N/search', 'N/runtime', 'N/currentRecord', 'N/record','N/url'],
 
                 //updateSelectedLabel()
                 // También podrías actualizar un label de cantidad:
-                paginationLabel.textContent = 'Mostrando ' + list.length + ' entidades de ' + allEntities.length;
+                paginationLabel.textContent = getPaginationLabel(list.length, allEntities.length, language);
             }
 
 
@@ -566,7 +629,7 @@ define(['N/search', 'N/runtime', 'N/currentRecord', 'N/record','N/url'],
 
             // Botón de Guardar
             var saveButton = createButton(
-                "Save",//translation.LMRY_SAVE,
+                translations.SAVE,//translation.LMRY_SAVE,
                 '#006AFF',      // Verde éxito 
                 '#FFFFFF',      // Texto blanco 
                 '#0055CC',      // Verde más oscuro en hover
@@ -614,7 +677,7 @@ define(['N/search', 'N/runtime', 'N/currentRecord', 'N/record','N/url'],
 
             // Botón de Cancelar
             var cancelButton = createButton(
-                "Cancel",//translation.LMRY_CANCEL,
+                translations.CANCEL,//translation.LMRY_CANCEL,
                 '#D2D2D2',      // Rojo alerta 
                 '#030000',      // Texto blanco
                 '#B3B3B3',      // Rojo más oscuro en hover
@@ -642,12 +705,9 @@ define(['N/search', 'N/runtime', 'N/currentRecord', 'N/record','N/url'],
 
             document.getElementById('entity-table-body').addEventListener('change', function (event) {
                 var target = event.target;
-                console.log("entity check")
 
                 if (target && target.classList.contains('entity-checkbox')) {
                     var id = parseInt(target.getAttribute('data-id'));
-                    console.log("entity check [id]", id)
-                    console.log("allEntities", allEntities.slice(0, 10))
                     for (var i = 0; i < allEntities.length; i++) {
                         if (allEntities[i].id == id) {
                             allEntities[i].checked = target.checked;
@@ -708,18 +768,22 @@ define(['N/search', 'N/runtime', 'N/currentRecord', 'N/record','N/url'],
                 return ent.checked;
             });
 
-            function compactEntityArray(arr) {
+            function compactEntityArray(arr) { //Update_vendor
                 var result = {};
                 for (var i = 0; i < arr.length; i++) {
-                    result[arr[i].id] = arr[i].status;
+                    result[arr[i].id] = {
+                        status:arr[i].status,
+                        filename:"",
+                        url:""
+                    }
                 }
                 return result;
             }
             var summary = {
-                s: 0,
-                p: result.length,
-                n: 0,
-                e: 0
+                s: 0, // Success
+                p: 0, // processing
+                n: result.length, // Loading
+                e: 0  // Error
             }
 
 
@@ -734,7 +798,7 @@ define(['N/search', 'N/runtime', 'N/currentRecord', 'N/record','N/url'],
             });
         }
 
-        function continueExecutionFlow(vendor, recordMassiveId, isError) {
+        function continueExecutionFlow(vendor, recordMassiveId, isError,filename,urlFile) {
             require(['N/task'], function (task) {
                 if (!recordMassiveId) return false;
                 var recordMasive = record.load({ id: recordMassiveId, type: "customrecord_lmry_co_massive_cer_log" });
@@ -747,7 +811,10 @@ define(['N/search', 'N/runtime', 'N/currentRecord', 'N/record','N/url'],
                     summary.s++;
                 }
 
-                vendors[vendor] = isError ? "ERROR" : "FINISH";
+                vendors[vendor].status = isError ? "ERROR" : "FINISH"; // Update_vendor
+                vendors[vendor].filename = isError ? "" : filename;
+                vendors[vendor].url = isError ? "" : urlFile;
+
                 recordMasive.setValue('custrecord_lmry_co_mass_vendors', JSON.stringify(vendors));
                 recordMasive.setValue('custrecord_lmry_co_mass_summary', JSON.stringify(summary));
                 recordMasive.save();

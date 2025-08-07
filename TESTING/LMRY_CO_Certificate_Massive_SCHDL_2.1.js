@@ -29,6 +29,7 @@ define([
             const paramRecordMassiveId = getParam('custscript_lmry_co_massive_record_id');
             const recordMassive = getRecordMassive(paramRecordMassiveId);
             const vendors = JSON.parse(recordMassive["custrecord_lmry_co_mass_vendors"]);
+            const summary = JSON.parse(recordMassive["custrecord_lmry_co_mass_summary"]);
             const reportId = recordMassive["custrecord_lmry_co_mass_tran"];
             const pendingVendor = findPendingVendor(vendors);
 
@@ -38,7 +39,7 @@ define([
                 const isRunning = validateExecution(custrecord_lmry_co_id_schedule, custrecord_lmry_co_id_deploy);
                 if (!isRunning) {
                     const recordLogId = createRecordLog(recordMassive, name);
-                    updateVendorStatus(vendors, pendingVendor, paramRecordMassiveId);
+                    updateVendorStatus(vendors, pendingVendor, paramRecordMassiveId,summary);
                     executeReport(recordMassive, pendingVendor, recordLogId, reportInfo);
                 }
             }
@@ -65,6 +66,7 @@ define([
             "custrecord_lmry_co_mass_ibook",
             "custrecord_lmry_co_mass_wht_type",
             "custrecord_lmry_co_mass_city_origin",
+            "custrecord_lmry_co_mass_summary"
         ]
         search.create({
             type: "customrecord_lmry_co_massive_cer_log",
@@ -85,7 +87,7 @@ define([
     }
 
     const findPendingVendor = (vendors) => {
-        return Object.keys(vendors).find(key => vendors[key] === 'PENDING');
+        return Object.keys(vendors).find(key => vendors[key].status === 'PENDING');
     }
 
     const getReportFeature = (reportId) => {
@@ -154,7 +156,7 @@ define([
         logRecord.setValue('custrecord_lmry_co_rpt_type', 'C');
 
         // Si el ID de reporte es 59, formatear fecha personalizada
-        if (idrpts == 59 && periodDate) {
+        if (tran == 59 && periodDate) {
             const parsedDate = format.parse({ value: periodDate, type: format.Type.DATE });
             const formatted = `${String(parsedDate.getDate()).padStart(2, '0')}/${String(parsedDate.getMonth() + 1).padStart(2, '0')}/${parsedDate.getFullYear()}`;
 
@@ -219,14 +221,18 @@ define([
         return translatedFields[language];
     }
 
-    const updateVendorStatus = (vendors, pendingVendor, paramRecordMassiveId) => {
-        vendors[pendingVendor] = "PROCESS";
+    const updateVendorStatus = (vendors, pendingVendor, paramRecordMassiveId,summary) => {
+        vendors[pendingVendor].status = "PROCESS"; //Update_vendor
+
+        summary.n--;
+        summary.p++;
+        
         record.submitFields({
             type: "customrecord_lmry_co_massive_cer_log",
             id: paramRecordMassiveId,
             values: {
                 custrecord_lmry_co_mass_vendors: JSON.stringify(vendors),
-                custrecord_lmry_co_mass_summary: JSON.stringify(vendors),
+                custrecord_lmry_co_mass_summary: JSON.stringify(summary), //error
             },
             options: {
                 enableSourcing: false,
