@@ -54,7 +54,7 @@ define([
 
 
                     recordObj.save({
-                        //disableTriggers: true,
+                        disableTriggers: false,
                     });
 
                     transaction.modificado = true;
@@ -185,7 +185,7 @@ define([
         }
 
         function getTransactions() {
-
+            //purchase order, sales order, item receipt, item fulfillment
             var transactionResult = [];
             var transactionSearch = search.create({
                 type: "transaction",
@@ -198,7 +198,7 @@ define([
                         "AND",
                         ["trandate", "within", "1/1/2024", "31/7/2024"],
                         "AND",
-                        ["type", "anyof", "VendBill", "VendCred", "CustCred", "CustInvc", "Check", "CustRfnd", "CustPymt", "Deposit", "Transfer", "Journal", "VPrep", "VendPymt", "CashSale", "RtnAuth", "VendAuth"]
+                        ["type", "anyof", "VendBill", "VendCred", "CustCred", "CustInvc","Journal", "CashSale", "RtnAuth", "VendAuth","ExpRept"]
                     ],
                 columns:
                     [
