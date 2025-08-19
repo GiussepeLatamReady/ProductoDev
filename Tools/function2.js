@@ -1,77 +1,58 @@
-function changeSubsidiary(currentRCD, subsidiaries) {
-    try {
-        console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
-        console.log("subsidiaries", subsidiaries);
-
-        var subsidiaryID = currentRCD.getCurrentSublistValue({
-            sublistId: 'submachine',
-            fieldId: 'subsidiary'
-        });
-
-        var isClient = true;
-        var entityFields = getEntityFields();
-
-        // Mapeo de cuántas subsidiarias hay por país
-        var subsidiariesByCountry = {};
-
-        Object.keys(subsidiaries).forEach(function (subsidiaryId) {
-            var countryCode = subsidiaries[subsidiaryId].countryCode;
-            if (!subsidiariesByCountry[countryCode]) {
-                subsidiariesByCountry[countryCode] = [];
-            }
-            subsidiariesByCountry[countryCode].push(subsidiaryId);
-        });
-
-        // Evitar la doble ejecución del evento de click
-        document.removeEventListener('click', handleButtonClick);
-        document.addEventListener('click', handleButtonClick);
-
-        function handleButtonClick(event) {
-            console.log("##############################");
-            console.log("handleButtonClick", "click");
-
-            var buttonActions = {
-                submachine_addedit: true,  // Agregar (isVisible = true)
-                submachine_remove: false   // Remover (isVisible = false)
-            };
-
-            if (event.target && buttonActions.hasOwnProperty(event.target.id)) {
-                var isVisible = buttonActions[event.target.id];
-
-                // Obtener el país de la subsidiaria seleccionada
-                var countryCode = subsidiaries[subsidiaryID].countryCode;
-
-                // Verificar si es una acción de eliminación y si quedan subsidiarias en ese país
-                if (!isVisible) {
-                    // Filtrar la subsidiaria eliminada
-                    subsidiariesByCountry[countryCode] = subsidiariesByCountry[countryCode].filter(id => id !== subsidiaryID);
-
-                    // Si todavía quedan subsidiarias en el mismo país, **no ocultar el grupo**
-                    if (subsidiariesByCountry[countryCode].length > 0) {
-                        console.log("No se oculta el grupo del país porque hay más subsidiarias en", countryCode);
-                        return;
-                    }
-                }
-
-                // Crear jsonSubsidiaries para la subsidiaria seleccionada
-                var jsonSubsidiaries = {};
-                jsonSubsidiaries[subsidiaryID] = subsidiaries[subsidiaryID];
-                console.log("jsonSubsidiaries", jsonSubsidiaries);
-
-                // Procesar los datos de campo
-                var fieldData = assignFieldsToSubsidiaries(jsonSubsidiaries, entityFields, currentRCD.type);
-
-                // Crear grupos y actualizar campos
-                createGroups(null, fieldData, isClient);
-                setCustpage(fieldData, isClient, currentRCD, isVisible);
-
-                console.log("Botón presionado: " + event.target.id.replace('submachine_', '') + ", Subsidiaria: ", subsidiaryID);
-                console.log("##############################");
-            }
-        }
-        console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
-
-    } catch (error) {
-        console.error('Error', error);
-    }
+arregloAuxiliar[contadorAuxiliar] = tramo[0]; //0
+arregloAuxiliar[contadorAuxiliar] += "|" + vendor;
+arregloAuxiliar[contadorAuxiliar] += "|" + internalid;
+arregloAuxiliar[contadorAuxiliar] += "|" + round(tax_rate, 6);
+arregloAuxiliar[contadorAuxiliar] += "|" + ratio;
+arregloAuxiliar[contadorAuxiliar] += "|" + parseFloat((parseFloat(aux_amount_remaining) * parseFloat(exchange_global)).toFixed(4)); //5
+arregloAuxiliar[contadorAuxiliar] += "|" + parseFloat(Math.round(parseFloat(val) * 10000) / 10000); //6
+arregloAuxiliar[contadorAuxiliar] += "|" + jurisdiccion_iib;
+arregloAuxiliar[contadorAuxiliar] += "|" + tran_number[posicion];
+arregloAuxiliar[contadorAuxiliar] += "|" + ccl_apli; //9
+arregloAuxiliar[contadorAuxiliar] += "|" + taxcode_group_text;
+arregloAuxiliar[contadorAuxiliar] += "|" + sub_type;
+arregloAuxiliar[contadorAuxiliar] += "|" + acumulado_mensualmente; //12
+arregloAuxiliar[contadorAuxiliar] += "|" + parseFloat((parseFloat(ccl_mini) * parseFloat(exchange_global)).toFixed(4));
+arregloAuxiliar[contadorAuxiliar] += "|" + parseFloat((parseFloat(suma_global) * parseFloat(exchange_global)).toFixed(4)); //14
+arregloAuxiliar[contadorAuxiliar] += "|" + amou_to_text; //15
+arregloAuxiliar[contadorAuxiliar] += "|" + dobaseamount_text;
+arregloAuxiliar[contadorAuxiliar] += "|" + parseFloat((parseFloat(maximo) * parseFloat(exchange_global)).toFixed(4)); //17
+arregloAuxiliar[contadorAuxiliar] += "|" + parseFloat((parseFloat(setbaseretention) * parseFloat(exchange_global)).toFixed(4));
+arregloAuxiliar[contadorAuxiliar] += "|" + bySubsidiary_text; //19
+arregloAuxiliar[contadorAuxiliar] += "|" + parseFloat((parseFloat(minimonoimponible) * parseFloat(exchange_global)).toFixed(4)); //20
+arregloAuxiliar[contadorAuxiliar] += "|" + parseFloat((parseFloat(tra_total_global_before_resta) * parseFloat(exchange_global)).toFixed(4));
+arregloAuxiliar[contadorAuxiliar] += "|" + parseFloat(parseFloat(suma_retenciones_anteriores).toFixed(4)); //22
+arregloAuxiliar[contadorAuxiliar] += "|" + parseFloat((parseFloat(amon_global) * parseFloat(exchange_global)).toFixed(4));
+arregloAuxiliar[contadorAuxiliar] += "|" + add_accumulated_text; //24
+arregloAuxiliar[contadorAuxiliar] += "|" + orden_pre; //25
+arregloAuxiliar[contadorAuxiliar] += "|" + Math.round(parseFloat(val) * 100) / 100;
+arregloAuxiliar[contadorAuxiliar] += "|" + taxtype; //27
+arregloAuxiliar[contadorAuxiliar] += "|" + tax_item;
+arregloAuxiliar[contadorAuxiliar] += "|" + subtype_ar; //29
+arregloAuxiliar[contadorAuxiliar] += "|" + regimen;
+arregloAuxiliar[contadorAuxiliar] += "|" + round2(parseFloat(baseAmount) * parseFloat(exchange_global)); //31
+var aux_id = '';
+if (bySubsidiary == '0') {
+    aux_id = "NT" + internalid;
+} else {
+    aux_id = "CC" + internalid;
 }
+arregloAuxiliar[contadorAuxiliar] += '|' + aux_id;
+arregloAuxiliar[contadorAuxiliar] += '|' + norma; //33
+arregloAuxiliar[contadorAuxiliar] += '|' + sub_type_value;
+arregloAuxiliar[contadorAuxiliar] += '|' + tax_code; //35
+arregloAuxiliar[contadorAuxiliar] += '|' + round4(parseFloat(baseAmount) * parseFloat(exchange_global)); //36
+arregloAuxiliar[contadorAuxiliar] += '|' + tramo[3]; //37
+arregloAuxiliar[contadorAuxiliar] += '|' + jurisdiccion_iib_value; //38
+arregloAuxiliar[contadorAuxiliar] += '|' + ccl_apli_value; //39
+arregloAuxiliar[contadorAuxiliar] += '|' + vendorvalue;
+arregloAuxiliar[contadorAuxiliar] += '|' + tax_rate_percentage;
+arregloAuxiliar[contadorAuxiliar] += '|' + pagoDeBill; //42
+arregloAuxiliar[contadorAuxiliar] += '|' + parseFloat(Math.round(parseFloat(val) * 10000) / 10000); //43
+arregloAuxiliar[contadorAuxiliar] += '|' + Math.round(parseFloat(minimum_retention) * parseFloat(exchange_global) * 10000) / 10000; //44
+arregloAuxiliar[contadorAuxiliar] += '|' + parseFloat(baseAmount) * parseFloat(exchange_global); //45
+arregloAuxiliar[contadorAuxiliar] += '|' + tipo_renta;
+arregloAuxiliar[contadorAuxiliar] += '|' + subtype_ar_text; //47
+arregloAuxiliar[contadorAuxiliar] += '|' + ((isIncomeType) ? "T" : "F");//48
+arregloAuxiliar[contadorAuxiliar] += '|' + (tra_total_global * parseFloat(exchange_global));//49
+
+contadorAuxiliar++;
