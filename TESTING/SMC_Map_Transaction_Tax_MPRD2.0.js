@@ -196,7 +196,7 @@ define([
                         "AND",
                         ["mainline", "is", "T"],
                         "AND",
-                        ["trandate", "within", "1/1/2024", "31/7/2024"],
+                        ["trandate", "within", "1/1/2024", "30/8/2025"],
                         "AND",
                         ["type", "anyof", "VendBill", "VendCred", "CustCred", "CustInvc","Journal", "CashSale", "RtnAuth", "VendAuth","ExpRept"]
                     ],
