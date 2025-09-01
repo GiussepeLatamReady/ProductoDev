@@ -413,7 +413,7 @@ define([
                     return false;
                 }
 
-                if (!Lib_certificate_massive.createRecordMassive()) return false;
+                if (!Lib_certificate_massive.createRecordMassive(scriptContext.currentRecord)) return false;
 
                 // Mesaje al usuario
                 if (language == 'es') {

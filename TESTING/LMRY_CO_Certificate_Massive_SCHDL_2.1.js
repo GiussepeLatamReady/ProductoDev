@@ -30,6 +30,7 @@ define([
             const getParam = name => runtime.getCurrentScript().getParameter({ name });
             const paramRecordMassiveId = getParam('custscript_lmry_co_massive_record_id');
             const recordMassive = getRecordMassive(paramRecordMassiveId);
+            log.error("recordMassive",recordMassive)
             const vendors = JSON.parse(recordMassive["custrecord_lmry_co_mass_vendors"]);
             const summary = JSON.parse(recordMassive["custrecord_lmry_co_mass_summary"]);
             const reportId = recordMassive["custrecord_lmry_co_mass_tran"];

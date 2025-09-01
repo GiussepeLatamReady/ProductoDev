@@ -332,14 +332,14 @@ function execute(context) {
                 });
                 provedorList.defaultValue = GLOBAL_LABELS["select_vendor"][language];
 
-                var recordMasive = form.addField({
-                    id: 'custpage_record_massive_id',
-                    type: UI.FieldType.TEXT,
-                    label: "Record Massive",
+
+                var recordMasiveIds = form.addField({
+                    id: 'custpage_record_massive_list_ids',
+                    type: UI.FieldType.TEXTAREA,
+                    label: "Record Massive IDS",
                     container: 'custpage_filran2'
                 });
-                recordMasive.updateDisplayType({ displayType: UI.FieldDisplayType.HIDDEN });
-                
+                recordMasiveIds.updateDisplayType({ displayType: UI.FieldDisplayType.HIDDEN });
                 /*
                 provedorList.addSelectOption({
                     value: ' ',
@@ -723,16 +723,16 @@ function execute(context) {
                 //Valida si es OneWorld
                 var idrpts = context.request.parameters.custpage_lmry_reporte;
                 var p = context.request.parameters;
-
+                var dataEntities = JSON.parse(p.custpage_record_massive_list_ids);
                 var features = {
                     SUBSIDIARIES: RUNTIME.isFeatureInEffect({ feature: "SUBSIDIARIES" }),
                     MULTIBOOK: RUNTIME.isFeatureInEffect({ feature: "MULTIBOOK" })
                 };
 
+                var logRecord = RECORD.create({ type: 'customrecord_lmry_co_massive_cer_log' });
+                logRecord.setValue('custrecord_lmry_co_mass_vendors', JSON.stringify(dataEntities.entitiesList));
+                logRecord.setValue('custrecord_lmry_co_mass_summary', JSON.stringify(dataEntities.summary));
 
-
-
-                var logRecord = RECORD.load({ type: 'customrecord_lmry_co_massive_cer_log', id: p.custpage_record_massive_id });
                 logRecord.setValue('custrecord_lmry_co_mass_name', GLOBAL_LABELS['pending'][language]);
                 logRecord.setValue('custrecord_lmry_co_mass_tran', idrpts);
                 if (idrpts == 56) {
@@ -1402,7 +1402,6 @@ function createSublistMassiveProcess(form, serverWidget) {
             var obj = JSON.parse(process.summary);
             total = obj.s + obj.p + obj.n + obj.e;
         }
-        log.error("total",total)
         if (total != 1) {
             var recordUrl = URLAPI.resolveRecord({ recordType: "customrecord_lmry_co_massive_cer_log", recordId: process.internalid, isEditMode: false });
             var details =
@@ -1411,11 +1410,6 @@ function createSublistMassiveProcess(form, serverWidget) {
                 '<div style="color: #424950; font-size: 14px;">' + GLOBAL_LABELS["LMRY_DETAILS"][language] + '</div>' +
                 '</div>' +
                 '</a>';
-            var dataFormat = FORMAT.format({
-                value: process.created,
-                type: FORMAT.Type.DATE
-            });
-            log.error("process",process)
             sublist.setSublistValue({ id: "row_date", line: i, value: process.created });
             sublist.setSublistValue({ id: "row_report", line: i, value: process.reportName });
             sublist.setSublistValue({ id: "row_period", line: i, value: process.periodName });
@@ -1475,7 +1469,6 @@ function getRecordMassive() {
             });
         });
     }
-    log.error("processList", processList)
     return processList;
 }
 

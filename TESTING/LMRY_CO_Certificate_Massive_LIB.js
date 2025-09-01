@@ -762,7 +762,7 @@ define(['N/search', 'N/runtime', 'N/currentRecord', 'N/record', 'N/url'],
             currentRecord = RCD;
         }
 
-        function createRecordMassive() {
+        function createRecordMassive(currentRecord) {
 
             var activeAntities = saveEntities.filter(function (ent) {
                 return ent.checked;
@@ -793,17 +793,17 @@ define(['N/search', 'N/runtime', 'N/currentRecord', 'N/record', 'N/url'],
                 n: Object.keys(entitiesList).length, // Loading
                 e: 0  // Error
             }
-
-
-            var logRecord = record.create({ type: 'customrecord_lmry_co_massive_cer_log' });
-            logRecord.setValue('custrecord_lmry_co_mass_vendors', JSON.stringify(entitiesList));
-            logRecord.setValue('custrecord_lmry_co_mass_summary', JSON.stringify(summary));
-            var rec_id = logRecord.save();
+                        
+            var result = {
+                entitiesList:entitiesList,
+                summary:summary
+            }
 
             currentRecord.setValue({
-                fieldId: 'custpage_record_massive_id',
-                value: rec_id
-            });
+                            fieldId: 'custpage_record_massive_list_ids',
+                            value: JSON.stringify(result)
+                        });
+
             return true;
         }
 
