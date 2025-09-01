@@ -39,12 +39,6 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/url'], (runtime, server
 
         buildTable() {
 
-            //this.form.clientScriptModulePath = './AR_LIBRARY_MENSUAL/LMRY_AR_Massive_Gene_Agip_CLNT_V2.1.js';
-            this.form.addButton({
-                id: "custpage_btn_reload",
-                label: this.translations.LMRY_REFRESH,
-                functionName: "reload()"
-            });
             this.tab = this.form.addTab({ id: 'custpage_tab_entities', label: this.translations.LMRY_ENTITIES });
             this.form.insertTab({ tab: this.tab, nexttab: 'notes' });
             this.sublist = this.form.addSublist({
@@ -58,8 +52,8 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/url'], (runtime, server
                 { id: 'custpage_col_number', label: this.translations.LMRY_NUMBER, type: serverWidget.FieldType.TEXT },
                 { id: 'custpage_col_entity', label: this.translations.LMRY_ENTITY, type: serverWidget.FieldType.TEXT },
                 { id: 'custpage_col_filename', label: this.translations.LMRY_FILE_NAME, type: serverWidget.FieldType.TEXT },
-                { id: 'custpage_col_url', label: this.translations.LMRY_URL, type: serverWidget.FieldType.TEXTAREA },
-                { id: 'custpage_col_status', label: this.translations.LMRY_STATUS, type: serverWidget.FieldType.TEXT},
+                //{ id: 'custpage_col_url', label: this.translations.LMRY_URL, type: serverWidget.FieldType.TEXTAREA },
+                { id: 'custpage_col_status', label: this.translations.LMRY_STATUS, type: serverWidget.FieldType.TEXTAREA},
             ];
             fields.forEach(fieldInfo => {
                 this.sublist.addField(fieldInfo);
@@ -79,15 +73,16 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/url'], (runtime, server
                 const entityUrl = url.resolveRecord({ recordType:"vendor", recordId: id, isEditMode: false });
                 setSublistValue("custpage_col_number", i + 1);
                 setSublistValue("custpage_col_entity", `<a class="dottedlink" href="${entityUrl}" target="_blank">${vendorName}</a>` );
-                setSublistValue("custpage_col_filename", filename || " ");
-                setSublistValue("custpage_col_url", urlfile || " ");
+                setSublistValue("custpage_col_filename", urlfile ? `<a target="_blank" href="${urlfile}"download>${filename}</a>` : " ");
+                //setSublistValue("custpage_col_url", urlfile ? `<a target="_blank" href="${urlfile}"download>Descarga</a>` : " ");
                 
 
                 const jsonStatus = {
                     "FINISH":this.translations.LMRY_PROCESING_CHECK,
                     "ERROR":this.translations.LMRY_ERROR,
                     "PROCESS":this.translations.LMRY_PROCESING,
-                    "PENDING":this.translations.LMRY_NOT_PROCESING
+                    "PENDING":this.translations.LMRY_NOT_PROCESING,
+                    "NO_DATA":this.translations.LMRY_NO_DATA
                 }
 
                 const title = jsonStatus[status];
@@ -185,13 +180,14 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/url'], (runtime, server
                     "LMRY_NOT_PROCESING": "Cargando",
                     "LMRY_PROCESING_CHECK": "Procesada con éxito",
                     "LMRY_FILE_NAME": "Nombre del archivo",
-                    "LMRY_URL": "Descargar"
+                    "LMRY_URL": "Descargar",
+                    "LMRY_NO_DATA": "No existe informacion para los criterios seleccionados."
                 },
                 "en": {
                     "LMRY_ENTITIES": "Entities",
                     "LMRY_NUMBER": "Position",
                     "LMRY_ENTITY": "Entity",
-                    "LMRY_STATUS": "State",
+                    "LMRY_STATUS": "Status",
                     "LMRY_PROCESING": "Processing",
                     "LMRY_ERROR": "Error",
                     "LMRY_NOT_PROCESING": "Loading",
@@ -199,7 +195,8 @@ define(['N/runtime', 'N/ui/serverWidget', 'N/search', 'N/url'], (runtime, server
                     "LMRY_REFRESH": "Refresh",
                     "LMRY_CREATED_FROM": "Created from",
                     "LMRY_FILE_NAME": "File Name",
-                    "LMRY_URL": "Download"
+                    "LMRY_URL": "Download",
+                    "LMRY_NO_DATA": "There is no information for the selected criteria."
                 }
             }
             return translatedFields[lenguage];

@@ -339,6 +339,7 @@ function execute(context) {
                     container: 'custpage_filran2'
                 });
                 recordMasive.updateDisplayType({ displayType: UI.FieldDisplayType.HIDDEN });
+                
                 /*
                 provedorList.addSelectOption({
                     value: ' ',
@@ -1392,31 +1393,42 @@ function createSublistMassiveProcess(form, serverWidget) {
 
 
     var recordList = getRecordMassive();
+    var i = 0
+    recordList.forEach(function (process, index) {
+        var total = 0;
+        if (!process.summary || process.summary == " ") {
+            total = 1;
+        }else{
+            var obj = JSON.parse(process.summary);
+            total = obj.s + obj.p + obj.n + obj.e;
+        }
+        log.error("total",total)
+        if (total != 1) {
+            var recordUrl = URLAPI.resolveRecord({ recordType: "customrecord_lmry_co_massive_cer_log", recordId: process.internalid, isEditMode: false });
+            var details =
+                '<a href="' + recordUrl + '" target="_blank" style="text-decoration: none; color: inherit;">' +
+                '<div style="display: grid; place-items: center; background: white; border-radius: 6px; transition: background-color 0.3s; border: 0.5px solid #bbd1e9;" onmouseover="this.style.backgroundColor=\'#bbd1e9\'" onmouseout="this.style.backgroundColor=\'white\';">' +
+                '<div style="color: #424950; font-size: 14px;">' + GLOBAL_LABELS["LMRY_DETAILS"][language] + '</div>' +
+                '</div>' +
+                '</a>';
+            var dataFormat = FORMAT.format({
+                value: process.created,
+                type: FORMAT.Type.DATE
+            });
+            log.error("process",process)
+            sublist.setSublistValue({ id: "row_date", line: i, value: process.created });
+            sublist.setSublistValue({ id: "row_report", line: i, value: process.reportName });
+            sublist.setSublistValue({ id: "row_period", line: i, value: process.periodName });
+            sublist.setSublistValue({ id: "row_subsidiary", line: i, value: process.subsidiary });
+            sublist.setSublistValue({ id: "row_multibook", line: i, value: process.multibook });
+            sublist.setSublistValue({ id: "row_created_by", line: i, value: process.employee });
+            sublist.setSublistValue({ id: "row_file_name", line: i, value: process.fileUrl ? process.fileName + ".zip" : process.fileName });
+            sublist.setSublistValue({ id: "row_details", line: i, value: details });
+            sublist.setSublistValue({ id: "row_summary", line: i, value: getSummary(process.summary) });
+            sublist.setSublistValue({ id: "row_download", line: i, value: process.fileUrl ? '<a target="_blank" href="' + process.fileUrl + '"download>' + GLOBAL_LABELS['descargar'][language] + '</a>' : " " });
+            i++;
+        }
 
-    recordList.forEach(function (process, i) {
-
-        var recordUrl = URLAPI.resolveRecord({ recordType: "customrecord_lmry_co_massive_cer_log", recordId: process.internalid, isEditMode: false });
-        var details =
-            '<a href="' + recordUrl + '" target="_blank" style="text-decoration: none; color: inherit;">' +
-            '<div style="display: grid; place-items: center; background: white; border-radius: 6px; transition: background-color 0.3s; border: 0.5px solid #bbd1e9;" onmouseover="this.style.backgroundColor=\'#bbd1e9\'" onmouseout="this.style.backgroundColor=\'white\';">' +
-            '<div style="color: #424950; font-size: 14px;">' + GLOBAL_LABELS["LMRY_DETAILS"][language] + '</div>' +
-            '</div>' +
-            '</a>';
-        var dataFormat = FORMAT.format({
-            value: process.created,
-            type: FORMAT.Type.DATE
-        });
-
-        sublist.setSublistValue({ id: "row_date", line: i, value: process.created });
-        sublist.setSublistValue({ id: "row_report", line: i, value: process.reportName });
-        sublist.setSublistValue({ id: "row_period", line: i, value: process.periodName });
-        sublist.setSublistValue({ id: "row_subsidiary", line: i, value: process.subsidiary });
-        sublist.setSublistValue({ id: "row_multibook", line: i, value: process.multibook });
-        sublist.setSublistValue({ id: "row_created_by", line: i, value: process.employee });
-        sublist.setSublistValue({ id: "row_file_name", line: i, value: process.fileName });
-        sublist.setSublistValue({ id: "row_details", line: i, value: details });
-        sublist.setSublistValue({ id: "row_summary", line: i, value: getSummary(process.summary) });
-        sublist.setSublistValue({ id: "row_download", line: i, value: "Download" });
 
 
     });
@@ -1438,6 +1450,7 @@ function getRecordMassive() {
                 SEARCH.createColumn({ name: 'formulatext', formula: "{custrecord_lmry_co_mass_empl}" }),
                 SEARCH.createColumn({ name: 'formulatext', formula: "{custrecord_lmry_co_mass_name}" }),
                 SEARCH.createColumn({ name: 'formulatext', formula: "{custrecord_lmry_co_mass_summary}" }),
+                SEARCH.createColumn({ name: 'formulatext', formula: "{custrecord_lmry_co_mass_file}" }),
                 SEARCH.createColumn({ name: "internalid", sort: SEARCH.Sort.DESC }),
             ]
     }).runPaged({ pageSize: 1000 });
@@ -1456,6 +1469,7 @@ function getRecordMassive() {
                     employee: result.getValue(result.columns[5]) || " ",
                     fileName: result.getValue(result.columns[6]) || " ",
                     summary: result.getValue(result.columns[7]) || " ",
+                    fileUrl: result.getValue(result.columns[8]) || "",
                 }
                 processList.push(process);
             });

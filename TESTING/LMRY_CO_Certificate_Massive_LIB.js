@@ -537,9 +537,9 @@ define(['N/search', 'N/runtime', 'N/currentRecord', 'N/record', 'N/url'],
                 const isPlural = shown !== 1;
 
                 const suffixMap = {
-                    en: isPlural ? 'ies' : 'y',       
-                    es: isPlural ? 'es' : '',         
-                    pt: isPlural ? 's' : ''           
+                    en: isPlural ? 'ies' : 'y',
+                    es: isPlural ? 'es' : '',
+                    pt: isPlural ? 's' : ''
                 };
 
                 return template
@@ -767,28 +767,36 @@ define(['N/search', 'N/runtime', 'N/currentRecord', 'N/record', 'N/url'],
             var activeAntities = saveEntities.filter(function (ent) {
                 return ent.checked;
             });
+            if (!activeAntities.length) {
+                alert("Elija al menos una entidad")
+                return false;
+            }
 
             function compactEntityArray(arr) { //Update_vendor
                 var result = {};
                 for (var i = 0; i < arr.length; i++) {
                     result[arr[i].id] = {
-                        status:arr[i].status,
-                        filename:"",
-                        url:""
+                        status: arr[i].status,
+                        filename: "",
+                        url: ""
                     }
                 }
                 return result;
             }
+            console.log("activeAntities",activeAntities)
+
+            var entitiesList = compactEntityArray(activeAntities);
+            console.log("entitiesList",entitiesList)
             var summary = {
                 s: 0, // Success
                 p: 0, // processing
-                n: result.length, // Loading
+                n: Object.keys(entitiesList).length, // Loading
                 e: 0  // Error
             }
 
 
             var logRecord = record.create({ type: 'customrecord_lmry_co_massive_cer_log' });
-            logRecord.setValue('custrecord_lmry_co_mass_vendors', JSON.stringify(compactEntityArray(activeAntities)));
+            logRecord.setValue('custrecord_lmry_co_mass_vendors', JSON.stringify(entitiesList));
             logRecord.setValue('custrecord_lmry_co_mass_summary', JSON.stringify(summary));
             var rec_id = logRecord.save();
 
@@ -796,10 +804,16 @@ define(['N/search', 'N/runtime', 'N/currentRecord', 'N/record', 'N/url'],
                 fieldId: 'custpage_record_massive_id',
                 value: rec_id
             });
+            return true;
         }
 
-        function continueExecutionFlow(vendor, recordMassiveId, isError,filename,urlFile) {
+        function continueExecutionFlow(vendor, recordLogId, isError, filename, urlFile, isNoData) {
             require(['N/task'], function (task) {
+
+                var recordLog = record.load({ id: recordLogId, type: "customrecord_lmry_co_rpt_generator_log" });
+
+                var recordMassiveId = recordLog.getValue("custrecord_lmry_co_rpt_massive_id");
+
                 if (!recordMassiveId) return false;
                 var recordMasive = record.load({ id: recordMassiveId, type: "customrecord_lmry_co_massive_cer_log" });
                 var vendors = JSON.parse(recordMasive.getValue("custrecord_lmry_co_mass_vendors"));
@@ -811,9 +825,24 @@ define(['N/search', 'N/runtime', 'N/currentRecord', 'N/record', 'N/url'],
                     summary.s++;
                 }
 
-                vendors[vendor].status = isError ? "ERROR" : "FINISH"; // Update_vendor
-                vendors[vendor].filename = isError ? "" : filename;
-                vendors[vendor].url = isError ? "" : urlFile;
+                var status = isError ? "ERROR" : isNoData ? "NO_DATA" : "FINISH";
+                vendors[vendor].status = status;
+
+                vendors[vendor].filename = isError || isNoData ? "" : filename;
+                vendors[vendor].url = isError || isNoData ? "" : urlFile;
+
+                if (!isError && !isNoData) {
+                    var lower = urlFile.toLowerCase();
+
+                    var type = "";
+                    if (lower.indexOf("/downloadfolder.nl") !== -1) type = "folder";
+                    else if (lower.indexOf("/media.nl") !== -1 || lower.indexOf("/downloadfile.nl") !== -1) type = "file";
+
+                    var idMatch = urlFile.match(/[?&]id=(\d+)/);
+                    var id = idMatch ? parseInt(idMatch[1], 10) : null;
+                    vendors[vendor].fileId = id;
+                    vendors[vendor].fileType = type;
+                }
 
                 recordMasive.setValue('custrecord_lmry_co_mass_vendors', JSON.stringify(vendors));
                 recordMasive.setValue('custrecord_lmry_co_mass_summary', JSON.stringify(summary));

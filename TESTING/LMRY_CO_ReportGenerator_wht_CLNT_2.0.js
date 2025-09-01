@@ -413,6 +413,8 @@ define([
                     return false;
                 }
 
+                if (!Lib_certificate_massive.createRecordMassive()) return false;
+
                 // Mesaje al usuario
                 if (language == 'es') {
                     alert('Se generara un archivo y se enviara un mail con la confirmacion del proceso.\n\nEste proceso puede durar varios minutos.\n\nPor favor actualizar el log para su descarga.');
@@ -422,8 +424,8 @@ define([
                     alert('A file is generated and an email will be sent with the confirmation of the process.\n\nThis process can take several minutes.\n\nPlease update the log for download.');
                 }
 
+                
 
-                Lib_certificate_massive.createRecordMassive();
                 
                 return true;
             } catch (err) {
