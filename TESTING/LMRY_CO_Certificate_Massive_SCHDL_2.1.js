@@ -30,7 +30,6 @@ define([
             const getParam = name => runtime.getCurrentScript().getParameter({ name });
             const paramRecordMassiveId = getParam('custscript_lmry_co_massive_record_id');
             const recordMassive = getRecordMassive(paramRecordMassiveId);
-            log.error("recordMassive",recordMassive)
             const vendors = JSON.parse(recordMassive["custrecord_lmry_co_mass_vendors"]);
             const summary = JSON.parse(recordMassive["custrecord_lmry_co_mass_summary"]);
             const reportId = recordMassive["custrecord_lmry_co_mass_tran"];
@@ -45,9 +44,6 @@ define([
                     executeReport(recordMassive, pendingVendor, recordLogId, reportInfo);
                 }
             }
-            log.error("pendingVendor",pendingVendor)
-            log.error("vendors",vendors)
-            log.error("summary",summary)
             if (summary.n == 0 && summary.p == 0) { // No hay entidades por procesar
                 setFileReport(vendors, recordMassive)
             }
@@ -297,7 +293,6 @@ define([
     };
 
     const setFileReport = (vendors, massiveRecord) => {
-        log.error("setFileReport","start")
         const { folderId, nameFile } = createFolder(massiveRecord);
         const objContext = runtime.getCurrentScript();
         const baseUrl = objContext.getParameter({
@@ -533,7 +528,6 @@ define([
             cleanFolderContents(subFolderId);
             try {
                 record.delete({ type: record.Type.FOLDER, id: subFolderId });
-                log.debug('Deleted folder', String(subFolderId));
             } catch (e) {
                 log.error('Folder delete error', `${subFolderId} - ${e.message}`);
             }

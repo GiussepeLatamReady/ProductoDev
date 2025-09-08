@@ -15,21 +15,23 @@ Covertir el proceso de singlevendor a multivendor
      
 ## Scripts
 + Create
-    LBRY  -
-    SCHDL   
-    LMRY_CO_Certificate_Massive_SCHDL_2.1.js
-    LatamReady - Certificate Massive SCHDL
-    _lmry_co_cert_massive_schdl
-    custscript_lmry_co_massive_record_id
-+ Update
 
+    LMRY_CO_Certificate_Massive_SCHDL_2.1.js
+    LMRY_CO_Certificate_Massive_URET_2.1.js
+    LMRY_CO_Certificate_Massive_LIB.js
+
++ Update
+    LMRY_CO_ReportGenerator_wht_CLNT_2.0.js
+    LMRY_CO_ReportGenerator_wht_STLT_2.0.js
 
 + Delete
 
 
 ## Records Configuration
 + Create
-
+    Name: LatamReady - CO Massive Certificate
+    id: customrecord_lmry_co_massive_cer_log 
+    
 + Update
     
 ## Fields

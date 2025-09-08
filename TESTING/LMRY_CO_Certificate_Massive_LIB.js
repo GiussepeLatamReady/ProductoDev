@@ -644,8 +644,6 @@ define(['N/search', 'N/runtime', 'N/currentRecord', 'N/record', 'N/url'],
                         document.body.removeChild(container);
                         document.body.removeChild(overlay);
                         saveEntities = JSON.parse(JSON.stringify(allEntities));
-                        console.log("saveEntities", saveEntities)
-                        console.log("currentRecord: ", currentRecord)
                         if (selectedCount == 1) {
 
                             var singleEntity = saveEntities.filter(function (ent) {
@@ -711,8 +709,6 @@ define(['N/search', 'N/runtime', 'N/currentRecord', 'N/record', 'N/url'],
                     for (var i = 0; i < allEntities.length; i++) {
                         if (allEntities[i].id == id) {
                             allEntities[i].checked = target.checked;
-                            console.log("allEntities[i].checked [id]", allEntities[i])
-                            console.log("target.checked [id]", target.checked)
                             break;
                         }
                     }
@@ -783,10 +779,8 @@ define(['N/search', 'N/runtime', 'N/currentRecord', 'N/record', 'N/url'],
                 }
                 return result;
             }
-            console.log("activeAntities",activeAntities)
 
             var entitiesList = compactEntityArray(activeAntities);
-            console.log("entitiesList",entitiesList)
             var summary = {
                 s: 0, // Success
                 p: 0, // processing
