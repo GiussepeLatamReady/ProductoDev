@@ -1,21 +1,131 @@
-   {
-      "type": "error.SuiteScriptError",
-      "name": "USER_ERROR",
-      "message": "Please enter a payment amount or apply credits/deposits",
-      "id": "",
-      "stack": [
-         "Error\n at RecordInvoker.save (suitescript/resources/javascript/record/serverRecordService.js:391:13)\n at NetSuiteObject.thenableFunction() (suitescript/resources/javascript/record/proxy.js:115:24)\n at Object.createPaymentFromInvoice (/SuiteApps/com.latamready.lmrycolocalization/co_wht_head_lines/lib/LR_CO_WhtHeadLines_Payment_LIB.js:579:57)\n at Object.summarize (/SuiteApps/com.latamready.lmrycolocalization/co_wht_head_lines/LR_CO_WhtHeadLines_Payment_MPRD.js:153:63)"
-      ],
-      "cause": {
-         "type": "internal error",
-         "code": "USER_ERROR",
-         "details": "Please enter a payment amount or apply credits/deposits",
-         "userEvent": null,
-         "stackTrace": [
-            "Error\n at RecordInvoker.save (suitescript/resources/javascript/record/serverRecordService.js:391:13)\n at NetSuiteObject.thenableFunction() (suitescript/resources/javascript/record/proxy.js:115:24)\n at Object.createPaymentFromInvoice (/SuiteApps/com.latamready.lmrycolocalization/co_wht_head_lines/lib/LR_CO_WhtHeadLines_Payment_LIB.js:579:57)\n at Object.summarize (/SuiteApps/com.latamready.lmrycolocalization/co_wht_head_lines/LR_CO_WhtHeadLines_Payment_MPRD.js:153:63)"
-         ],
-         "notifyOff": false
-      },
-      "notifyOff": false,
-      "userFacing": true
-   }
+{
+    "15493405": {
+        "1": "257",
+        "2": "257",
+        "3": "257",
+        "4": "257"
+    },
+    "15493406": {
+        "1": "257",
+        "2": "257",
+        "3": "257",
+        "4": "257"
+    },
+    "15493407": {
+        "1": "259",
+        "2": "259",
+        "3": "259",
+        "4": "259"
+    },
+    "15493408": {
+        "1": "257",
+        "2": "257",
+        "3": "257",
+        "4": "257"
+    },
+    "15493409": {
+        "1": "259",
+        "2": "259",
+        "3": "259",
+        "4": "259"
+    },
+    "15503293": {
+        "1": "259",
+        "2": "259",
+        "3": "259",
+        "4": "259"
+    },
+    "15503294": {
+        "1": "257",
+        "2": "257",
+        "3": "257",
+        "4": "257"
+    }
+}
+
+[
+    {
+        "item": "",
+        "account": "5681",
+        "expenseAccount": null,
+        "purchaseAccount": "257",
+        "saleAccount": "256",
+        "isSales": false,
+        "lineuniquekey": "15493405",
+        "department": "",
+        "_class": "",
+        "location": ""
+    },
+    {
+        "item": "4573",
+        "account": "83",
+        "expenseAccount": null,
+        "purchaseAccount": "257",
+        "saleAccount": "256",
+        "isSales": false,
+        "lineuniquekey": "15493406",
+        "department": "",
+        "_class": "",
+        "location": "13"
+    },
+    {
+        "item": "387",
+        "account": "205",
+        "expenseAccount": null,
+        "purchaseAccount": "259",
+        "saleAccount": "261",
+        "isSales": false,
+        "lineuniquekey": "15493407",
+        "department": "",
+        "_class": "",
+        "location": "13"
+    },
+    {
+        "item": "501",
+        "account": "8",
+        "expenseAccount": null,
+        "purchaseAccount": "257",
+        "saleAccount": "256",
+        "isSales": false,
+        "lineuniquekey": "15493408",
+        "department": "4",
+        "_class": "",
+        "location": "13"
+    },
+    {
+        "item": "501",
+        "account": "8",
+        "expenseAccount": null,
+        "purchaseAccount": "259",
+        "saleAccount": "261",
+        "isSales": false,
+        "lineuniquekey": "15493409",
+        "department": "4",
+        "_class": "",
+        "location": "13"
+    },
+    {
+        "item": "1155",
+        "account": "259",
+        "expenseAccount": null,
+        "purchaseAccount": "259",
+        "saleAccount": "261",
+        "isSales": false,
+        "lineuniquekey": "15503293",
+        "department": "",
+        "_class": "",
+        "location": ""
+    },
+    {
+        "item": "1146",
+        "account": "257",
+        "expenseAccount": null,
+        "purchaseAccount": "257",
+        "saleAccount": "256",
+        "isSales": false,
+        "lineuniquekey": "15503294",
+        "department": "",
+        "_class": "",
+        "location": ""
+    }
+]
