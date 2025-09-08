@@ -40,7 +40,7 @@ define([
         var calendarSubsiName = '';
 
         var varFiscalCalendar = null;
-        var saveEntities = []
+
         function pageInit(scriptContext) {
 
             var varRecordRpt = scriptContext.currentRecord.getValue({
@@ -603,73 +603,6 @@ define([
                 console.log('LLEGO HASTA AQUI: ' + subsidiary);
 
 
-                /*
-                var vendorSearchObj = search.create({
-                    type: "vendor",
-                    filters:
-                        [
-                            ["isinactive", "is", "F"],
-                            "AND",
-                            ["msesubsidiary.internalid", "anyof", subsidiary]
-                        ],
-                    columns:
-                        [
-                            search.createColumn({ name: "internalid", label: "Internal ID" }),
-                            search.createColumn({
-                                name: "formulatext",
-                                formula:columVendor,
-                                sort: search.Sort.ASC,
-                                label: "ENTITY NAME"
-                            })
-                        ]
-                });
-
-                var searchResult = vendorSearchObj.run();
-
-                var selectVendor = scriptContext.currentRecord.getField({
-                    fieldId: 'custpage_proovedor_list'
-                });
-
-                selectVendor.removeSelectOption({
-                    value: null
-                });
-
-                selectVendor.insertSelectOption({
-                    value: 0,
-                    text: ' '
-                });
-
-                var DbolStop = false;
-                var iniLoop = 0;
-                var endLoop = 1000;
-                while (!DbolStop) {
-
-                    var searchResultCount = searchResult.getRange(iniLoop, endLoop);
-
-                    if (searchResultCount != null) {
-
-                        var intLength = searchResultCount.length;
-
-                        if (intLength < 1000) {
-                            DbolStop = true;
-                        }else{
-                            iniLoop += 1000;
-                            endLoop += 1000;
-                        }
-                        for (var i = 0; i < intLength; i++) {
-                            var vendorID = searchResultCount[i].getValue('internalid');
-                            var vendorNM = searchResultCount[i].getValue('formulatext');
-                            selectVendor.insertSelectOption({
-                                value: vendorID,
-                                text: vendorNM
-                            });
-                        }
-
-                    }else{
-                        DbolStop = true;
-                    }
-                }
-                */
                 console.log('PASO EL CAMBIO : ' + subsidiary);
 
                 

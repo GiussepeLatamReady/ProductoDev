@@ -832,12 +832,6 @@ function formatDate(date) {
         value: date,
         type: FORMAT.Type.DATE
     });
-    /*
-    parseDate = FORMAT.format({
-        type: FORMAT.Type.DATE,
-        value: parseDate
-    });
-    */
     return parseDate;
 }
 
