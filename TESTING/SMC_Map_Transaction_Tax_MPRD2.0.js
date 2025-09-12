@@ -187,7 +187,24 @@ define([
         function getTransactions() {
             //purchase order, sales order, item receipt, item fulfillment
             var transactionResult = [];
-            
+            var purchase = [
+                "VendBill",
+                "VendCred",
+                "Journal",
+                "VendAuth",
+                "ExpRept",
+                "CardChrg",
+                "CardRfnd"
+            ]
+            var sales = [
+                "CustInvc",
+                "CustCred",
+                "Deposit",
+                "Check",
+                "RtnAuth",
+                "VPrep",
+            ]
+            var types = purchase.concat(sales);
             var transactionSearch = search.create({
                 type: "transaction",
                 settings: [{ "name": "consolidationtype", "value": "ACCTTYPE" }, { "name": "includeperiodendtransactions", "value": "F" }],
@@ -197,7 +214,9 @@ define([
                         "AND",
                         ["mainline", "is", "T"],
                         "AND",
-                        ["type", "anyof", "VendBill", "VendCred", "CustCred","Journal", "VendAuth","ExpRept"]
+                        ["trandate", "within", "1/1/2024", "31/12/2024"],
+                        "AND",
+                        ["type", "anyof", types]
                     ],
                 columns:
                     [
