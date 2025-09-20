@@ -203,6 +203,8 @@ define([
                 "Check",
                 "RtnAuth",
                 "VPrep",
+                "CashSale",
+                "CashRfnd"
             ]
             var types = purchase.concat(sales);
             var transactionSearch = search.create({
@@ -216,7 +218,7 @@ define([
                         "AND",
                         ["trandate", "within", "1/1/2024", "31/12/2024"],
                         "AND",
-                        ["type", "anyof", types]
+                        ["type", "anyof", "CashSale","CashRfnd"]
                     ],
                 columns:
                     [
