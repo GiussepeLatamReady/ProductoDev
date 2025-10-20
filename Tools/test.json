@@ -1,131 +1,82 @@
 {
-    "15493405": {
-        "1": "257",
-        "2": "257",
-        "3": "257",
-        "4": "257"
+    "type": "http.ClientResponse",
+    "code": 401,
+    "headers": {
+        "Akamai-GRN": [
+            "0.166d3e17.1760908780.b47ba5f"
+        ],
+        "akamai-grn": [
+            "0.166d3e17.1760908780.b47ba5f"
+        ],
+        "Akamai-Grn": [
+            "0.166d3e17.1760908780.b47ba5f"
+        ],
+        "connection": [
+            "close"
+        ],
+        "Connection": [
+            "close"
+        ],
+        "Content-Type": [
+            "application/json;charset=utf-8"
+        ],
+        "content-type": [
+            "application/json;charset=utf-8"
+        ],
+        "Date": [
+            "Sun, 19 Oct 2025 21:19:40 GMT"
+        ],
+        "date": [
+            "Sun, 19 Oct 2025 21:19:40 GMT"
+        ],
+        "NS_RTIMER_COMPOSITE": [
+            "1592290207:706172746E6572732D66616C6C2D3031372E70726F642D7068782D6E6132332E636F72652E6E732E696E7465726E616C:80"
+        ],
+        "ns_rtimer_composite": [
+            "1592290207:706172746E6572732D66616C6C2D3031372E70726F642D7068782D6E6132332E636F72652E6E732E696E7465726E616C:80"
+        ],
+        "Ns_rtimer_composite": [
+            "1592290207:706172746E6572732D66616C6C2D3031372E70726F642D7068782D6E6132332E636F72652E6E732E696E7465726E616C:80"
+        ],
+        "Strict-Transport-Security": [
+            "max-age=31536000"
+        ],
+        "strict-transport-security": [
+            "max-age=31536000"
+        ],
+        "transfer-encoding": [
+            "chunked"
+        ],
+        "Transfer-Encoding": [
+            "chunked"
+        ],
+        "Vary": [
+            "User-Agent"
+        ],
+        "vary": [
+            "User-Agent"
+        ],
+        "Via": [
+            "1.1 mono001"
+        ],
+        "via": [
+            "1.1 mono001"
+        ],
+        "X-Content-Type-Options": [
+            "nosniff"
+        ],
+        "x-content-type-options": [
+            "nosniff"
+        ],
+        "X-N-OperationId": [
+            "7403d573-52cd-4894-b115-a192ae202aef"
+        ],
+        "x-n-operationid": [
+            "7403d573-52cd-4894-b115-a192ae202aef"
+        ],
+        "X-N-Operationid": [
+            "7403d573-52cd-4894-b115-a192ae202aef"
+        ]
     },
-    "15493406": {
-        "1": "257",
-        "2": "257",
-        "3": "257",
-        "4": "257"
-    },
-    "15493407": {
-        "1": "259",
-        "2": "259",
-        "3": "259",
-        "4": "259"
-    },
-    "15493408": {
-        "1": "257",
-        "2": "257",
-        "3": "257",
-        "4": "257"
-    },
-    "15493409": {
-        "1": "259",
-        "2": "259",
-        "3": "259",
-        "4": "259"
-    },
-    "15503293": {
-        "1": "259",
-        "2": "259",
-        "3": "259",
-        "4": "259"
-    },
-    "15503294": {
-        "1": "257",
-        "2": "257",
-        "3": "257",
-        "4": "257"
-    }
+    "body": "{\"error\" : {\"code\" : \"INVALID_LOGIN_ATTEMPT\", \"message\" : \"Invalid login attempt.\"}}"
 }
-
-[
-    {
-        "item": "",
-        "account": "5681",
-        "expenseAccount": null,
-        "purchaseAccount": "257",
-        "saleAccount": "256",
-        "isSales": false,
-        "lineuniquekey": "15493405",
-        "department": "",
-        "_class": "",
-        "location": ""
-    },
-    {
-        "item": "4573",
-        "account": "83",
-        "expenseAccount": null,
-        "purchaseAccount": "257",
-        "saleAccount": "256",
-        "isSales": false,
-        "lineuniquekey": "15493406",
-        "department": "",
-        "_class": "",
-        "location": "13"
-    },
-    {
-        "item": "387",
-        "account": "205",
-        "expenseAccount": null,
-        "purchaseAccount": "259",
-        "saleAccount": "261",
-        "isSales": false,
-        "lineuniquekey": "15493407",
-        "department": "",
-        "_class": "",
-        "location": "13"
-    },
-    {
-        "item": "501",
-        "account": "8",
-        "expenseAccount": null,
-        "purchaseAccount": "257",
-        "saleAccount": "256",
-        "isSales": false,
-        "lineuniquekey": "15493408",
-        "department": "4",
-        "_class": "",
-        "location": "13"
-    },
-    {
-        "item": "501",
-        "account": "8",
-        "expenseAccount": null,
-        "purchaseAccount": "259",
-        "saleAccount": "261",
-        "isSales": false,
-        "lineuniquekey": "15493409",
-        "department": "4",
-        "_class": "",
-        "location": "13"
-    },
-    {
-        "item": "1155",
-        "account": "259",
-        "expenseAccount": null,
-        "purchaseAccount": "259",
-        "saleAccount": "261",
-        "isSales": false,
-        "lineuniquekey": "15503293",
-        "department": "",
-        "_class": "",
-        "location": ""
-    },
-    {
-        "item": "1146",
-        "account": "257",
-        "expenseAccount": null,
-        "purchaseAccount": "257",
-        "saleAccount": "256",
-        "isSales": false,
-        "lineuniquekey": "15503294",
-        "department": "",
-        "_class": "",
-        "location": ""
-    }
-]
