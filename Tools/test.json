@@ -1,82 +1,11 @@
 {
-    "type": "http.ClientResponse",
-    "code": 401,
-    "headers": {
-        "Akamai-GRN": [
-            "0.166d3e17.1760908780.b47ba5f"
-        ],
-        "akamai-grn": [
-            "0.166d3e17.1760908780.b47ba5f"
-        ],
-        "Akamai-Grn": [
-            "0.166d3e17.1760908780.b47ba5f"
-        ],
-        "connection": [
-            "close"
-        ],
-        "Connection": [
-            "close"
-        ],
-        "Content-Type": [
-            "application/json;charset=utf-8"
-        ],
-        "content-type": [
-            "application/json;charset=utf-8"
-        ],
-        "Date": [
-            "Sun, 19 Oct 2025 21:19:40 GMT"
-        ],
-        "date": [
-            "Sun, 19 Oct 2025 21:19:40 GMT"
-        ],
-        "NS_RTIMER_COMPOSITE": [
-            "1592290207:706172746E6572732D66616C6C2D3031372E70726F642D7068782D6E6132332E636F72652E6E732E696E7465726E616C:80"
-        ],
-        "ns_rtimer_composite": [
-            "1592290207:706172746E6572732D66616C6C2D3031372E70726F642D7068782D6E6132332E636F72652E6E732E696E7465726E616C:80"
-        ],
-        "Ns_rtimer_composite": [
-            "1592290207:706172746E6572732D66616C6C2D3031372E70726F642D7068782D6E6132332E636F72652E6E732E696E7465726E616C:80"
-        ],
-        "Strict-Transport-Security": [
-            "max-age=31536000"
-        ],
-        "strict-transport-security": [
-            "max-age=31536000"
-        ],
-        "transfer-encoding": [
-            "chunked"
-        ],
-        "Transfer-Encoding": [
-            "chunked"
-        ],
-        "Vary": [
-            "User-Agent"
-        ],
-        "vary": [
-            "User-Agent"
-        ],
-        "Via": [
-            "1.1 mono001"
-        ],
-        "via": [
-            "1.1 mono001"
-        ],
-        "X-Content-Type-Options": [
-            "nosniff"
-        ],
-        "x-content-type-options": [
-            "nosniff"
-        ],
-        "X-N-OperationId": [
-            "7403d573-52cd-4894-b115-a192ae202aef"
-        ],
-        "x-n-operationid": [
-            "7403d573-52cd-4894-b115-a192ae202aef"
-        ],
-        "X-N-Operationid": [
-            "7403d573-52cd-4894-b115-a192ae202aef"
-        ]
-    },
-    "body": "{\"error\" : {\"code\" : \"INVALID_LOGIN_ATTEMPT\", \"message\" : \"Invalid login attempt.\"}}"
+    "id": "custrecord_lmry_addr_city",
+    "label": "Latam - City Test",
+    "type": "select",
+    "isMandatory": false,
+    "isDisabled": false,
+    "isPopup": true,
+    "isDisplay": true,
+    "isVisible": true,
+    "isReadOnly": false
 }
