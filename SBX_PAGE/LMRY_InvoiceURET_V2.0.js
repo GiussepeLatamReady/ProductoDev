@@ -1951,7 +1951,6 @@ define(['./Latam_Library/LMRY_UniversalSetting_LBRY', './Latam_Library/LMRY_Hide
             if (swAccess == true && approvalStatus == 2) {
               // Realiza la redireccion de cuentas
               if (ST_FEATURE == false || ST_FEATURE == "F") {
-                log.error("Create_WHT_Latam","ANTES")
                 Library_Validation.Create_WHT_Latam('invoice', scriptContext.newRecord.id, scriptContext);
               }
               //log.debug('invoice', scriptContext.newRecord.id);
