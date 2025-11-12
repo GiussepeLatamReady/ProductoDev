@@ -1,21 +1,18 @@
-   {
-      "type": "error.SuiteScriptError",
-      "name": "USER_ERROR",
-      "message": "Please enter a payment amount or apply credits/deposits",
-      "id": "",
-      "stack": [
-         "Error\n at RecordInvoker.save (suitescript/resources/javascript/record/serverRecordService.js:391:13)\n at NetSuiteObject.thenableFunction() (suitescript/resources/javascript/record/proxy.js:115:24)\n at Object.createPaymentFromInvoice (/SuiteApps/com.latamready.lmrycolocalization/co_wht_head_lines/lib/LR_CO_WhtHeadLines_Payment_LIB.js:579:57)\n at Object.summarize (/SuiteApps/com.latamready.lmrycolocalization/co_wht_head_lines/LR_CO_WhtHeadLines_Payment_MPRD.js:153:63)"
-      ],
-      "cause": {
-         "type": "internal error",
-         "code": "USER_ERROR",
-         "details": "Please enter a payment amount or apply credits/deposits",
-         "userEvent": null,
-         "stackTrace": [
-            "Error\n at RecordInvoker.save (suitescript/resources/javascript/record/serverRecordService.js:391:13)\n at NetSuiteObject.thenableFunction() (suitescript/resources/javascript/record/proxy.js:115:24)\n at Object.createPaymentFromInvoice (/SuiteApps/com.latamready.lmrycolocalization/co_wht_head_lines/lib/LR_CO_WhtHeadLines_Payment_LIB.js:579:57)\n at Object.summarize (/SuiteApps/com.latamready.lmrycolocalization/co_wht_head_lines/LR_CO_WhtHeadLines_Payment_MPRD.js:153:63)"
-         ],
-         "notifyOff": false
-      },
-      "notifyOff": false,
-      "userFacing": true
-   }
+{
+    "data": {
+        "20005810788": [
+            {
+                "tipo_alicuota": "P",
+                "fecha_de_publicacion": "2025-09-25",
+                "fecha_de_vigencia_desde": "2025-10-01",
+                "fecha_de_vigencia_hasta": "2025-10-31",
+                "numero_cuit": 20005810788,
+                "tipo_contr_insc": "C",
+                "marca_alta_baja_sujeto": "N",
+                "marca_cbio_alicuota": "N",
+                "alicuota": 6,
+                "nro_grupo": "25"
+            }
+        ]
+    }
+}
