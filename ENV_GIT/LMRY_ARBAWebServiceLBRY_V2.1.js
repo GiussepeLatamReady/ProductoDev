@@ -919,7 +919,6 @@ define(["require", "exports", "N/email", "N/file", "N/format", "N/http", "N/log"
                 id: searchLog2[0].getValue('internalid')
             });
             const filters = logObj.getValue("custrecord_lmry_ar_ws_resumen_filt").split('|');
-
             flagEntity == null ? flagEntity = 0 : flagEntity = flagEntity;
             if (entityType == 1 && (flagEntity == 0 || flagEntity == 2)) {
                 vendorList = cargarEntity("vendor", subsidiary, juridicPerson, entityIDBase, filters[2], filters[3]);
@@ -931,6 +930,7 @@ define(["require", "exports", "N/email", "N/file", "N/format", "N/http", "N/log"
             let mensaje = '';
             let cond = false;
             let feature_ws_osci = true;
+
             if (entityType == 1) {
 
                 try {
@@ -959,27 +959,51 @@ define(["require", "exports", "N/email", "N/file", "N/format", "N/http", "N/log"
                                 return acc;
                             }, []);
                             const periodFormat = getPeriodFormat(period);
-                            const alicuotasByCuit = getAlicuotasByCUIT(validCuits, periodFormat,"R");
+                            const alicuotasByCuit = getAlicuotasByCUIT(validCuits, periodFormat, "R");
                             let datosDefault = obtenerSetup(subsidiary, "1");
+                            let apply = datosDefault[0].getValue('custrecord_lmry_ar_ws_default_cc');
+                            let percent = datosDefault[0].getValue('custrecord_lmry_ar_ws_default_percent');
+                            let fechas = getPeriodo(period).split(',');
+                            let fdesde = fechas[0];
+                            let fhasta = fechas[1];
+                            fdesde = generarFecha(fdesde.substring(0, 4), fdesde.substring(4, 6), fdesde.substring(6, 8));
+                            fhasta = generarFecha(fhasta.substring(0, 4), fhasta.substring(4, 6), fhasta.substring(6, 8));
                             for (let i = 0; i < vendorList; i++) {
                                 const vendor = vendorList[i];
+                                const entityID = vendor.getValue('internalid');
                                 const vat = vendor.getValue('vatregnumber') || '';
                                 const dv = vendor.getValue('custentity_lmry_digito_verificator') || '';
                                 const cuit = vat + dv;
-                                if (!validaCUIT(cuit)) continue;
-                                
+                                if (!validaCUIT(cuit)) {
+
+                                    contadorError2++;
+                                    continue;
+                                }
+
                                 const alicuotaByEntity = alicuotasByCuit[cuit];
 
-                                if (alicuotaByEntity) {
-                                    
-                                }else{
-                                    
-                                }
-                                
-                            }
-                        }
+                                if (alicuotaByEntity && apply) {
+                                    let alicuota = parseFloat(alicuotaByEntity["alicuota"]) / 100;
+                                    let grupoAlicouta = alicuotaByEntity["nro_grupo"];
+                                    let fechaDesdeList = alicuotaByEntity["fecha_de_vigencia_desde"];
+                                    let fechaHastaList = alicuotaByEntity["fecha_de_vigencia_hasta"];
+                                    let fechaDesde = generarFecha(fechaDesdeList.substring(0, 4), fechaDesdeList.substring(5, 7), fechaDesdeList.substring(8, 10));
+                                    let fechaHasta = generarFecha(fechaHastaList.substring(0, 4), fechaHastaList.substring(5, 7), fechaHastaList.substring(8, 10));
 
-                        vendorList.forEach((vendorElement) => {
+                                    salida += createContributoryClass(entityID, 1, grupoAlicouta, alicuota, fechaDesde, fechaHasta, detalle, subsidiary, period, datosDefault);
+
+                                } else {
+                                    if (apply) {
+                                        salida += createContributoryClass(entityID, 1, 'WS-NEP', percent, fdesde, fhasta, detalle, subsidiary, period, datosDefault);
+                                        contadorError3++
+                                    }
+                                }
+
+                                contadorGeneral++;
+                                entityIDBase = entityID;
+                            }
+                        }else{
+                            vendorList.forEach((vendorElement) => {
                             let cuit = vendorElement.getValue('vatregnumber') + vendorElement.getValue('custentity_lmry_digito_verificator');
                             let entityID = vendorElement.getValue('internalid');
                             let valida = validaCUIT(cuit);
@@ -1210,6 +1234,9 @@ define(["require", "exports", "N/email", "N/file", "N/format", "N/http", "N/log"
                             entityIDBase = entityID;
 
                         });
+                        }
+
+                        
                         if (vendorList.length === 80) {
                             cond = true;
                         } else {
@@ -1245,204 +1272,260 @@ define(["require", "exports", "N/email", "N/file", "N/format", "N/http", "N/log"
                         //     entityType = 3;
                         // }
 
-                        customerList.forEach((customerElement) => {
-                            let cuit = customerElement.getValue('vatregnumber') + customerElement.getValue('custentity_lmry_digito_verificator');
-                            let entityID = customerElement.getValue('internalid');
-                            let valida = validaCUIT(cuit);
+                        if (feature_ws_osci) {
+                            const validCuits = customerList.reduce((acc, vendor) => {
+                                const vat = vendor.getValue('vatregnumber') || '';
+                                const dv = vendor.getValue('custentity_lmry_digito_verificator') || '';
+                                const cuit = vat + dv;
+                                if (validaCUIT(cuit)) acc.push(cuit);
+                                return acc;
+                            }, []);
+                            const periodFormat = getPeriodFormat(period);
+                            const alicuotasByCuit = getAlicuotasByCUIT(validCuits, periodFormat, "R");
+                            let datosDefault = obtenerSetup(subsidiary, "1");
+                            let apply = datosDefault[0].getValue('custrecord_lmry_ar_ws_default_cc');
+                            let percent = datosDefault[0].getValue('custrecord_lmry_ar_ws_default_percent');
+                            let fechas = getPeriodo(period).split(',');
+                            let fdesde = fechas[0];
+                            let fhasta = fechas[1];
+                            fdesde = generarFecha(fdesde.substring(0, 4), fdesde.substring(4, 6), fdesde.substring(6, 8));
+                            fhasta = generarFecha(fhasta.substring(0, 4), fhasta.substring(4, 6), fhasta.substring(6, 8));
+                            for (let i = 0; i < customerList; i++) {
+                                const customer = customerList[i];
+                                const entityID = customer.getValue('internalid');
+                                const vat = customer.getValue('vatregnumber') || '';
+                                const dv = customer.getValue('custentity_lmry_digito_verificator') || '';
+                                const cuit = vat + dv;
+                                if (!validaCUIT(cuit)) {
 
-                            if (cuit.length == 11 && valida) {
-                                let respuesta = generarXMLConsulta(period, cuit, detalle, entityID, subsidiary);
-                                if (respuesta.indexOf('Create') != -1 || respuesta.indexOf('Edit') != -1) {
-                                    contadorExito++;
-                                }
-                                else if (respuesta.indexOf('PREFIJO DE CUIT INVALIDO') != -1) {
-                                    contadorError1++;
-                                    if (descError1 == 'Vacio') {
-                                        descError1 = customerElement.getValue('internalid');
-                                    }
-                                    else {
-                                        descError1 += ',' + customerElement.getValue('internalid');
-                                    }
-                                    record.submitFields({
-                                        type: "customer",
-                                        id: customerElement.getValue('internalid'),
-                                        values: {
-                                            "custentity_lmry_arba_cuit_invalid": true
-                                        },
-                                    });
-                                }
-                                else if (respuesta.indexOf('NUMERO DE CUIT INVALIDO') != -1) {
                                     contadorError2++;
-                                    if (descError2 == 'Vacio') {
-                                        descError2 = customerElement.getValue('internalid');
-                                    }
-                                    else {
-                                        descError2 += ',' + customerElement.getValue('internalid');
-                                    }
-                                    record.submitFields({
-                                        type: "customer",
-                                        id: customerElement.getValue('internalid'),
-                                        values: {
-                                            "custentity_lmry_arba_cuit_invalid": true
-                                        },
-                                    });
+                                    continue;
+                                }
 
-                                }
-                                else if (respuesta.indexOf('La CUIT ingresada no se encuentra en ningun padron') != -1) {
-                                    contadorError3++;
-                                    if (descError3 == 'Vacio') {
-                                        descError3 = customerElement.getValue('internalid');
-                                    }
-                                    else {
-                                        descError3 += ',' + customerElement.getValue('internalid');
-                                    }
-                                }
-                                else if (respuesta.indexOf('El usuario ingresado y / o la contraseña son inválidos.') != -1) {
-                                    logObj.setValue({
-                                        fieldId: 'custrecord_lmry_ar_ws_resumen_descrip',
-                                        value: 'Error al conectar con la api'
-                                    });
-                                    logObj.setValue({
-                                        fieldId: 'custrecord_lmry_ar_ws_resumen_estado',
-                                        value: 'Finalizado'
-                                    });
-                                    otherIDSave = logObj.save({
-                                        enableSourcing: true,
-                                        ignoreMandatoryFields: true
-                                    });
-                                    return true;
-                                }
-                                else if (respuesta.indexOf('Internal Server') != -1) {
-                                    logObj.setValue({
-                                        fieldId: 'custrecord_lmry_ar_ws_resumen_descrip',
-                                        value: 'Error Interno del Servidor'
-                                    });
-                                    logObj.setValue({
-                                        fieldId: 'custrecord_lmry_ar_ws_resumen_estado',
-                                        value: 'Finalizado'
-                                    });
-                                    otherIDSave = logObj.save({
-                                        enableSourcing: true,
-                                        ignoreMandatoryFields: true
-                                    });
-                                    // return true;
-                                    throw 'Error Interno del Servidor';
-                                }
-                                else if (respuesta.indexOf('Fallo') != -1) {
-                                    logObj.setValue({
-                                        fieldId: 'custrecord_lmry_ar_ws_resumen_descrip',
-                                        value: 'No se ha configurado el setup'
-                                    });
-                                    logObj.setValue({
-                                        fieldId: 'custrecord_lmry_ar_ws_resumen_estado',
-                                        value: 'Finalizado'
-                                    });
-                                    otherIDSave = logObj.save({
-                                        enableSourcing: true,
-                                        ignoreMandatoryFields: true
-                                    });
-                                    // return true;
-                                    throw 'No se ha configurado el setup';
-                                }
-                                else if (respuesta.indexOf('El periodo es inválido o inexistente') != -1) {
-                                    logObj.setValue({
-                                        fieldId: 'custrecord_lmry_ar_ws_resumen_descrip',
-                                        value: 'El periodo es inválido o inexistente'
-                                    });
-                                    logObj.setValue({
-                                        fieldId: 'custrecord_lmry_ar_ws_resumen_estado',
-                                        value: 'Finalizado'
-                                    });
-                                    otherIDSave = logObj.save({
-                                        enableSourcing: true,
-                                        ignoreMandatoryFields: true
-                                    });
-                                    // return true;
-                                    throw 'El periodo es inválido o inexistente';
-                                }
-                                else if (respuesta.indexOf('No se encontró ningún padrón consultando con las fechas') != -1) {
-                                    logObj.setValue({
-                                        fieldId: 'custrecord_lmry_ar_ws_resumen_descrip',
-                                        value: 'El periodo es inválido o inexistente'
-                                    });
-                                    logObj.setValue({
-                                        fieldId: 'custrecord_lmry_ar_ws_resumen_estado',
-                                        value: 'Finalizado'
-                                    });
-                                    otherIDSave = logObj.save({
-                                        enableSourcing: true,
-                                        ignoreMandatoryFields: true
-                                    });
-                                    // return true;
-                                    throw 'El periodo es inválido o inexistente';
-                                }
-                                else if (respuesta.indexOf('Error al intentar conectar con el web service') != -1) {
-                                    logObj.setValue({
-                                        fieldId: 'custrecord_lmry_ar_ws_resumen_descrip',
-                                        value: 'Error al intentar conectar con el web service'
-                                    });
-                                    logObj.setValue({
-                                        fieldId: 'custrecord_lmry_ar_ws_resumen_estado',
-                                        value: 'Finalizado'
-                                    });
-                                    otherIDSave = logObj.save({
-                                        enableSourcing: true,
-                                        ignoreMandatoryFields: true
-                                    });
-                                    // return true;
-                                    throw 'Error al intentar conectar con el web service';
-                                }
-                                else if (respuesta.indexOf('EL PADRON CONSULTADO NO SE ENCUENTRA PUBLICADO') != -1) {
-                                    logObj.setValue({
-                                        fieldId: 'custrecord_lmry_ar_ws_resumen_descrip',
-                                        value: 'El padron consultado no se encuentra publicado'
-                                    });
-                                    logObj.setValue({
-                                        fieldId: 'custrecord_lmry_ar_ws_resumen_estado',
-                                        value: 'Finalizado'
-                                    });
-                                    otherIDSave = logObj.save({
-                                        enableSourcing: true,
-                                        ignoreMandatoryFields: true
-                                    });
-                                    // return true;
-                                    throw 'El padron consultado no se encuentra publicado';
-                                }
-                                else if (respuesta.indexOf('Omitida') != -1) {
-                                    contadorOmit++;
-                                    if (descOmit == 'Vacio') {
-                                        descOmit = customerElement.getValue('internalid');
-                                    }
-                                    else {
-                                        descOmit += ',' + customerElement.getValue('internalid');
-                                    }
-                                }
-                                else if (respuesta.indexOf('Vacio') != -1) {
-                                    contadorVacio++;
-                                    if (descVacio == 'Vacio') {
-                                        descVacio = customerElement.getValue('internalid');
-                                    }
-                                    else {
-                                        descVacio += ',' + customerElement.getValue('internalid');
-                                    }
-                                }
-                                else {
-                                    contadorError4++;
-                                    if (descError4 == 'Vacio') {
-                                        descError4 = customerElement.getValue('internalid');
-                                    }
-                                    else {
-                                        descError4 += ',' + customerElement.getValue('internalid');
-                                    }
-                                }
-                                salida += respuesta;
+                                const alicuotaByEntity = alicuotasByCuit[cuit];
 
+                                if (alicuotaByEntity && apply) {
+                                    let alicuota = parseFloat(alicuotaByEntity["alicuota"]) / 100;
+                                    let grupoAlicouta = alicuotaByEntity["nro_grupo"];
+                                    let fechaDesdeList = alicuotaByEntity["fecha_de_vigencia_desde"];
+                                    let fechaHastaList = alicuotaByEntity["fecha_de_vigencia_hasta"];
+                                    let fechaDesde = generarFecha(fechaDesdeList.substring(0, 4), fechaDesdeList.substring(5, 7), fechaDesdeList.substring(8, 10));
+                                    let fechaHasta = generarFecha(fechaHastaList.substring(0, 4), fechaHastaList.substring(5, 7), fechaHastaList.substring(8, 10));
+
+                                    salida += createContributoryClass(entityID, 1, grupoAlicouta, alicuota, fechaDesde, fechaHasta, detalle, subsidiary, period, datosDefault);
+
+                                } else {
+                                    if (apply) {
+                                        salida += createContributoryClass(entityID, 1, 'WS-NEP', percent, fdesde, fhasta, detalle, subsidiary, period, datosDefault);
+                                        contadorError3++
+                                    }
+                                }
+
+                                contadorGeneral++;
+                                entityIDBase = entityID;
                             }
+                        } else {
+                            customerList.forEach((customerElement) => {
+                                let cuit = customerElement.getValue('vatregnumber') + customerElement.getValue('custentity_lmry_digito_verificator');
+                                let entityID = customerElement.getValue('internalid');
+                                let valida = validaCUIT(cuit);
 
-                            contadorGeneral++;
-                            entityIDBase = entityID;
+                                if (cuit.length == 11 && valida) {
+                                    let respuesta = generarXMLConsulta(period, cuit, detalle, entityID, subsidiary);
+                                    if (respuesta.indexOf('Create') != -1 || respuesta.indexOf('Edit') != -1) {
+                                        contadorExito++;
+                                    }
+                                    else if (respuesta.indexOf('PREFIJO DE CUIT INVALIDO') != -1) {
+                                        contadorError1++;
+                                        if (descError1 == 'Vacio') {
+                                            descError1 = customerElement.getValue('internalid');
+                                        }
+                                        else {
+                                            descError1 += ',' + customerElement.getValue('internalid');
+                                        }
+                                        record.submitFields({
+                                            type: "customer",
+                                            id: customerElement.getValue('internalid'),
+                                            values: {
+                                                "custentity_lmry_arba_cuit_invalid": true
+                                            },
+                                        });
+                                    }
+                                    else if (respuesta.indexOf('NUMERO DE CUIT INVALIDO') != -1) {
+                                        contadorError2++;
+                                        if (descError2 == 'Vacio') {
+                                            descError2 = customerElement.getValue('internalid');
+                                        }
+                                        else {
+                                            descError2 += ',' + customerElement.getValue('internalid');
+                                        }
+                                        record.submitFields({
+                                            type: "customer",
+                                            id: customerElement.getValue('internalid'),
+                                            values: {
+                                                "custentity_lmry_arba_cuit_invalid": true
+                                            },
+                                        });
 
-                        });
+                                    }
+                                    else if (respuesta.indexOf('La CUIT ingresada no se encuentra en ningun padron') != -1) {
+                                        contadorError3++;
+                                        if (descError3 == 'Vacio') {
+                                            descError3 = customerElement.getValue('internalid');
+                                        }
+                                        else {
+                                            descError3 += ',' + customerElement.getValue('internalid');
+                                        }
+                                    }
+                                    else if (respuesta.indexOf('El usuario ingresado y / o la contraseña son inválidos.') != -1) {
+                                        logObj.setValue({
+                                            fieldId: 'custrecord_lmry_ar_ws_resumen_descrip',
+                                            value: 'Error al conectar con la api'
+                                        });
+                                        logObj.setValue({
+                                            fieldId: 'custrecord_lmry_ar_ws_resumen_estado',
+                                            value: 'Finalizado'
+                                        });
+                                        otherIDSave = logObj.save({
+                                            enableSourcing: true,
+                                            ignoreMandatoryFields: true
+                                        });
+                                        return true;
+                                    }
+                                    else if (respuesta.indexOf('Internal Server') != -1) {
+                                        logObj.setValue({
+                                            fieldId: 'custrecord_lmry_ar_ws_resumen_descrip',
+                                            value: 'Error Interno del Servidor'
+                                        });
+                                        logObj.setValue({
+                                            fieldId: 'custrecord_lmry_ar_ws_resumen_estado',
+                                            value: 'Finalizado'
+                                        });
+                                        otherIDSave = logObj.save({
+                                            enableSourcing: true,
+                                            ignoreMandatoryFields: true
+                                        });
+                                        // return true;
+                                        throw 'Error Interno del Servidor';
+                                    }
+                                    else if (respuesta.indexOf('Fallo') != -1) {
+                                        logObj.setValue({
+                                            fieldId: 'custrecord_lmry_ar_ws_resumen_descrip',
+                                            value: 'No se ha configurado el setup'
+                                        });
+                                        logObj.setValue({
+                                            fieldId: 'custrecord_lmry_ar_ws_resumen_estado',
+                                            value: 'Finalizado'
+                                        });
+                                        otherIDSave = logObj.save({
+                                            enableSourcing: true,
+                                            ignoreMandatoryFields: true
+                                        });
+                                        // return true;
+                                        throw 'No se ha configurado el setup';
+                                    }
+                                    else if (respuesta.indexOf('El periodo es inválido o inexistente') != -1) {
+                                        logObj.setValue({
+                                            fieldId: 'custrecord_lmry_ar_ws_resumen_descrip',
+                                            value: 'El periodo es inválido o inexistente'
+                                        });
+                                        logObj.setValue({
+                                            fieldId: 'custrecord_lmry_ar_ws_resumen_estado',
+                                            value: 'Finalizado'
+                                        });
+                                        otherIDSave = logObj.save({
+                                            enableSourcing: true,
+                                            ignoreMandatoryFields: true
+                                        });
+                                        // return true;
+                                        throw 'El periodo es inválido o inexistente';
+                                    }
+                                    else if (respuesta.indexOf('No se encontró ningún padrón consultando con las fechas') != -1) {
+                                        logObj.setValue({
+                                            fieldId: 'custrecord_lmry_ar_ws_resumen_descrip',
+                                            value: 'El periodo es inválido o inexistente'
+                                        });
+                                        logObj.setValue({
+                                            fieldId: 'custrecord_lmry_ar_ws_resumen_estado',
+                                            value: 'Finalizado'
+                                        });
+                                        otherIDSave = logObj.save({
+                                            enableSourcing: true,
+                                            ignoreMandatoryFields: true
+                                        });
+                                        // return true;
+                                        throw 'El periodo es inválido o inexistente';
+                                    }
+                                    else if (respuesta.indexOf('Error al intentar conectar con el web service') != -1) {
+                                        logObj.setValue({
+                                            fieldId: 'custrecord_lmry_ar_ws_resumen_descrip',
+                                            value: 'Error al intentar conectar con el web service'
+                                        });
+                                        logObj.setValue({
+                                            fieldId: 'custrecord_lmry_ar_ws_resumen_estado',
+                                            value: 'Finalizado'
+                                        });
+                                        otherIDSave = logObj.save({
+                                            enableSourcing: true,
+                                            ignoreMandatoryFields: true
+                                        });
+                                        // return true;
+                                        throw 'Error al intentar conectar con el web service';
+                                    }
+                                    else if (respuesta.indexOf('EL PADRON CONSULTADO NO SE ENCUENTRA PUBLICADO') != -1) {
+                                        logObj.setValue({
+                                            fieldId: 'custrecord_lmry_ar_ws_resumen_descrip',
+                                            value: 'El padron consultado no se encuentra publicado'
+                                        });
+                                        logObj.setValue({
+                                            fieldId: 'custrecord_lmry_ar_ws_resumen_estado',
+                                            value: 'Finalizado'
+                                        });
+                                        otherIDSave = logObj.save({
+                                            enableSourcing: true,
+                                            ignoreMandatoryFields: true
+                                        });
+                                        // return true;
+                                        throw 'El padron consultado no se encuentra publicado';
+                                    }
+                                    else if (respuesta.indexOf('Omitida') != -1) {
+                                        contadorOmit++;
+                                        if (descOmit == 'Vacio') {
+                                            descOmit = customerElement.getValue('internalid');
+                                        }
+                                        else {
+                                            descOmit += ',' + customerElement.getValue('internalid');
+                                        }
+                                    }
+                                    else if (respuesta.indexOf('Vacio') != -1) {
+                                        contadorVacio++;
+                                        if (descVacio == 'Vacio') {
+                                            descVacio = customerElement.getValue('internalid');
+                                        }
+                                        else {
+                                            descVacio += ',' + customerElement.getValue('internalid');
+                                        }
+                                    }
+                                    else {
+                                        contadorError4++;
+                                        if (descError4 == 'Vacio') {
+                                            descError4 = customerElement.getValue('internalid');
+                                        }
+                                        else {
+                                            descError4 += ',' + customerElement.getValue('internalid');
+                                        }
+                                    }
+                                    salida += respuesta;
+
+                                }
+
+                                contadorGeneral++;
+                                entityIDBase = entityID;
+
+                            });
+                        }
+
+
                         if (customerList.length === 80) {
                             cond = true;
                         } else {
@@ -1458,7 +1541,6 @@ define(["require", "exports", "N/email", "N/file", "N/format", "N/http", "N/log"
                     log.error('customerListDespuesFiltro', error);
                 }
             }
-m
             if ((salida.indexOf('Edit') != -1) || (salida.indexOf('Create') != -1)) {
                 sendrptuser('ARBA Web Service', 1, salida);
                 mensaje = 'Se creó o actualizó CCL';
@@ -1605,8 +1687,8 @@ m
          * @returns Cadena con el nombre del archivo
          */
 
-        function getAlicuotasByCUIT(cuits,period,type) {
-            const auxBody = JSON.stringify({ period,cuits,type });
+        function getAlicuotasByCUIT(cuits, period, type) {
+            const auxBody = JSON.stringify({ period, cuits, type });
             let responsePadron = http.post({
                 body: auxBody,
                 url: "http://149.130.171.192:3000/padron/Arba",
@@ -1721,7 +1803,6 @@ m
          * @returns 
          */
         function cargarEntity(type, subsidiary, juridicPerson, nroID, isvalidCuit, isOpenTransactions) {
-
             let filters = new Array();
             filters[0] = search.createFilter({
                 name: 'vatregnumber',
