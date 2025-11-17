@@ -929,8 +929,9 @@ define(["require", "exports", "N/email", "N/file", "N/format", "N/http", "N/log"
 
             let mensaje = '';
             let cond = false;
-            let feature_ws_osci = true;
-
+            let datosDefault = obtenerSetup(subsidiary, entityType);
+            let feature_ws_osci = datosDefault[0].getValue('custrecord_lmry_ar_ws_osci_arba');
+            feature_ws_osci = feature_ws_osci === "T" || feature_ws_osci === true ? true: false;
             if (entityType == 1) {
 
                 try {
@@ -960,7 +961,6 @@ define(["require", "exports", "N/email", "N/file", "N/format", "N/http", "N/log"
                             }, []);
                             const periodFormat = getPeriodFormat(period);
                             const alicuotasByCuit = getAlicuotasByCUIT(validCuits, periodFormat, "R");
-                            let datosDefault = obtenerSetup(subsidiary, "1");
                             let apply = datosDefault[0].getValue('custrecord_lmry_ar_ws_default_cc');
                             let percent = datosDefault[0].getValue('custrecord_lmry_ar_ws_default_percent');
                             let fechas = getPeriodo(period).split(',');
@@ -968,20 +968,19 @@ define(["require", "exports", "N/email", "N/file", "N/format", "N/http", "N/log"
                             let fhasta = fechas[1];
                             fdesde = generarFecha(fdesde.substring(0, 4), fdesde.substring(4, 6), fdesde.substring(6, 8));
                             fhasta = generarFecha(fhasta.substring(0, 4), fhasta.substring(4, 6), fhasta.substring(6, 8));
-                            for (let i = 0; i < vendorList; i++) {
+                            for (let i = 0; i < vendorList.length; i++) {
                                 const vendor = vendorList[i];
                                 const entityID = vendor.getValue('internalid');
                                 const vat = vendor.getValue('vatregnumber') || '';
                                 const dv = vendor.getValue('custentity_lmry_digito_verificator') || '';
                                 const cuit = vat + dv;
                                 if (!validaCUIT(cuit)) {
-
                                     contadorError2++;
                                     continue;
                                 }
 
-                                const alicuotaByEntity = alicuotasByCuit[cuit];
-
+                                let alicuotaByEntity = alicuotasByCuit[cuit];
+                                if (alicuotaByEntity) alicuotaByEntity = alicuotaByEntity[0]
                                 if (alicuotaByEntity && apply) {
                                     let alicuota = parseFloat(alicuotaByEntity["alicuota"]) / 100;
                                     let grupoAlicouta = alicuotaByEntity["nro_grupo"];
@@ -991,7 +990,7 @@ define(["require", "exports", "N/email", "N/file", "N/format", "N/http", "N/log"
                                     let fechaHasta = generarFecha(fechaHastaList.substring(0, 4), fechaHastaList.substring(5, 7), fechaHastaList.substring(8, 10));
 
                                     salida += createContributoryClass(entityID, 1, grupoAlicouta, alicuota, fechaDesde, fechaHasta, detalle, subsidiary, period, datosDefault);
-
+                                    contadorExito++
                                 } else {
                                     if (apply) {
                                         salida += createContributoryClass(entityID, 1, 'WS-NEP', percent, fdesde, fhasta, detalle, subsidiary, period, datosDefault);
@@ -1271,18 +1270,18 @@ define(["require", "exports", "N/email", "N/file", "N/format", "N/http", "N/log"
                         //     salidaFor = customerList.length;
                         //     entityType = 3;
                         // }
-
+                        datosDefault[0].getValue('custrecord_lmry_ar_ws_default_cc');
                         if (feature_ws_osci) {
-                            const validCuits = customerList.reduce((acc, vendor) => {
-                                const vat = vendor.getValue('vatregnumber') || '';
-                                const dv = vendor.getValue('custentity_lmry_digito_verificator') || '';
+                            const validCuits = customerList.reduce((acc, customer) => {
+                                const vat = customer.getValue('vatregnumber') || '';
+                                const dv = customer.getValue('custentity_lmry_digito_verificator') || '';
                                 const cuit = vat + dv;
                                 if (validaCUIT(cuit)) acc.push(cuit);
                                 return acc;
                             }, []);
                             const periodFormat = getPeriodFormat(period);
-                            const alicuotasByCuit = getAlicuotasByCUIT(validCuits, periodFormat, "R");
-                            let datosDefault = obtenerSetup(subsidiary, "1");
+                            const alicuotasByCuit = getAlicuotasByCUIT(validCuits, periodFormat, "P");
+                            
                             let apply = datosDefault[0].getValue('custrecord_lmry_ar_ws_default_cc');
                             let percent = datosDefault[0].getValue('custrecord_lmry_ar_ws_default_percent');
                             let fechas = getPeriodo(period).split(',');
@@ -1290,30 +1289,32 @@ define(["require", "exports", "N/email", "N/file", "N/format", "N/http", "N/log"
                             let fhasta = fechas[1];
                             fdesde = generarFecha(fdesde.substring(0, 4), fdesde.substring(4, 6), fdesde.substring(6, 8));
                             fhasta = generarFecha(fhasta.substring(0, 4), fhasta.substring(4, 6), fhasta.substring(6, 8));
-                            for (let i = 0; i < customerList; i++) {
+                            for (let i = 0; i < customerList.length; i++) {
                                 const customer = customerList[i];
                                 const entityID = customer.getValue('internalid');
                                 const vat = customer.getValue('vatregnumber') || '';
                                 const dv = customer.getValue('custentity_lmry_digito_verificator') || '';
                                 const cuit = vat + dv;
                                 if (!validaCUIT(cuit)) {
-
                                     contadorError2++;
                                     continue;
                                 }
 
-                                const alicuotaByEntity = alicuotasByCuit[cuit];
-
+                                let alicuotaByEntity = alicuotasByCuit[cuit];
+                                if (alicuotaByEntity) alicuotaByEntity = alicuotaByEntity[0]
                                 if (alicuotaByEntity && apply) {
                                     let alicuota = parseFloat(alicuotaByEntity["alicuota"]) / 100;
                                     let grupoAlicouta = alicuotaByEntity["nro_grupo"];
                                     let fechaDesdeList = alicuotaByEntity["fecha_de_vigencia_desde"];
                                     let fechaHastaList = alicuotaByEntity["fecha_de_vigencia_hasta"];
-                                    let fechaDesde = generarFecha(fechaDesdeList.substring(0, 4), fechaDesdeList.substring(5, 7), fechaDesdeList.substring(8, 10));
-                                    let fechaHasta = generarFecha(fechaHastaList.substring(0, 4), fechaHastaList.substring(5, 7), fechaHastaList.substring(8, 10));
 
+                                    const [anioDesde, mesDesde, diaDesde] = fechaDesdeList.split("-");
+                                    const [anioHasta, mesHasta, diaHasta] = fechaHastaList.split("-");
+
+                                    let fechaDesde = generarFecha(anioDesde, mesDesde, diaDesde);
+                                    let fechaHasta = generarFecha(anioHasta, mesHasta, diaHasta);
                                     salida += createContributoryClass(entityID, 1, grupoAlicouta, alicuota, fechaDesde, fechaHasta, detalle, subsidiary, period, datosDefault);
-
+                                    contadorExito++
                                 } else {
                                     if (apply) {
                                         salida += createContributoryClass(entityID, 1, 'WS-NEP', percent, fdesde, fhasta, detalle, subsidiary, period, datosDefault);
@@ -1901,7 +1902,6 @@ define(["require", "exports", "N/email", "N/file", "N/format", "N/http", "N/log"
                 filters: filters
             });
             const entitys = VendSearch.run().getRange(0, 80);
-            log.debug('entitys', entitys);
             return entitys;
 
             // let vendorArray = [];
@@ -2370,6 +2370,9 @@ define(["require", "exports", "N/email", "N/file", "N/format", "N/http", "N/log"
             });
             columnDatos[35] = search.createColumn({
                 name: 'custrecord_lmry_ar_ws_add_accumulated'
+            });
+            columnDatos[36] = search.createColumn({
+                name: 'custrecord_lmry_ar_ws_osci_arba'
             });
             let serachObj = search.create({
                 type: 'customrecord_lmry_ar_ws_setup',
