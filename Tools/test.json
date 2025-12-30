@@ -1,18 +1,20 @@
 {
-    "data": {
-        "20005810788": [
-            {
-                "tipo_alicuota": "P",
-                "fecha_de_publicacion": "2025-09-25",
-                "fecha_de_vigencia_desde": "2025-10-01",
-                "fecha_de_vigencia_hasta": "2025-10-31",
-                "numero_cuit": 20005810788,
-                "tipo_contr_insc": "C",
-                "marca_alta_baja_sujeto": "N",
-                "marca_cbio_alicuota": "N",
-                "alicuota": 6,
-                "nro_grupo": "25"
-            }
-        ]
-    }
+    "SUBSIDIARY": true,
+    "MULTIBOOK": true,
+    "DEPARTMENTS": true,
+    "LOCATIONS": true,
+    "CLASSES": true,
+    "MULTICURRENCY": true,
+    "INSTALLMENTS": true,
+    "APPROVALBILL": true,
+    "APPROVALINVOICE": false,
+    "APPROVALJOURNAL": true,
+    "LANGUAGE": "en",
+    "MANDATORY_DEPARTMENT": false,
+    "MANDATORY_LOCATION": false,
+    "MANDATORY_CLASS": false,
+    "FULL_MULTIBOOK": true,
+    "GLOBAL_ACCOUNT": true,
+    "REVERSALVOIDING": false,
+    "MULTIPLECALENDARS": true
 }
