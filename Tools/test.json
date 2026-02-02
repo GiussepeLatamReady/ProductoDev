@@ -1,20 +1,1208 @@
-{
-    "SUBSIDIARY": true,
-    "MULTIBOOK": true,
-    "DEPARTMENTS": true,
-    "LOCATIONS": true,
-    "CLASSES": true,
-    "MULTICURRENCY": true,
-    "INSTALLMENTS": true,
-    "APPROVALBILL": true,
-    "APPROVALINVOICE": false,
-    "APPROVALJOURNAL": true,
-    "LANGUAGE": "en",
-    "MANDATORY_DEPARTMENT": false,
-    "MANDATORY_LOCATION": false,
-    "MANDATORY_CLASS": false,
-    "FULL_MULTIBOOK": true,
-    "GLOBAL_ACCOUNT": true,
-    "REVERSALVOIDING": false,
-    "MULTIPLECALENDARS": true
-}
+[
+    {
+        "internalid": "134367",
+        "vatregnumber": "2012153208",
+        "custentity_lmry_digito_verificator": "8",
+        "typeEntity": "customer",
+        "responsibleType": "4",
+        "name": "Norma Beatriz D´Onofrio",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "134376",
+        "vatregnumber": "2011774586",
+        "custentity_lmry_digito_verificator": "6",
+        "typeEntity": "customer",
+        "responsibleType": "4",
+        "name": "MICHALEWICZ ARIEL",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "134377",
+        "vatregnumber": "2014883961",
+        "custentity_lmry_digito_verificator": "1",
+        "typeEntity": "customer",
+        "responsibleType": "4",
+        "name": "LOPREITE RODOLFO HUGO",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "134379",
+        "vatregnumber": "2024428374",
+        "custentity_lmry_digito_verificator": "9",
+        "typeEntity": "customer",
+        "responsibleType": "4",
+        "name": "MIGUELES ISAIAS PEDRO ANDRES",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "134380",
+        "vatregnumber": "2025257946",
+        "custentity_lmry_digito_verificator": "0",
+        "typeEntity": "customer",
+        "responsibleType": "4",
+        "name": "MAJERSKY ANDRES MATIAS",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "134388",
+        "vatregnumber": "5500000001",
+        "custentity_lmry_digito_verificator": "8",
+        "typeEntity": "customer",
+        "responsibleType": "9",
+        "name": "LEVADURA URUGUAYA S.A.",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "134483",
+        "vatregnumber": "3050005574",
+        "custentity_lmry_digito_verificator": "6",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "ORIGENES SEGUROS S.A.",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "134524",
+        "vatregnumber": "3050139538",
+        "custentity_lmry_digito_verificator": "9",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "GRUPO LINDE GAS ARGENTINA S.A.",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "134545",
+        "vatregnumber": "3050370362",
+        "custentity_lmry_digito_verificator": "5",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "DIAGEO ARGENTINA S A",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "134586",
+        "vatregnumber": "3051762685",
+        "custentity_lmry_digito_verificator": "2",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "CAMARA ARGENTINA DE LA INDUSTRIA DE BEBIDAS SIN ALCOHOL",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "134626",
+        "vatregnumber": "3053662310",
+        "custentity_lmry_digito_verificator": "4",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "REGINALD LEE S.A.",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "134643",
+        "vatregnumber": "3054446711",
+        "custentity_lmry_digito_verificator": "1",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "ADMINISTRACION BAIGUN SH",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "134659",
+        "vatregnumber": "3055609559",
+        "custentity_lmry_digito_verificator": "7",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "PAREXKLAUKOL S.A.",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "134660",
+        "vatregnumber": "3055763592",
+        "custentity_lmry_digito_verificator": "7",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "HELADERIAS FREDDO S A I C I Y A",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "134664",
+        "vatregnumber": "3056588761",
+        "custentity_lmry_digito_verificator": "7",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "Centro Electrico S.A.",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "134671",
+        "vatregnumber": "3057161462",
+        "custentity_lmry_digito_verificator": "2",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "Farmacia Arieta S.C.S.",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "134674",
+        "vatregnumber": "3057365208",
+        "custentity_lmry_digito_verificator": "4",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "CABLEVISION S.A.",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "134745",
+        "vatregnumber": "3061291775",
+        "custentity_lmry_digito_verificator": "9",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "NOVOZYMES BIOAG S.A.",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "134789",
+        "vatregnumber": "3064279606",
+        "custentity_lmry_digito_verificator": "9",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "Minera del Altiplano S.A.",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "134821",
+        "vatregnumber": "3065872071",
+        "custentity_lmry_digito_verificator": "2",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "CNH ARGENTINA S A",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "134827",
+        "vatregnumber": "3066085883",
+        "custentity_lmry_digito_verificator": "7",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "NEWELL RUBBERMAID ARGENTINA S.A.",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "134850",
+        "vatregnumber": "3067773358",
+        "custentity_lmry_digito_verificator": "2",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "OILTANKING ARGENTINA S.A",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "134854",
+        "vatregnumber": "3067781711",
+        "custentity_lmry_digito_verificator": "5",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "GFK CE Argentina SA",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "134855",
+        "vatregnumber": "3067791163",
+        "custentity_lmry_digito_verificator": "4",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "ZUCAMOR S.A.",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "134932",
+        "vatregnumber": "3068993322",
+        "custentity_lmry_digito_verificator": "6",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "GENERAL MILLS ARG S.A.",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "134951",
+        "vatregnumber": "3069408971",
+        "custentity_lmry_digito_verificator": "9",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "La Plaza Central SCS",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "134952",
+        "vatregnumber": "3069413212",
+        "custentity_lmry_digito_verificator": "6",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "FARMACIA PLAZA SAN JUSTO S C S",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "134968",
+        "vatregnumber": "3069556267",
+        "custentity_lmry_digito_verificator": "1",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "DECISION SUPPORT SA",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "135009",
+        "vatregnumber": "3069954245",
+        "custentity_lmry_digito_verificator": "4",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "EMPRESA DISTRIBUIDORA DE ELETRICIDAD DE MENDONZA SA",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "135115",
+        "vatregnumber": "3070755837",
+        "custentity_lmry_digito_verificator": "3",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "LAGASH SYSTEMS S.A.",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "135160",
+        "vatregnumber": "3070801387",
+        "custentity_lmry_digito_verificator": "7",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "ARYSTA LIFESCIENCE ARGENTINA SA",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "135244",
+        "vatregnumber": "3070891094",
+        "custentity_lmry_digito_verificator": "1",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "DELEGACION DEL PAIS VASCO EUSKADI EN ARGENTINA",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "135305",
+        "vatregnumber": "3070962783",
+        "custentity_lmry_digito_verificator": "6",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "ELECTROMONTAJES BADIA S.R.L.",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "135315",
+        "vatregnumber": "3070977625",
+        "custentity_lmry_digito_verificator": "4",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "SALES DE JUJUY SOCIEDAD ANONIMA",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "135344",
+        "vatregnumber": "3071004630",
+        "custentity_lmry_digito_verificator": "8",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "WMS GAMING INTERNATIONAL S.L. SUCURSAL ARGENTINA",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "135430",
+        "vatregnumber": "3071126470",
+        "custentity_lmry_digito_verificator": "8",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "Etermax S.A.",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "135443",
+        "vatregnumber": "3071141665",
+        "custentity_lmry_digito_verificator": "6",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "PRICEWATERHOUSECOOPERS SERVICE DELIVERY CENTER (ARGENTINA) S.A",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "135451",
+        "vatregnumber": "3071144835",
+        "custentity_lmry_digito_verificator": "3",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "LIMAGRAIN ARGENTINA S.A.",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "135474",
+        "vatregnumber": "3071164420",
+        "custentity_lmry_digito_verificator": "9",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "NS3 INTERNET S.A.",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "135489",
+        "vatregnumber": "3071189758",
+        "custentity_lmry_digito_verificator": "1",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "ADMIFARM GROUP SERVICIOS S.A.",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "135512",
+        "vatregnumber": "3071213746",
+        "custentity_lmry_digito_verificator": "7",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "FARMACIA SHOPPING CATAN, SOCIEDAD EN COMANDITA SIMPLE",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "135516",
+        "vatregnumber": "3071214381",
+        "custentity_lmry_digito_verificator": "5",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "Evandti AR SA",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "135577",
+        "vatregnumber": "3071415884",
+        "custentity_lmry_digito_verificator": "4",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "Aberdeen Consulting Group S.A.",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "135581",
+        "vatregnumber": "3071425168",
+        "custentity_lmry_digito_verificator": "2",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "PATAGONIA BREWING COMPANY S.A.",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "135587",
+        "vatregnumber": "3071428963",
+        "custentity_lmry_digito_verificator": "9",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "Mundipharma Argentina S.R.L",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "135589",
+        "vatregnumber": "3071430026",
+        "custentity_lmry_digito_verificator": "8",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "Consultatio Investments. S.A.",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "135596",
+        "vatregnumber": "3071433688",
+        "custentity_lmry_digito_verificator": "2",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "JALIL AUTOMOTORES S.A.",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "135600",
+        "vatregnumber": "3071439364",
+        "custentity_lmry_digito_verificator": "9",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "KURARAY ARGENTINA SRL",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "135623",
+        "vatregnumber": "3071480847",
+        "custentity_lmry_digito_verificator": "4",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "ALITALIA SOCIETA AEREA ITALIANA S.P.A.",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "135629",
+        "vatregnumber": "3071491297",
+        "custentity_lmry_digito_verificator": "2",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "SUANFARMA ARGENTINA S.A.",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "135631",
+        "vatregnumber": "3071494201",
+        "custentity_lmry_digito_verificator": "4",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "TESSUTO ITALIANO SRL",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "135660",
+        "vatregnumber": "3071533181",
+        "custentity_lmry_digito_verificator": "7",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "TLI SRL",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "135676",
+        "vatregnumber": "3071549795",
+        "custentity_lmry_digito_verificator": "2",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "PLANT IMPACT ARGENTINA S.A.",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "135692",
+        "vatregnumber": "3071578611",
+        "custentity_lmry_digito_verificator": "3",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "GIS PREMIUN ARGENTINA SRL",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "135710",
+        "vatregnumber": "3071608152",
+        "custentity_lmry_digito_verificator": "0",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "DRAGON OIL A S.A.",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "135869",
+        "vatregnumber": "3356892260",
+        "custentity_lmry_digito_verificator": "9",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "TV MUSIC HOUSE JUJUY SRL",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "135871",
+        "vatregnumber": "3357444163",
+        "custentity_lmry_digito_verificator": "9",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "DIESEL LANGE SRL",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "135923",
+        "vatregnumber": "3370714207",
+        "custentity_lmry_digito_verificator": "9",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "EMSUR ARGENTINA S. A.",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "135936",
+        "vatregnumber": "3370864480",
+        "custentity_lmry_digito_verificator": "9",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "SOVEREIGN PRODUCTOS PARA LABORATORIOS SRL",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "135990",
+        "vatregnumber": "3463895203",
+        "custentity_lmry_digito_verificator": "5",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "UDEM SRL",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "136016",
+        "vatregnumber": "5500000212",
+        "custentity_lmry_digito_verificator": "6",
+        "typeEntity": "customer",
+        "responsibleType": "4",
+        "name": "MAGNA SEATING",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "191858",
+        "vatregnumber": "2792716002",
+        "custentity_lmry_digito_verificator": "7",
+        "typeEntity": "customer",
+        "responsibleType": "4",
+        "name": "Maria Elisa Olivieri",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "196090",
+        "vatregnumber": "3071612603",
+        "custentity_lmry_digito_verificator": "6",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "AUTO ACTION ARGENTINA S.A",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "198920",
+        "vatregnumber": "3071059497",
+        "custentity_lmry_digito_verificator": "6",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "SANATORIO PASTEUR SA Y OTROS UTE",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "198924",
+        "vatregnumber": "3070733125",
+        "custentity_lmry_digito_verificator": "5",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "OSMOTICA PHARMACEUTICAL ARGENTINA SAU",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "213384",
+        "vatregnumber": "3071644964",
+        "custentity_lmry_digito_verificator": "1",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "NUARGENTINA S.A",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "254726",
+        "vatregnumber": "3370179666",
+        "custentity_lmry_digito_verificator": "8",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "BOMBAS GOULDS S.A.",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "255643",
+        "vatregnumber": "3050012415",
+        "custentity_lmry_digito_verificator": "2",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "ARTE GRAFICO EDITORIAL ARGENTIN S.A.",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "260478",
+        "vatregnumber": "3070759612",
+        "custentity_lmry_digito_verificator": "7",
+        "typeEntity": "customer",
+        "responsibleType": "4",
+        "name": "Fundación Banco de Alimentos",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "263000",
+        "vatregnumber": "3371023662",
+        "custentity_lmry_digito_verificator": "9",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "MAVHA S.A.",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "269249",
+        "vatregnumber": "3071518140",
+        "custentity_lmry_digito_verificator": "8",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "MASALRO S.R.L.",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "270001",
+        "vatregnumber": "5500000350",
+        "custentity_lmry_digito_verificator": "5",
+        "typeEntity": "customer",
+        "responsibleType": "9",
+        "name": "Michael Page International NEM ?st. Dan. Ltd. ?ti",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "272726",
+        "vatregnumber": "3371103429",
+        "custentity_lmry_digito_verificator": "9",
+        "typeEntity": "customer",
+        "responsibleType": "4",
+        "name": "VELOCE LOGISTICA S.A.",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "276888",
+        "vatregnumber": "3057785017",
+        "custentity_lmry_digito_verificator": "4",
+        "typeEntity": "customer",
+        "responsibleType": "4",
+        "name": "COMITE INTERNACIONAL DE LA CRUZ ROJA",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "284076",
+        "vatregnumber": "3069895184",
+        "custentity_lmry_digito_verificator": "9",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "PRIMARY SA",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "288673",
+        "vatregnumber": "3070880695",
+        "custentity_lmry_digito_verificator": "8",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "Rotam de Argentina Agroquimica SRL",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "288932",
+        "vatregnumber": "2327399689",
+        "custentity_lmry_digito_verificator": "9",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "VALENTIN ALVAREZ",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "296425",
+        "vatregnumber": "3070928563",
+        "custentity_lmry_digito_verificator": "3",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "Viajes El Corte Inglés Argentina S.A.",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "306037",
+        "vatregnumber": "3050160299",
+        "custentity_lmry_digito_verificator": "6",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "TAKEDA PHARMA SA",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "308785",
+        "vatregnumber": "2035657643",
+        "custentity_lmry_digito_verificator": "9",
+        "typeEntity": "customer",
+        "responsibleType": "4",
+        "name": "Santiago Joaquín Díaz",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "312272",
+        "vatregnumber": "3059839743",
+        "custentity_lmry_digito_verificator": "7",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "BODEGA LUIGI BOSCA E HIJOS S R L",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "324650",
+        "vatregnumber": "3066385174",
+        "custentity_lmry_digito_verificator": "4",
+        "typeEntity": "customer",
+        "responsibleType": "4",
+        "name": "CAEDI SA",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "328618",
+        "vatregnumber": "3071223870",
+        "custentity_lmry_digito_verificator": "0",
+        "typeEntity": "customer",
+        "responsibleType": "4",
+        "name": "ASOCIACION CIVIL CENTRO DE ESTUDIOS SCHAUEN",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "334937",
+        "vatregnumber": "3071512358",
+        "custentity_lmry_digito_verificator": "0",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "MOBBEX ARGENTINA SRL",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "346906",
+        "vatregnumber": "3071193772",
+        "custentity_lmry_digito_verificator": "9",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "MARKEN LIMITED",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "352671",
+        "vatregnumber": "3071180297",
+        "custentity_lmry_digito_verificator": "1",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "Iúnigo argentina compañía de seguros S.A.",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "364313",
+        "vatregnumber": "3061917514",
+        "custentity_lmry_digito_verificator": "6",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "GLENCORE PACHON S.A",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "371548",
+        "vatregnumber": "2025613165",
+        "custentity_lmry_digito_verificator": "0",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "Federico Javier Rothacher",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "374663",
+        "vatregnumber": "3370762337",
+        "custentity_lmry_digito_verificator": "9",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "Colegio Torres de Ladrillo SRL",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "487662",
+        "vatregnumber": "3071646340",
+        "custentity_lmry_digito_verificator": "7",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "SHPP ARGENTINA SRL",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "699016",
+        "vatregnumber": "3071639111",
+        "custentity_lmry_digito_verificator": "2",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "TENNECO CLEAN AIR ARGENTINA",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "727429",
+        "vatregnumber": "3071707704",
+        "custentity_lmry_digito_verificator": "7",
+        "typeEntity": "customer",
+        "responsibleType": "4",
+        "name": "FUNDACION JEROME LEJEUNE ARGENTINA",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "735139",
+        "vatregnumber": "2006440267",
+        "custentity_lmry_digito_verificator": "7",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "RODRIGUEZ LUIS MARIA",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "754212",
+        "vatregnumber": "3058000397",
+        "custentity_lmry_digito_verificator": "0",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "FUNDACION DEL SUR PARA EL DESARROLLO TECNOLOGICO",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "854653",
+        "vatregnumber": "3071535705",
+        "custentity_lmry_digito_verificator": "0",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "DEVLIGHTS, S.R.L.",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "934380",
+        "vatregnumber": "3068243458",
+        "custentity_lmry_digito_verificator": "5",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "DISTROCUYO S.A.",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "1065674",
+        "vatregnumber": "3071215690",
+        "custentity_lmry_digito_verificator": "9",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "REFI PAMPA S.A.",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "1327590",
+        "vatregnumber": "5500000426",
+        "custentity_lmry_digito_verificator": "9",
+        "typeEntity": "customer",
+        "responsibleType": "9",
+        "name": "Stelling Investments Limited",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "1361750",
+        "vatregnumber": "3071575385",
+        "custentity_lmry_digito_verificator": "1",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "EUREKA LABS S.R.L.",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "1464325",
+        "vatregnumber": "3071038916",
+        "custentity_lmry_digito_verificator": "7",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "Viapool SRL",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "1474456",
+        "vatregnumber": "3065883952",
+        "custentity_lmry_digito_verificator": "3",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "OTAMERICA EBYTEM S. A.",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "1499344",
+        "vatregnumber": "3070746242",
+        "custentity_lmry_digito_verificator": "5",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "FUNDACION NORDELTA",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "1667902",
+        "vatregnumber": "3071487281",
+        "custentity_lmry_digito_verificator": "4",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "Cabanellas Etchebarne Kelly Sociedad Civil",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "1707040",
+        "vatregnumber": "3371619483",
+        "custentity_lmry_digito_verificator": "9",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "Movilidad Digital SAS",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "1746886",
+        "vatregnumber": "3070496099",
+        "custentity_lmry_digito_verificator": "9",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "Banco de Servicios y Transacciones SA",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "1769661",
+        "vatregnumber": "5500000331",
+        "custentity_lmry_digito_verificator": "9",
+        "typeEntity": "customer",
+        "responsibleType": "9",
+        "name": "CITIZENSHIP INVEST DMCC",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "2047532",
+        "vatregnumber": "3071071636",
+        "custentity_lmry_digito_verificator": "2",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "D.N.P. DISTRIBUCIONES S.A.",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "2113940",
+        "vatregnumber": "3059821885",
+        "custentity_lmry_digito_verificator": "0",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "KWS Argentina S.A.",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "2200922",
+        "vatregnumber": "5500000410",
+        "custentity_lmry_digito_verificator": "2",
+        "typeEntity": "customer",
+        "responsibleType": "9",
+        "name": "SUAN FARMA, S.A.U",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "2223887",
+        "vatregnumber": "5500000003",
+        "custentity_lmry_digito_verificator": "4",
+        "typeEntity": "customer",
+        "responsibleType": "9",
+        "name": "The Not Company SPA",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "2272997",
+        "vatregnumber": "5500000438",
+        "custentity_lmry_digito_verificator": "2",
+        "typeEntity": "customer",
+        "responsibleType": "9",
+        "name": "DVA Agro GmbH",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "2278019",
+        "vatregnumber": "5500000212",
+        "custentity_lmry_digito_verificator": "6",
+        "typeEntity": "customer",
+        "responsibleType": "9",
+        "name": "Blackfish Media LLC",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "2360235",
+        "vatregnumber": "5500000001",
+        "custentity_lmry_digito_verificator": "8",
+        "typeEntity": "customer",
+        "responsibleType": "9",
+        "name": "NEVONO S.A.",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "2361655",
+        "vatregnumber": "5500000212",
+        "custentity_lmry_digito_verificator": "6",
+        "typeEntity": "customer",
+        "responsibleType": "9",
+        "name": "Lendable Inc",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "2426076",
+        "vatregnumber": "5500000001",
+        "custentity_lmry_digito_verificator": "8",
+        "typeEntity": "customer",
+        "responsibleType": "9",
+        "name": "Interfood Latin America S.A.",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "2426378",
+        "vatregnumber": "5500000001",
+        "custentity_lmry_digito_verificator": "8",
+        "typeEntity": "customer",
+        "responsibleType": "9",
+        "name": "FAROLATINO SA",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "2484528",
+        "vatregnumber": "3071635015",
+        "custentity_lmry_digito_verificator": "7",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "SELECTIVITY S.A.S.",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "2505105",
+        "vatregnumber": "3051713744",
+        "custentity_lmry_digito_verificator": "4",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "CLOSE UP S.A.",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "2506419",
+        "vatregnumber": "2028935599",
+        "custentity_lmry_digito_verificator": "6",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "MIGUEL CARUGATI",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "2575383",
+        "vatregnumber": "3070753243",
+        "custentity_lmry_digito_verificator": "9",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "PRODUCTOS VETERINARIOS S.A.",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "2848090",
+        "vatregnumber": "3071595490",
+        "custentity_lmry_digito_verificator": "3",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "PAN AMERICAN ENERGY LLC SUCURSAL ARGENTINA - YPF S.A.",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "2888205",
+        "vatregnumber": "3064496108",
+        "custentity_lmry_digito_verificator": "3",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "EL NORTE CORDOBES S.R.L.",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "2929087",
+        "vatregnumber": "5500000005",
+        "custentity_lmry_digito_verificator": "0",
+        "typeEntity": "customer",
+        "responsibleType": "9",
+        "name": "Aviagen America Latina Ltda",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "2968756",
+        "vatregnumber": "5500000005",
+        "custentity_lmry_digito_verificator": "0",
+        "typeEntity": "customer",
+        "responsibleType": "9",
+        "name": "SCATEC BRASIL SERVICIOS LTDA.",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "2972390",
+        "vatregnumber": "5500000333",
+        "custentity_lmry_digito_verificator": "5",
+        "typeEntity": "customer",
+        "responsibleType": "9",
+        "name": "Rocktree Logistics Pte Ltd",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "3016278",
+        "vatregnumber": "5500000001",
+        "custentity_lmry_digito_verificator": "8",
+        "typeEntity": "customer",
+        "responsibleType": "9",
+        "name": "Tixcon S.A.",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "3098784",
+        "vatregnumber": "3070716304",
+        "custentity_lmry_digito_verificator": "2",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "GRUPO 2000 AGRUPACION",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "3105606",
+        "vatregnumber": "5500000003",
+        "custentity_lmry_digito_verificator": "4",
+        "typeEntity": "customer",
+        "responsibleType": "9",
+        "name": "Vertiv Cono Sur Limitada",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "3114796",
+        "vatregnumber": "3071687100",
+        "custentity_lmry_digito_verificator": "9",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "SUPERMAT CENTRAL S.A.S",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "3117134",
+        "vatregnumber": "5500000001",
+        "custentity_lmry_digito_verificator": "8",
+        "typeEntity": "customer",
+        "responsibleType": "9",
+        "name": "LA SANITARIA SA",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "3477278",
+        "vatregnumber": "3357444163",
+        "custentity_lmry_digito_verificator": "9",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "DIESEL LANGE S R L",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "3865028",
+        "vatregnumber": "3071634083",
+        "custentity_lmry_digito_verificator": "6",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "EMCOSUD S.R.L.",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "3986922",
+        "vatregnumber": "3070839876",
+        "custentity_lmry_digito_verificator": "0",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "BECERRA BURSATIL S. A.",
+        "stateBuenosAires": false
+    },
+    {
+        "internalid": "4028252",
+        "vatregnumber": "3056886674",
+        "custentity_lmry_digito_verificator": "2",
+        "typeEntity": "customer",
+        "responsibleType": "1",
+        "name": "CARTELLONE OIL&GAS S.A.U.",
+        "stateBuenosAires": false
+    }
+]
